@@ -12,5 +12,5 @@ test('Valid initialization', () => {
   instance.init(baseConfig);
   const stats = instance.getStats();
 
-  expect(stats).toEqual(baseConfig);
+  expect(stats.baseURL).toEqual(baseConfig.baseURL);
 });

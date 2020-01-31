@@ -1,8 +1,8 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 
-import { BASE_URL, API_URL } from '../config';
+import { BASE_URL } from '../config';
 
-import { Logger } from './Logger';
+import { Agent } from './Agent';
 import { IServiceAI } from '../interfaces/service-ai.interface';
 import { IConfig } from '../interfaces/config.interface';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
@@ -14,26 +14,16 @@ import { CheckSessionResponseDto } from '../dto/check-session.response.dto';
 
 export class ServiceAI implements IServiceAI {
   private baseURL = BASE_URL;
-  private useDebug = false;
-  private logger = new Logger(false);
-
-  // private defaults = {
-  //   options: {
-  //     resolveWithFullResponse: true,
-  //     json: true,
-  //   },
-  // };
+  private agent = new Agent();
 
   init(config: IConfig): void {
     this.baseURL = config.baseURL;
-    this.useDebug = config.useDebug;
-    this.logger.init({ useDebug: this.useDebug });
+    this.agent.init(config);
   }
 
   getStats(): IConfig {
     return {
       baseURL: this.baseURL,
-      useDebug: this.useDebug,
     } as IConfig;
   }
 
@@ -61,7 +51,6 @@ export class ServiceAI implements IServiceAI {
     const headers = this.createHeaders(undefined, true);
     const config: AxiosRequestConfig = {
       ...headers,
-      baseURL: `${this.baseURL}${API_URL}`,
       url: '/login',
       method: 'POST',
       data: {
@@ -70,15 +59,12 @@ export class ServiceAI implements IServiceAI {
       ...headers,
     };
 
-    this.logger.log(`HTTP ${config.method} ${config.url}:`);
-    this.logger.log('=> Request: ', config);
-
     let response = null;
     try {
-      const { body } = await axios.request(config);
+      const { data } = await this.agent.request(config);
       response = new StartSessionResponseDto({
-        sessionToken: body.sessionToken,
-        loginURL: body.loginURL,
+        sessionToken: data.sessionToken,
+        loginURL: data.loginURL,
       });
     } catch (error) {
       response = new StartSessionResponseDto({
@@ -86,14 +72,12 @@ export class ServiceAI implements IServiceAI {
       });
     }
 
-    this.logger.log('<= Response: ', response);
-
     return Promise.resolve(response);
   }
 
   checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponseDto> {
     const { sessionToken } = options;
-    this.logger.log('checkSession: ', { sessionToken });
+    console.log('ServiceAI.ts, checkSession [80]: ', { sessionToken });
 
     const response = new CheckSessionResponseDto({
       isLoggedIn: false,

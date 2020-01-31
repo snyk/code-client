@@ -1,5 +1,16 @@
-import { sum } from '../src/index';
+import { BASE_URL } from '../src/config';
+import { ServiceAI } from '../src/index';
+import { IConfig } from '../src/interfaces/config.interface';
 
-test('Sum 4 + 5 = 9', () => {
-  expect(sum(4, 5)).toBe(9)
+const instance = new ServiceAI();
+const baseConfig: IConfig = {
+  baseURL: BASE_URL,
+  useDebug: false,
+};
+
+test('Valid initialization', () => {
+  instance.init(baseConfig);
+  const stats = instance.getStats();
+
+  expect(stats).toEqual(baseConfig);
 });

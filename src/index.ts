@@ -1,1 +1,5 @@
-export const sum = (a: number, b: number): number => a + b;
+import { ServiceAI } from './modules/ServiceAI';
+
+export {
+  ServiceAI,
+};

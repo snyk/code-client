@@ -6,6 +6,7 @@
   "module": "build/index.es.js",
   "jsnext:main": "build/index.es.js",
   "scripts": {
+    "prebuild": "npm run lint && npm run test",
     "build": "rollup -c",
     "lint": "npx eslint src/**/*.ts",
     "lint-fix": "npx eslint --fix src/**/*.ts",
@@ -30,8 +31,10 @@
   "homepage": "https://github.com/DeepCodeAI/tsc#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.1",
+    "@rollup/plugin-json": "^4.0.1",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "@types/jest": "^25.1.1",
+    "@types/request-promise": "^4.1.45",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "eslint": "^6.8.0",
@@ -50,6 +53,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "request-promise": "^4.2.5"
   }
 }

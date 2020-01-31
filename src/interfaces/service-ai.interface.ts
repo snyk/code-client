@@ -1,7 +1,7 @@
 import { IConfig } from './config.interface';
 
-import { StartLoginResponseDto } from '../dto/start-login.response.dto';
-import { StartLoginRequestDto } from '../dto/start-login.request.dto';
+import { StartSessionResponseDto } from '../dto/start-session.response.dto';
+import { StartSessionRequestDto } from '../dto/start-session.request.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
 import { CheckSessionResponseDto } from '../dto/check-session.response.dto';
 
@@ -16,7 +16,7 @@ export interface IServiceAI {
    * Requests the creation of a new login session
    * @param options
    */
-  startLogin(options: StartLoginRequestDto): Promise<StartLoginResponseDto>;
+  startSession(options: StartSessionRequestDto): Promise<StartSessionResponseDto>;
 
   /**
    * Checks status of the login process

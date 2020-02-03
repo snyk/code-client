@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "npx eslint src/**/*.ts",
-    "lint-fix": "npx eslint --fix src/**/*.ts",
+    "lint:fix": "npx eslint --fix src/**/*.ts",
     "test": "jest --coverage"
   },
   "files": [

@@ -60,15 +60,18 @@ export class ServiceAI implements IServiceAI {
 
     try {
       const { data } = await this.agent.request(config);
-      return Promise.resolve(new StartSessionResponseDto({
-        sessionToken: data.sessionToken,
-        loginURL: data.loginURL,
-      }));
-
+      return Promise.resolve(
+        new StartSessionResponseDto({
+          sessionToken: data.sessionToken,
+          loginURL: data.loginURL,
+        }),
+      );
     } catch (error) {
-      return Promise.resolve(new StartSessionResponseDto({
-        error,
-      }));
+      return Promise.resolve(
+        new StartSessionResponseDto({
+          error,
+        }),
+      );
     }
   }
 
@@ -83,21 +86,26 @@ export class ServiceAI implements IServiceAI {
 
     try {
       const result = await this.agent.request(config);
-      return Promise.resolve(new CheckSessionResponseDto({
-        isLoggedIn: result.status === 200,
-      }));
-
+      return Promise.resolve(
+        new CheckSessionResponseDto({
+          isLoggedIn: result.status === 200,
+        }),
+      );
     } catch (error) {
       const { response } = error;
       if (response && response.status === 304) {
-        return Promise.resolve(new CheckSessionResponseDto({
-          isLoggedIn: false,
-        }));
+        return Promise.resolve(
+          new CheckSessionResponseDto({
+            isLoggedIn: false,
+          }),
+        );
       }
 
-      return Promise.resolve(new CheckSessionResponseDto({
-        error,
-      }));
+      return Promise.resolve(
+        new CheckSessionResponseDto({
+          error,
+        }),
+      );
     }
   }
 }

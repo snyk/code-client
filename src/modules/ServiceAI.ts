@@ -56,32 +56,56 @@ export class ServiceAI implements IServiceAI {
       data: {
         source,
       },
-      ...headers,
     };
 
-    let response = null;
     try {
       const { data } = await this.agent.request(config);
-      response = new StartSessionResponseDto({
-        sessionToken: data.sessionToken,
-        loginURL: data.loginURL,
-      });
+      return Promise.resolve(
+        new StartSessionResponseDto({
+          sessionToken: data.sessionToken,
+          loginURL: data.loginURL,
+        }),
+      );
     } catch (error) {
-      response = new StartSessionResponseDto({
-        error,
-      });
+      return Promise.resolve(
+        new StartSessionResponseDto({
+          error,
+        }),
+      );
     }
-
-    return Promise.resolve(response);
   }
 
-  checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponseDto> {
+  async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponseDto> {
     const { sessionToken } = options;
-    console.log('ServiceAI.ts, checkSession [80]: ', { sessionToken });
+    const headers = this.createHeaders(sessionToken);
+    const config: AxiosRequestConfig = {
+      ...headers,
+      url: `/session?cache=${Math.random() * 1000000}`,
+      method: 'GET',
+    };
 
-    const response = new CheckSessionResponseDto({
-      isLoggedIn: false,
-    });
-    return Promise.resolve(response);
+    try {
+      const result = await this.agent.request(config);
+      return Promise.resolve(
+        new CheckSessionResponseDto({
+          isLoggedIn: result.status === 200,
+        }),
+      );
+    } catch (error) {
+      const { response } = error;
+      if (response && response.status === 304) {
+        return Promise.resolve(
+          new CheckSessionResponseDto({
+            isLoggedIn: false,
+          }),
+        );
+      }
+
+      return Promise.resolve(
+        new CheckSessionResponseDto({
+          error,
+        }),
+      );
+    }
   }
 }

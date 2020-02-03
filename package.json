@@ -6,10 +6,9 @@
   "module": "build/index.es.js",
   "jsnext:main": "build/index.es.js",
   "scripts": {
-    "prebuild": "npm run lint && npm run test",
     "build": "rollup -c",
     "lint": "npx eslint src/**/*.ts",
-    "lint-fix": "npx eslint --fix src/**/*.ts",
+    "lint:fix": "npx eslint --fix src/**/*.ts",
     "test": "jest --coverage"
   },
   "files": [

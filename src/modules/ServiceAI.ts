@@ -11,6 +11,8 @@ import { StartSessionRequestDto } from '../dto/start-session.request.dto';
 import { StartSessionResponseDto } from '../dto/start-session.response.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
 import { CheckSessionResponseDto } from '../dto/check-session.response.dto';
+import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
+import { GetFiltersResponseDto } from '../dto/get-filter.response.dto';
 
 export class ServiceAI implements IServiceAI {
   private baseURL = BASE_URL;
@@ -67,7 +69,7 @@ export class ServiceAI implements IServiceAI {
         }),
       );
     } catch (error) {
-      return Promise.resolve(
+      return Promise.reject(
         new StartSessionResponseDto({
           error,
         }),
@@ -101,7 +103,28 @@ export class ServiceAI implements IServiceAI {
         );
       }
 
-      return Promise.resolve(
+      return Promise.reject(
+        new CheckSessionResponseDto({
+          error,
+        }),
+      );
+    }
+  }
+
+  async getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponseDto> {
+    const { sessionToken } = options;
+    const headers = this.createHeaders(sessionToken);
+    const config: AxiosRequestConfig = {
+      ...headers,
+      url: '/filters',
+      method: 'GET',
+    };
+
+    try {
+      const { data } = await this.agent.request(config);
+      return Promise.resolve(new GetFiltersResponseDto(data));
+    } catch (error) {
+      return Promise.reject(
         new CheckSessionResponseDto({
           error,
         }),

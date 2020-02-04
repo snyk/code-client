@@ -1,7 +1,8 @@
-import { AxiosRequestConfig, AxiosError } from 'axios';
+import { AxiosError, AxiosRequestConfig } from 'axios';
 
 import { BASE_URL } from '../config';
-import { errors } from '../constants/errors';
+import { ERRORS } from '../constants/errors';
+import { RequestTypes } from '../enums/request-types';
 
 import { Agent } from './Agent';
 import { IServiceAI } from '../interfaces/service-ai.interface';
@@ -18,11 +19,14 @@ import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
 import { GetFiltersResponseDto } from '../dto/get-filters.response.dto';
 import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
 import { CreateBundleResponseDto } from '../dto/create-bundle.response.dto';
+import { CheckBundleRequestDto } from '../dto/check-bundle.request.dto';
+import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
 
 type StartSessionResponse = StartSessionResponseDto | ErrorResponseDto;
 type CheckSessionResponse = CheckSessionResponseDto | ErrorResponseDto;
 type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
 type CreateBundleResponse = CreateBundleResponseDto | ErrorResponseDto;
+type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
 
 export class ServiceAI implements IServiceAI {
   private baseURL = BASE_URL;
@@ -50,6 +54,19 @@ export class ServiceAI implements IServiceAI {
     }
 
     return response.status || null;
+  }
+
+  createErrorResponse(error: AxiosError, type: RequestTypes): ErrorResponseDto {
+    const statusCode = this.getStatusCode(error);
+    const errorMessages = ERRORS[type];
+
+    const statusText = statusCode ? errorMessages[statusCode] : errorMessages.other;
+
+    return {
+      error,
+      statusCode,
+      statusText,
+    } as ErrorResponseDto;
   }
 
   private createHeaders(sessionToken = '', useContentType = false, isUpload = false): IHeaders {
@@ -92,13 +109,7 @@ export class ServiceAI implements IServiceAI {
         }),
       );
     } catch (error) {
-      return Promise.reject(
-        new ErrorResponseDto({
-          error,
-          statusCode: this.getStatusCode(error),
-          statusText: errors.startSession.other,
-        }),
-      );
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.startSession));
     }
   }
 
@@ -128,15 +139,7 @@ export class ServiceAI implements IServiceAI {
         );
       }
 
-      const statusCode = this.getStatusCode(error);
-      const statusText = statusCode ? errors.checkSession[statusCode] : errors.checkSession.other;
-      return Promise.reject(
-        new ErrorResponseDto({
-          error,
-          statusCode,
-          statusText,
-        }),
-      );
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.checkSession));
     }
   }
 
@@ -153,22 +156,13 @@ export class ServiceAI implements IServiceAI {
       const { data } = await this.agent.request(config);
       return Promise.resolve(new GetFiltersResponseDto(data));
     } catch (error) {
-      const statusCode = this.getStatusCode(error);
-      const statusText = statusCode ? errors.getFilters[statusCode] : errors.getFilters.other;
-
-      return Promise.reject(
-        new ErrorResponseDto({
-          error,
-          statusCode,
-          statusText,
-        }),
-      );
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.getFilters));
     }
   }
 
   async createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse> {
     const { sessionToken, files } = options;
-    const headers = this.createHeaders(sessionToken);
+    const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
       ...headers,
       url: '/bundle',
@@ -182,16 +176,25 @@ export class ServiceAI implements IServiceAI {
       const { data } = await this.agent.request(config);
       return Promise.resolve(new CreateBundleResponseDto(data));
     } catch (error) {
-      const statusCode = this.getStatusCode(error);
-      const statusText = statusCode ? errors.getFilters[statusCode] : errors.getFilters.other;
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.createBundle));
+    }
+  }
 
-      return Promise.reject(
-        new ErrorResponseDto({
-          error,
-          statusCode,
-          statusText,
-        }),
-      );
+  async checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse> {
+    const { sessionToken, bundleId } = options;
+    const headers = this.createHeaders(sessionToken);
+
+    const config: AxiosRequestConfig = {
+      ...headers,
+      url: `/bundle/${bundleId}`,
+      method: 'GET',
+    };
+
+    try {
+      const { data } = await this.agent.request(config);
+      return Promise.resolve(new CheckBundleResponseDto(data));
+    } catch (error) {
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.checkBundle));
     }
   }
 }

@@ -39,7 +39,7 @@ export interface IServiceAI {
    * Requests the creation of a new login session
    * @param options
    */
-  startSession(options: StartSessionRequestDto): Promise<StartSessionResponse>
+  startSession(options: StartSessionRequestDto): Promise<StartSessionResponse>;
 
   /**
    * Checks status of the login process

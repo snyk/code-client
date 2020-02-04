@@ -4,4 +4,7 @@ export enum RequestTypes {
   getFilters = 'getFilters',
   createBundle = 'createBundle',
   checkBundle = 'checkBundle',
+  extendBundle = 'extendBundle',
+  uploadFiles = 'uploadFiles',
+  getAnalysis = 'getAnalysis',
 }

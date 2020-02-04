@@ -6,22 +6,18 @@ import { IConfig } from '../interfaces/config.interface';
 
 export class Agent {
   private baseURL = BASE_URL;
-  private useDebug = false;
-
   private agent = axios.create({
     baseURL: `${BASE_URL}${API_URL}`,
   });
   private logger = new Logger(false);
 
-  init(config: IConfig): void {
+  public init(config: IConfig): void {
     this.baseURL = config.baseURL;
-    this.useDebug = config.useDebug;
-
-    this.logger.init({ useDebug: this.useDebug });
+    this.logger.init({ useDebug: config.useDebug });
     this.initAgent();
   }
 
-  initAgent(): void {
+  private initAgent(): void {
     this.agent = axios.create({
       baseURL: `${this.baseURL}${API_URL}`,
     });
@@ -46,7 +42,7 @@ export class Agent {
     );
   }
 
-  async request(config: AxiosRequestConfig): Promise<AxiosResponse> {
+  public async request(config: AxiosRequestConfig): Promise<AxiosResponse> {
     return this.agent.request(config);
   }
 }

@@ -1,13 +1,22 @@
 import { AxiosError, AxiosRequestConfig } from 'axios';
 
-import { BASE_URL } from '../config';
 import { ERRORS } from '../constants/errors';
 import { RequestTypes } from '../enums/request-types.enum';
 
 import { Agent } from './Agent';
-import { IServiceAI } from '../interfaces/service-ai.interface';
 import { IConfig } from '../interfaces/config.interface';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
+import {
+  IServiceAI,
+  StartSessionResponse,
+  CheckSessionResponse,
+  GetFiltersResponse,
+  CreateBundleResponse,
+  CheckBundleResponse,
+  ExtendBundleResponse,
+  UploadFilesResponse,
+  GetAnalysisResponse,
+} from '../interfaces/service-ai.interface';
 
 import { ErrorResponseDto } from '../dto/error.response.dto';
 
@@ -28,31 +37,10 @@ import { UploadFilesResponseDto } from '../dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 
-type StartSessionResponse = StartSessionResponseDto | ErrorResponseDto;
-type CheckSessionResponse = CheckSessionResponseDto | ErrorResponseDto;
-type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
-type CreateBundleResponse = CreateBundleResponseDto | ErrorResponseDto;
-type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
-type ExtendBundleResponse = ExtendBundleResponseDto | ErrorResponseDto;
-type UploadFilesResponse = UploadFilesResponseDto | ErrorResponseDto;
-type GetAnalysisResponse = GetAnalysisResponseDto | ErrorResponseDto;
-
 export class ServiceAI implements IServiceAI {
-  private baseURL = BASE_URL;
   private agent = new Agent();
 
-  init(config: IConfig): void {
-    this.baseURL = config.baseURL;
-    this.agent.init(config);
-  }
-
-  getStats(): IConfig {
-    return {
-      baseURL: this.baseURL,
-    } as IConfig;
-  }
-
-  getStatusCode(error: AxiosError): number | null {
+  private getStatusCode(error: AxiosError): number | null {
     if (!error) {
       return null;
     }
@@ -65,7 +53,7 @@ export class ServiceAI implements IServiceAI {
     return response.status || null;
   }
 
-  createErrorResponse(error: AxiosError, type: RequestTypes): ErrorResponseDto {
+  private createErrorResponse(error: AxiosError, type: RequestTypes): ErrorResponseDto {
     const statusCode = this.getStatusCode(error);
     const errorMessages = ERRORS[type];
 
@@ -97,7 +85,11 @@ export class ServiceAI implements IServiceAI {
     };
   }
 
-  async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {
+  public init(config: IConfig): void {
+    this.agent.init(config);
+  }
+
+  public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {
     const { source } = options;
     const headers = this.createHeaders(undefined, true);
     const config: AxiosRequestConfig = {
@@ -122,7 +114,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse> {
+  public async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse> {
     const { sessionToken } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -152,7 +144,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponse> {
+  public async getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponse> {
     const { sessionToken } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -169,7 +161,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse> {
+  public async createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse> {
     const { sessionToken, files } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
@@ -189,7 +181,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse> {
+  public async checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse> {
     const { sessionToken, bundleId } = options;
     const headers = this.createHeaders(sessionToken);
 
@@ -207,7 +199,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse> {
+  public async extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse> {
     const { sessionToken, bundleId, files, removedFiles } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
@@ -228,7 +220,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async uploadFiles(options: UploadFilesRequestDto): Promise<UploadFilesResponse> {
+  public async uploadFiles(options: UploadFilesRequestDto): Promise<UploadFilesResponse> {
     const { sessionToken, bundleId, content } = options;
     const headers = this.createHeaders(sessionToken, true, true);
     const config: AxiosRequestConfig = {
@@ -246,7 +238,7 @@ export class ServiceAI implements IServiceAI {
     }
   }
 
-  async getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse> {
+  public async getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse> {
     const { sessionToken, bundleId, useLinters } = options;
     const headers = this.createHeaders(sessionToken);
     const params = useLinters ? { linters: true } : {};

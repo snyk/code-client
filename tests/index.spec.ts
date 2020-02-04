@@ -2,15 +2,16 @@ import { BASE_URL } from '../src/config';
 import { ServiceAI } from '../src/index';
 import { IConfig } from '../src/interfaces/config.interface';
 
-const instance = new ServiceAI();
 const baseConfig: IConfig = {
   baseURL: BASE_URL,
   useDebug: false,
 };
 
-test('Valid initialization', () => {
-  instance.init(baseConfig);
-  const stats = instance.getStats();
+describe('Creating instance', () => {
+  it('creates and initializes service', () => {
+    const AI = new ServiceAI();
+    AI.init(baseConfig);
 
-  expect(stats.baseURL).toEqual(baseConfig.baseURL);
+    expect(AI).toBeInstanceOf(ServiceAI);
+  });
 });

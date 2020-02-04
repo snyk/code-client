@@ -1,8 +1,5 @@
 import { PACKAGE_SHORT_NAME } from '../config';
-
-export interface ILoggerConfig {
-  useDebug: boolean;
-}
+import { ILoggerConfig } from '../interfaces/logger.interface';
 
 export class Logger {
   constructor(private useDebug: boolean) {}
@@ -20,12 +17,12 @@ export class Logger {
     return `${hour}:${min}:${sec}`;
   }
 
-  init(options: ILoggerConfig): void {
+  public init(options: ILoggerConfig): void {
     this.useDebug = options.useDebug;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(...args: any[]): void {
+  public log(...args: any[]): void {
     if (!this.useDebug) {
       return;
     }

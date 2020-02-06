@@ -1,5 +1,4 @@
 import { Logger } from '../src/modules/Logger';
-// import { ILoggerConfig } from '../src/interfaces/logger.interface';
 
 describe('Logger', () => {
   let consoleOutput: string[] = [];

@@ -4,18 +4,12 @@ import { Logger } from './Logger';
 import { BASE_URL, API_URL } from '../config';
 import { IConfig } from '../interfaces/config.interface';
 
+const defaultURL = `${BASE_URL}${API_URL}`;
+
 export class Agent {
   private baseURL = BASE_URL;
-  private agent = axios.create({
-    baseURL: `${BASE_URL}${API_URL}`,
-  });
+  private agent = axios.create({ baseURL: defaultURL });
   private logger = new Logger(false);
-
-  public init(config: IConfig): void {
-    this.baseURL = config.baseURL;
-    this.logger.init({ useDebug: config.useDebug });
-    this.initAgent();
-  }
 
   private initAgent(): void {
     this.agent = axios.create({
@@ -40,6 +34,12 @@ export class Agent {
         return Promise.reject(error);
       },
     );
+  }
+
+  public init(config: IConfig): void {
+    this.baseURL = config.baseURL;
+    this.logger.init({ useDebug: config.useDebug });
+    this.initAgent();
   }
 
   public async request(config: AxiosRequestConfig): Promise<AxiosResponse> {

@@ -1,11 +1,5 @@
-import { BASE_URL } from '../src/config';
 import { ServiceAI } from '../src/index';
-import { IConfig } from '../src/interfaces/config.interface';
-
-const baseConfig: IConfig = {
-  baseURL: BASE_URL,
-  useDebug: false,
-};
+import { baseConfig } from './mocks/base-config';
 
 describe('Creating instance', () => {
   it('creates and initializes service', () => {

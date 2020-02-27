@@ -2,6 +2,7 @@ import queue from 'queue';
 
 import { Logger } from './Logger';
 import { Http } from './Http';
+import { Emitter } from './Emitter';
 
 import { PLUGIN } from '../constants/common';
 import { BUNDLE_ERRORS } from '../constants/messages';
@@ -9,6 +10,8 @@ import { ANALYSIS_STATUS } from '../constants/analysis';
 import { IFileInfo, IFileQueue } from '../interfaces/files.interface';
 import { IQueueAnalysisCheck } from '../interfaces/queue.interface';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
+
+import { throttle } from '../utils/throttle';
 
 const loopDelay = 1000;
 
@@ -57,6 +60,10 @@ export class Queues {
       autostart: false,
     });
 
+    const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
+    const totalChunks = chunks.map(chunk => chunk.length).reduce((acc, curr) => acc + curr, 0);
+    let currentChunk = 0;
+
     chunks.forEach((chunk, index) => {
       let chunkSize = 0;
       const requestBody = chunk.map(fileItem => {
@@ -80,10 +87,16 @@ export class Queues {
 
       q.push(async () => {
         const { error, statusCode } = await uploadFilesRunner({ sessionToken, bundleId, content: requestBody });
+
         if (error) {
           debugInfo.errorText = BUNDLE_ERRORS.upload[statusCode] || error.message;
           debugInfo.error = error;
         }
+
+        currentChunk += chunk.length;
+        console.log('****** From Queues:  ******', currentChunk, totalChunks);
+        emitUploadResult(currentChunk, totalChunks);
+
         return debugInfo;
       });
     });
@@ -92,7 +105,9 @@ export class Queues {
   }
 
   async startAnalysisLoop(options: IQueueAnalysisCheck): Promise<void> {
-    const { bundleId, onAnalysisFinish } = options;
+    const { bundleId } = options;
+
+    const emitAnalysisProgress = throttle(Emitter.analyseProgress, loopDelay);
 
     if (!bundleId) {
       this.logger.log('Analysis: no bundle ID');
@@ -110,12 +125,13 @@ export class Queues {
         status === ANALYSIS_STATUS.dcDone;
 
       if (status === ANALYSIS_STATUS.done) {
-        if (onAnalysisFinish) {
-          onAnalysisFinish({ analysisResults, analysisURL });
+        if (analysisResults) {
+          Emitter.analyseFinish({ analysisResults, analysisURL });
         }
       }
 
       if (inProgress) {
+        emitAnalysisProgress(options);
         this.nextAnalysisLoopTick(options);
       }
 

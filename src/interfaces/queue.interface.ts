@@ -14,7 +14,6 @@ export interface IQueueAnalysisCheck {
   bundleId: string;
   sessionToken: string;
   useLinter?: boolean;
-  onAnalysisFinish?: Function;
 }
 
 export interface IQueueAnalysisCheckResult {

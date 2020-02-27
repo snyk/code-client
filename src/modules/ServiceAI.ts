@@ -3,6 +3,7 @@ import { Files } from './Files';
 import { Queues } from './Queues';
 import { Http } from './Http';
 import { Logger } from './Logger';
+import { Emitter } from './Emitter';
 
 import { IConfig } from '../interfaces/config.interface';
 import { IFileInfo } from '../interfaces/files.interface';
@@ -113,6 +114,7 @@ export class ServiceAI implements IServiceAI {
       }
 
       this.uploadQueueFinished = true;
+      Emitter.uploadBundleFinish();
     });
 
     uploadQueue.start();
@@ -131,7 +133,7 @@ export class ServiceAI implements IServiceAI {
   }
 
   public async analyse(options: AnalyseRequestDto): Promise<AnalyseResponseDto> {
-    const { files, sessionToken, onAnalysisFinish } = options;
+    const { files, sessionToken } = options;
     const fullFilesInfo = this.files.getFilesData(files);
     const bundle = await this.files.buildBundle(files);
     const result = await this.createBundle({
@@ -142,7 +144,7 @@ export class ServiceAI implements IServiceAI {
     const bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
     const uploadedBundleID = await this.processUploadFiles(bundleId, fullFilesInfo, sessionToken);
 
-    this.queues.startAnalysisLoop({ bundleId, sessionToken, onAnalysisFinish });
+    this.queues.startAnalysisLoop({ bundleId, sessionToken });
 
     return Promise.resolve({ bundleId: uploadedBundleID });
   }

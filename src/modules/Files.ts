@@ -1,9 +1,13 @@
 import fs from 'fs';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 
+import { Emitter } from './Emitter';
+
 import { IFiles, IFileInfo } from '../interfaces/files.interface';
 import { CRYPTO } from '../constants/files';
 import { PLUGIN } from '../constants/common';
+
+import { throttle } from '../utils/throttle';
 
 type FileInfo = {
   hash: string;
@@ -65,12 +69,20 @@ export class Files {
   }
 
   public buildBundle(files: string[]): Promise<IFiles> {
-    const result = files.reduce((res, path) => {
+    const emitResult = throttle(Emitter.buildBundleProgress, 1000);
+
+    const result = files.reduce((res, path, idx) => {
+      const processed = idx + 1;
+      const total = files.length;
+
       const fileInfo = this.getFileInfo(path);
       res[path] = fileInfo.hash;
 
+      emitResult(processed, total);
       return res;
     }, {});
+
+    Emitter.buildBundleFinish();
 
     return Promise.resolve(result);
   }

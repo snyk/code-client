@@ -1,12 +1,12 @@
-let lastTime = 0;
-
 export function throttle(emitAction: Function, timeOut: number): Function {
-  const now = new Date();
+  let lastTime = 0;
 
   return function(...args: number[]): void {
-    if (Number(now) - lastTime >= timeOut) {
+    const now = Number(new Date());
+
+    if (now - lastTime >= timeOut) {
       emitAction(...args);
-      lastTime = Number(now);
+      lastTime = now;
     }
   };
 }

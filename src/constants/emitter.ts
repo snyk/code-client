@@ -7,4 +7,5 @@ export const CUSTOM_EVENTS = {
   uploadFilesFinish: 'uploadFilesFinish',
   analyseProgress: 'analyseProgress',
   analyseFinish: 'analyseFinish',
+  error: 'error',
 };

@@ -32,7 +32,7 @@ export class Files {
       .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
   }
 
-  public getFilesData(files: string[]): IFileInfo[] {
+  public async getFilesData(files: string[]): Promise<IFileInfo[]> {
     const result = files.map(file => {
       const { hash, size, content } = this.getFileInfo(file);
 
@@ -68,13 +68,12 @@ export class Files {
     };
   }
 
-  public buildBundle(files: string[]): Promise<IFiles> {
+  public async buildBundle(files: string[]): Promise<IFiles> {
     const emitResult = throttle(Emitter.buildBundleProgress, 1000);
+    const total = files.length;
 
     const result = files.reduce((res, path, idx) => {
       const processed = idx + 1;
-      const total = files.length;
-
       const fileInfo = this.getFileInfo(path);
       res[path] = fileInfo.hash;
 

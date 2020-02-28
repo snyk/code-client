@@ -30,7 +30,6 @@ import { CheckBundleRequestDto } from '../dto/check-bundle.request.dto';
 import { ExtendBundleRequestDto } from '../dto/extend-bundle.request.dto';
 import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
-import { AnalyseResponseDto } from '../dto/analyse.response.dto';
 import { AnalyseRequestDto } from '../dto/analyse.request.dto';
 
 export class ServiceAI implements IServiceAI {
@@ -132,20 +131,34 @@ export class ServiceAI implements IServiceAI {
     });
   }
 
-  public async analyse(options: AnalyseRequestDto): Promise<AnalyseResponseDto> {
-    const { files, sessionToken } = options;
-    const fullFilesInfo = this.files.getFilesData(files);
-    const bundle = await this.files.buildBundle(files);
-    const result = await this.createBundle({
-      files: bundle,
-      sessionToken,
-    });
+  public async analyse(options: AnalyseRequestDto): Promise<void> {
+    try {
+      const { files, sessionToken } = options;
+      const fullFilesInfo = await this.files.getFilesData(files);
+      const bundle = await this.files.buildBundle(files);
+      const result = await this.createBundle({
+        files: bundle,
+        sessionToken,
+      });
 
-    const bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
-    const uploadedBundleID = await this.processUploadFiles(bundleId, fullFilesInfo, sessionToken);
+      const bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
+      await this.processUploadFiles(bundleId, fullFilesInfo, sessionToken);
 
-    this.queues.startAnalysisLoop({ bundleId, sessionToken });
+      this.queues.startAnalysisLoop({ bundleId, sessionToken });
+    } catch (error) {
+      Emitter.sendError(error);
+    }
 
-    return Promise.resolve({ bundleId: uploadedBundleID });
+    return Promise.resolve();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on(eventName: string, callback: Function, ...args: any[]): void {
+    Emitter.on(eventName, callback, ...args);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  emit(eventName: string, ...args: any[]): void {
+    Emitter.emit(eventName, ...args);
   }
 }

@@ -14,6 +14,7 @@ import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 import { throttle } from '../utils/throttle';
 
 const loopDelay = 1000;
+const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
 
 export class Queues {
   private logger = new Logger(false);
@@ -60,7 +61,6 @@ export class Queues {
       autostart: false,
     });
 
-    const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
     const totalChunks = chunks.map(chunk => chunk.length).reduce((acc, curr) => acc + curr, 0);
     let currentChunk = 0;
 
@@ -94,7 +94,6 @@ export class Queues {
         }
 
         currentChunk += chunk.length;
-        console.log('****** From Queues:  ******', currentChunk, totalChunks);
         emitUploadResult(currentChunk, totalChunks);
 
         return debugInfo;
@@ -106,7 +105,6 @@ export class Queues {
 
   async startAnalysisLoop(options: IQueueAnalysisCheck): Promise<void> {
     const { bundleId } = options;
-
     const emitAnalysisProgress = throttle(Emitter.analyseProgress, loopDelay);
 
     if (!bundleId) {
@@ -118,6 +116,8 @@ export class Queues {
 
     if (result instanceof GetAnalysisResponseDto) {
       const { status, analysisResults, analysisURL } = result;
+
+      emitAnalysisProgress({ analysisResults, analysisURL });
 
       const inProgress =
         status === ANALYSIS_STATUS.fetching ||
@@ -131,7 +131,6 @@ export class Queues {
       }
 
       if (inProgress) {
-        emitAnalysisProgress(options);
         this.nextAnalysisLoopTick(options);
       }
 

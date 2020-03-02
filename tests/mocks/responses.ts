@@ -1,3 +1,4 @@
+import path from 'path';
 import { bundleId, sessionToken } from './base-config';
 
 import { ErrorResponseDto } from '../../src/dto/error.response.dto';
@@ -18,7 +19,11 @@ const bundleResponse = {
   bundleId,
   missingFiles: [],
   uploadURL: 'mock-upload-url',
-}
+};
+
+const root = __dirname;
+const mockProjectPath = path.resolve(root, '../mocked_data');
+const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
 
 /**
  * Successful responses
@@ -66,7 +71,7 @@ export const getAnalysisResponse = new GetAnalysisResponseDto({
       },
     },
     files: {
-      '/home/user/repo/main.js': {
+      [analysedFile]: {
         0: [
           {
             cols: [120, 150],

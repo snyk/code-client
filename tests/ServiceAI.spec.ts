@@ -24,15 +24,24 @@ import {
   extendBundleResponse,
   uploadFilesResponse,
   getAnalysisResponse,
-
   checkBundleError404,
   extendBundleError404,
 } from './mocks/responses';
+// import { AnalyseRequestDto } from '../src/dto/analyse.request.dto';
+
+import { IQueueAnalysisCheckResult } from '../src/interfaces/queue.interface';
+
+import { mockFiles, mockNewAnalysisResults } from './mocks/requests';
 
 startMockServer();
 
-describe('Requests to public API', () => {
+async function sleep(timeout: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(), timeout);
+  });
+}
 
+describe('Requests to public API', () => {
   const AI = new ServiceAI();
   AI.init(baseConfig);
 
@@ -157,5 +166,25 @@ describe('Requests to public API', () => {
 
     const response = await AI.getAnalysis(options);
     expect(response).toEqual(getAnalysisResponse);
+  });
+
+  /**
+   * Get Analysis Result
+   */
+  it('gets analysis result', async () => {
+    const options = {
+      files: mockFiles,
+      sessionToken,
+    };
+
+    AI.on(
+      'analyseFinish',
+      async (result: IQueueAnalysisCheckResult): Promise<void> => {
+        expect(result).toEqual(mockNewAnalysisResults);
+      },
+    );
+
+    await AI.analyse(options);
+    await sleep(500);
   });
 });

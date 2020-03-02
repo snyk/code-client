@@ -35,6 +35,7 @@ export function startMockServer(): void {
 
   checkBundleError(mockServer);
   extendBundleError(mockServer);
+  createNewBundleSuccess(mockServer);
 }
 
 function agentSuccess(mockServer: Scope): void {
@@ -85,6 +86,12 @@ function checkBundleSuccess(mockServer: Scope): void {
     .reply(200, checkBundleResponse);
 }
 
+function createNewBundleSuccess(mockServer: Scope): void {
+  mockServer
+    .post(`/bundle/${bundleId}`)
+    .reply(200, checkBundleResponse);
+}
+
 function extendBundleSuccess(mockServer: Scope): void {
   mockServer
     .put(`/bundle/${bundleId}`)
@@ -117,3 +124,4 @@ function extendBundleError(mockServer: Scope): void {
     .put(`/bundle/${expiredBundleId}`)
     .reply(404, extendBundleResponse);
 }
+

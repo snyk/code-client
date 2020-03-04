@@ -30,6 +30,8 @@ import { UploadFilesRequestDto } from './dto/upload-files.request.dto';
 import { UploadFilesResponseDto } from './dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from './dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from './dto/get-analysis.response.dto';
+import { AnalyseRequestDto } from './dto/analyse.request.dto';
+import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
 
 export {
   ServiceAI,
@@ -64,4 +66,6 @@ export {
   UploadFilesResponseDto,
   GetAnalysisRequestDto,
   GetAnalysisResponseDto,
+  AnalyseRequestDto,
+  IQueueAnalysisCheckResult,
 };

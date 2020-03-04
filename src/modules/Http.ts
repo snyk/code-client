@@ -199,7 +199,7 @@ export class Http {
   }
 
   public async extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse> {
-    const { sessionToken, bundleId, files, removedFiles } = options;
+    const { sessionToken, bundleId, files, removedFiles = [] } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
       ...headers,

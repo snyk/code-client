@@ -42,6 +42,7 @@ export class ServiceAI implements IServiceAI {
   processedChunks = {}; // cache for processed and stored chunks
   uploadQueueFinished = false;
   uploadQueueErrors = false;
+  bundleId = '';
 
   public init(config: IConfig): void {
     this.agent.init(config);
@@ -136,15 +137,24 @@ export class ServiceAI implements IServiceAI {
       const { files, sessionToken } = options;
       const fullFilesInfo = await this.files.getFilesData(files);
       const bundle = await this.files.buildBundle(files);
-      const result = await this.createBundle({
-        files: bundle,
-        sessionToken,
-      });
 
-      const bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
-      await this.processUploadFiles(bundleId, fullFilesInfo, sessionToken);
+      if (!this.bundleId) {
+        const result = await this.createBundle({
+          files: bundle,
+          sessionToken,
+        });
+        this.bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
+      } else {
+        this.extendBundle({
+          sessionToken,
+          bundleId: this.bundleId,
+          files: bundle,
+        });
+      }
 
-      this.queues.startAnalysisLoop({ bundleId, sessionToken });
+      await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
+
+      this.queues.startAnalysisLoop({ bundleId: this.bundleId, sessionToken });
     } catch (error) {
       Emitter.sendError(error);
     }

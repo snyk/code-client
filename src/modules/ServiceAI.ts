@@ -31,6 +31,8 @@ import { ExtendBundleRequestDto } from '../dto/extend-bundle.request.dto';
 import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { AnalyseRequestDto } from '../dto/analyse.request.dto';
+import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
+import { ExtendBundleResponseDto } from '../dto/extend-bundle.response.dto';
 
 export class ServiceAI implements IServiceAI {
   private agent = new Agent();
@@ -145,11 +147,27 @@ export class ServiceAI implements IServiceAI {
         });
         this.bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
       } else {
-        this.extendBundle({
-          sessionToken,
+        const checkBundleResult = await this.checkBundle({
           bundleId: this.bundleId,
-          files: bundle,
+          sessionToken,
         });
+
+        if (checkBundleResult instanceof CheckBundleResponseDto) {
+          const extendResults = await this.extendBundle({
+            files: bundle,
+            sessionToken,
+            bundleId: this.bundleId,
+            removedFiles: [],
+          });
+
+          this.bundleId = extendResults instanceof ExtendBundleResponseDto ? extendResults.bundleId : this.bundleId;
+        } else {
+          const result = await this.createBundle({
+            files: bundle,
+            sessionToken,
+          });
+          this.bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
+        }
       }
 
       await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);

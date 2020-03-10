@@ -134,6 +134,22 @@ export class ServiceAI implements IServiceAI {
     });
   }
 
+  public getMissingFilesInfo = (missingFiles: string[], filesInfo: IFileInfo[]): IFileInfo[] => {
+    const missingFilesData: IFileInfo[] = [];
+
+    const result = missingFiles.reduce((resultArr, missingFile) => {
+      const fullInfo = filesInfo.find(fileInfo => fileInfo.path === missingFile);
+
+      if (fullInfo) {
+        resultArr.push(fullInfo);
+      }
+
+      return resultArr;
+    }, missingFilesData);
+
+    return result;
+  };
+
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
       const { files, sessionToken } = options;
@@ -196,7 +212,9 @@ export class ServiceAI implements IServiceAI {
       }
 
       if (missingFiles.length) {
-        await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
+        const missingFilesInfo = this.getMissingFilesInfo(missingFiles, fullFilesInfo);
+        this.getMissingFilesInfo(missingFiles, fullFilesInfo);
+        await this.processUploadFiles(this.bundleId, missingFilesInfo, sessionToken);
       }
       this.queues.startAnalysisLoop({ bundleId: this.bundleId, sessionToken });
     } catch (error) {

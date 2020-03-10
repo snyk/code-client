@@ -198,7 +198,6 @@ export class ServiceAI implements IServiceAI {
       if (missingFiles.length) {
         await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
       }
-      // await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
       this.queues.startAnalysisLoop({ bundleId: this.bundleId, sessionToken });
     } catch (error) {
       Emitter.sendError(error);

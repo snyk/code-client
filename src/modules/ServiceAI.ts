@@ -139,13 +139,21 @@ export class ServiceAI implements IServiceAI {
       const { files, sessionToken } = options;
       const fullFilesInfo = await this.files.getFilesData(files);
       const bundle = await this.files.buildBundle(files);
+      let missingFiles: string[] = [];
 
       if (!this.bundleId) {
-        const result = await this.createBundle({
+        const createBundleResult = await this.createBundle({
           files: bundle,
           sessionToken,
         });
-        this.bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
+
+        if (createBundleResult instanceof CreateBundleResponseDto) {
+          this.bundleId = createBundleResult.bundleId;
+
+          if (createBundleResult.missingFiles?.length) {
+            missingFiles = [...createBundleResult.missingFiles];
+          }
+        }
       } else {
         const checkBundleResult = await this.checkBundle({
           bundleId: this.bundleId,
@@ -153,6 +161,10 @@ export class ServiceAI implements IServiceAI {
         });
 
         if (checkBundleResult instanceof CheckBundleResponseDto) {
+          if (checkBundleResult.missingFiles?.length) {
+            missingFiles = [...checkBundleResult.missingFiles];
+          }
+
           const extendResults = await this.extendBundle({
             files: bundle,
             sessionToken,
@@ -160,18 +172,33 @@ export class ServiceAI implements IServiceAI {
             removedFiles: [],
           });
 
-          this.bundleId = extendResults instanceof ExtendBundleResponseDto ? extendResults.bundleId : this.bundleId;
+          if (extendResults instanceof ExtendBundleResponseDto) {
+            this.bundleId = extendResults.bundleId;
+
+            if (extendResults.missingFiles?.length) {
+              missingFiles = [...extendResults.missingFiles];
+            }
+          }
         } else {
-          const result = await this.createBundle({
+          const createBundleResult = await this.createBundle({
             files: bundle,
             sessionToken,
           });
-          this.bundleId = result instanceof CreateBundleResponseDto ? result.bundleId : '';
+
+          if (createBundleResult instanceof CreateBundleResponseDto) {
+            this.bundleId = createBundleResult.bundleId;
+
+            if (createBundleResult.missingFiles?.length) {
+              missingFiles = [...createBundleResult.missingFiles];
+            }
+          }
         }
       }
 
-      await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
-
+      if (missingFiles.length) {
+        await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
+      }
+      // await this.processUploadFiles(this.bundleId, fullFilesInfo, sessionToken);
       this.queues.startAnalysisLoop({ bundleId: this.bundleId, sessionToken });
     } catch (error) {
       Emitter.sendError(error);

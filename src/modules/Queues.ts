@@ -57,7 +57,7 @@ export class Queues {
   ): IFileQueue {
     const q = queue({
       results: [],
-      concurrency: 10,
+      concurrency: 20,
       autostart: false,
     });
 

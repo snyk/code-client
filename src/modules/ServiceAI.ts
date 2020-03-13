@@ -152,7 +152,7 @@ export class ServiceAI implements IServiceAI {
 
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
-      const { files, sessionToken } = options;
+      const { files, sessionToken, removedFiles = [] } = options;
       const fullFilesInfo = await this.files.getFilesData(files);
       const bundle = await this.files.buildBundle(files);
       let missingFiles: string[] = [];
@@ -185,7 +185,7 @@ export class ServiceAI implements IServiceAI {
             files: bundle,
             sessionToken,
             bundleId: this.bundleId,
-            removedFiles: [],
+            removedFiles,
           });
 
           if (extendResults instanceof ExtendBundleResponseDto) {

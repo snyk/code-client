@@ -1,4 +1,3 @@
-import { Agent } from './Agent';
 import { Files } from './Files';
 import { Queues } from './Queues';
 import { Http } from './Http';
@@ -35,7 +34,6 @@ import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
 import { ExtendBundleResponseDto } from '../dto/extend-bundle.response.dto';
 
 export class ServiceAI implements IServiceAI {
-  private agent = new Agent();
   private files = new Files();
   private queues = new Queues();
   private http = new Http();
@@ -47,8 +45,10 @@ export class ServiceAI implements IServiceAI {
   bundleId = '';
 
   public init(config: IConfig): void {
-    this.agent.init(config);
+    this.bundleId = '';
+    this.http = new Http();
     this.http.init(config);
+    this.queues.updateHttp(this.http);
   }
 
   public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {

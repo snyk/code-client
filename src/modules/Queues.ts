@@ -20,6 +20,10 @@ export class Queues {
   private logger = new Logger(false);
   private http = new Http();
 
+  public updateHttp(http: Http): void {
+    this.http = http;
+  }
+
   // Create Chunks
   public createUploadChunks(files: IFileInfo[]): Array<IFileInfo[]> {
     const chunks = [];

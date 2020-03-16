@@ -37,7 +37,7 @@ import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 
 export class Http {
-  private agent = new Agent();
+  agent = new Agent();
 
   private getStatusCode(error: AxiosError): number | null {
     if (!error) {
@@ -85,7 +85,8 @@ export class Http {
   }
 
   public init(config: IConfig): void {
-    this.agent.init(config);
+    const agent = new Agent();
+    this.agent = agent.init(config);
   }
 
   public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {

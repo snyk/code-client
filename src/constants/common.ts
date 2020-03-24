@@ -16,9 +16,9 @@ export const PLUGIN = {
 
   maxFileSize: 4 * 1024 * 1024,
 
-  // Max payload is 4 MB, but we will use 3.5 MB for files due to we need also to send
+  // Max payload is 4 MB, but we will use 3 MB for files due to we need also to send
   // another info about files with their contents
-  maxPayload: 3.5 * 1024 * 1024,
+  maxPayload: 3 * 1024 * 1024,
 
   // Delay in ms between starting analysis for changed files
   analysisDelay: 5 * 1000, // 5 sec

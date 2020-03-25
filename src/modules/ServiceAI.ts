@@ -233,4 +233,8 @@ export class ServiceAI implements IServiceAI {
   emit(eventName: string, ...args: any[]): void {
     Emitter.emit(eventName, ...args);
   }
+
+  removeListeners(): void {
+    Emitter.removeListeners();
+  }
 }

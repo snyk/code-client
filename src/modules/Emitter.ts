@@ -4,6 +4,14 @@ import { IQueueAnalysisCheckResult } from '../interfaces/queue.interface';
 const EventEmitter = require('events').EventEmitter;
 
 class Emitter extends EventEmitter {
+  constructor() {
+    super();
+    this.buildBundleProgress = this.buildBundleProgress.bind(this);
+    this.uploadBundleProgress = this.uploadBundleProgress.bind(this);
+    this.analyseProgress = this.analyseProgress.bind(this);
+    this.removeListeners = this.removeListeners.bind(this);
+  }
+
   buildBundleProgress(processed: number, total: number): void {
     this.emit(CUSTOM_EVENTS.buildBundleProgress, processed, total);
   }
@@ -32,11 +40,8 @@ class Emitter extends EventEmitter {
     this.emit(CUSTOM_EVENTS.error, error);
   }
 
-  constructor() {
-    super();
-    this.buildBundleProgress = this.buildBundleProgress.bind(this);
-    this.uploadBundleProgress = this.uploadBundleProgress.bind(this);
-    this.analyseProgress = this.analyseProgress.bind(this);
+  removeListeners(): void {
+    this.removeAllListeners();
   }
 }
 

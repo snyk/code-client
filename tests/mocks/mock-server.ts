@@ -14,6 +14,7 @@ import {
 
   checkBundleError404,
 } from './responses';
+import { mockNewAnalysisResults } from './requests';
 
 export function startMockServer(): void {
 
@@ -32,6 +33,7 @@ export function startMockServer(): void {
   extendBundleSuccess(mockServer);
   uploadFilesSuccess(mockServer);
   getAnalysisSuccess(mockServer);
+  getAnalysisResult(mockServer);
 
   checkBundleError(mockServer);
   extendBundleError(mockServer);
@@ -108,6 +110,12 @@ function getAnalysisSuccess(mockServer: Scope): void {
   mockServer
     .get(`/analysis/${bundleId}`)
     .reply(200, getAnalysisResponse);
+}
+
+function getAnalysisResult(mockServer: Scope): void {
+  mockServer
+    .post(`/bundle`)
+    .reply(200, mockNewAnalysisResults);
 }
 
 /**

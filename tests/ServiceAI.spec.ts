@@ -175,6 +175,7 @@ describe('Requests to public API', () => {
     const options = {
       files: mockFiles,
       sessionToken,
+      removedFiles: [],
     };
 
     AI.on(

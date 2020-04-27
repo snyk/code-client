@@ -1,7 +1,7 @@
 {
   "name": "@deepcode/tsc",
   "version": "1.0.0",
-  "description": "Typescript consumer of public API",
+  "description": "Typescript consumer of Deepcode public API",
   "main": "build/index.js",
   "module": "build/index.es.js",
   "jsnext:main": "build/index.es.js",

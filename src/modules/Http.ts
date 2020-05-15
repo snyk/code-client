@@ -3,8 +3,8 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 import { ERRORS } from '../constants/errors';
 import { RequestTypes } from '../enums/request-types.enum';
 
+import { apiPath } from '../constants/common';
 import { Agent } from './Agent';
-import { IConfig } from '../interfaces/config.interface';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
 import {
   StartSessionResponse,
@@ -37,7 +37,25 @@ import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 
 export class Http {
-  agent = new Agent();
+  private agent = new Agent(true);
+
+  constructor() {
+    this.checkBundle = this.checkBundle.bind(this);
+    this.getStatusCode = this.getStatusCode.bind(this);
+    this.createErrorResponse = this.createErrorResponse.bind(this);
+    this.checkSession = this.checkSession.bind(this);
+    this.getAnalysis = this.getAnalysis.bind(this);
+    this.uploadFiles = this.uploadFiles.bind(this);
+    this.extendBundle = this.extendBundle.bind(this);
+    this.createBundle = this.createBundle.bind(this);
+    this.getFilters = this.getFilters.bind(this);
+    this.startSession = this.startSession.bind(this);
+    this.createHeaders = this.createHeaders.bind(this);
+
+    // if (config && config.baseURL) {
+    //   this.baseURL = baseURL.replace(/\/$/, '');
+    // }
+  }
 
   private getStatusCode(error: AxiosError): number | null {
     if (!error) {
@@ -84,17 +102,12 @@ export class Http {
     };
   }
 
-  public init(config: IConfig): void {
-    const agent = new Agent();
-    this.agent = agent.init(config);
-  }
-
   public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {
-    const { source } = options;
+    const { source, baseURL } = options;
     const headers = this.createHeaders(undefined, true);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: '/login',
+      url: `${baseURL}${apiPath}/login`,
       method: 'POST',
       data: {
         source,
@@ -115,11 +128,11 @@ export class Http {
   }
 
   public async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse> {
-    const { sessionToken } = options;
+    const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: `/session?cache=${Math.random() * 1000000}`,
+      url: `${baseURL}${apiPath}/session?cache=${Math.random() * 1000000}`,
       method: 'GET',
     };
 
@@ -145,11 +158,11 @@ export class Http {
   }
 
   public async getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponse> {
-    const { sessionToken } = options;
+    const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: '/filters',
+      url: `${baseURL}${apiPath}/filters`,
       method: 'GET',
     };
 
@@ -162,11 +175,11 @@ export class Http {
   }
 
   public async createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse> {
-    const { sessionToken, files } = options;
+    const { baseURL, sessionToken, files } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: '/bundle',
+      url: `${baseURL}${apiPath}/bundle`,
       method: 'POST',
       data: {
         files,
@@ -182,12 +195,12 @@ export class Http {
   }
 
   public async checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse> {
-    const { sessionToken, bundleId } = options;
+    const { baseURL, sessionToken, bundleId } = options;
     const headers = this.createHeaders(sessionToken);
 
     const config: AxiosRequestConfig = {
       ...headers,
-      url: `/bundle/${bundleId}`,
+      url: `${baseURL}${apiPath}/bundle/${bundleId}`,
       method: 'GET',
     };
 
@@ -200,11 +213,11 @@ export class Http {
   }
 
   public async extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse> {
-    const { sessionToken, bundleId, files, removedFiles } = options;
+    const { baseURL, sessionToken, bundleId, files, removedFiles } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: `/bundle/${bundleId}`,
+      url: `${baseURL}${apiPath}/bundle/${bundleId}`,
       method: 'PUT',
       data: {
         files,
@@ -221,11 +234,11 @@ export class Http {
   }
 
   public async uploadFiles(options: UploadFilesRequestDto): Promise<UploadFilesResponse> {
-    const { sessionToken, bundleId, content } = options;
+    const { baseURL, sessionToken, bundleId, content } = options;
     const headers = this.createHeaders(sessionToken, true, true);
     const config: AxiosRequestConfig = {
       ...headers,
-      url: `/file/${bundleId}`,
+      url: `${baseURL}${apiPath}/file/${bundleId}`,
       method: 'POST',
       data: content,
     };
@@ -239,13 +252,13 @@ export class Http {
   }
 
   public async getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse> {
-    const { sessionToken, bundleId, useLinters } = options;
+    const { baseURL, sessionToken, bundleId, useLinters } = options;
     const headers = this.createHeaders(sessionToken);
     const params = useLinters ? { linters: true } : {};
     const config: AxiosRequestConfig = {
       ...headers,
       ...params,
-      url: `/analysis/${bundleId}`,
+      url: `${baseURL}${apiPath}/analysis/${bundleId}`,
       method: 'GET',
     };
 
@@ -255,19 +268,5 @@ export class Http {
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getAnalysis));
     }
-  }
-
-  constructor() {
-    this.checkBundle = this.checkBundle.bind(this);
-    this.getStatusCode = this.getStatusCode.bind(this);
-    this.createErrorResponse = this.createErrorResponse.bind(this);
-    this.checkSession = this.checkSession.bind(this);
-    this.getAnalysis = this.getAnalysis.bind(this);
-    this.uploadFiles = this.uploadFiles.bind(this);
-    this.extendBundle = this.extendBundle.bind(this);
-    this.createBundle = this.createBundle.bind(this);
-    this.getFilters = this.getFilters.bind(this);
-    this.startSession = this.startSession.bind(this);
-    this.createHeaders = this.createHeaders.bind(this);
   }
 }

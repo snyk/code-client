@@ -5,7 +5,7 @@ import { Emitter } from './Emitter';
 
 import { IFiles, IFileInfo } from '../interfaces/files.interface';
 import { CRYPTO } from '../constants/files';
-import { PLUGIN } from '../constants/common';
+import { maxPayload } from '../constants/common';
 
 import { throttle } from '../utils/throttle';
 
@@ -50,7 +50,7 @@ export class Files {
   private getFileInfo(filePath: string): FileInfo {
     const fileSize = fs.lstatSync(filePath).size;
 
-    if (fileSize > PLUGIN.maxPayload) {
+    if (fileSize > maxPayload) {
       return {
         hash: '',
         size: 0,

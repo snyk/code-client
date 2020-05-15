@@ -1,27 +1,10 @@
 import path from 'path';
 
-export const PLUGIN = {
-  name: 'deepcode',
-  title: 'DeepCode (Beta)',
-  statusTitle: 'DeepCode',
-  ideName: 'atom',
-  url: 'https://www.deepcode.ai',
-  termURL: 'https://www.deepcode.ai/tc',
+export const isWindows = path.sep === '\\';
 
-  dbName: 'DeepCodeDB',
-  dbVersion: 1,
+// Max payload is 5 MB, but we will use 4 MB for files due to we need also to send
+// another info about files with their contents
+export const maxPayload = 4 * 1024 * 1024;
 
-  pathSeparator: path.sep,
-  isWindows: (path.sep === '\\'),
-
-  maxFileSize: 4 * 1024 * 1024,
-
-  // Max payload is 4 MB, but we will use 3 MB for files due to we need also to send
-  // another info about files with their contents
-  maxPayload: 3 * 1024 * 1024,
-
-  // Delay in ms between starting analysis for changed files
-  analysisDelay: 5 * 1000, // 5 sec
-
-  problemsPanelURI: 'atom://deepcode-problems-panel',
-};
+export const defaultBaseURL = 'https://www.deepcode.ai';
+export const apiPath = '/publicapi';

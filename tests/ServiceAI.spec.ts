@@ -1,5 +1,6 @@
 import { ServiceAI } from '../src/index';
-import { baseConfig, sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
+import { defaultBaseURL as baseURL } from '../src/constants/common';
+import { sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
 
 import { ErrorResponseDto } from '../src/dto/error.response.dto';
 import { StartSessionRequestDto } from '../src/dto/start-session.request.dto';
@@ -43,14 +44,14 @@ async function sleep(timeout: number): Promise<void> {
 
 describe('Requests to public API', () => {
   const AI = new ServiceAI();
-  AI.init(baseConfig);
-
+  
   /**
    * Start Session
    */
   it('starts session successfully', async () => {
     const options = new StartSessionRequestDto({
       source: 'atom',
+      baseURL,
     });
 
     const response = await AI.startSession(options);
@@ -62,6 +63,7 @@ describe('Requests to public API', () => {
    */
   it('checks session successfully', async () => {
     const options = new CheckSessionRequestDto({
+      baseURL,
       sessionToken,
     });
 
@@ -74,6 +76,7 @@ describe('Requests to public API', () => {
    */
   it('gets filters successfully', async () => {
     const options = new GetFiltersRequestDto({
+      baseURL,
       sessionToken,
     });
 
@@ -94,6 +97,7 @@ describe('Requests to public API', () => {
    */
   it('checks bundle successfully', async () => {
     const options = new CheckBundleRequestDto({
+      baseURL,
       sessionToken,
       bundleId,
     });
@@ -104,6 +108,7 @@ describe('Requests to public API', () => {
 
   it('checks expired bundle successfully', async () => {
     const options = new CheckBundleRequestDto({
+      baseURL,
       sessionToken,
       bundleId: expiredBundleId,
     });
@@ -160,6 +165,7 @@ describe('Requests to public API', () => {
    */
   it('gets analysis successfully', async () => {
     const options = new GetAnalysisRequestDto({
+      baseURL,
       sessionToken,
       bundleId,
     });
@@ -173,8 +179,9 @@ describe('Requests to public API', () => {
    */
   it('gets analysis result', async () => {
     const options = {
-      files: mockFiles,
+      baseURL,
       sessionToken,
+      files: mockFiles,
       removedFiles: [],
     };
 

@@ -1,4 +1,3 @@
-import { PACKAGE_SHORT_NAME } from '../config';
 import { ILoggerConfig } from '../interfaces/logger.interface';
 
 export class Logger {
@@ -28,6 +27,6 @@ export class Logger {
     }
 
     const time = this.getTime();
-    console.log(`[${PACKAGE_SHORT_NAME}] ${time} `, ...args);
+    console.log(`[DC-API] ${time} `, ...args);
   }
 }

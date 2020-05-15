@@ -1,5 +1,3 @@
-import { IConfig } from './config.interface';
-
 import { ErrorResponseDto } from '../dto/error.response.dto';
 
 import { StartSessionRequestDto } from '../dto/start-session.request.dto';
@@ -29,12 +27,6 @@ export type UploadFilesResponse = UploadFilesResponseDto | ErrorResponseDto;
 export type GetAnalysisResponse = GetAnalysisResponseDto | ErrorResponseDto;
 
 export interface IServiceAI {
-  /**
-   * Initialization of service
-   * @param config
-   */
-  init(config: IConfig): void;
-
   /**
    * Requests the creation of a new login session
    * @param options

@@ -5,6 +5,7 @@ import { CreateBundleRequestDto } from '../../src/dto/create-bundle.request.dto'
 import { ExtendBundleRequestDto } from '../../src/dto/extend-bundle.request.dto';
 import { UploadFilesRequestDto } from '../../src/dto/upload-files.request.dto';
 
+import { defaultBaseURL as baseURL } from '../../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './base-config';
 
 const hashMain = '3e297985';
@@ -62,11 +63,13 @@ const files: IFiles = {
 };
 
 export const createBundleRequest = new CreateBundleRequestDto({
+  baseURL,
   sessionToken,
   files,
 });
 
 export const extendBundleRequest = new ExtendBundleRequestDto({
+  baseURL,
   sessionToken,
   bundleId,
   files,
@@ -74,6 +77,7 @@ export const extendBundleRequest = new ExtendBundleRequestDto({
 });
 
 export const extendBundleRequestExpired = new ExtendBundleRequestDto({
+  baseURL,
   sessionToken,
   bundleId: expiredBundleId,
   files,
@@ -81,6 +85,7 @@ export const extendBundleRequestExpired = new ExtendBundleRequestDto({
 });
 
 export const uploadFilesRequest = new UploadFilesRequestDto({
+  baseURL,
   sessionToken,
   bundleId,
   content: [

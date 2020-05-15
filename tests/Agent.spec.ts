@@ -2,7 +2,8 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 
 import { Agent } from '../src/modules/Agent';
 import { startMockServer } from './mocks/mock-server';
-import { baseConfig } from './mocks/base-config';
+
+import { defaultBaseURL as baseURL, apiPath } from '../src/constants/common';
 
 startMockServer();
 
@@ -11,8 +12,7 @@ describe('Agent', () => {
 
   beforeEach(() => {
     agent = new Agent();
-    agent.init(baseConfig);
-  })
+  });
 
   it('creates and initializes an instance', () => {
     expect(agent).toBeInstanceOf(Agent);
@@ -20,7 +20,7 @@ describe('Agent', () => {
 
   it('makes successful request', async () => {
     const config: AxiosRequestConfig = {
-      url: '/agent-response',
+      url: `${baseURL}${apiPath}/agent-response`,
       method: 'GET',
     };
     const mockData = {
@@ -34,7 +34,7 @@ describe('Agent', () => {
 
   it('makes unsuccessful request', async () => {
     const config: AxiosRequestConfig = {
-      url: '/agent-error',
+      url: `${baseURL}${apiPath}/agent-error`,
       method: 'GET',
     };
 

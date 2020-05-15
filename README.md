@@ -15,29 +15,18 @@ $ npm install --save @deepcode/tsc
 ```javascript
 import { ServiceAI } from '@deepcode/tsc';
 
-const config = {
-  // An address of server which will be used in order to send code and analyse it.
-  // Required field.
-  // Default: 'https://www.deepcode.ai'.
-  baseURL: 'https://www.deepcode.ai',
-
-  // Allows output debug messages to console.
-  // Optional field.
-  // Default: false.
-  useDebug: true,
-};
+// An address of server which will be used in order to send code and analyse it.
+// Default: 'https://www.deepcode.ai'.
+const baseURL = 'https://www.deepcode.ai';
 
 const AI = new ServiceAI();
-
-// Initialization of the service
-// You may init the service at any moment you want
-AI.init(config);
 ```
 
 ### Requests the creation of a new login session
 
 ```javascript
 const { sessionToken, loginURL } = await AI.startSession({
+  baseURL,
   // An identificator for the editor using the DeepCode APIs
   source: 'atom',
 });
@@ -45,10 +34,10 @@ const { sessionToken, loginURL } = await AI.startSession({
 
 ### Checks status of the login process
 ```javascript
-const { isLoggedIn } = await AI.checkSession({ sessionToken });
+const { isLoggedIn } = await AI.checkSession({ baseURL, sessionToken });
 
 // Requests current filtering options for uploaded bundles
-const { extensions, configFiles } = await AI.getFilters({ sessionToken });
+const { extensions, configFiles } = await AI.getFilters({ baseURL, sessionToken });
 ```
 
 ### Create and upload bundle for Analysis
@@ -59,8 +48,9 @@ const { extensions, configFiles } = await AI.getFilters({ sessionToken });
  * Parameters: AnalyseRequestDto
 
   {
-    files: string[];
+    baseURL: string;
     sessionToken: string;
+    files: string[];
     useLinters?: boolean;
   }
 
@@ -68,7 +58,7 @@ const { extensions, configFiles } = await AI.getFilters({ sessionToken });
 public async analyse(options: AnalyseRequestDto): Promise<void> {}
 ```
 
-### Needs to subscribe for the following evetns:
+### Needs to subscribe for the following events:
 ```javascript
 /** Building bundle process started with provided data */
 AI.on('buildBundleProgress', (processed: number, total: number) = {
@@ -139,10 +129,7 @@ const { bundleId, missingFiles, uploadURL } = result;
 ### Checks the status of a bundle
 
 ```javascript
-const result = await AI.checkBundle({
-  sessionToken,
-  bundleId,
-});
+const result = await AI.checkBundle({ baseURL, sessionToken, bundleId });
 const { bundleId, missingFiles, uploadURL } = result;
 ```
 

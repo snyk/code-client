@@ -1,6 +1,6 @@
 import nock, { Scope } from 'nock';
 
-import { API_URL, BASE_URL } from '../../src/config';
+import { defaultBaseURL as baseURL, apiPath } from '../../src/constants/common';
 import { bundleId, expiredBundleId } from './base-config';
 import {
   startSessionResponse,
@@ -18,9 +18,7 @@ import { mockNewAnalysisResults } from './requests';
 
 export function startMockServer(): void {
 
-  const apiURL = `${BASE_URL}${API_URL}`;
-
-  const mockServer = nock(apiURL);
+  const mockServer = nock(`${baseURL}${apiPath}`);
 
   agentSuccess(mockServer);
   agentError(mockServer);

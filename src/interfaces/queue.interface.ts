@@ -11,8 +11,9 @@ export interface IQueueDebugInfo {
 }
 
 export interface IQueueAnalysisCheck {
-  bundleId: string;
+  baseURL: string;
   sessionToken: string;
+  bundleId: string;
   useLinter?: boolean;
 }
 

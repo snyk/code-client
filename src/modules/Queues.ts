@@ -4,7 +4,7 @@ import { Logger } from './Logger';
 import { Http } from './Http';
 import { Emitter } from './Emitter';
 
-import { PLUGIN } from '../constants/common';
+import { maxPayload } from '../constants/common';
 import { BUNDLE_ERRORS } from '../constants/messages';
 import { ANALYSIS_STATUS } from '../constants/analysis';
 import { IFileInfo, IFileQueue } from '../interfaces/files.interface';
@@ -34,7 +34,7 @@ export class Queues {
       const { size } = fileInfo;
       const nextSize = currentSize + size;
 
-      if (nextSize >= PLUGIN.maxPayload) {
+      if (nextSize >= maxPayload) {
         chunks.push(currentChunk);
         currentSize = size;
         currentChunk = [fileInfo];
@@ -54,9 +54,10 @@ export class Queues {
 
   // Create Queues
   public createUploadQueue(
+    baseURL: string,
+    sessionToken: string,
     chunks: Array<IFileInfo[]>,
     bundleId: string,
-    sessionToken: string,
     uploadFilesRunner: Function,
   ): IFileQueue {
     const q = queue({
@@ -90,7 +91,12 @@ export class Queues {
       };
 
       q.push(async () => {
-        const { error, statusCode } = await uploadFilesRunner({ sessionToken, bundleId, content: requestBody });
+        const { error, statusCode } = await uploadFilesRunner({
+          baseURL,
+          sessionToken,
+          bundleId,
+          content: requestBody,
+        });
 
         if (error) {
           debugInfo.errorText = BUNDLE_ERRORS.upload[statusCode] || error.message;

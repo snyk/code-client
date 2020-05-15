@@ -1,25 +1,25 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import { Logger } from './Logger';
 
-import { API_URL } from '../config';
-import { IConfig } from '../interfaces/config.interface';
-
 export class Agent {
-  baseURL = '';
-  _agent = axios.create();
-  logger = new Logger(false);
+  private _axios = axios.create();
+  private logger = new Logger(false);
 
-  public get agent(): AxiosInstance {
-    this.initAgent();
-    return this._agent;
+  constructor(useDebug = false) {
+    this._axios = axios.create();
+    if (useDebug) {
+      this.initLogger();
+    }
   }
 
-  private initAgent(): void {
-    this._agent = axios.create({
-      baseURL: `${this.baseURL}${API_URL}`,
-    });
+  public get agent(): AxiosInstance {
+    return this._axios;
+  }
 
-    this._agent.interceptors.request.use(config => {
+  private initLogger(): void {
+    this.logger.init({ useDebug: true });
+
+    this._axios.interceptors.request.use(config => {
       const { method, url } = config;
       this.logger.log(`HTTP ${method?.toUpperCase()} ${url}:`);
       this.logger.log('=> Request: ', config);
@@ -27,7 +27,7 @@ export class Agent {
       return config;
     });
 
-    this._agent.interceptors.response.use(
+    this._axios.interceptors.response.use(
       response => {
         this.logger.log('<= Response: ', response);
         return response;
@@ -37,13 +37,6 @@ export class Agent {
         return Promise.reject(error);
       },
     );
-  }
-
-  public init(config: IConfig): Agent {
-    this.baseURL = config.baseURL;
-    this.logger.init({ useDebug: config.useDebug });
-    this.initAgent();
-    return this;
   }
 
   public async request(config: AxiosRequestConfig): Promise<AxiosResponse> {

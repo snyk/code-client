@@ -24,13 +24,12 @@ Now you can use this package as usual:
 import { ServiceAI } from '@deepcode/tsc';
 
 const AI = new ServiceAI();
-AI.init({
-  baseURL: 'https://www.deepcode.ai',
-  useDebug: true,
-});
 
 async login() {
-  const { sessionToken } = await AI.startSession({ source: 'atom' });
+  const { sessionToken } = await AI.startSession({ 
+    baseURL: 'https://www.deepcode.ai',
+    source: 'atom' 
+  });
   return Promise.resolve(sessionToken);
 }
 ```

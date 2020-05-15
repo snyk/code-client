@@ -1,6 +1,5 @@
 import { ServiceAI } from './modules/ServiceAI';
 
-import { IConfig } from './interfaces/config.interface';
 import { IFiles, IFileContent } from './interfaces/files.interface';
 import {
   IServiceAI,
@@ -36,7 +35,6 @@ import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
 export {
   ServiceAI,
 
-  IConfig,
   IFiles,
   IFileContent,
   IServiceAI,

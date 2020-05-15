@@ -4,7 +4,6 @@ import { Http } from './Http';
 import { Logger } from './Logger';
 import { Emitter } from './Emitter';
 
-import { IConfig } from '../interfaces/config.interface';
 import { IFileInfo } from '../interfaces/files.interface';
 import { IQueueDebugInfo } from '../interfaces/queue.interface';
 
@@ -38,16 +37,13 @@ export class ServiceAI implements IServiceAI {
   private queues = new Queues();
   private http = new Http();
   private logger = new Logger(false);
+  public bundleId = '';
 
   processedChunks = {}; // cache for processed and stored chunks
   uploadQueueFinished = false;
   uploadQueueErrors = false;
-  bundleId = '';
 
-  public init(config: IConfig): void {
-    this.bundleId = '';
-    this.http = new Http();
-    this.http.init(config);
+  constructor() {
     this.queues.updateHttp(this.http);
   }
 
@@ -83,7 +79,12 @@ export class ServiceAI implements IServiceAI {
     return this.http.getAnalysis(options);
   }
 
-  public async processUploadFiles(bundleId: string, filesInfo: IFileInfo[], sessionToken: string): Promise<string> {
+  public async processUploadFiles(
+    baseURL: string,
+    sessionToken: string,
+    bundleId: string,
+    filesInfo: IFileInfo[],
+  ): Promise<string> {
     this.uploadQueueFinished = false;
     this.uploadQueueErrors = false;
     this.processedChunks = {};
@@ -93,7 +94,7 @@ export class ServiceAI implements IServiceAI {
     const chunks = this.queues.createUploadChunks(filesInfo);
 
     // 2. generate and start queue
-    const uploadQueue = this.queues.createUploadQueue(chunks, bundleId, sessionToken, this.http.uploadFiles);
+    const uploadQueue = this.queues.createUploadQueue(baseURL, sessionToken, chunks, bundleId, this.http.uploadFiles);
 
     uploadQueue.on('success', (result: IQueueDebugInfo) => {
       const { chunkNumber } = result;
@@ -152,15 +153,16 @@ export class ServiceAI implements IServiceAI {
 
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
-      const { files, sessionToken, removedFiles = [] } = options;
+      const { baseURL, sessionToken, files, removedFiles = [] } = options;
       const fullFilesInfo = await this.files.getFilesData(files);
       const bundle = await this.files.buildBundle(files);
       let missingFiles: string[] = [];
 
       if (!this.bundleId) {
         const createBundleResult = await this.createBundle({
-          files: bundle,
+          baseURL,
           sessionToken,
+          files: bundle,
         });
 
         if (createBundleResult instanceof CreateBundleResponseDto) {
@@ -172,8 +174,9 @@ export class ServiceAI implements IServiceAI {
         }
       } else {
         const checkBundleResult = await this.checkBundle({
-          bundleId: this.bundleId,
+          baseURL,
           sessionToken,
+          bundleId: this.bundleId,
         });
 
         if (checkBundleResult instanceof CheckBundleResponseDto) {
@@ -182,9 +185,10 @@ export class ServiceAI implements IServiceAI {
           }
 
           const extendResults = await this.extendBundle({
-            files: bundle,
+            baseURL,
             sessionToken,
             bundleId: this.bundleId,
+            files: bundle,
             removedFiles,
           });
 
@@ -197,8 +201,9 @@ export class ServiceAI implements IServiceAI {
           }
         } else {
           const createBundleResult = await this.createBundle({
-            files: bundle,
+            baseURL,
             sessionToken,
+            files: bundle,
           });
 
           if (createBundleResult instanceof CreateBundleResponseDto) {
@@ -214,9 +219,9 @@ export class ServiceAI implements IServiceAI {
       if (missingFiles.length) {
         const missingFilesInfo = this.getMissingFilesInfo(missingFiles, fullFilesInfo);
         this.getMissingFilesInfo(missingFiles, fullFilesInfo);
-        await this.processUploadFiles(this.bundleId, missingFilesInfo, sessionToken);
+        await this.processUploadFiles(baseURL, sessionToken, this.bundleId, missingFilesInfo);
       }
-      this.queues.startAnalysisLoop({ bundleId: this.bundleId, sessionToken });
+      this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId });
     } catch (error) {
       Emitter.sendError(error);
     }

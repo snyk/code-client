@@ -1,5 +1,18 @@
 import { RequestTypes } from '../enums/request-types.enum';
 
+export const ERROR_CODES = new Set([
+  304, //loginInProgress,
+  400, // unauthorizedContent,
+  401, // unauthorizedUser,
+  403, // unauthorizedBundleAccess,
+  404, // notFound,
+  413, // bigPayload,
+  500, // serverError,
+  502, // badGateway,
+  503, // serviceUnavailable,
+  504, // timeout,
+]);
+
 export const ERRORS = {
   [RequestTypes.startSession]: {
     other: 'Login failed',

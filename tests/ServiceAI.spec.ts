@@ -18,7 +18,6 @@ import {
 } from './mocks/requests';
 import {
   startSessionResponse,
-  checkSessionResponse,
   getFiltersResponse,
   createBundleResponse,
   checkBundleResponse,
@@ -32,7 +31,7 @@ import {
 
 import { IQueueAnalysisCheckResult } from '../src/interfaces/queue.interface';
 
-import { mockFiles, mockNewAnalysisResults } from './mocks/requests';
+import { mockProjectPath, mockFiles, mockNewAnalysisResults } from './mocks/requests';
 
 startMockServer();
 
@@ -68,7 +67,7 @@ describe('Requests to public API', () => {
     });
 
     const response = await AI.checkSession(options);
-    expect(response).toEqual(checkSessionResponse);
+    expect(response).toEqual(true);
   });
 
   /**
@@ -181,6 +180,7 @@ describe('Requests to public API', () => {
     const options = {
       baseURL,
       sessionToken,
+      baseDir: mockProjectPath,
       files: mockFiles,
       removedFiles: [],
     };

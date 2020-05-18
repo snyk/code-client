@@ -5,7 +5,7 @@ import { Emitter } from './Emitter';
 
 import { IFiles, IFileInfo } from '../interfaces/files.interface';
 import { CRYPTO } from '../constants/files';
-import { maxPayload } from '../constants/common';
+import { isWindows, maxPayload } from '../constants/common';
 
 import { throttle } from '../utils/throttle';
 
@@ -32,19 +32,13 @@ export class Files {
       .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
   }
 
-  public async getFilesData(files: string[]): Promise<IFileInfo[]> {
-    const result = files.map(file => {
-      const { hash, size, content } = this.getFileInfo(file);
+  public async getFilesData(baseDir: string, files: string[]): Promise<IFileInfo[]> {
+    return files.map(file => {
+      const info = this.getFileInfo(baseDir + file);
+      const path = !isWindows ? file : file.replace('\\', '/');
 
-      return {
-        path: file,
-        size,
-        hash,
-        content,
-      };
+      return { path, ...info };
     });
-
-    return result;
   }
 
   private getFileInfo(filePath: string): FileInfo {
@@ -68,16 +62,15 @@ export class Files {
     };
   }
 
-  public async buildBundle(files: string[]): Promise<IFiles> {
+  public async buildBundle(files: IFileInfo[]): Promise<IFiles> {
     const emitResult = throttle(Emitter.buildBundleProgress, 1000);
     const total = files.length;
-
-    const result = files.reduce((res, path, idx) => {
+    const result = files.reduce((res, fileInfo, idx) => {
       const processed = idx + 1;
-      const fileInfo = this.getFileInfo(path);
-      res[path] = fileInfo.hash;
 
       emitResult(processed, total);
+
+      res[fileInfo.path] = fileInfo.hash;
       return res;
     }, {});
 

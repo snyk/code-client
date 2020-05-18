@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import { Logger } from './Logger';
+// import { ERROR_CODES } from '../constants/errors';
 
 export class Agent {
   private _axios = axios.create();
@@ -31,11 +32,13 @@ export class Agent {
       response => {
         this.logger.log('<= Response: ', response);
         return response;
-      },
-      error => {
-        this.logger.log('<= Response ERROR: ', error);
-        return Promise.reject(error);
-      },
+      }//,
+      // error => {
+      //   if (!ERROR_CODES.has(error.statusCode)) {
+      //     this.logger.log('<= Response ERROR: ', error);
+      //   }
+      //   return Promise.reject(error);
+      // },
     );
   }
 

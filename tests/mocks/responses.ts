@@ -3,7 +3,6 @@ import { bundleId, sessionToken } from './base-config';
 
 import { ErrorResponseDto } from '../../src/dto/error.response.dto';
 import { StartSessionResponseDto } from '../../src/dto/start-session.response.dto';
-import { CheckSessionResponseDto } from '../../src/dto/check-session.response.dto';
 import { GetFiltersResponseDto } from '../../src/dto/get-filters.response.dto';
 import { CreateBundleResponseDto } from '../../src/dto/create-bundle.response.dto';
 import { CheckBundleResponseDto } from '../../src/dto/check-bundle.response.dto';
@@ -31,10 +30,6 @@ const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
 export const startSessionResponse = new StartSessionResponseDto({
   sessionToken,
   loginURL: 'mock-login-url',
-});
-
-export const checkSessionResponse = new CheckSessionResponseDto({
-  isLoggedIn: true,
 });
 
 export const getFiltersResponse = new GetFiltersResponseDto({

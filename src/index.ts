@@ -4,7 +4,6 @@ import { IFiles, IFileContent } from './interfaces/files.interface';
 import {
   IServiceAI,
   StartSessionResponse,
-  CheckSessionResponse,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -16,7 +15,6 @@ import {
 import { StartSessionRequestDto } from './dto/start-session.request.dto';
 import { StartSessionResponseDto } from './dto/start-session.response.dto';
 import { CheckSessionRequestDto } from './dto/check-session.request.dto';
-import { CheckSessionResponseDto } from './dto/check-session.response.dto';
 import { GetFiltersRequestDto } from './dto/get-filters.request.dto';
 import { GetFiltersResponseDto } from './dto/get-filters.response.dto';
 import { CreateBundleRequestDto } from './dto/create-bundle.request.dto';
@@ -40,7 +38,6 @@ export {
   IServiceAI,
 
   StartSessionResponse,
-  CheckSessionResponse,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -51,7 +48,6 @@ export {
   StartSessionRequestDto,
   StartSessionResponseDto,
   CheckSessionRequestDto,
-  CheckSessionResponseDto,
   GetFiltersRequestDto,
   GetFiltersResponseDto,
   CreateBundleRequestDto,

@@ -12,14 +12,14 @@ const hashMain = '3e297985';
 const hashApp = 'c8bc6452';
 
 const root = __dirname;
-const mockProjectPath = path.resolve(root, '../mocked_data');
-const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
+export const mockProjectPath = path.resolve(root, '../mocked_data');
+const analysedFile = `/sample_repository/main.js`;
 
 export const mockFiles = [
   analysedFile,
-  `${mockProjectPath}/sample_repository/sub_folder/test2.js`,
-  `${mockProjectPath}/sample_repository/utf8.js`,
-  `${mockProjectPath}/test.java`,
+  `/sample_repository/sub_folder/test2.js`,
+  `/sample_repository/utf8.js`,
+  `/test.java`,
 ];
 
 export const mockAnalysisResults = {

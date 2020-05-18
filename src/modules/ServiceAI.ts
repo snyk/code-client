@@ -10,7 +10,6 @@ import { IQueueDebugInfo } from '../interfaces/queue.interface';
 import {
   IServiceAI,
   StartSessionResponse,
-  CheckSessionResponse,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -51,7 +50,7 @@ export class ServiceAI implements IServiceAI {
     return this.http.startSession(options);
   }
 
-  public async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse> {
+  public checkSession(options: CheckSessionRequestDto): Promise<boolean> {
     return this.http.checkSession(options);
   }
 
@@ -138,7 +137,7 @@ export class ServiceAI implements IServiceAI {
   public getMissingFilesInfo = (missingFiles: string[], filesInfo: IFileInfo[]): IFileInfo[] => {
     const missingFilesData: IFileInfo[] = [];
 
-    const result = missingFiles.reduce((resultArr, missingFile) => {
+    return missingFiles.reduce((resultArr, missingFile) => {
       const fullInfo = filesInfo.find(fileInfo => fileInfo.path === missingFile);
 
       if (fullInfo) {
@@ -147,15 +146,13 @@ export class ServiceAI implements IServiceAI {
 
       return resultArr;
     }, missingFilesData);
-
-    return result;
   };
 
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
-      const { baseURL, sessionToken, files, removedFiles = [] } = options;
-      const fullFilesInfo = await this.files.getFilesData(files);
-      const bundle = await this.files.buildBundle(files);
+      const { baseURL, sessionToken, baseDir, files, removedFiles = [] } = options;
+      const fullFilesInfo = await this.files.getFilesData(baseDir, files);
+      const bundle = await this.files.buildBundle(fullFilesInfo);
       let missingFiles: string[] = [];
 
       if (!this.bundleId) {
@@ -218,12 +215,12 @@ export class ServiceAI implements IServiceAI {
 
       if (missingFiles.length) {
         const missingFilesInfo = this.getMissingFilesInfo(missingFiles, fullFilesInfo);
-        this.getMissingFilesInfo(missingFiles, fullFilesInfo);
         await this.processUploadFiles(baseURL, sessionToken, this.bundleId, missingFilesInfo);
       }
       this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId });
     } catch (error) {
       Emitter.sendError(error);
+      throw error;
     }
 
     return Promise.resolve();

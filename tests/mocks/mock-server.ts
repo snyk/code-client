@@ -4,7 +4,6 @@ import { defaultBaseURL as baseURL, apiPath } from '../../src/constants/common';
 import { bundleId, expiredBundleId } from './base-config';
 import {
   startSessionResponse,
-  checkSessionResponse,
   getFiltersResponse,
   createBundleResponse,
   checkBundleResponse,
@@ -65,7 +64,7 @@ function checkSessionSuccess(mockServer: Scope): void {
   // URL looks like '/session?cache=270956.22901860584'
   mockServer
     .get(/\/session\?cache=\d+\.\d+/)
-    .reply(200, checkSessionResponse);
+    .reply(200, 'true');
 }
 
 function getFiltersSuccess(mockServer: Scope): void {

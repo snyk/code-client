@@ -8,7 +8,6 @@ import { Agent } from './Agent';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
 import {
   StartSessionResponse,
-  CheckSessionResponse,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -22,7 +21,6 @@ import { ErrorResponseDto } from '../dto/error.response.dto';
 import { StartSessionRequestDto } from '../dto/start-session.request.dto';
 import { StartSessionResponseDto } from '../dto/start-session.response.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
-import { CheckSessionResponseDto } from '../dto/check-session.response.dto';
 import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
 import { GetFiltersResponseDto } from '../dto/get-filters.response.dto';
 import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
@@ -51,10 +49,6 @@ export class Http {
     this.getFilters = this.getFilters.bind(this);
     this.startSession = this.startSession.bind(this);
     this.createHeaders = this.createHeaders.bind(this);
-
-    // if (config && config.baseURL) {
-    //   this.baseURL = baseURL.replace(/\/$/, '');
-    // }
   }
 
   private getStatusCode(error: AxiosError): number | null {
@@ -127,7 +121,7 @@ export class Http {
     }
   }
 
-  public async checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse> {
+  public async checkSession(options: CheckSessionRequestDto): Promise<boolean> {
     const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -138,22 +132,13 @@ export class Http {
 
     try {
       const result = await this.agent.request(config);
-      return Promise.resolve(
-        new CheckSessionResponseDto({
-          isLoggedIn: result.status === 200,
-        }),
-      );
+      return result.status === 200;
     } catch (error) {
       const { response } = error;
       if (response && response.status === 304) {
-        return Promise.resolve(
-          new CheckSessionResponseDto({
-            isLoggedIn: false,
-          }),
-        );
+        return false;
       }
-
-      return Promise.reject(this.createErrorResponse(error, RequestTypes.checkSession));
+      throw error;
     }
   }
 

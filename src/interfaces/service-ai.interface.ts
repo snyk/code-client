@@ -3,7 +3,6 @@ import { ErrorResponseDto } from '../dto/error.response.dto';
 import { StartSessionRequestDto } from '../dto/start-session.request.dto';
 import { StartSessionResponseDto } from '../dto/start-session.response.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
-import { CheckSessionResponseDto } from '../dto/check-session.response.dto';
 import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
 import { GetFiltersResponseDto } from '../dto/get-filters.response.dto';
 import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
@@ -18,7 +17,6 @@ import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 
 export type StartSessionResponse = StartSessionResponseDto | ErrorResponseDto;
-export type CheckSessionResponse = CheckSessionResponseDto | ErrorResponseDto;
 export type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
 export type CreateBundleResponse = CreateBundleResponseDto | ErrorResponseDto;
 export type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
@@ -37,7 +35,7 @@ export interface IServiceAI {
    * Checks status of the login process
    * @param options
    */
-  checkSession(options: CheckSessionRequestDto): Promise<CheckSessionResponse>;
+  checkSession(options: CheckSessionRequestDto): Promise<boolean>;
 
   /**
    * Requests current filtering options for uploaded bundles

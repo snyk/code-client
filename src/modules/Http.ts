@@ -135,7 +135,7 @@ export class Http {
       return result.status === 200;
     } catch (error) {
       const { response } = error;
-      if (response && response.status === 304) {
+      if (response && [304, 400, 401].includes(response.status)) {
         return false;
       }
       throw error;

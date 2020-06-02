@@ -10,6 +10,7 @@ import {
   extendBundleResponse,
   uploadFilesResponse,
   getAnalysisResponse,
+  reportErrorResponse,
 
   checkBundleError404,
 } from './responses';
@@ -31,6 +32,7 @@ export function startMockServer(): void {
   uploadFilesSuccess(mockServer);
   getAnalysisSuccess(mockServer);
   getAnalysisResult(mockServer);
+  reportError(mockServer);
 
   checkBundleError(mockServer);
   extendBundleError(mockServer);
@@ -58,6 +60,12 @@ function startSessionSuccess(mockServer: Scope): void {
   mockServer
     .post('/login')
     .reply(200, startSessionResponse);
+}
+
+function reportError(mockServer: Scope): void {
+  mockServer
+    .post('/error')
+    .reply(200, reportErrorResponse);
 }
 
 function checkSessionSuccess(mockServer: Scope): void {
@@ -129,4 +137,3 @@ function extendBundleError(mockServer: Scope): void {
     .put(`/bundle/${expiredBundleId}`)
     .reply(404, extendBundleResponse);
 }
-

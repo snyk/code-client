@@ -7,4 +7,5 @@ export enum RequestTypes {
   extendBundle = 'extendBundle',
   uploadFiles = 'uploadFiles',
   getAnalysis = 'getAnalysis',
+  reportError = 'reportError',
 }

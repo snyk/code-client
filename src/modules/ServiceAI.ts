@@ -16,6 +16,7 @@ import {
   ExtendBundleResponse,
   UploadFilesResponse,
   GetAnalysisResponse,
+  ReportErrorResponse,
 } from '../interfaces/service-ai.interface';
 
 import { StartSessionRequestDto } from '../dto/start-session.request.dto';
@@ -30,6 +31,7 @@ import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { AnalyseRequestDto } from '../dto/analyse.request.dto';
 import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
 import { ExtendBundleResponseDto } from '../dto/extend-bundle.response.dto';
+import { ReportErrorRequestDto } from '../dto/report-error.request.dto';
 
 export class ServiceAI implements IServiceAI {
   private files = new Files();
@@ -76,6 +78,10 @@ export class ServiceAI implements IServiceAI {
 
   public async getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse> {
     return this.http.getAnalysis(options);
+  }
+
+  public async reportError(options: ReportErrorRequestDto): Promise<ReportErrorResponse> {
+    return this.http.reportError(options);
   }
 
   public async processUploadFiles(

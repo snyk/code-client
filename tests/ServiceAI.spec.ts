@@ -15,6 +15,7 @@ import {
   extendBundleRequest,
   extendBundleRequestExpired,
   uploadFilesRequest,
+  reportErrorRequest,
 } from './mocks/requests';
 import {
   startSessionResponse,
@@ -26,6 +27,7 @@ import {
   getAnalysisResponse,
   checkBundleError404,
   extendBundleError404,
+  reportErrorResponse,
 } from './mocks/responses';
 // import { AnalyseRequestDto } from '../src/dto/analyse.request.dto';
 
@@ -43,7 +45,15 @@ async function sleep(timeout: number): Promise<void> {
 
 describe('Requests to public API', () => {
   const AI = new ServiceAI();
-  
+
+  /**
+   * Report error
+   */
+  it('reports error successfully', async () => {
+    const response = await AI.reportError(reportErrorRequest);
+    expect(response).toEqual(reportErrorResponse);
+  });
+
   /**
    * Start Session
    */

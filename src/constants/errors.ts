@@ -60,4 +60,7 @@ export const ERRORS = {
     403: 'Unauthorized access to requested bundle',
     other: 'Getting analysis failed',
   },
+  [RequestTypes.reportError]: {
+    other: 'Reporting error failed',
+  },
 };

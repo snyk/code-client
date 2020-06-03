@@ -15,6 +15,8 @@ import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
 import { UploadFilesResponseDto } from '../dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
+import { ReportErrorRequestDto } from '../dto/report-error.request.dto';
+import { ReportErrorResponseDto } from '../dto/report-error.response.dto';
 
 export type StartSessionResponse = StartSessionResponseDto | ErrorResponseDto;
 export type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
@@ -23,6 +25,7 @@ export type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
 export type ExtendBundleResponse = ExtendBundleResponseDto | ErrorResponseDto;
 export type UploadFilesResponse = UploadFilesResponseDto | ErrorResponseDto;
 export type GetAnalysisResponse = GetAnalysisResponseDto | ErrorResponseDto;
+export type ReportErrorResponse = ReportErrorResponseDto | ErrorResponseDto;
 
 export interface IServiceAI {
   /**
@@ -72,4 +75,10 @@ export interface IServiceAI {
    * @param options
    */
   getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse>;
+
+  /**
+   * Reports an error
+   * @param options
+   */
+  reportError(options: ReportErrorRequestDto): Promise<ReportErrorResponse>;
 }

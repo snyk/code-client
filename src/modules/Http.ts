@@ -14,6 +14,7 @@ import {
   ExtendBundleResponse,
   UploadFilesResponse,
   GetAnalysisResponse,
+  ReportErrorResponse,
 } from '../interfaces/service-ai.interface';
 
 import { ErrorResponseDto } from '../dto/error.response.dto';
@@ -33,6 +34,8 @@ import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
 import { UploadFilesResponseDto } from '../dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
+import { ReportErrorRequestDto } from '../dto/report-error.request.dto';
+import { ReportErrorResponseDto } from '../dto/report-error.response.dto';
 
 export class Http {
   private agent = new Agent(true);
@@ -48,6 +51,7 @@ export class Http {
     this.createBundle = this.createBundle.bind(this);
     this.getFilters = this.getFilters.bind(this);
     this.startSession = this.startSession.bind(this);
+    this.reportError = this.reportError.bind(this);
     this.createHeaders = this.createHeaders.bind(this);
   }
 
@@ -252,6 +256,30 @@ export class Http {
       return Promise.resolve(new GetAnalysisResponseDto(data));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getAnalysis));
+    }
+  }
+
+  public async reportError(options: ReportErrorRequestDto): Promise<ReportErrorResponse> {
+    const { baseURL, sessionToken, source, type, message, path, bundleId, data } = options;
+    const config: AxiosRequestConfig = {
+      url: `${baseURL}${apiPath}/error`,
+      method: 'POST',
+      data: {
+        sessionToken,
+        source,
+        type,
+        message,
+        path,
+        bundleId,
+        data
+      },
+    };
+
+    try {
+      await this.agent.request(config);
+      return Promise.resolve(new ReportErrorResponseDto({}));
+    } catch (error) {
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.reportError));
     }
   }
 }

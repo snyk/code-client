@@ -26,9 +26,9 @@ import { ServiceAI } from '@deepcode/tsc';
 const AI = new ServiceAI();
 
 async login() {
-  const { sessionToken } = await AI.startSession({ 
+  const { sessionToken } = await AI.startSession({
     baseURL: 'https://www.deepcode.ai',
-    source: 'atom' 
+    source: 'atom'
   });
   return Promise.resolve(sessionToken);
 }

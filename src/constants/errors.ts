@@ -63,4 +63,7 @@ export const ERRORS = {
   [RequestTypes.reportError]: {
     other: 'Reporting error failed',
   },
+  [RequestTypes.reportEvent]: {
+    other: 'Reporting event failed',
+  },
 };

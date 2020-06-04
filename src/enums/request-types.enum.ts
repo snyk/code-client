@@ -8,4 +8,5 @@ export enum RequestTypes {
   uploadFiles = 'uploadFiles',
   getAnalysis = 'getAnalysis',
   reportError = 'reportError',
+  reportEvent = 'reportEvent',
 }

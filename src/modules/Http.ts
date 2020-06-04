@@ -14,7 +14,7 @@ import {
   ExtendBundleResponse,
   UploadFilesResponse,
   GetAnalysisResponse,
-  ReportErrorResponse,
+  ReportTelemetryResponse,
 } from '../interfaces/service-ai.interface';
 
 import { ErrorResponseDto } from '../dto/error.response.dto';
@@ -34,8 +34,8 @@ import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
 import { UploadFilesResponseDto } from '../dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
-import { ReportErrorRequestDto } from '../dto/report-error.request.dto';
-import { ReportErrorResponseDto } from '../dto/report-error.response.dto';
+import { ReportTelemetryRequestDto } from '../dto/report-telemetry.request.dto';
+import { ReportTelemetryResponseDto } from '../dto/report-telemetry.response.dto';
 
 export class Http {
   private agent = new Agent(true);
@@ -52,6 +52,7 @@ export class Http {
     this.getFilters = this.getFilters.bind(this);
     this.startSession = this.startSession.bind(this);
     this.reportError = this.reportError.bind(this);
+    this.reportEvent = this.reportEvent.bind(this);
     this.createHeaders = this.createHeaders.bind(this);
   }
 
@@ -259,8 +260,8 @@ export class Http {
     }
   }
 
-  public async reportError(options: ReportErrorRequestDto): Promise<ReportErrorResponse> {
-    const { baseURL, sessionToken, source, type, message, path, bundleId, data } = options;
+  public async reportError(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse> {
+    const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
     const config: AxiosRequestConfig = {
       url: `${baseURL}${apiPath}/error`,
       method: 'POST',
@@ -271,15 +272,43 @@ export class Http {
         message,
         path,
         bundleId,
+        version,
+        environmentVersion,
         data
       },
     };
 
     try {
       await this.agent.request(config);
-      return Promise.resolve(new ReportErrorResponseDto({}));
+      return Promise.resolve(new ReportTelemetryResponseDto({}));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.reportError));
+    }
+  }
+
+  public async reportEvent(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse> {
+    const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
+    const config: AxiosRequestConfig = {
+      url: `${baseURL}${apiPath}/track`,
+      method: 'POST',
+      data: {
+        sessionToken,
+        source,
+        type,
+        message,
+        path,
+        bundleId,
+        version,
+        environmentVersion,
+        data
+      },
+    };
+
+    try {
+      await this.agent.request(config);
+      return Promise.resolve(new ReportTelemetryResponseDto({}));
+    } catch (error) {
+      return Promise.reject(this.createErrorResponse(error, RequestTypes.reportEvent));
     }
   }
 }

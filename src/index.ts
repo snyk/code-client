@@ -10,7 +10,7 @@ import {
   ExtendBundleResponse,
   UploadFilesResponse,
   GetAnalysisResponse,
-  ReportErrorResponse,
+  ReportTelemetryResponse,
 } from './interfaces/service-ai.interface';
 
 import { StartSessionRequestDto } from './dto/start-session.request.dto';
@@ -28,8 +28,8 @@ import { UploadFilesRequestDto } from './dto/upload-files.request.dto';
 import { UploadFilesResponseDto } from './dto/upload-files.response.dto';
 import { GetAnalysisRequestDto } from './dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from './dto/get-analysis.response.dto';
-import { ReportErrorRequestDto } from './dto/report-error.request.dto';
-import { ReportErrorResponseDto } from './dto/report-error.response.dto';
+import { ReportTelemetryRequestDto } from './dto/report-telemetry.request.dto';
+import { ReportTelemetryResponseDto } from './dto/report-telemetry.response.dto';
 import { AnalyseRequestDto } from './dto/analyse.request.dto';
 import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
 
@@ -47,7 +47,7 @@ export {
   ExtendBundleResponse,
   UploadFilesResponse,
   GetAnalysisResponse,
-  ReportErrorResponse,
+  ReportTelemetryResponse,
 
   StartSessionRequestDto,
   StartSessionResponseDto,
@@ -64,8 +64,8 @@ export {
   UploadFilesResponseDto,
   GetAnalysisRequestDto,
   GetAnalysisResponseDto,
-  ReportErrorRequestDto,
-  ReportErrorResponseDto,
+  ReportTelemetryRequestDto,
+  ReportTelemetryResponseDto,
   AnalyseRequestDto,
   IQueueAnalysisCheckResult,
 };

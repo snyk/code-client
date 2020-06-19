@@ -33,3 +33,20 @@ async login() {
   return Promise.resolve(sessionToken);
 }
 ```
+
+## Publishing
+
+### Before publishing make sure test pass
+
+```shell script
+$ cd <package-location>
+$ npm run test
+```
+
+#### Build and publish
+
+```shell script
+$ cd <package-location>
+$ npm run build
+$ npm publish --access public
+```

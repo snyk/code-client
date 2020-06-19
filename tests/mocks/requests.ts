@@ -4,7 +4,7 @@ import { IFiles } from '../../src/interfaces/files.interface';
 import { CreateBundleRequestDto } from '../../src/dto/create-bundle.request.dto';
 import { ExtendBundleRequestDto } from '../../src/dto/extend-bundle.request.dto';
 import { UploadFilesRequestDto } from '../../src/dto/upload-files.request.dto';
-import { ReportErrorRequestDto } from '../../src/dto/report-error.request.dto';
+import { ReportTelemetryRequestDto } from '../../src/dto/report-telemetry.request.dto';
 
 import { defaultBaseURL as baseURL } from '../../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './base-config';
@@ -101,7 +101,7 @@ export const uploadFilesRequest = new UploadFilesRequestDto({
   ],
 });
 
-export const reportErrorRequest = new ReportErrorRequestDto({
+export const reportTelemetryRequest = new ReportTelemetryRequestDto({
   baseURL,
   sessionToken,
   bundleId,

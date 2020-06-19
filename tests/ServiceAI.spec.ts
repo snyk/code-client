@@ -15,7 +15,7 @@ import {
   extendBundleRequest,
   extendBundleRequestExpired,
   uploadFilesRequest,
-  reportErrorRequest,
+  reportTelemetryRequest,
 } from './mocks/requests';
 import {
   startSessionResponse,
@@ -27,7 +27,7 @@ import {
   getAnalysisResponse,
   checkBundleError404,
   extendBundleError404,
-  reportErrorResponse,
+  reportTelemetryResponse,
 } from './mocks/responses';
 // import { AnalyseRequestDto } from '../src/dto/analyse.request.dto';
 
@@ -50,8 +50,16 @@ describe('Requests to public API', () => {
    * Report error
    */
   it('reports error successfully', async () => {
-    const response = await AI.reportError(reportErrorRequest);
-    expect(response).toEqual(reportErrorResponse);
+    const response = await AI.reportError(reportTelemetryRequest);
+    expect(response).toEqual(reportTelemetryResponse);
+  });
+
+  /**
+   * Report event
+   */
+  it('reports event successfully', async () => {
+    const response = await AI.reportEvent(reportTelemetryRequest);
+    expect(response).toEqual(reportTelemetryResponse);
   });
 
   /**

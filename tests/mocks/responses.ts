@@ -9,7 +9,7 @@ import { CheckBundleResponseDto } from '../../src/dto/check-bundle.response.dto'
 import { ExtendBundleResponseDto } from '../../src/dto/extend-bundle.response.dto';
 import { UploadFilesResponseDto } from '../../src/dto/upload-files.response.dto';
 import { GetAnalysisResponseDto } from '../../src/dto/get-analysis.response.dto';
-import { ReportErrorResponseDto } from '../../src/dto/report-error.response.dto';
+import { ReportTelemetryResponseDto } from '../../src/dto/report-telemetry.response.dto';
 
 import { ERRORS } from '../../src/constants/errors';
 import { AnalysisStatus } from '../../src/enums/analysis-status.enum';
@@ -95,4 +95,4 @@ export const extendBundleError404 = new ErrorResponseDto({
   statusText: ERRORS[RequestTypes.extendBundle][404],
 });
 
-export const reportErrorResponse = new ReportErrorResponseDto({});
+export const reportTelemetryResponse = new ReportTelemetryResponseDto({});

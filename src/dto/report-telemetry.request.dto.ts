@@ -1,6 +1,6 @@
 import { BaseDto } from './base.dto';
 
-export class ReportErrorRequestDto extends BaseDto<ReportErrorRequestDto> {
+export class ReportTelemetryRequestDto extends BaseDto<ReportTelemetryRequestDto> {
   readonly baseURL: string;
   readonly sessionToken?: string;
   readonly source?: string;
@@ -8,5 +8,7 @@ export class ReportErrorRequestDto extends BaseDto<ReportErrorRequestDto> {
   readonly message?: string;
   readonly path?: string;
   readonly bundleId?: string;
+  readonly version?: string;
+  readonly environmentVersion?: string;
   readonly data?: any;
 }

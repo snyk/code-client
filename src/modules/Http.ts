@@ -197,7 +197,7 @@ export class Http {
 
     try {
       const { data } = await this.agent.request(config);
-      return Promise.resolve(new CheckBundleResponseDto({ ...data, expired: false }));
+      return Promise.resolve(new CheckBundleResponseDto(data));
     } catch (error) {
       return Promise.resolve(this.createErrorResponse(error, RequestTypes.checkBundle));
     }

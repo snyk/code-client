@@ -1,7 +1,6 @@
 import { Files } from './Files';
 import { Queues } from './Queues';
 import { Http } from './Http';
-import { Logger } from './Logger';
 import { Emitter } from './Emitter';
 
 import { IFileInfo } from '../interfaces/files.interface';
@@ -37,7 +36,6 @@ export class ServiceAI implements IServiceAI {
   private files = new Files();
   private queues = new Queues();
   private http = new Http();
-  private logger = new Logger(false);
   public bundleId = '';
 
   processedChunks = {}; // cache for processed and stored chunks
@@ -115,13 +113,13 @@ export class ServiceAI implements IServiceAI {
     });
 
     uploadQueue.on('end', () => {
-      this.logger.log('Upload Queue results:');
+      console.log('Upload Queue results:');
       if (uploadQueue.results) {
         uploadQueue.results.forEach((debugInfo, index) => {
           if (debugInfo.error) {
             this.uploadQueueErrors = true;
           }
-          this.logger.log(`- Result ${index}: `, debugInfo);
+          console.log(`- Result ${index}: `, debugInfo);
         });
       }
 
@@ -227,7 +225,10 @@ export class ServiceAI implements IServiceAI {
         const missingFilesInfo = this.getMissingFilesInfo(missingFiles, fullFilesInfo);
         await this.processUploadFiles(baseURL, sessionToken, this.bundleId, missingFilesInfo);
       }
-      this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId });
+      this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
+        Emitter.sendError(error);
+        throw error;
+      });
     } catch (error) {
       Emitter.sendError(error);
       throw error;

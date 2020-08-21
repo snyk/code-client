@@ -1,6 +1,4 @@
 import queue from 'queue';
-
-import { Logger } from './Logger';
 import { Http } from './Http';
 import { Emitter } from './Emitter';
 
@@ -17,7 +15,6 @@ const loopDelay = 1000;
 const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
 
 export class Queues {
-  private logger = new Logger(false);
   private http = new Http();
 
   public updateHttp(http: Http): void {
@@ -118,7 +115,7 @@ export class Queues {
     const emitAnalysisProgress = throttle(Emitter.analyseProgress, loopDelay);
 
     if (!bundleId) {
-      this.logger.log('Analysis: no bundle ID');
+      console.log('Analysis: no bundle ID');
       return Promise.resolve();
     }
 

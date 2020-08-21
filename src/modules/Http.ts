@@ -1,4 +1,3 @@
-// import { sessionToken } from './../../tests/mocks/base-config';
 import { AxiosError, AxiosRequestConfig } from 'axios';
 
 import { ERRORS } from '../constants/errors';

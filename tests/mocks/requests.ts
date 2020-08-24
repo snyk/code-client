@@ -55,6 +55,7 @@ export const mockNewAnalysisResults = {
       },
     },
   },
+  progress: 80,
   analysisURL: 'mock-analysis-url',
 };
 

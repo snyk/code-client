@@ -19,5 +19,6 @@ export interface IQueueAnalysisCheck {
 
 export interface IQueueAnalysisCheckResult {
   analysisResults: IAnalysisResult;
+  progress: number;
   analysisURL: string;
 }

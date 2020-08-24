@@ -1,48 +1,43 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
-import { Logger } from './Logger';
-// import { ERROR_CODES } from '../constants/errors';
+import { ERROR_CODES } from '../constants/errors';
 
 export class Agent {
   private _axios = axios.create();
-  private logger = new Logger(false);
 
-  constructor(useDebug = false) {
+  constructor() {
     this._axios = axios.create();
-    if (useDebug) {
-      this.initLogger();
-    }
   }
 
   public get agent(): AxiosInstance {
+    this._axios.interceptors.request.use(
+      config => {
+        const { method, url } = config;
+        console.log(`HTTP ${method?.toUpperCase()} ${url}:`);
+        console.log('=> Request: ', config);
+
+        return config;
+      },
+      error => {
+        throw error;
+      },
+    );
+    this._axios.interceptors.response.use(
+      response => {
+        console.log('<= Response: ', response);
+        return response;
+      },
+      error => {
+        console.log('error -->', error);
+        if (!ERROR_CODES.has(error.statusCode)) {
+          console.log('<= Response ERROR: ', error);
+        }
+        throw error;
+      },
+    );
     return this._axios;
   }
 
-  private initLogger(): void {
-    this.logger.init({ useDebug: true });
-
-    this._axios.interceptors.request.use(config => {
-      const { method, url } = config;
-      this.logger.log(`HTTP ${method?.toUpperCase()} ${url}:`);
-      this.logger.log('=> Request: ', config);
-
-      return config;
-    });
-
-    this._axios.interceptors.response.use(
-      response => {
-        this.logger.log('<= Response: ', response);
-        return response;
-      }//,
-      // error => {
-      //   if (!ERROR_CODES.has(error.statusCode)) {
-      //     this.logger.log('<= Response ERROR: ', error);
-      //   }
-      //   return Promise.reject(error);
-      // },
-    );
-  }
-
-  public async request(config: AxiosRequestConfig): Promise<AxiosResponse> {
+  public request(config: AxiosRequestConfig): Promise<AxiosResponse> {
     return this.agent.request(config);
   }
 }

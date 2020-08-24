@@ -125,9 +125,11 @@ export class Queues {
     const result = await this.http.getAnalysis(options);
 
     if (result instanceof GetAnalysisResponseDto) {
-      const { status, analysisResults, analysisURL } = result;
+      const { status, analysisResults, analysisURL, progress } = result;
 
-      emitAnalysisProgress({ analysisResults, analysisURL });
+      const newProgress = progress || 0.01;
+
+      emitAnalysisProgress({ analysisResults, progress: newProgress, analysisURL });
 
       const inProgress =
         status === ANALYSIS_STATUS.fetching ||
@@ -136,7 +138,7 @@ export class Queues {
 
       if (status === ANALYSIS_STATUS.done) {
         if (analysisResults) {
-          Emitter.analyseFinish({ analysisResults, analysisURL });
+          Emitter.analyseFinish({ analysisResults, progress: 1.0, analysisURL });
         }
       }
 

@@ -9,6 +9,7 @@
     "build": "rollup -c",
     "lint": "npx eslint src/**/*.ts",
     "lint:fix": "npx eslint --fix src/**/*.ts",
+    "watch": "rollup -w -c",
     "test": "jest --coverage"
   },
   "files": [

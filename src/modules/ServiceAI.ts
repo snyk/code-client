@@ -119,7 +119,7 @@ export class ServiceAI implements IServiceAI {
           if (debugInfo.error) {
             this.uploadQueueErrors = true;
           }
-          console.log(`- Result ${index}: `, debugInfo);
+          console.log(`- Result ${index}: ${JSON.stringify(debugInfo)}`.slice(0, 399));
         });
       }
 

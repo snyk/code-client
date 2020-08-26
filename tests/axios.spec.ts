@@ -1,23 +1,13 @@
 import { AxiosError, AxiosRequestConfig } from 'axios';
 
-import { Agent } from '../src/modules/Agent';
+import axios from '../src/modules/axios';
 import { startMockServer } from './mocks/mock-server';
 
 import { defaultBaseURL as baseURL, apiPath } from '../src/constants/common';
 
 startMockServer();
 
-describe('Agent', () => {
-  let agent: Agent;
-
-  beforeEach(() => {
-    agent = new Agent();
-  });
-
-  it('creates and initializes an instance', () => {
-    expect(agent).toBeInstanceOf(Agent);
-  });
-
+describe('axios', () => {
   it('makes successful request', async () => {
     const config: AxiosRequestConfig = {
       url: `${baseURL}${apiPath}/agent-response`,
@@ -27,7 +17,7 @@ describe('Agent', () => {
       name: 'agent',
     };
 
-    const { data } = await agent.request(config);
+    const { data } = await axios.request(config);
 
     expect(data).toEqual(mockData);
   });
@@ -40,7 +30,7 @@ describe('Agent', () => {
 
     let result: AxiosError;
     try {
-      await agent.request(config);
+      await axios.request(config);
       result = {
         config,
         isAxiosError: true,

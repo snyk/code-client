@@ -115,7 +115,7 @@ export class Queues {
     const emitAnalysisProgress = throttle(Emitter.analyseProgress, loopDelay);
 
     if (!bundleId) {
-      console.log('Analysis: no bundle ID');
+      console.debug('Analysis: no bundle ID');
       return Promise.resolve();
     }
 
@@ -125,8 +125,6 @@ export class Queues {
       const { status, analysisResults, analysisURL, progress } = result;
 
       const newProgress = progress || 0.01;
-
-      emitAnalysisProgress({ analysisResults, progress: newProgress, analysisURL });
 
       const inProgress =
         status === ANALYSIS_STATUS.fetching ||
@@ -140,6 +138,7 @@ export class Queues {
       }
 
       if (inProgress) {
+        emitAnalysisProgress({ analysisResults, progress: newProgress, analysisURL });
         this.nextAnalysisLoopTick(options);
       }
 

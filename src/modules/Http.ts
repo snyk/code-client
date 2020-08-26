@@ -4,7 +4,7 @@ import { ERRORS } from '../constants/errors';
 import { RequestTypes } from '../enums/request-types.enum';
 
 import { apiPath } from '../constants/common';
-import { Agent } from './Agent';
+import axios from './axios';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
 import {
   StartSessionResponse,
@@ -38,8 +38,6 @@ import { ReportTelemetryRequestDto } from '../dto/report-telemetry.request.dto';
 import { ReportTelemetryResponseDto } from '../dto/report-telemetry.response.dto';
 
 export class Http {
-  private agent = new Agent();
-
   constructor() {
     this.checkBundle = this.checkBundle.bind(this);
     this.getStatusCode = this.getStatusCode.bind(this);
@@ -114,7 +112,7 @@ export class Http {
     };
 
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(
         new StartSessionResponseDto({
           sessionToken: data.sessionToken,
@@ -136,11 +134,10 @@ export class Http {
     };
 
     try {
-      const result = await this.agent.request(config);
+      const result = await axios.request(config);
       return result.status === 200;
     } catch (error) {
       const { response } = error;
-      console.log(' this is the response ', response);
       if (response && [304, 400, 401].includes(response.status)) {
         return false;
       }
@@ -158,7 +155,7 @@ export class Http {
     };
 
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(new GetFiltersResponseDto(data));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getFilters));
@@ -178,7 +175,7 @@ export class Http {
     };
 
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(new CreateBundleResponseDto(data));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.createBundle));
@@ -196,7 +193,7 @@ export class Http {
     };
 
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(new CheckBundleResponseDto(data));
     } catch (error) {
       return Promise.resolve(this.createErrorResponse(error, RequestTypes.checkBundle));
@@ -217,7 +214,7 @@ export class Http {
     };
 
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(new ExtendBundleResponseDto(data));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.extendBundle));
@@ -235,7 +232,7 @@ export class Http {
     };
 
     try {
-      await this.agent.request(config);
+      await axios.request(config);
       return Promise.resolve(new UploadFilesResponseDto({ success: true }));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.uploadFiles));
@@ -253,7 +250,7 @@ export class Http {
       method: 'GET',
     };
     try {
-      const { data } = await this.agent.request(config);
+      const { data } = await axios.request(config);
       return Promise.resolve(new GetAnalysisResponseDto(data));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getAnalysis));
@@ -279,7 +276,7 @@ export class Http {
     };
 
     try {
-      await this.agent.request(config);
+      await axios.request(config);
       return Promise.resolve(new ReportTelemetryResponseDto({}));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.reportError));
@@ -305,7 +302,7 @@ export class Http {
     };
 
     try {
-      await this.agent.request(config);
+      await axios.request(config);
       return Promise.resolve(new ReportTelemetryResponseDto({}));
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.reportEvent));

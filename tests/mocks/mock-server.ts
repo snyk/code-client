@@ -41,11 +41,9 @@ export function startMockServer(): void {
 }
 
 function agentSuccess(mockServer: Scope): void {
-  mockServer
-    .get('/agent-response')
-    .reply(200, {
-      name: 'agent',
-    });
+  mockServer.get('/agent-response').reply(200, {
+    name: 'agent',
+  });
 }
 
 function agentError(mockServer: Scope): void {

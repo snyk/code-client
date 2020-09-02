@@ -1,23 +1,22 @@
-import * as crypto from "crypto";
-import * as nodePath from "path";
-import { Buffer } from "buffer";
+import * as crypto from 'crypto';
+import * as nodePath from 'path';
+import { Buffer } from 'buffer';
 import * as fs from 'fs';
+import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 import {
   HASH_ALGORITHM,
   ENCODE_TYPE,
   GITIGNORE_FILENAME,
   DCIGNORE_FILENAME,
   FILE_CURRENT_STATUS,
-  ALLOWED_PAYLOAD_SIZE
-} from "../constants/files";
+  ALLOWED_PAYLOAD_SIZE,
+} from '../constants/files';
 
 import { PayloadMissingFileInterface, ISupportedFiles } from '../interfaces/files.interface';
 
-import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
-
 export const DCIGNORE_DRAFTS = {
   custom: CustomDCIgnore,
-  default: DefaultDCIgnore
+  default: DefaultDCIgnore,
 };
 
 // The file limit was hardcoded to 2mb but seems to be a function of ALLOWED_PAYLOAD_SIZE
@@ -25,10 +24,7 @@ export const DCIGNORE_DRAFTS = {
 const SAFE_PAYLOAD_SIZE = ALLOWED_PAYLOAD_SIZE / 2; // safe size for requests
 
 export const createFileHash = (file: string): string => {
-  return crypto
-    .createHash(HASH_ALGORITHM)
-    .update(file)
-    .digest(ENCODE_TYPE);
+  return crypto.createHash(HASH_ALGORITHM).update(file).digest(ENCODE_TYPE);
 };
 
 export const readFileSync = (filePath: string): string => {
@@ -36,7 +32,7 @@ export const readFileSync = (filePath: string): string => {
 };
 
 export const getFileNameFromPath = (path: string): string => {
-  const splittedPath = path.split("/");
+  const splittedPath = path.split('/');
   return splittedPath[splittedPath.length - 1];
 };
 
@@ -44,7 +40,7 @@ export let filesProgress = { processed: 0, total: 0 };
 
 export let serverFilesFilterList: ISupportedFiles = {
   configFiles: [],
-  extensions: []
+  extensions: [],
 };
 
 export const acceptFileToBundle = (name: string): boolean => {
@@ -57,19 +53,17 @@ export const acceptFileToBundle = (name: string): boolean => {
 
 export const isFileChangingBundle = (name: string): boolean => {
   name = nodePath.basename(name);
-  return (name === GITIGNORE_FILENAME || name === DCIGNORE_FILENAME);
+  return name === GITIGNORE_FILENAME || name === DCIGNORE_FILENAME;
 };
 
-export const parseGitignoreFile = async (
-  filePath: string
-): Promise<string[]> => {
+export const parseGitignoreFile = async (filePath: string): Promise<string[]> => {
   const gitignoreContent: string | string[] = readFileSync(filePath);
-  return gitignoreContent.split("\n").filter(file => !!file);
+  return gitignoreContent.split('\n').filter(file => !!file);
 };
 
 export const createMissingFilesPayloadUtil = async (
   missingFiles: Array<string>,
-  currentWorkspacePath: string
+  currentWorkspacePath: string,
 ): Promise<Array<PayloadMissingFileInterface>> => {
   const result: {
     fileHash: string;
@@ -83,7 +77,7 @@ export const createMissingFilesPayloadUtil = async (
       result.push({
         fileHash: createFileHash(fileContent),
         filePath,
-        fileContent
+        fileContent,
       });
     }
   }
@@ -93,13 +87,13 @@ export const createMissingFilesPayloadUtil = async (
 export const compareFileChanges = async (
   filePath: string,
   currentWorkspacePath: string,
-  currentWorkspaceFilesBundle: { [key: string]: string } | null
+  currentWorkspaceFilesBundle: { [key: string]: string } | null,
 ): Promise<{ [key: string]: string }> => {
   const filePathInsideBundle = filePath.split(currentWorkspacePath)[1];
   const response: { [key: string]: string } = {
-    fileHash: "",
+    fileHash: '',
     filePath: filePathInsideBundle,
-    status: ""
+    status: '',
   };
   const { same, modified, created, deleted } = FILE_CURRENT_STATUS;
   try {
@@ -107,19 +101,13 @@ export const compareFileChanges = async (
     response.fileHash = fileHash;
     if (currentWorkspaceFilesBundle) {
       if (currentWorkspaceFilesBundle[filePathInsideBundle]) {
-        response.status =
-          fileHash === currentWorkspaceFilesBundle[filePathInsideBundle]
-            ? same
-            : modified;
+        response.status = fileHash === currentWorkspaceFilesBundle[filePathInsideBundle] ? same : modified;
       } else {
         response.status = created;
       }
     }
   } catch (err) {
-    if (
-      currentWorkspaceFilesBundle &&
-      currentWorkspaceFilesBundle[filePathInsideBundle]
-    ) {
+    if (currentWorkspaceFilesBundle && currentWorkspaceFilesBundle[filePathInsideBundle]) {
       response.status = deleted;
       return response;
     }
@@ -129,12 +117,10 @@ export const compareFileChanges = async (
 };
 
 export const processPayloadSize = (
-  payload: Array<PayloadMissingFileInterface>
+  payload: Array<PayloadMissingFileInterface>,
 ): {
   chunks: boolean;
-  payload:
-    | Array<PayloadMissingFileInterface>
-    | Array<Array<PayloadMissingFileInterface>>;
+  payload: Array<PayloadMissingFileInterface> | Array<Array<PayloadMissingFileInterface>>;
 } => {
   const buffer = Buffer.from(JSON.stringify(payload));
   const payloadByteSize = Buffer.byteLength(buffer);
@@ -151,7 +137,7 @@ export const splitPayloadIntoChunks = (
     fileHash: string;
     filePath: string;
     fileContent: string;
-  }[]
+  }[],
 ) => {
   const chunkedPayload = [];
 
@@ -162,15 +148,10 @@ export const splitPayloadIntoChunks = (
   let currentChunkSize = 0;
   for (const p of payload) {
     const currentChunkElement = p;
-    const currentWorstCaseChunkElementSize = Buffer.byteLength(
-      Buffer.from(JSON.stringify(currentChunkElement))
-    );
+    const currentWorstCaseChunkElementSize = Buffer.byteLength(Buffer.from(JSON.stringify(currentChunkElement)));
     const lastChunk = chunkedPayload[chunkedPayload.length - 1];
 
-    if (
-      !lastChunk ||
-      currentChunkSize + currentWorstCaseChunkElementSize > SAFE_PAYLOAD_SIZE
-    ) {
+    if (!lastChunk || currentChunkSize + currentWorstCaseChunkElementSize > SAFE_PAYLOAD_SIZE) {
       // Start a new chunk
       chunkedPayload.push([p]);
       currentChunkSize = currentWorstCaseChunkElementSize;

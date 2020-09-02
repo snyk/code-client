@@ -30,6 +30,6 @@ export interface PayloadMissingFileInterface {
 }
 
 export interface ISupportedFiles {
-  configFiles: string[],
-  extensions: string[],
+  configFiles: string[];
+  extensions: string[];
 }

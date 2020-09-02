@@ -115,7 +115,7 @@ export class Http {
       const response = await axios.request<StartSessionResponseDto>(config);
       return { type: 'success', value: response.data };
     } catch (error) {
-      return { type: 'error', error: this.createErrorResponse(error, RequestTypes.startSession) }
+      return { type: 'error', error: this.createErrorResponse(error, RequestTypes.startSession) };
     }
   }
 
@@ -150,7 +150,9 @@ export class Http {
     };
 
     try {
-      const { data: { extensions, configFiles } } = await axios.request(config);
+      const {
+        data: { extensions, configFiles },
+      } = await axios.request(config);
       return { extensions, configFiles };
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getFilters));

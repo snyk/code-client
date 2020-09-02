@@ -1,7 +1,7 @@
 import { CUSTOM_EVENTS } from '../constants/emitter';
 import { IQueueAnalysisCheckResult } from '../interfaces/queue.interface';
 
-const EventEmitter = require('events').EventEmitter;
+const { EventEmitter } = require('events');
 
 class Emitter extends EventEmitter {
   constructor() {

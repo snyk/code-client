@@ -46,6 +46,21 @@ module.exports = {
     'import/no-absolute-path': 'off',
     'no-prototype-builtins': 'off',
     'indent': 'warn',
-    'quote-props': 'off'
-  }
+    'quote-props': 'off',
+    'lines-between-class-members': 'off',
+    'import/extensions': ['error', 'ignorePackages', {
+      js: 'never',
+      mjs: 'never',
+      jsx: 'never',
+      ts: 'never',
+      tsx: 'never',
+    }],
+  },
+  'settings': {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.vue'],
+      },
+    },
+  },
 }

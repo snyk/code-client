@@ -1,7 +1,7 @@
 import { RequestTypes } from '../enums/request-types.enum';
 
 export const ERROR_CODES = new Set([
-  304, //loginInProgress,
+  304, // loginInProgress,
   400, // unauthorizedContent,
   401, // unauthorizedUser,
   403, // unauthorizedBundleAccess,

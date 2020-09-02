@@ -1,4 +1,3 @@
 import { BaseDto } from './base.dto';
 
-export class ReportTelemetryResponseDto extends BaseDto<ReportTelemetryResponseDto> {
-}
+export class ReportTelemetryResponseDto extends BaseDto<ReportTelemetryResponseDto> {}

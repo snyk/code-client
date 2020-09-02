@@ -3,8 +3,8 @@ import axios from 'axios';
 const axios_ = axios.create({
   responseType: 'json',
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
 axios_.interceptors.request.use(

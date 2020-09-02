@@ -1,3 +1,5 @@
-export class AnalyseResponseDto {
+type AnalyseResponseDto = {
   readonly bundleId: string;
-}
+};
+
+export default AnalyseResponseDto;

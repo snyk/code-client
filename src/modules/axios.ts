@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 
 const axios_ = axios.create({
   responseType: 'json',
@@ -8,23 +8,24 @@ const axios_ = axios.create({
 });
 
 axios_.interceptors.request.use(
-  config => {
+  (config: AxiosRequestConfig) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { method, url, data } = config;
     console.log(`=> HTTP ${method?.toUpperCase()} ${url} ${data ? JSON.stringify(data) : ''}`.slice(0, 399));
 
     return config;
   },
-  error => {
+  (error: AxiosError) => {
     throw error;
   },
 );
 
 axios_.interceptors.response.use(
-  response => {
+  (response: AxiosResponse) => {
     console.log(`<= Response: ${response.status} ${JSON.stringify(response.data)}`.slice(0, 399));
     return response;
   },
-  error => {
+  (error: AxiosError) => {
     console.error(`Response error --> ${error.message}`);
     throw error;
   },

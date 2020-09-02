@@ -1,7 +1,8 @@
-export function throttle(emitAction: Function, timeOut: number): Function {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export default function throttle(emitAction: Function, timeOut: number): Function {
   let lastTime = 0;
 
-  return function (...args: number[]): void {
+  return (...args: number[]): void => {
     const now = Number(new Date());
 
     if (now - lastTime >= timeOut) {

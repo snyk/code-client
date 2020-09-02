@@ -1,16 +1,28 @@
-import { CUSTOM_EVENTS } from '../constants/emitter';
+import { EventEmitter } from 'events';
+
 import { IQueueAnalysisCheckResult } from '../interfaces/queue.interface';
 
-const { EventEmitter } = require('events');
+enum CUSTOM_EVENTS {
+  buildBundleProgress = 'buildBundleProgress',
+  buildBundleFinish = 'buildBundleFinish',
+  createBundleProgress = 'createBundleProgress',
+  createBundleFinish = 'createBundleFinish',
+  uploadBundleProgress = 'uploadBundleProgress',
+  uploadFilesFinish = 'uploadFilesFinish',
+  analyseProgress = 'analyseProgress',
+  analyseFinish = 'analyseFinish',
+  error = 'error'
+}
+
 
 class Emitter extends EventEmitter {
-  constructor() {
-    super();
-    this.buildBundleProgress = this.buildBundleProgress.bind(this);
-    this.uploadBundleProgress = this.uploadBundleProgress.bind(this);
-    this.analyseProgress = this.analyseProgress.bind(this);
-    this.removeListeners = this.removeListeners.bind(this);
-  }
+  // constructor() {
+  //   super();
+  //   this.buildBundleProgress = this.buildBundleProgress.bind(this);
+  //   this.uploadBundleProgress = this.uploadBundleProgress.bind(this);
+  //   this.analyseProgress = this.analyseProgress.bind(this);
+  //   this.removeListeners = this.removeListeners.bind(this);
+  // }
 
   buildBundleProgress(processed: number, total: number): void {
     this.emit(CUSTOM_EVENTS.buildBundleProgress, processed, total);
@@ -47,4 +59,4 @@ class Emitter extends EventEmitter {
 
 const EmitterInstance = new Emitter();
 
-export { EmitterInstance as Emitter };
+export default EmitterInstance;

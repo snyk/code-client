@@ -1,13 +1,13 @@
 import fs from 'fs';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 
-import { Emitter } from './Emitter';
+import Emitter from './Emitter';
 
 import { IFiles, IFileInfo } from '../interfaces/files.interface';
 import { CRYPTO } from '../constants/files';
 import { isWindows, maxPayload } from '../constants/common';
 
-import { throttle } from '../utils/throttle';
+import throttle from '../utils/throttle';
 
 type FileInfo = {
   hash: string;
@@ -15,19 +15,8 @@ type FileInfo = {
   content: string;
 };
 
-export class Files {
-  private readFileContent(filePath: string): string {
-    return fs.readFileSync(filePath).toString('utf8');
-  }
-
-  private createFileHash(fileContent: string): string {
-    return crypto
-      .createHash(CRYPTO.algorithm)
-      .update(fileContent)
-      .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
-  }
-
-  public async getFilesData(baseDir: string, files: string[]): Promise<IFileInfo[]> {
+export default class Files {
+  public getFilesData(baseDir: string, files: string[]): IFileInfo[] {
     return files.map(file => {
       const info = this.getFileInfo(baseDir + file);
       const path = !isWindows ? file : file.replace('\\', '/');
@@ -36,6 +25,7 @@ export class Files {
     });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private getFileInfo(filePath: string): FileInfo {
     const fileSize = fs.lstatSync(filePath).size;
 
@@ -47,8 +37,11 @@ export class Files {
       };
     }
 
-    const fileContent = this.readFileContent(filePath);
-    const fileHash = this.createFileHash(fileContent);
+    const fileContent = fs.readFileSync(filePath).toString('utf8');
+    const fileHash = crypto
+      .createHash(CRYPTO.algorithm)
+      .update(fileContent)
+      .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
 
     return {
       hash: fileHash,
@@ -57,6 +50,7 @@ export class Files {
     };
   }
 
+  // eslint-disable-next-line class-methods-use-this
   public async buildBundle(files: IFileInfo[]): Promise<IFiles> {
     const emitResult = throttle(Emitter.buildBundleProgress, 1000);
     const total = files.length;

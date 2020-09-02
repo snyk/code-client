@@ -1,13 +1,14 @@
+
 import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
 
-import { ErrorResponseDto } from '../src/dto/error.response.dto';
-import { StartSessionRequestDto } from '../src/dto/start-session.request.dto';
-import { CheckSessionRequestDto } from '../src/dto/check-session.request.dto';
-import { GetFiltersRequestDto } from '../src/dto/get-filters.request.dto';
-import { CheckBundleRequestDto } from '../src/dto/check-bundle.request.dto';
-import { GetAnalysisRequestDto } from '../src/dto/get-analysis.request.dto';
+import ErrorResponseDto from '../src/dto/error.response.dto';
+import StartSessionRequestDto from '../src/dto/start-session.request.dto';
+import CheckSessionRequestDto from '../src/dto/check-session.request.dto';
+import GetFiltersRequestDto from '../src/dto/get-filters.request.dto';
+import CheckBundleRequestDto from '../src/dto/check-bundle.request.dto';
+import GetAnalysisRequestDto from '../src/dto/get-analysis.request.dto';
 
 import { startMockServer } from './mocks/mock-server';
 import {
@@ -27,7 +28,6 @@ import {
   getAnalysisResponse,
   checkBundleError404,
   extendBundleError404,
-  reportTelemetryResponse,
 } from './mocks/responses';
 // import { AnalyseRequestDto } from '../src/dto/analyse.request.dto';
 
@@ -50,8 +50,7 @@ describe('Requests to public API', () => {
    * Report error
    */
   it('reports error successfully', async () => {
-    const response = await AI.reportError(reportTelemetryRequest);
-    expect(response).toEqual(reportTelemetryResponse);
+    await AI.reportError(reportTelemetryRequest);
   });
 
   /**
@@ -59,7 +58,6 @@ describe('Requests to public API', () => {
    */
   it('reports event successfully', async () => {
     const response = await AI.reportEvent(reportTelemetryRequest);
-    expect(response).toEqual(reportTelemetryResponse);
   });
 
   /**

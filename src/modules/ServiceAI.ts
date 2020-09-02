@@ -1,39 +1,29 @@
-import { Files } from './Files';
-import { Queues } from './Queues';
-import { Http } from './Http';
-import { Emitter } from './Emitter';
+import Files from './Files';
+import Queues from './Queues';
+import Http from './Http';
+import Emitter from './Emitter';
 
 import { IFileInfo } from '../interfaces/files.interface';
 import { IQueueDebugInfo } from '../interfaces/queue.interface';
 
-import {
-  IServiceAI,
-  IResult,
-  GetFiltersResponse,
-  CreateBundleResponse,
-  CheckBundleResponse,
-  ExtendBundleResponse,
-  UploadFilesResponse,
-  GetAnalysisResponse,
-  ReportTelemetryResponse,
-} from '../interfaces/service-ai.interface';
+import { IServiceAI, IResult } from '../interfaces/service-ai.interface';
+import StartSessionRequestDto from '../dto/start-session.request.dto';
+import StartSessionResponseDto from '../dto/start-session.response.dto';
+import CheckSessionRequestDto from '../dto/check-session.request.dto';
+import GetFiltersRequestDto from '../dto/get-filters.request.dto';
+import GetFiltersResponseDto from '../dto/get-filters.response.dto';
+import CreateBundleRequestDto from '../dto/create-bundle.request.dto';
+import CreateBundleResponseDto from '../dto/create-bundle.response.dto';
+import CheckBundleRequestDto from '../dto/check-bundle.request.dto';
+import UploadFilesRequestDto from '../dto/upload-files.request.dto';
+import GetAnalysisRequestDto from '../dto/get-analysis.request.dto';
+import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
+import AnalyseRequestDto from '../dto/analyse.request.dto';
+import CheckBundleResponseDto from '../dto/check-bundle.response.dto';
+import ExtendBundleResponseDto from '../dto/extend-bundle.response.dto';
+import ReportTelemetryRequestDto from '../dto/report-telemetry.request.dto';
 
-import { StartSessionRequestDto } from '../dto/start-session.request.dto';
-import { StartSessionResponseDto } from '../dto/start-session.response.dto';
-import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
-import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
-import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
-import { CreateBundleResponseDto } from '../dto/create-bundle.response.dto';
-import { CheckBundleRequestDto } from '../dto/check-bundle.request.dto';
-import { ExtendBundleRequestDto } from '../dto/extend-bundle.request.dto';
-import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
-import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
-import { AnalyseRequestDto } from '../dto/analyse.request.dto';
-import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
-import { ExtendBundleResponseDto } from '../dto/extend-bundle.response.dto';
-import { ReportTelemetryRequestDto } from '../dto/report-telemetry.request.dto';
-
-export class ServiceAI implements IServiceAI {
+export default class ServiceAI implements IServiceAI {
   private files = new Files();
   private queues = new Queues();
   private http = new Http();
@@ -51,39 +41,35 @@ export class ServiceAI implements IServiceAI {
     return this.http.startSession(options);
   }
 
-  public checkSession(options: CheckSessionRequestDto): Promise<boolean> {
+  public checkSession(options: CheckSessionRequestDto): Promise<IResult<boolean>> {
     return this.http.checkSession(options);
   }
 
-  public async getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponse> {
+  public async getFilters(options: GetFiltersRequestDto): Promise<IResult<GetFiltersResponseDto>> {
     return this.http.getFilters(options);
   }
 
-  public async createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse> {
+  public async createBundle(options: CreateBundleRequestDto): Promise<IResult<CreateBundleResponseDto>> {
     return this.http.createBundle(options);
   }
 
-  public async checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse> {
+  public async checkBundle(options: CheckBundleRequestDto): Promise<IResult<CheckBundleResponseDto>> {
     return this.http.checkBundle(options);
   }
 
-  public async extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse> {
-    return this.http.extendBundle(options);
-  }
-
-  public async uploadFiles(options: UploadFilesRequestDto): Promise<UploadFilesResponse> {
+  public async uploadFiles(options: UploadFilesRequestDto): Promise<IResult<boolean>> {
     return this.http.uploadFiles(options);
   }
 
-  public async getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse> {
+  public async getAnalysis(options: GetAnalysisRequestDto): Promise<IResult<GetAnalysisResponseDto>> {
     return this.http.getAnalysis(options);
   }
 
-  public async reportError(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse> {
+  public async reportError(options: ReportTelemetryRequestDto): Promise<IResult<void>> {
     return this.http.reportError(options);
   }
 
-  public async reportEvent(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse> {
+  public async reportEvent(options: ReportTelemetryRequestDto): Promise<IResult<void>> {
     return this.http.reportEvent(options);
   }
 
@@ -102,7 +88,13 @@ export class ServiceAI implements IServiceAI {
     const chunks = this.queues.createUploadChunks(filesInfo);
 
     // 2. generate and start queue
-    const uploadQueue = this.queues.createUploadQueue(baseURL, sessionToken, chunks, bundleId, this.http.uploadFiles);
+    const uploadQueue = this.queues.createUploadQueue(
+      baseURL,
+      sessionToken,
+      chunks,
+      bundleId,
+      this.http.uploadFiles.bind(this),
+    );
 
     uploadQueue.on('success', (result: IQueueDebugInfo) => {
       const { chunkNumber } = result;
@@ -160,7 +152,7 @@ export class ServiceAI implements IServiceAI {
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
       const { baseURL, sessionToken, baseDir, files, removedFiles = [] } = options;
-      const fullFilesInfo = await this.files.getFilesData(baseDir, files);
+      const fullFilesInfo = this.files.getFilesData(baseDir, files);
       const bundle = await this.files.buildBundle(fullFilesInfo);
       let missingFiles: string[] = [];
 

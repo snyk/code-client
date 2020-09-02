@@ -36,27 +36,26 @@ export const getFileNameFromPath = (path: string): string => {
   return splittedPath[splittedPath.length - 1];
 };
 
-export let filesProgress = { processed: 0, total: 0 };
+export const filesProgress = { processed: 0, total: 0 };
 
-export let serverFilesFilterList: ISupportedFiles = {
+export const serverFilesFilterList: ISupportedFiles = {
   configFiles: [],
   extensions: [],
 };
 
 export const acceptFileToBundle = (name: string): boolean => {
-  name = nodePath.basename(name);
+  const checkName = nodePath.basename(name);
   return (
-    (serverFilesFilterList.configFiles || []).includes(name) ||
-    (serverFilesFilterList.extensions || []).includes(nodePath.extname(name))
+    (serverFilesFilterList.configFiles || []).includes(checkName) ||
+    (serverFilesFilterList.extensions || []).includes(nodePath.extname(checkName))
   );
 };
 
 export const isFileChangingBundle = (name: string): boolean => {
-  name = nodePath.basename(name);
-  return name === GITIGNORE_FILENAME || name === DCIGNORE_FILENAME;
+  return [GITIGNORE_FILENAME, DCIGNORE_FILENAME].includes(nodePath.basename(name));
 };
 
-export const parseGitignoreFile = async (filePath: string): Promise<string[]> => {
+export const parseGitignoreFile = (filePath: string): string[] => {
   const gitignoreContent: string | string[] = readFileSync(filePath);
   return gitignoreContent.split('\n').filter(file => !!file);
 };
@@ -84,11 +83,11 @@ export const createMissingFilesPayloadUtil = async (
   return result;
 };
 
-export const compareFileChanges = async (
+export const compareFileChanges = (
   filePath: string,
   currentWorkspacePath: string,
   currentWorkspaceFilesBundle: { [key: string]: string } | null,
-): Promise<{ [key: string]: string }> => {
+): { [key: string]: string } => {
   const filePathInsideBundle = filePath.split(currentWorkspacePath)[1];
   const response: { [key: string]: string } = {
     fileHash: '',
@@ -97,7 +96,7 @@ export const compareFileChanges = async (
   };
   const { same, modified, created, deleted } = FILE_CURRENT_STATUS;
   try {
-    const fileHash = await createFileHash(readFileSync(filePath));
+    const fileHash = createFileHash(readFileSync(filePath));
     response.fileHash = fileHash;
     if (currentWorkspaceFilesBundle) {
       if (currentWorkspaceFilesBundle[filePathInsideBundle]) {
@@ -116,29 +115,16 @@ export const compareFileChanges = async (
   return response;
 };
 
-export const processPayloadSize = (
-  payload: Array<PayloadMissingFileInterface>,
-): {
-  chunks: boolean;
-  payload: Array<PayloadMissingFileInterface> | Array<Array<PayloadMissingFileInterface>>;
-} => {
-  const buffer = Buffer.from(JSON.stringify(payload));
-  const payloadByteSize = Buffer.byteLength(buffer);
-
-  if (payloadByteSize < ALLOWED_PAYLOAD_SIZE) {
-    return { chunks: false, payload };
-  }
-  const chunkedPayload = splitPayloadIntoChunks(payload);
-  return chunkedPayload;
-};
-
 export const splitPayloadIntoChunks = (
   payload: {
     fileHash: string;
     filePath: string;
     fileContent: string;
   }[],
-) => {
+): {
+  chunks: boolean;
+  payload: Array<PayloadMissingFileInterface> | Array<Array<PayloadMissingFileInterface>>;
+} => {
   const chunkedPayload = [];
 
   // Break input array of files
@@ -163,4 +149,19 @@ export const splitPayloadIntoChunks = (
   }
 
   return { chunks: true, payload: chunkedPayload };
+};
+
+export const processPayloadSize = (
+  payload: Array<PayloadMissingFileInterface>,
+): {
+  chunks: boolean;
+  payload: Array<PayloadMissingFileInterface> | Array<Array<PayloadMissingFileInterface>>;
+} => {
+  const buffer = Buffer.from(JSON.stringify(payload));
+  const payloadByteSize = Buffer.byteLength(buffer);
+
+  if (payloadByteSize < ALLOWED_PAYLOAD_SIZE) {
+    return { chunks: false, payload };
+  }
+  return splitPayloadIntoChunks(payload);
 };

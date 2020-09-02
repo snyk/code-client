@@ -1,36 +1,24 @@
-import { ErrorResponseDto } from '../dto/error.response.dto';
+import ErrorResponseDto from '../dto/error.response.dto';
 
-import { StartSessionRequestDto } from '../dto/start-session.request.dto';
-import { StartSessionResponseDto } from '../dto/start-session.response.dto';
-import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
-import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
-import { GetFiltersResponseDto } from '../dto/get-filters.response.dto';
-import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
-import { CreateBundleResponseDto } from '../dto/create-bundle.response.dto';
-import { CheckBundleRequestDto } from '../dto/check-bundle.request.dto';
-import { CheckBundleResponseDto } from '../dto/check-bundle.response.dto';
-import { ExtendBundleRequestDto } from '../dto/extend-bundle.request.dto';
-import { ExtendBundleResponseDto } from '../dto/extend-bundle.response.dto';
-import { UploadFilesRequestDto } from '../dto/upload-files.request.dto';
-import { UploadFilesResponseDto } from '../dto/upload-files.response.dto';
-import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
+import StartSessionRequestDto from '../dto/start-session.request.dto';
+import StartSessionResponseDto from '../dto/start-session.response.dto';
+import CheckSessionRequestDto from '../dto/check-session.request.dto';
+import GetFiltersRequestDto from '../dto/get-filters.request.dto';
+import GetFiltersResponseDto from '../dto/get-filters.response.dto';
+import CreateBundleRequestDto from '../dto/create-bundle.request.dto';
+import CreateBundleResponseDto from '../dto/create-bundle.response.dto';
+import CheckBundleRequestDto from '../dto/check-bundle.request.dto';
+import CheckBundleResponseDto from '../dto/check-bundle.response.dto';
+import UploadFilesRequestDto from '../dto/upload-files.request.dto';
+import GetAnalysisRequestDto from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
-import { ReportTelemetryRequestDto } from '../dto/report-telemetry.request.dto';
-import { ReportTelemetryResponseDto } from '../dto/report-telemetry.response.dto';
-import { AnalyseRequestDto } from '../dto/analyse.request.dto';
+import ReportTelemetryRequestDto from '../dto/report-telemetry.request.dto';
+import AnalyseRequestDto from '../dto/analyse.request.dto';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError = { type: 'error'; error: ErrorResponseDto };
 
 export type IResult<T> = ResultSuccess<T> | ResultError;
-
-export type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
-export type CreateBundleResponse = CreateBundleResponseDto | ErrorResponseDto;
-export type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
-export type ExtendBundleResponse = ExtendBundleResponseDto | ErrorResponseDto;
-export type UploadFilesResponse = UploadFilesResponseDto | ErrorResponseDto;
-export type GetAnalysisResponse = GetAnalysisResponseDto | ErrorResponseDto;
-export type ReportTelemetryResponse = ReportTelemetryResponseDto | ErrorResponseDto;
 
 export interface IServiceAI {
   /**
@@ -43,55 +31,49 @@ export interface IServiceAI {
    * Checks status of the login process
    * @param options
    */
-  checkSession(options: CheckSessionRequestDto): Promise<boolean>;
+  checkSession(options: CheckSessionRequestDto): Promise<IResult<boolean>>;
 
   /**
    * Requests current filtering options for uploaded bundles
    * @param options
    */
-  getFilters(options: GetFiltersRequestDto): Promise<GetFiltersResponse>;
+  getFilters(options: GetFiltersRequestDto): Promise<IResult<GetFiltersResponseDto>>;
 
   /**
    * Creates a new bundle
    * @param options
    */
-  createBundle(options: CreateBundleRequestDto): Promise<CreateBundleResponse>;
+  createBundle(options: CreateBundleRequestDto): Promise<IResult<CreateBundleResponseDto>>;
 
   /**
    * Checks the status of a bundle
    * @param options
    */
-  checkBundle(options: CheckBundleRequestDto): Promise<CheckBundleResponse>;
-
-  /**
-   * Creates a new bundle based on a previously uploaded one
-   * @param options
-   */
-  extendBundle(options: ExtendBundleRequestDto): Promise<ExtendBundleResponse>;
+  checkBundle(options: CheckBundleRequestDto): Promise<IResult<CheckBundleResponseDto>>;
 
   /**
    * Uploads missing files to a bundle
    * @param options
    */
-  uploadFiles(options: UploadFilesRequestDto): Promise<UploadFilesResponse>;
+  uploadFiles(options: UploadFilesRequestDto): Promise<IResult<boolean>>;
 
   /**
    * Starts a new bundle analysis or checks its current status and available results
    * @param options
    */
-  getAnalysis(options: GetAnalysisRequestDto): Promise<GetAnalysisResponse>;
+  getAnalysis(options: GetAnalysisRequestDto): Promise<IResult<GetAnalysisResponseDto>>;
 
   /**
    * Reports an error
    * @param options
    */
-  reportError(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse>;
+  reportError(options: ReportTelemetryRequestDto): Promise<IResult<void>>;
 
   /**
    * Reports an event
    * @param options
    */
-  reportEvent(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse>;
+  reportEvent(options: ReportTelemetryRequestDto): Promise<IResult<void>>;
 
   /**
    * Reports an event

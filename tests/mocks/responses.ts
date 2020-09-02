@@ -1,19 +1,16 @@
+
 import path from 'path';
 import { bundleId, sessionToken } from './base-config';
 
-import { ErrorResponseDto } from '../../src/dto/error.response.dto';
-import { StartSessionResponseDto } from '../../src/dto/start-session.response.dto';
-import { GetFiltersResponseDto } from '../../src/dto/get-filters.response.dto';
-import { CreateBundleResponseDto } from '../../src/dto/create-bundle.response.dto';
-import { CheckBundleResponseDto } from '../../src/dto/check-bundle.response.dto';
-import { ExtendBundleResponseDto } from '../../src/dto/extend-bundle.response.dto';
-import { UploadFilesResponseDto } from '../../src/dto/upload-files.response.dto';
-import { GetAnalysisResponseDto } from '../../src/dto/get-analysis.response.dto';
-import { ReportTelemetryResponseDto } from '../../src/dto/report-telemetry.response.dto';
+import ErrorResponseDto from '../../src/dto/error.response.dto';
+import StartSessionResponseDto from '../../src/dto/start-session.response.dto';
+import GetFiltersResponseDto from '../../src/dto/get-filters.response.dto';
+import CreateBundleResponseDto from '../../src/dto/create-bundle.response.dto';
+import CheckBundleResponseDto from '../../src/dto/check-bundle.response.dto';
+import ExtendBundleResponseDto from '../../src/dto/extend-bundle.response.dto';
+import { GetAnalysisResponseDto, AnalysisStatus } from '../../src/dto/get-analysis.response.dto';
 
-import { ERRORS } from '../../src/constants/errors';
-import { AnalysisStatus } from '../../src/enums/analysis-status.enum';
-import { RequestTypes } from '../../src/enums/request-types.enum';
+import { ERRORS, RequestTypes } from '../../src/constants/errors';
 
 const bundleResponse = {
   bundleId,
@@ -50,9 +47,7 @@ export const extendBundleResponse: ExtendBundleResponseDto = {
   ...bundleResponse,
 };
 
-export const uploadFilesResponse: UploadFilesResponseDto = {
-  success: true,
-};
+export const uploadFilesResponse = true;
 
 export const getAnalysisResponse: GetAnalysisResponseDto = {
   status: AnalysisStatus.done,
@@ -95,4 +90,3 @@ export const extendBundleError404: ErrorResponseDto = {
   statusText: ERRORS[RequestTypes.extendBundle][404],
 };
 
-export const reportTelemetryResponse: ReportTelemetryResponseDto = {};

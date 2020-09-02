@@ -17,8 +17,9 @@ module.exports = {
     'Atomics': 'readonly',
     'SharedArrayBuffer': 'readonly'
   },
+  'parser': "@typescript-eslint/parser",
   'parserOptions': {
-    'ecmaVersion': 2018,
+    'ecmaVersion': 2020,
     'sourceType': 'module',
     'project': './tsconfig.json'
   },
@@ -36,17 +37,19 @@ module.exports = {
     ],
     'require-jsdoc': 'off',
     'space-before-function-paren': 'off',
-    // 'semi': 'off',
     'comma-dangle': 'off',
     'object-curly-spacing': 'warn',
     'padded-blocks': 'off',
     'camelcase': 'warn',
     'object-property-newline': 'off',
-    'prefer-const': 'off',
+    'prefer-const': 'warn',
     'import/no-absolute-path': 'off',
     'no-prototype-builtins': 'off',
     'indent': 'warn',
-    'quote-props': 'off',
+    'quote-props': [
+      'warn',
+      'as-needed'
+    ],
     'lines-between-class-members': 'off',
     'import/extensions': ['error', 'ignorePackages', {
       js: 'never',
@@ -55,6 +58,12 @@ module.exports = {
       ts: 'never',
       tsx: 'never',
     }],
+    'no-restricted-syntax': 'off',
+    'no-await-in-loop': 'warn',
+    'no-underscore-dangle': 'off',
+    'max-classes-per-file': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'warn',
   },
   'settings': {
     'import/resolver': {

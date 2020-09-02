@@ -3,7 +3,7 @@ import path from 'path';
 import { IFiles } from '../../src/interfaces/files.interface';
 import { CreateBundleRequestDto } from '../../src/dto/create-bundle.request.dto';
 import { ExtendBundleRequestDto } from '../../src/dto/extend-bundle.request.dto';
-import { UploadFilesRequestDto } from '../../src/dto/upload-files.request.dto';
+import UploadFilesRequestDto from '../../src/dto/upload-files.request.dto';
 import { ReportTelemetryRequestDto } from '../../src/dto/report-telemetry.request.dto';
 
 import { defaultBaseURL as baseURL } from '../../src/constants/common';

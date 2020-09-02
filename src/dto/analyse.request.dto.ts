@@ -1,4 +1,4 @@
-export class AnalyseRequestDto {
+export default class AnalyseRequestDto {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly useLinters?: boolean;

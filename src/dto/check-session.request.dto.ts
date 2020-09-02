@@ -1,6 +1,6 @@
 import { BaseDto } from './base.dto';
 
-export class CheckSessionRequestDto extends BaseDto<CheckSessionRequestDto> {
+export default class CheckSessionRequestDto extends BaseDto<CheckSessionRequestDto> {
   readonly baseURL: string;
   readonly sessionToken: string;
 }

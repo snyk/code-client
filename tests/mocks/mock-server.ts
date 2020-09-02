@@ -10,7 +10,6 @@ import {
   extendBundleResponse,
   uploadFilesResponse,
   getAnalysisResponse,
-  reportTelemetryResponse,
 
   checkBundleError404,
 } from './responses';

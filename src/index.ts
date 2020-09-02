@@ -1,4 +1,4 @@
-import { ServiceAI } from './modules/ServiceAI';
+import ServiceAI from './modules/ServiceAI';
 
 import { IServiceAI } from './interfaces/service-ai.interface';
 

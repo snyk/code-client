@@ -43,7 +43,6 @@
     "jest": "^26.4.2",
     "nock": "^13.0.4",
     "prettier": "^2.1.1",
-    "queue": "^6.0.1",
     "rollup": "^2.26.9",
     "rollup-plugin-peer-deps-external": "^2.2.3",
     "rollup-plugin-typescript2": "^0.27.2",
@@ -62,6 +61,7 @@
     "@types/lodash": "^4.14.159",
     "lodash": "^4.17.19",
     "ignore": "^5.1.8",
-    "@deepcode/dcignore": "^1.0.2"
+    "@deepcode/dcignore": "^1.0.2",
+    "queue": "^6.0.1"
   }
 }

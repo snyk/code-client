@@ -1,20 +1,26 @@
 import queue from 'queue';
-import { Http } from './Http';
-import { Emitter } from './Emitter';
+import Http from './Http';
+import Emitter from './Emitter';
 
 import { maxPayload } from '../constants/common';
-import { BUNDLE_ERRORS } from '../constants/messages';
-import { ANALYSIS_STATUS } from '../constants/analysis';
+import { BUNDLE_ERRORS } from '../constants/errors';
 import { IFileInfo, IFileQueue } from '../interfaces/files.interface';
 import { IQueueAnalysisCheck } from '../interfaces/queue.interface';
-import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 
-import { throttle } from '../utils/throttle';
+import throttle from '../utils/throttle';
 
 const loopDelay = 1000;
 const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
 
-export class Queues {
+enum ANALYSIS_STATUS {
+  fetching = 'FETCHING',
+  analyzing = 'ANALYZING',
+  dcDone = 'DC_DONE',
+  done = 'DONE',
+  failed = 'FAILED'
+}
+
+export default class Queues {
   private http = new Http();
 
   public updateHttp(http: Http): void {
@@ -22,6 +28,7 @@ export class Queues {
   }
 
   // Create Chunks
+  // eslint-disable-next-line class-methods-use-this
   public createUploadChunks(files: IFileInfo[]): Array<IFileInfo[]> {
     const chunks = [];
     let currentSize = 0;
@@ -50,6 +57,7 @@ export class Queues {
   }
 
   // Create Queues
+  // eslint-disable-next-line class-methods-use-this
   public createUploadQueue(
     baseURL: string,
     sessionToken: string,
@@ -121,7 +129,7 @@ export class Queues {
 
     const result = await this.http.getAnalysis(options);
 
-    if (result instanceof GetAnalysisResponseDto) {
+    if (result.type === 'success') {
       const { status, analysisResults, analysisURL, progress } = result;
 
       const newProgress = progress || 0.01;
@@ -144,6 +152,8 @@ export class Queues {
 
       return Promise.resolve();
     }
+
+    return Promise.resolve();
   }
 
   async nextAnalysisLoopTick(options: IQueueAnalysisCheck): Promise<void> {

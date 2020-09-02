@@ -13,14 +13,14 @@ export class ExclusionRule {
   prefix_ = '';
   set_ = false;
 
-  addExclusions(exclusions: Array<string>, prefix: string) {
+  addExclusions(exclusions: Array<string>, prefix: string): void {
     if (this.set_) return;
     this.ig_.add(exclusions);
     this.prefix_ = prefix;
     this.set_ = true;
   }
 
-  excludes(path: string) {
+  excludes(path: string): boolean {
     return this.ig_.ignores(nodePath.relative(this.prefix_, path));
   }
 }
@@ -29,12 +29,12 @@ export class ExclusionRule {
 export class ExclusionFilter {
   exclusions_: Array<ExclusionRule> = [];
 
-  addExclusionRule(exclusion: ExclusionRule) {
+  addExclusionRule(exclusion: ExclusionRule): void {
     this.exclusions_.push(exclusion);
   }
 
-  excludes(path: string) {
-    for (let exclusion of this.exclusions_) {
+  excludes(path: string): boolean {
+    for (const exclusion of this.exclusions_) {
       if (exclusion.excludes(path)) {
         return true;
       }

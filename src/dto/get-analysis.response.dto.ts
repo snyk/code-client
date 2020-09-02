@@ -1,10 +1,16 @@
-import { BaseDto } from './base.dto';
-import { AnalysisStatus } from '../enums/analysis-status.enum';
 import { IAnalysisResult } from '../interfaces/analysis-result.interface';
 
-export class GetAnalysisResponseDto extends BaseDto<GetAnalysisResponseDto> {
+export enum AnalysisStatus {
+  fetching = 'FETCHING',
+  analyzing = 'ANALYZING',
+  dcDone = 'DC_DONE',
+  done = 'DONE',
+  failed = 'FAILED',
+}
+
+export type GetAnalysisResponseDto = {
   readonly status: AnalysisStatus;
   readonly progress: number;
   readonly analysisURL: string;
   readonly analysisResults?: IAnalysisResult;
-}
+};

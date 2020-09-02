@@ -1,6 +1,10 @@
-import { AnalysisSeverity } from '../enums/analysis-severity.enum';
-
 export type Point = [number, number];
+
+enum AnalysisSeverity {
+  info = 1,
+  warning,
+  critical,
+}
 
 export interface ISuggestion {
   id: string;

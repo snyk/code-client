@@ -28,14 +28,15 @@ export const getBaseExclusionFilter = (): ExclusionFilter => {
 };
 
 // Helper function - read files and count progress
-export const createListOfDirFiles = async (options: CreateListOfFiles) => {
-  let { folderPath, path, exclusionFilter, progress } = options;
+export const createListOfDirFiles = (options: CreateListOfFiles): string[] => {
+  const { path, progress } = options;
+  let { folderPath, exclusionFilter } = options;
   // Entry point default values:
   exclusionFilter = exclusionFilter || getBaseExclusionFilter();
   progress.percentDone = progress.percentDone || 0;
   progress.multiplier = progress.multiplier || 1;
 
-  let list: string[] = [];
+  const list: string[] = [];
   folderPath = folderPath || path;
   const dirContent: string[] = fs.readdirSync(path);
   const relativeDirPath = nodePath.relative(folderPath, path);
@@ -50,7 +51,7 @@ export const createListOfDirFiles = async (options: CreateListOfFiles) => {
     if ([GITIGNORE_FILENAME, DCIGNORE_FILENAME].includes(name)) {
       // We've found a ignore file.
       const exclusionRule = new ExclusionRule();
-      exclusionRule.addExclusions(await parseGitignoreFile(fullChildPath), relativeDirPath);
+      exclusionRule.addExclusions(parseGitignoreFile(fullChildPath), relativeDirPath);
       // We need to modify the exclusion rules so we have to create a copy of the exclusionFilter.
       exclusionFilter = exclusionFilter.copy();
       exclusionFilter.addExclusionRule(exclusionRule);
@@ -90,7 +91,7 @@ export const createListOfDirFiles = async (options: CreateListOfFiles) => {
       }
 
       if (isDirectory) {
-        const subList = await createListOfDirFiles({
+        const subList = createListOfDirFiles({
           folderPath,
           path: `${path}/${name}`,
           exclusionFilter,

@@ -1,18 +1,51 @@
-module.exports =  {
-  parser:  '@typescript-eslint/parser',  // Specifies the ESLint parser
-  extends:  [
-    'plugin:@typescript-eslint/recommended',  // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-    'prettier/@typescript-eslint',  // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
-    'plugin:prettier/recommended',  // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+module.exports = {
+  'plugins': [
+    '@typescript-eslint',
+    'prettier',
+    'import'
   ],
-  parserOptions:  {
-    ecmaVersion:  2018,  // Allows for the parsing of modern ECMAScript features
-    sourceType:  'module',  // Allows for the use of imports
+  'extends': [
+    'eslint:recommended',
+    'airbnb-base',
+    'plugin:@typescript-eslint/recommended',
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    'plugin:prettier/recommended',
+    'prettier',
+    'prettier/@typescript-eslint'
+  ],
+  'globals': {
+    'Atomics': 'readonly',
+    'SharedArrayBuffer': 'readonly'
   },
-  rules:  {
-    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-    // e.g. "@typescript-eslint/explicit-function-return-type": "off",
-    '@typescript-eslint/interface-name-prefix': 'off',
-    'prettier/prettier': 'warn',
+  'parserOptions': {
+    'ecmaVersion': 2018,
+    'sourceType': 'module',
+    'project': './tsconfig.json'
   },
-};
+  'env': {
+    'es6': true,
+    // 'browser': true,
+    'node': true
+  },
+  'rules': {
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'arrow-parens': [
+      'error',
+      'as-needed'
+    ],
+    'require-jsdoc': 'off',
+    'space-before-function-paren': 'off',
+    // 'semi': 'off',
+    'comma-dangle': 'off',
+    'object-curly-spacing': 'warn',
+    'padded-blocks': 'off',
+    'camelcase': 'warn',
+    'object-property-newline': 'off',
+    'prefer-const': 'off',
+    'import/no-absolute-path': 'off',
+    'no-prototype-builtins': 'off',
+    'indent': 'warn',
+    'quote-props': 'off'
+  }
+}

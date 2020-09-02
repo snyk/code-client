@@ -28,33 +28,33 @@ const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
 /**
  * Successful responses
  */
-export const startSessionResponse = new StartSessionResponseDto({
+export const startSessionResponse: StartSessionResponseDto = {
   sessionToken,
   loginURL: 'mock-login-url',
-});
+};
 
-export const getFiltersResponse = new GetFiltersResponseDto({
+export const getFiltersResponse: GetFiltersResponseDto = {
   extensions: ['.java', '.js', '.ts', '.py'],
   configFiles: ['.eslintrc.js', '.eslintrc.json', 'tslint.json', 'pylintrc'],
-});
+};
 
-export const createBundleResponse = new CreateBundleResponseDto({
+export const createBundleResponse: CreateBundleResponseDto = {
   ...bundleResponse,
-});
+};
 
-export const checkBundleResponse = new CheckBundleResponseDto({
+export const checkBundleResponse: CheckBundleResponseDto = {
   ...bundleResponse,
-});
+};
 
-export const extendBundleResponse = new ExtendBundleResponseDto({
+export const extendBundleResponse: ExtendBundleResponseDto = {
   ...bundleResponse,
-});
+};
 
-export const uploadFilesResponse = new UploadFilesResponseDto({
+export const uploadFilesResponse: UploadFilesResponseDto = {
   success: true,
-});
+};
 
-export const getAnalysisResponse = new GetAnalysisResponseDto({
+export const getAnalysisResponse: GetAnalysisResponseDto = {
   status: AnalysisStatus.done,
   progress: 100,
   analysisURL: 'mock-analysis-url',
@@ -78,21 +78,21 @@ export const getAnalysisResponse = new GetAnalysisResponseDto({
       },
     },
   },
-});
+};
 
 /**
  * Errors
  */
-export const checkBundleError404 = new ErrorResponseDto({
+export const checkBundleError404: ErrorResponseDto = {
   error: {},
   statusCode: 404,
   statusText: ERRORS[RequestTypes.checkBundle][404],
-});
+};
 
-export const extendBundleError404 = new ErrorResponseDto({
+export const extendBundleError404: ErrorResponseDto = {
   error: {},
   statusCode: 404,
   statusText: ERRORS[RequestTypes.extendBundle][404],
-});
+};
 
-export const reportTelemetryResponse = new ReportTelemetryResponseDto({});
+export const reportTelemetryResponse: ReportTelemetryResponseDto = {};

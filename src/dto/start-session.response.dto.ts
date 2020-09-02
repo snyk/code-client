@@ -1,6 +1,4 @@
-import { BaseDto } from './base.dto';
-
-export class StartSessionResponseDto extends BaseDto<StartSessionResponseDto> {
+export type StartSessionResponseDto = {
   readonly sessionToken: string;
   readonly loginURL: string;
 }

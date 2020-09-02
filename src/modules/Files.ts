@@ -17,12 +17,7 @@ type FileInfo = {
 
 export class Files {
   private readFileContent(filePath: string): string {
-    return fs.readFileSync(filePath, { encoding: CRYPTO.fileEncode });
-  }
-
-  private createFileContent(filePath: string): string {
-    const fileContent = this.readFileContent(filePath);
-    return fileContent;
+    return fs.readFileSync(filePath).toString('utf8');
   }
 
   private createFileHash(fileContent: string): string {
@@ -52,7 +47,7 @@ export class Files {
       };
     }
 
-    const fileContent = this.createFileContent(filePath);
+    const fileContent = this.readFileContent(filePath);
     const fileHash = this.createFileHash(fileContent);
 
     return {

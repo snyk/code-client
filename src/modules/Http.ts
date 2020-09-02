@@ -6,8 +6,9 @@ import { RequestTypes } from '../enums/request-types.enum';
 import { apiPath } from '../constants/common';
 import axios from './axios';
 import { IHeader, IHeaders } from '../interfaces/http.interface';
+
 import {
-  StartSessionResponse,
+  IResult,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -23,7 +24,6 @@ import { StartSessionRequestDto } from '../dto/start-session.request.dto';
 import { StartSessionResponseDto } from '../dto/start-session.response.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
 import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
-import { GetFiltersResponseDto } from '../dto/get-filters.response.dto';
 import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
 import { CreateBundleResponseDto } from '../dto/create-bundle.response.dto';
 import { CheckBundleRequestDto } from '../dto/check-bundle.request.dto';
@@ -99,7 +99,7 @@ export class Http {
     };
   }
 
-  public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {
+  public async startSession(options: StartSessionRequestDto): Promise<IResult<StartSessionResponseDto>> {
     const { source, baseURL } = options;
     const headers = this.createHeaders(undefined, true);
     const config: AxiosRequestConfig = {
@@ -112,15 +112,10 @@ export class Http {
     };
 
     try {
-      const { data } = await axios.request(config);
-      return Promise.resolve(
-        new StartSessionResponseDto({
-          sessionToken: data.sessionToken,
-          loginURL: data.loginURL,
-        }),
-      );
+      const response = await axios.request<StartSessionResponseDto>(config);
+      return { type: 'success', value: response.data };
     } catch (error) {
-      return Promise.reject(this.createErrorResponse(error, RequestTypes.startSession));
+      return { type: 'error', error: this.createErrorResponse(error, RequestTypes.startSession) }
     }
   }
 
@@ -155,8 +150,8 @@ export class Http {
     };
 
     try {
-      const { data } = await axios.request(config);
-      return Promise.resolve(new GetFiltersResponseDto(data));
+      const { data: { extensions, configFiles } } = await axios.request(config);
+      return { extensions, configFiles };
     } catch (error) {
       return Promise.reject(this.createErrorResponse(error, RequestTypes.getFilters));
     }

@@ -1,6 +1,4 @@
-import { BaseDto } from './base.dto';
-
-export class GetFiltersResponseDto extends BaseDto<GetFiltersResponseDto> {
+export interface GetFiltersResponseDto {
   readonly extensions: string[];
   readonly configFiles: string[];
 }

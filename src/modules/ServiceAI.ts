@@ -8,7 +8,7 @@ import { IQueueDebugInfo } from '../interfaces/queue.interface';
 
 import {
   IServiceAI,
-  StartSessionResponse,
+  IResult,
   GetFiltersResponse,
   CreateBundleResponse,
   CheckBundleResponse,
@@ -19,6 +19,7 @@ import {
 } from '../interfaces/service-ai.interface';
 
 import { StartSessionRequestDto } from '../dto/start-session.request.dto';
+import { StartSessionResponseDto } from '../dto/start-session.response.dto';
 import { CheckSessionRequestDto } from '../dto/check-session.request.dto';
 import { GetFiltersRequestDto } from '../dto/get-filters.request.dto';
 import { CreateBundleRequestDto } from '../dto/create-bundle.request.dto';
@@ -46,7 +47,7 @@ export class ServiceAI implements IServiceAI {
     this.queues.updateHttp(this.http);
   }
 
-  public async startSession(options: StartSessionRequestDto): Promise<StartSessionResponse> {
+  public async startSession(options: StartSessionRequestDto): Promise<IResult<StartSessionResponseDto>> {
     return this.http.startSession(options);
   }
 
@@ -225,7 +226,8 @@ export class ServiceAI implements IServiceAI {
         const missingFilesInfo = this.getMissingFilesInfo(missingFiles, fullFilesInfo);
         await this.processUploadFiles(baseURL, sessionToken, this.bundleId, missingFilesInfo);
       }
-      this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
+
+      await this.queues.startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
         Emitter.sendError(error);
         throw error;
       });

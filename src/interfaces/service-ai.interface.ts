@@ -17,8 +17,13 @@ import { GetAnalysisRequestDto } from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 import { ReportTelemetryRequestDto } from '../dto/report-telemetry.request.dto';
 import { ReportTelemetryResponseDto } from '../dto/report-telemetry.response.dto';
+import { AnalyseRequestDto } from '../dto/analyse.request.dto';
 
-export type StartSessionResponse = StartSessionResponseDto | ErrorResponseDto;
+type ResultSuccess<T> = { type: 'success'; value: T };
+type ResultError = { type: 'error'; error: ErrorResponseDto };
+
+export type IResult<T> = ResultSuccess<T> | ResultError;
+
 export type GetFiltersResponse = GetFiltersResponseDto | ErrorResponseDto;
 export type CreateBundleResponse = CreateBundleResponseDto | ErrorResponseDto;
 export type CheckBundleResponse = CheckBundleResponseDto | ErrorResponseDto;
@@ -32,7 +37,7 @@ export interface IServiceAI {
    * Requests the creation of a new login session
    * @param options
    */
-  startSession(options: StartSessionRequestDto): Promise<StartSessionResponse>;
+  startSession(options: StartSessionRequestDto): Promise<IResult<StartSessionResponseDto>>;
 
   /**
    * Checks status of the login process
@@ -87,4 +92,17 @@ export interface IServiceAI {
    * @param options
    */
   reportEvent(options: ReportTelemetryRequestDto): Promise<ReportTelemetryResponse>;
+
+  /**
+   * Reports an event
+   * @param options
+   */
+  analyse(options: AnalyseRequestDto): Promise<void>;
+
+  /**
+   * Event emitters
+   */
+  on(eventName: string, callback: Function, ...args: any[]): void;
+  emit(eventName: string, ...args: any[]): void;
+  removeListeners(): void;
 }

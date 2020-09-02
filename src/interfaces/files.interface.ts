@@ -22,3 +22,14 @@ export interface IFileQueue {
   on: Function;
   start: Function;
 }
+
+export interface PayloadMissingFileInterface {
+  fileHash: string;
+  filePath: string;
+  fileContent: string;
+}
+
+export interface ISupportedFiles {
+  configFiles: string[],
+  extensions: string[],
+}

@@ -1,4 +1,4 @@
-interface IErrorResponse {
+export interface IErrorResponse {
   readonly error: object;
   readonly statusCode: number | null;
   readonly statusText: string;

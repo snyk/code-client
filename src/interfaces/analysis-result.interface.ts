@@ -1,5 +1,6 @@
 export type Point = [number, number];
 
+// eslint-disable-next-line no-shadow
 enum AnalysisSeverity {
   info = 1,
   warning,

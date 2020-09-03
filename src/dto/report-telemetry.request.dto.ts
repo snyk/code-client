@@ -1,6 +1,4 @@
-import { BaseDto } from './base.dto';
-
-export default class ReportTelemetryRequestDto extends BaseDto<ReportTelemetryRequestDto> {
+type ReportTelemetryRequestDto = {
   readonly baseURL: string;
   readonly sessionToken?: string;
   readonly source?: string;
@@ -11,4 +9,6 @@ export default class ReportTelemetryRequestDto extends BaseDto<ReportTelemetryRe
   readonly version?: string;
   readonly environmentVersion?: string;
   readonly data?: any;
-}
+};
+
+export default ReportTelemetryRequestDto;

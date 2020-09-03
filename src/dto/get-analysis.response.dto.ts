@@ -1,5 +1,6 @@
 import { IAnalysisResult } from '../interfaces/analysis-result.interface';
 
+// eslint-disable-next-line no-shadow
 export enum AnalysisStatus {
   fetching = 'FETCHING',
   analyzing = 'ANALYZING',

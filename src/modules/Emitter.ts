@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 
 import { IQueueAnalysisCheckResult } from '../interfaces/queue.interface';
 
+// eslint-disable-next-line no-shadow
 enum CUSTOM_EVENTS {
   buildBundleProgress = 'buildBundleProgress',
   buildBundleFinish = 'buildBundleFinish',
@@ -15,14 +16,6 @@ enum CUSTOM_EVENTS {
 }
 
 class Emitter extends EventEmitter {
-  // constructor() {
-  //   super();
-  //   this.buildBundleProgress = this.buildBundleProgress.bind(this);
-  //   this.uploadBundleProgress = this.uploadBundleProgress.bind(this);
-  //   this.analyseProgress = this.analyseProgress.bind(this);
-  //   this.removeListeners = this.removeListeners.bind(this);
-  // }
-
   buildBundleProgress(processed: number, total: number): void {
     this.emit(CUSTOM_EVENTS.buildBundleProgress, processed, total);
   }

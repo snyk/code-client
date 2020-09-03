@@ -13,7 +13,7 @@ import { IResult } from '../interfaces/service-ai.interface';
 import throttle from '../utils/throttle';
 
 const loopDelay = 1000;
-const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
+const emitUploadResult = throttle(Emitter.uploadBundleProgress.bind(Emitter), loopDelay);
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -119,7 +119,7 @@ export default class Queues {
 
   async startAnalysisLoop(options: IQueueAnalysisCheck): Promise<void> {
     const { bundleId } = options;
-    const emitAnalysisProgress = throttle(Emitter.analyseProgress, loopDelay);
+    const emitAnalysisProgress = throttle(Emitter.analyseProgress.bind(Emitter), loopDelay);
 
     if (!bundleId) {
       console.debug('Analysis: no bundle ID');

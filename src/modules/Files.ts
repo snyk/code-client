@@ -52,7 +52,7 @@ export default class Files {
 
   // eslint-disable-next-line class-methods-use-this
   public async buildBundle(files: IFileInfo[]): Promise<IFiles> {
-    const emitResult = throttle(Emitter.buildBundleProgress, 1000);
+    const emitResult = throttle(Emitter.buildBundleProgress.bind(Emitter), 1000);
     const total = files.length;
     const result = files.reduce((res, fileInfo, idx) => {
       const processed = idx + 1;

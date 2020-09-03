@@ -1,6 +1,6 @@
-import { BaseDto } from './base.dto';
-
-export default class StartSessionRequestDto extends BaseDto<StartSessionRequestDto> {
+type StartSessionRequestDto = {
   readonly baseURL: string;
   readonly source: string;
-}
+};
+
+export default StartSessionRequestDto;

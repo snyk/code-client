@@ -1,6 +1,6 @@
-import { BaseDto } from './base.dto';
-
-export default class GetFiltersRequestDto extends BaseDto<GetFiltersRequestDto> {
+type GetFiltersRequestDto = {
   readonly baseURL: string;
   readonly sessionToken: string;
-}
+};
+
+export default GetFiltersRequestDto;

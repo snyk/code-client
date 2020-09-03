@@ -248,6 +248,7 @@ export default class ServiceAI implements IServiceAI {
     Emitter.emit(eventName, ...args);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   removeListeners(): void {
     Emitter.removeListeners();
   }

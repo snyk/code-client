@@ -1,9 +1,10 @@
-import { BaseDto } from './base.dto';
 import { IFileContent } from '../interfaces/files.interface';
 
-export default class UploadFilesRequestDto extends BaseDto<UploadFilesRequestDto> {
+type UploadFilesRequestDto = {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly bundleId: string;
   readonly content: IFileContent[];
-}
+};
+
+export default UploadFilesRequestDto;

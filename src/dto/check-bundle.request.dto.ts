@@ -1,7 +1,7 @@
-import { BaseDto } from './base.dto';
-
-export default class CheckBundleRequestDto extends BaseDto<CheckBundleRequestDto> {
+type CheckBundleRequestDto = {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly bundleId: string;
-}
+};
+
+export default CheckBundleRequestDto;

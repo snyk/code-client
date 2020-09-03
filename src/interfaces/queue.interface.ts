@@ -7,7 +7,7 @@ export interface IQueueDebugInfo {
   filesCount: number;
   files: string[];
   errorText: string;
-  error: string;
+  error: boolean;
 }
 
 export interface IQueueAnalysisCheck {

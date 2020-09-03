@@ -20,7 +20,6 @@ import GetAnalysisRequestDto from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 import AnalyseRequestDto from '../dto/analyse.request.dto';
 import CheckBundleResponseDto from '../dto/check-bundle.response.dto';
-import ExtendBundleResponseDto from '../dto/extend-bundle.response.dto';
 import ReportTelemetryRequestDto from '../dto/report-telemetry.request.dto';
 
 export default class ServiceAI implements IServiceAI {
@@ -157,32 +156,35 @@ export default class ServiceAI implements IServiceAI {
       let missingFiles: string[] = [];
 
       if (!this.bundleId) {
-        const createBundleResult = await this.createBundle({
+        const createBundleResult = await this.http.createBundle({
           baseURL,
           sessionToken,
           files: bundle,
         });
 
-        if (createBundleResult instanceof CreateBundleResponseDto) {
-          this.bundleId = createBundleResult.bundleId;
+        if (createBundleResult.type === 'error') {
+          // TODO: process Error
+          return;
+        }
 
-          if (createBundleResult.missingFiles?.length) {
-            missingFiles = [...createBundleResult.missingFiles];
-          }
+        this.bundleId = createBundleResult.value.bundleId;
+
+        if (createBundleResult.value.missingFiles?.length) {
+          missingFiles = [...createBundleResult.value.missingFiles];
         }
       } else {
-        const checkBundleResult = await this.checkBundle({
+        const checkBundleResult = await this.http.checkBundle({
           baseURL,
           sessionToken,
           bundleId: this.bundleId,
         });
 
-        if (checkBundleResult instanceof CheckBundleResponseDto) {
-          if (checkBundleResult.missingFiles?.length) {
-            missingFiles = [...checkBundleResult.missingFiles];
+        if (checkBundleResult.type === 'success') {
+          if (checkBundleResult.value.missingFiles?.length) {
+            missingFiles = [...checkBundleResult.value.missingFiles];
           }
 
-          const extendResults = await this.extendBundle({
+          const extendResults = await this.http.extendBundle({
             baseURL,
             sessionToken,
             bundleId: this.bundleId,
@@ -190,12 +192,15 @@ export default class ServiceAI implements IServiceAI {
             removedFiles,
           });
 
-          if (extendResults instanceof ExtendBundleResponseDto) {
-            this.bundleId = extendResults.bundleId;
+          if (extendResults.type === 'error') {
+            // TODO: process Error
+            return;
+          }
 
-            if (extendResults.missingFiles?.length) {
-              missingFiles = [...extendResults.missingFiles];
-            }
+          this.bundleId = extendResults.value.bundleId;
+
+          if (extendResults.value.missingFiles?.length) {
+            missingFiles = [...extendResults.value.missingFiles];
           }
         } else {
           const createBundleResult = await this.createBundle({
@@ -204,12 +209,15 @@ export default class ServiceAI implements IServiceAI {
             files: bundle,
           });
 
-          if (createBundleResult instanceof CreateBundleResponseDto) {
-            this.bundleId = createBundleResult.bundleId;
+          if (createBundleResult.type === 'error') {
+            // TODO: process Error
+            return;
+          }
 
-            if (createBundleResult.missingFiles?.length) {
-              missingFiles = [...createBundleResult.missingFiles];
-            }
+          this.bundleId = createBundleResult.value.bundleId;
+
+          if (createBundleResult.value.missingFiles?.length) {
+            missingFiles = [...createBundleResult.value.missingFiles];
           }
         }
       }
@@ -227,16 +235,15 @@ export default class ServiceAI implements IServiceAI {
       Emitter.sendError(error);
       throw error;
     }
-
-    return Promise.resolve();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line class-methods-use-this
   on(eventName: string, callback: Function, ...args: any[]): void {
-    Emitter.on(eventName, callback, ...args);
+    Emitter.on(eventName, callback(...args));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line class-methods-use-this
   emit(eventName: string, ...args: any[]): void {
     Emitter.emit(eventName, ...args);
   }

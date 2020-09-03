@@ -4,21 +4,18 @@ import Emitter from './Emitter';
 
 import { maxPayload } from '../constants/common';
 import { BUNDLE_ERRORS } from '../constants/errors';
-import { IFileInfo, IFileQueue } from '../interfaces/files.interface';
+import { IFileInfo, IFileQueue, IFileContent } from '../interfaces/files.interface';
 import { IQueueAnalysisCheck } from '../interfaces/queue.interface';
+import { AnalysisStatus } from '../dto/get-analysis.response.dto';
+import UploadFilesRequestDto from '../dto/upload-files.request.dto';
+import { IResult } from '../interfaces/service-ai.interface';
 
 import throttle from '../utils/throttle';
 
 const loopDelay = 1000;
 const emitUploadResult = throttle(Emitter.uploadBundleProgress, loopDelay);
 
-enum ANALYSIS_STATUS {
-  fetching = 'FETCHING',
-  analyzing = 'ANALYZING',
-  dcDone = 'DC_DONE',
-  done = 'DONE',
-  failed = 'FAILED'
-}
+const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
 export default class Queues {
   private http = new Http();
@@ -63,7 +60,7 @@ export default class Queues {
     sessionToken: string,
     chunks: Array<IFileInfo[]>,
     bundleId: string,
-    uploadFilesRunner: Function,
+    uploadFilesRunner: (options: UploadFilesRequestDto) => Promise<IResult<boolean>>,
   ): IFileQueue {
     const q = queue({
       results: [],
@@ -83,7 +80,7 @@ export default class Queues {
         return {
           fileHash: hash,
           fileContent: content,
-        };
+        } as IFileContent;
       });
       const debugInfo = {
         requestBody,
@@ -92,20 +89,22 @@ export default class Queues {
         filesCount: chunk.length,
         files: chunk.map(fileItem => fileItem.path),
         errorText: '',
-        error: '',
+        error: false,
       };
 
       q.push(async () => {
-        const { error, statusCode } = await uploadFilesRunner({
+        const uploadResponse = await uploadFilesRunner({
           baseURL,
           sessionToken,
           bundleId,
           content: requestBody,
         });
 
-        if (error) {
-          debugInfo.errorText = BUNDLE_ERRORS.upload[statusCode] || error.message;
-          debugInfo.error = error;
+        if (uploadResponse.type === 'error') {
+          const { error } = uploadResponse;
+          debugInfo.errorText = ((error.statusCode && BUNDLE_ERRORS.upload[error.statusCode]) ||
+            error.statusText) as string;
+          debugInfo.error = true;
         }
 
         currentChunk += chunk.length;
@@ -130,16 +129,13 @@ export default class Queues {
     const result = await this.http.getAnalysis(options);
 
     if (result.type === 'success') {
-      const { status, analysisResults, analysisURL, progress } = result;
+      const { status, analysisResults, analysisURL, progress } = result.value;
 
       const newProgress = progress || 0.01;
 
-      const inProgress =
-        status === ANALYSIS_STATUS.fetching ||
-        status === ANALYSIS_STATUS.analyzing ||
-        status === ANALYSIS_STATUS.dcDone;
+      const inProgress = [AnalysisStatus.fetching, AnalysisStatus.analyzing, AnalysisStatus.dcDone].includes(status);
 
-      if (status === ANALYSIS_STATUS.done) {
+      if (status === AnalysisStatus.done) {
         if (analysisResults) {
           Emitter.analyseFinish({ analysisResults, progress: 1.0, analysisURL });
         }
@@ -147,19 +143,13 @@ export default class Queues {
 
       if (inProgress) {
         emitAnalysisProgress({ analysisResults, progress: newProgress, analysisURL });
-        this.nextAnalysisLoopTick(options);
+
+        await sleep(loopDelay);
+        return this.startAnalysisLoop(options);
       }
 
       return Promise.resolve();
     }
-
-    return Promise.resolve();
-  }
-
-  async nextAnalysisLoopTick(options: IQueueAnalysisCheck): Promise<void> {
-    setTimeout(async () => {
-      await this.startAnalysisLoop(options);
-    }, loopDelay);
 
     return Promise.resolve();
   }

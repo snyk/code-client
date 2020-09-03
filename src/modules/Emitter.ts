@@ -11,9 +11,8 @@ enum CUSTOM_EVENTS {
   uploadFilesFinish = 'uploadFilesFinish',
   analyseProgress = 'analyseProgress',
   analyseFinish = 'analyseFinish',
-  error = 'error'
+  error = 'error',
 }
-
 
 class Emitter extends EventEmitter {
   // constructor() {

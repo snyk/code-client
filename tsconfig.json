@@ -2,9 +2,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "build",
-    "module": "esnext",
-    "target": "es6",
-    "lib": ["es6", "dom", "es7", "es2017", "es2018", "es2019"],
+    "target": "es2018",
+    "module": "CommonJS",
+    "lib": ["es6", "dom", "es7", "es2017", "es2018"],
     "sourceMap": true,
     "allowJs": false,
     "declaration": true,

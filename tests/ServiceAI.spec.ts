@@ -3,13 +3,16 @@ import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
 
-import { startMockServer } from './mocks/mock-server';
+import startMockServer from './mocks/mock-server';
 import {
   createBundleRequest,
   extendBundleRequest,
   extendBundleRequestExpired,
   uploadFilesRequest,
   reportTelemetryRequest,
+  mockProjectPath,
+  mockFiles,
+  mockNewAnalysisResults,
 } from './mocks/requests';
 import {
   startSessionResponse,
@@ -23,8 +26,6 @@ import {
 } from './mocks/responses';
 
 import { IQueueAnalysisCheckResult } from '../src/interfaces/queue.interface';
-
-import { mockProjectPath, mockFiles, mockNewAnalysisResults } from './mocks/requests';
 
 startMockServer();
 
@@ -41,7 +42,7 @@ describe('Requests to public API', () => {
    * Report error
    */
   it('reports error successfully', async () => {
-    const response = await AI.reportError(reportTelemetryRequest);
+    const response = await AI.http.reportError(reportTelemetryRequest);
     expect(response.type).toEqual('success');
   });
 
@@ -49,7 +50,7 @@ describe('Requests to public API', () => {
    * Report event
    */
   it('reports event successfully', async () => {
-    const response = await AI.reportEvent(reportTelemetryRequest);
+    const response = await AI.http.reportEvent(reportTelemetryRequest);
     expect(response.type).toEqual('success');
   });
 
@@ -62,7 +63,7 @@ describe('Requests to public API', () => {
       baseURL,
     };
 
-    const response = await AI.startSession(options);
+    const response = await AI.http.startSession(options);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(startSessionResponse);
@@ -77,7 +78,7 @@ describe('Requests to public API', () => {
       sessionToken,
     };
 
-    const response = await AI.checkSession(options);
+    const response = await AI.http.checkSession(options);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(true);
@@ -92,7 +93,7 @@ describe('Requests to public API', () => {
       sessionToken,
     };
 
-    const response = await AI.getFilters(options);
+    const response = await AI.http.getFilters(options);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(getFiltersResponse);
@@ -102,7 +103,7 @@ describe('Requests to public API', () => {
    * Create Bundle
    */
   it('creates bundle successfully', async () => {
-    const response = await AI.createBundle(createBundleRequest);
+    const response = await AI.http.createBundle(createBundleRequest);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(createBundleResponse);
@@ -118,7 +119,7 @@ describe('Requests to public API', () => {
       bundleId,
     };
 
-    const response = await AI.checkBundle(options);
+    const response = await AI.http.checkBundle(options);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(checkBundleResponse);
@@ -131,7 +132,7 @@ describe('Requests to public API', () => {
       bundleId: expiredBundleId,
     };
 
-    const response = await AI.checkBundle(options);
+    const response = await AI.http.checkBundle(options);
     expect(response.type).toEqual('error');
     // dummy to cheat typescript compiler
     if (response.type == 'success') return;
@@ -163,7 +164,7 @@ describe('Requests to public API', () => {
    * Upload Files
    */
   it('uploads files successfully', async () => {
-    const response = await AI.uploadFiles(uploadFilesRequest);
+    const response = await AI.http.uploadFiles(uploadFilesRequest);
     expect(response.type).toEqual('success');
   });
 
@@ -177,7 +178,7 @@ describe('Requests to public API', () => {
       bundleId,
     };
 
-    const response = await AI.getAnalysis(options);
+    const response = await AI.http.getAnalysis(options);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value).toEqual(getAnalysisResponse);

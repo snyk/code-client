@@ -8,7 +8,7 @@ import { IFileInfo, IFileQueue, IFileContent } from '../interfaces/files.interfa
 import { IQueueAnalysisCheck } from '../interfaces/queue.interface';
 import { AnalysisStatus } from '../dto/get-analysis.response.dto';
 import UploadFilesRequestDto from '../dto/upload-files.request.dto';
-import { IResult } from '../interfaces/service-ai.interface';
+import { IResult } from '../interfaces/http.interface';
 
 import throttle from '../utils/throttle';
 

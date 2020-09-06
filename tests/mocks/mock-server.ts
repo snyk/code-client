@@ -14,7 +14,7 @@ import {
 } from './responses';
 import { mockNewAnalysisResults } from './requests';
 
-export function startMockServer(): void {
+export default function startMockServer(): void {
 
   const mockServer = nock(`${baseURL}${apiPath}`);
 

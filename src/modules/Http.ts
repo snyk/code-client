@@ -4,45 +4,20 @@ import { ERRORS, RequestTypes } from '../constants/errors';
 
 import { apiPath } from '../constants/common';
 import axios from './axios';
-import { IHeader, IHeaders } from '../interfaces/http.interface';
+import { IHeader, IHeaders, IResult, ErrorResponseDto } from '../interfaces/http.interface';
 
-import { IResult } from '../interfaces/service-ai.interface';
+import { IFiles } from '../interfaces/files.interface';
 
-import ErrorResponseDto from '../dto/error.response.dto';
-
-import StartSessionRequestDto from '../dto/start-session.request.dto';
 import StartSessionResponseDto from '../dto/start-session.response.dto';
-import CheckSessionRequestDto from '../dto/check-session.request.dto';
-import GetFiltersRequestDto from '../dto/get-filters.request.dto';
 import GetFiltersResponseDto from '../dto/get-filters.response.dto';
-import CreateBundleRequestDto from '../dto/create-bundle.request.dto';
 import CreateBundleResponseDto from '../dto/create-bundle.response.dto';
-import CheckBundleRequestDto from '../dto/check-bundle.request.dto';
 import CheckBundleResponseDto from '../dto/check-bundle.response.dto';
-import ExtendBundleRequestDto from '../dto/extend-bundle.request.dto';
 import ExtendBundleResponseDto from '../dto/extend-bundle.response.dto';
 import UploadFilesRequestDto from '../dto/upload-files.request.dto';
-import GetAnalysisRequestDto from '../dto/get-analysis.request.dto';
 import { GetAnalysisResponseDto } from '../dto/get-analysis.response.dto';
 import ReportTelemetryRequestDto from '../dto/report-telemetry.request.dto';
 
 export default class Http {
-  // constructor() {
-  //   this.checkBundle = this.checkBundle.bind(this);
-  //   this.getStatusCode = this.getStatusCode.bind(this);
-  //   this.createErrorResponse = this.createErrorResponse.bind(this);
-  //   this.checkSession = this.checkSession.bind(this);
-  //   this.getAnalysis = this.getAnalysis.bind(this);
-  //   this.uploadFiles = this.uploadFiles.bind(this);
-  //   this.extendBundle = this.extendBundle.bind(this);
-  //   this.createBundle = this.createBundle.bind(this);
-  //   this.getFilters = this.getFilters.bind(this);
-  //   this.startSession = this.startSession.bind(this);
-  //   this.reportError = this.reportError.bind(this);
-  //   this.reportEvent = this.reportEvent.bind(this);
-  //   this.createHeaders = this.createHeaders.bind(this);
-  // }
-
   // eslint-disable-next-line class-methods-use-this
   private getStatusCode(error: AxiosError): number | null {
     if (!error) {
@@ -61,13 +36,12 @@ export default class Http {
     const statusCode = this.getStatusCode(error);
     const errorMessages = ERRORS[type];
 
-    const statusText = statusCode ? errorMessages[statusCode] : errorMessages.other;
+    const statusText: string = statusCode ? errorMessages[statusCode] : errorMessages.other;
 
     return {
-      error,
       statusCode,
       statusText,
-    } as ErrorResponseDto;
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -90,7 +64,10 @@ export default class Http {
     };
   }
 
-  public async startSession(options: StartSessionRequestDto): Promise<IResult<StartSessionResponseDto>> {
+  public async startSession(options: {
+    readonly baseURL: string;
+    readonly source: string;
+  }): Promise<IResult<StartSessionResponseDto>> {
     const { source, baseURL } = options;
     const headers = this.createHeaders(undefined, true);
     const config: AxiosRequestConfig = {
@@ -110,7 +87,10 @@ export default class Http {
     }
   }
 
-  public async checkSession(options: CheckSessionRequestDto): Promise<IResult<boolean>> {
+  public async checkSession(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+  }): Promise<IResult<boolean>> {
     const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -132,7 +112,10 @@ export default class Http {
       });
   }
 
-  public async getFilters(options: GetFiltersRequestDto): Promise<IResult<GetFiltersResponseDto>> {
+  public async getFilters(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+  }): Promise<IResult<GetFiltersResponseDto>> {
     const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -149,7 +132,11 @@ export default class Http {
     }
   }
 
-  public async createBundle(options: CreateBundleRequestDto): Promise<IResult<CreateBundleResponseDto>> {
+  public async createBundle(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly files: IFiles;
+  }): Promise<IResult<CreateBundleResponseDto>> {
     const { baseURL, sessionToken, files } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
@@ -169,7 +156,11 @@ export default class Http {
     }
   }
 
-  public async checkBundle(options: CheckBundleRequestDto): Promise<IResult<CheckBundleResponseDto>> {
+  public async checkBundle(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly bundleId: string;
+  }): Promise<IResult<CheckBundleResponseDto>> {
     const { baseURL, sessionToken, bundleId } = options;
     const headers = this.createHeaders(sessionToken);
 
@@ -187,7 +178,13 @@ export default class Http {
     }
   }
 
-  public async extendBundle(options: ExtendBundleRequestDto): Promise<IResult<ExtendBundleResponseDto>> {
+  public async extendBundle(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly bundleId: string;
+    readonly files: IFiles;
+    readonly removedFiles?: string[];
+  }): Promise<IResult<ExtendBundleResponseDto>> {
     const { baseURL, sessionToken, bundleId, files, removedFiles } = options;
     const headers = this.createHeaders(sessionToken, true);
     const config: AxiosRequestConfig = {
@@ -226,7 +223,12 @@ export default class Http {
     }
   }
 
-  public async getAnalysis(options: GetAnalysisRequestDto): Promise<IResult<GetAnalysisResponseDto>> {
+  public async getAnalysis(options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly bundleId: string;
+    readonly useLinters?: boolean;
+  }): Promise<IResult<GetAnalysisResponseDto>> {
     const { baseURL, sessionToken, bundleId, useLinters } = options;
     const headers = this.createHeaders(sessionToken);
     const params = useLinters ? { linters: true } : {};

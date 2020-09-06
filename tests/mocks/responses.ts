@@ -1,14 +1,9 @@
 
 import path from 'path';
+
 import { bundleId, sessionToken } from './base-config';
 
-import ErrorResponseDto from '../../src/dto/error.response.dto';
-import StartSessionResponseDto from '../../src/dto/start-session.response.dto';
-import GetFiltersResponseDto from '../../src/dto/get-filters.response.dto';
-import CreateBundleResponseDto from '../../src/dto/create-bundle.response.dto';
-import CheckBundleResponseDto from '../../src/dto/check-bundle.response.dto';
-import ExtendBundleResponseDto from '../../src/dto/extend-bundle.response.dto';
-import { GetAnalysisResponseDto, AnalysisStatus } from '../../src/dto/get-analysis.response.dto';
+import { AnalysisStatus } from '../../src/dto/get-analysis.response.dto';
 
 import { ERRORS, RequestTypes } from '../../src/constants/errors';
 
@@ -25,29 +20,29 @@ const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
 /**
  * Successful responses
  */
-export const startSessionResponse: StartSessionResponseDto = {
+export const startSessionResponse = {
   sessionToken,
   loginURL: 'mock-login-url',
 };
 
-export const getFiltersResponse: GetFiltersResponseDto = {
+export const getFiltersResponse = {
   extensions: ['.java', '.js', '.ts', '.py'],
   configFiles: ['.eslintrc.js', '.eslintrc.json', 'tslint.json', 'pylintrc'],
 };
 
-export const createBundleResponse: CreateBundleResponseDto = {
+export const createBundleResponse = {
   ...bundleResponse,
 };
 
-export const checkBundleResponse: CheckBundleResponseDto = {
+export const checkBundleResponse = {
   ...bundleResponse,
 };
 
-export const extendBundleResponse: ExtendBundleResponseDto = {
+export const extendBundleResponse = {
   ...bundleResponse,
 };
 
-export const getAnalysisResponse: GetAnalysisResponseDto = {
+export const getAnalysisResponse = {
   status: AnalysisStatus.done,
   progress: 100,
   analysisURL: 'mock-analysis-url',
@@ -76,14 +71,12 @@ export const getAnalysisResponse: GetAnalysisResponseDto = {
 /**
  * Errors
  */
-export const checkBundleError404: ErrorResponseDto = {
-  error: {},
+export const checkBundleError404 = {
   statusCode: 404,
   statusText: ERRORS[RequestTypes.checkBundle][404],
 };
 
-export const extendBundleError404: ErrorResponseDto = {
-  error: {},
+export const extendBundleError404 = {
   statusCode: 404,
   statusText: ERRORS[RequestTypes.extendBundle][404],
 };

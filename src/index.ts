@@ -1,7 +1,5 @@
 import ServiceAI from './modules/ServiceAI';
 
-import { IServiceAI } from './interfaces/service-ai.interface';
-
 import { IBundles, IHashesBundles, IRemoteBundlesCollection, IRemoteBundle } from './interfaces/bundle.interface';
 
 import { checkIfBundleIsEmpty } from './utils/bundlesUtils';
@@ -16,7 +14,6 @@ import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
 
 export {
   ServiceAI,
-  IServiceAI,
   IQueueAnalysisCheckResult,
   IBundles,
   IHashesBundles,

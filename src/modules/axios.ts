@@ -15,9 +15,9 @@ axios_.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => {
-    throw error;
-  },
+  // (error: AxiosError) => {
+  //   throw error;
+  // },
 );
 
 axios_.interceptors.response.use(

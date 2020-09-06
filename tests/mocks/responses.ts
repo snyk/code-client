@@ -47,8 +47,6 @@ export const extendBundleResponse: ExtendBundleResponseDto = {
   ...bundleResponse,
 };
 
-export const uploadFilesResponse = true;
-
 export const getAnalysisResponse: GetAnalysisResponseDto = {
   status: AnalysisStatus.done,
   progress: 100,

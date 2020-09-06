@@ -25,7 +25,7 @@ import ReportTelemetryRequestDto from '../dto/report-telemetry.request.dto';
 export default class ServiceAI implements IServiceAI {
   private files = new Files();
   private queues = new Queues();
-  private http = new Http();
+  public http = new Http();
   public bundleId = '';
 
   processedChunks = {}; // cache for processed and stored chunks
@@ -237,9 +237,10 @@ export default class ServiceAI implements IServiceAI {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/ban-types, class-methods-use-this
   on(eventName: string, callback: Function, ...args: any[]): void {
-    Emitter.on(eventName, callback(...args));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    Emitter.on(eventName, () => callback(...args));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

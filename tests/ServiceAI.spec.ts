@@ -3,13 +3,6 @@ import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
 
-import ErrorResponseDto from '../src/dto/error.response.dto';
-import StartSessionRequestDto from '../src/dto/start-session.request.dto';
-import CheckSessionRequestDto from '../src/dto/check-session.request.dto';
-import GetFiltersRequestDto from '../src/dto/get-filters.request.dto';
-import CheckBundleRequestDto from '../src/dto/check-bundle.request.dto';
-import GetAnalysisRequestDto from '../src/dto/get-analysis.request.dto';
-
 import { startMockServer } from './mocks/mock-server';
 import {
   createBundleRequest,
@@ -24,7 +17,6 @@ import {
   createBundleResponse,
   checkBundleResponse,
   extendBundleResponse,
-  uploadFilesResponse,
   getAnalysisResponse,
   checkBundleError404,
   extendBundleError404,
@@ -49,7 +41,8 @@ describe('Requests to public API', () => {
    * Report error
    */
   it('reports error successfully', async () => {
-    await AI.reportError(reportTelemetryRequest);
+    const response = await AI.reportError(reportTelemetryRequest);
+    expect(response.type).toEqual('success');
   });
 
   /**
@@ -57,45 +50,52 @@ describe('Requests to public API', () => {
    */
   it('reports event successfully', async () => {
     const response = await AI.reportEvent(reportTelemetryRequest);
+    expect(response.type).toEqual('success');
   });
 
   /**
    * Start Session
    */
   it('starts session successfully', async () => {
-    const options = new StartSessionRequestDto({
+    const options = {
       source: 'atom',
       baseURL,
-    });
+    };
 
     const response = await AI.startSession(options);
-    expect(response).toEqual(startSessionResponse);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(startSessionResponse);
   });
 
   /**
    * Check Session
    */
   it('checks session successfully', async () => {
-    const options = new CheckSessionRequestDto({
+    const options = {
       baseURL,
       sessionToken,
-    });
+    };
 
     const response = await AI.checkSession(options);
-    expect(response).toEqual(true);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(true);
   });
 
   /**
    * Get filters
    */
   it('gets filters successfully', async () => {
-    const options = new GetFiltersRequestDto({
+    const options = {
       baseURL,
       sessionToken,
-    });
+    };
 
     const response = await AI.getFilters(options);
-    expect(response).toEqual(getFiltersResponse);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(getFiltersResponse);
   });
 
   /**
@@ -103,67 +103,60 @@ describe('Requests to public API', () => {
    */
   it('creates bundle successfully', async () => {
     const response = await AI.createBundle(createBundleRequest);
-    expect(response).toEqual(createBundleResponse);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(createBundleResponse);
   });
 
   /**
    * Check Bundle
    */
   it('checks bundle successfully', async () => {
-    const options = new CheckBundleRequestDto({
+    const options = {
       baseURL,
       sessionToken,
       bundleId,
-    });
+    };
 
     const response = await AI.checkBundle(options);
-    expect(response).toEqual(checkBundleResponse);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(checkBundleResponse);
   });
 
   it('checks expired bundle successfully', async () => {
-    const options = new CheckBundleRequestDto({
+    const options = {
       baseURL,
       sessionToken,
       bundleId: expiredBundleId,
-    });
+    };
 
-    let response: ErrorResponseDto;
-    try {
-      await AI.checkBundle(options);
-      response = new ErrorResponseDto({});
-    } catch (error) {
-      response = {
-        error: {},
-        statusCode: error.statusCode,
-        statusText: error.statusText,
-      };
-    }
-
-    expect(response).toEqual(checkBundleError404);
+    const response = await AI.checkBundle(options);
+    expect(response.type).toEqual('error');
+    // dummy to cheat typescript compiler
+    if (response.type == 'success') return;
+    expect(response.error.statusCode).toEqual(checkBundleError404.statusCode);
+    expect(response.error.statusText).toEqual(checkBundleError404.statusText);
   });
 
   /**
    * Extend Bundle
    */
   it('extends bundle successfully', async () => {
-    const response = await AI.extendBundle(extendBundleRequest);
-    expect(response).toEqual(extendBundleResponse);
+    const response = await AI.http.extendBundle(extendBundleRequest);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(extendBundleResponse);
   });
 
   it('extends expired bundle successfully', async () => {
-    let response: ErrorResponseDto;
-    try {
-      await AI.extendBundle(extendBundleRequestExpired);
-      response = new ErrorResponseDto({});
-    } catch (error) {
-      response = {
-        error: {},
-        statusCode: error.statusCode,
-        statusText: error.statusText,
-      };
-    }
+    const response = await AI.http.extendBundle(extendBundleRequestExpired);
 
-    expect(response).toEqual(extendBundleError404);
+    expect(response.type).toEqual('error');
+    // dummy to cheat typescript compiler
+    if (response.type == 'success') return;
+    expect(response.error.statusCode).toEqual(extendBundleError404.statusCode);
+    expect(response.error.statusText).toEqual(extendBundleError404.statusText);
   });
 
   /**
@@ -171,21 +164,23 @@ describe('Requests to public API', () => {
    */
   it('uploads files successfully', async () => {
     const response = await AI.uploadFiles(uploadFilesRequest);
-    expect(response).toEqual(uploadFilesResponse);
+    expect(response.type).toEqual('success');
   });
 
   /**
    * Get Analysis
    */
   it('gets analysis successfully', async () => {
-    const options = new GetAnalysisRequestDto({
+    const options = {
       baseURL,
       sessionToken,
       bundleId,
-    });
+    };
 
     const response = await AI.getAnalysis(options);
-    expect(response).toEqual(getAnalysisResponse);
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value).toEqual(getAnalysisResponse);
   });
 
   /**

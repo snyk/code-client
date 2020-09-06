@@ -8,7 +8,6 @@ import {
   createBundleResponse,
   checkBundleResponse,
   extendBundleResponse,
-  uploadFilesResponse,
   getAnalysisResponse,
 
   checkBundleError404,
@@ -63,13 +62,13 @@ function startSessionSuccess(mockServer: Scope): void {
 function reportError(mockServer: Scope): void {
   mockServer
     .post('/error')
-    .reply(200, reportTelemetryResponse);
+    .reply(200, 'OK');
 }
 
 function reportEvent(mockServer: Scope): void {
   mockServer
     .post('/track')
-    .reply(200, reportTelemetryResponse);
+    .reply(200, 'OK');
 }
 
 function checkSessionSuccess(mockServer: Scope): void {
@@ -112,7 +111,7 @@ function extendBundleSuccess(mockServer: Scope): void {
 function uploadFilesSuccess(mockServer: Scope): void {
   mockServer
     .post(`/file/${bundleId}`)
-    .reply(200, uploadFilesResponse);
+    .reply(200, 'OK');
 }
 
 function getAnalysisSuccess(mockServer: Scope): void {

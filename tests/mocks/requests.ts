@@ -1,10 +1,6 @@
 import path from 'path';
 
 import { IFiles } from '../../src/interfaces/files.interface';
-import { CreateBundleRequestDto } from '../../src/dto/create-bundle.request.dto';
-import { ExtendBundleRequestDto } from '../../src/dto/extend-bundle.request.dto';
-import UploadFilesRequestDto from '../../src/dto/upload-files.request.dto';
-import { ReportTelemetryRequestDto } from '../../src/dto/report-telemetry.request.dto';
 
 import { defaultBaseURL as baseURL } from '../../src/constants/common';
 import { sessionToken, bundleId, expiredBundleId } from './base-config';
@@ -64,29 +60,29 @@ const files: IFiles = {
   '/home/user/repo/app.js': hashApp,
 };
 
-export const createBundleRequest = new CreateBundleRequestDto({
+export const createBundleRequest = {
   baseURL,
   sessionToken,
   files,
-});
+};
 
-export const extendBundleRequest = new ExtendBundleRequestDto({
+export const extendBundleRequest = {
   baseURL,
   sessionToken,
   bundleId,
   files,
   removedFiles: [],
-});
+};
 
-export const extendBundleRequestExpired = new ExtendBundleRequestDto({
+export const extendBundleRequestExpired = {
   baseURL,
   sessionToken,
   bundleId: expiredBundleId,
   files,
   removedFiles: [],
-});
+};
 
-export const uploadFilesRequest = new UploadFilesRequestDto({
+export const uploadFilesRequest = {
   baseURL,
   sessionToken,
   bundleId,
@@ -100,9 +96,9 @@ export const uploadFilesRequest = new UploadFilesRequestDto({
       fileContent: 'const App = new App();',
     },
   ],
-});
+};
 
-export const reportTelemetryRequest = new ReportTelemetryRequestDto({
+export const reportTelemetryRequest = {
   baseURL,
   sessionToken,
   bundleId,
@@ -118,4 +114,4 @@ export const reportTelemetryRequest = new ReportTelemetryRequestDto({
       'fooo'
     ]
   }
-});
+};

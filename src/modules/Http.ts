@@ -6,10 +6,9 @@ import { apiPath } from '../constants/common';
 import axios from './axios';
 import { IHeader, IHeaders, IResult, ErrorResponseDto } from '../interfaces/http.interface';
 
-import { IFiles } from '../interfaces/files.interface';
+import { IFiles, ISupportedFiles } from '../interfaces/files.interface';
 
 import StartSessionResponseDto from '../dto/start-session.response.dto';
-import GetFiltersResponseDto from '../dto/get-filters.response.dto';
 import CreateBundleResponseDto from '../dto/create-bundle.response.dto';
 import CheckBundleResponseDto from '../dto/check-bundle.response.dto';
 import ExtendBundleResponseDto from '../dto/extend-bundle.response.dto';
@@ -115,7 +114,7 @@ export default class Http {
   public async getFilters(options: {
     readonly baseURL: string;
     readonly sessionToken: string;
-  }): Promise<IResult<GetFiltersResponseDto>> {
+  }): Promise<IResult<ISupportedFiles>> {
     const { sessionToken, baseURL } = options;
     const headers = this.createHeaders(sessionToken);
     const config: AxiosRequestConfig = {
@@ -125,7 +124,7 @@ export default class Http {
     };
 
     try {
-      const response = await axios.request<GetFiltersResponseDto>(config);
+      const response = await axios.request<ISupportedFiles>(config);
       return { type: 'success', value: response.data };
     } catch (error) {
       return { type: 'error', error: this.createErrorResponse(error, RequestTypes.getFilters) };

@@ -29,7 +29,7 @@ export interface PayloadMissingFileInterface {
   fileContent: string;
 }
 
-export interface ISupportedFiles {
+export type ISupportedFiles = {
   configFiles: string[];
   extensions: string[];
-}
+};

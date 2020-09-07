@@ -15,9 +15,10 @@ axios_.interceptors.request.use(
 
     return config;
   },
-  // (error: AxiosError) => {
-  //   throw error;
-  // },
+  (error: AxiosError) => {
+    console.error(`Request error --> ${error.message}`);
+    throw error;
+  },
 );
 
 axios_.interceptors.response.use(
@@ -26,7 +27,7 @@ axios_.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    console.error(`Response error --> ${error.message}`);
+    console.warn(`Response error --> ${error.message}`);
     throw error;
   },
 );

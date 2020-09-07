@@ -10,7 +10,7 @@ import { ERRORS, RequestTypes } from '../../src/constants/errors';
 const bundleResponse = {
   bundleId,
   missingFiles: [],
-  uploadURL: 'mock-upload-url',
+  uploadURL: `https://www.deepcode.ai/publicapi/file/${bundleId}`,
 };
 
 const root = __dirname;
@@ -21,13 +21,8 @@ const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
  * Successful responses
  */
 export const startSessionResponse = {
-  sessionToken,
   loginURL: 'mock-login-url',
-};
-
-export const getFiltersResponse = {
-  extensions: ['.java', '.js', '.ts', '.py'],
-  configFiles: ['.eslintrc.js', '.eslintrc.json', 'tslint.json', 'pylintrc'],
+  sessionToken: bundleId
 };
 
 export const createBundleResponse = {

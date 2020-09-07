@@ -4,15 +4,14 @@ import { defaultBaseURL as baseURL, apiPath } from '../../src/constants/common';
 import { bundleId, expiredBundleId } from './base-config';
 import {
   startSessionResponse,
-  getFiltersResponse,
   createBundleResponse,
   checkBundleResponse,
   extendBundleResponse,
   getAnalysisResponse,
-
   checkBundleError404,
 } from './responses';
 import { mockNewAnalysisResults } from './requests';
+import { supportedFiles } from '../src/utils/filesUtils';
 
 export default function startMockServer(): void {
 
@@ -81,7 +80,7 @@ function checkSessionSuccess(mockServer: Scope): void {
 function getFiltersSuccess(mockServer: Scope): void {
   mockServer
     .get('/filters')
-    .reply(200, getFiltersResponse);
+    .reply(200, supportedFiles);
 }
 
 function createBundleSuccess(mockServer: Scope): void {

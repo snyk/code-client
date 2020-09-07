@@ -38,16 +38,47 @@ export const getFileNameFromPath = (path: string): string => {
 
 export const filesProgress = { processed: 0, total: 0 };
 
-export const serverFilesFilterList: ISupportedFiles = {
-  configFiles: [],
-  extensions: [],
+export const supportedFiles: ISupportedFiles = {
+  extensions: [
+    '.py',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.cxx',
+    '.h',
+    '.hpp',
+    '.hxx',
+    '.es',
+    '.es6',
+    '.htm',
+    '.html',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+    '.vue',
+    '.java',
+  ],
+  configFiles: [
+    '.dcignore',
+    '.gitignore',
+    '.pylintrc',
+    'pylintrc',
+    '.pmdrc.xml',
+    '.ruleset.xml',
+    'ruleset.xml',
+    'tslint.json',
+    '.eslintrc.js',
+    '.eslintrc.json',
+    '.eslintrc.yml',
+  ],
 };
 
 export const acceptFileToBundle = (name: string): boolean => {
   const checkName = nodePath.basename(name);
   return (
-    (serverFilesFilterList.configFiles || []).includes(checkName) ||
-    (serverFilesFilterList.extensions || []).includes(nodePath.extname(checkName))
+    (supportedFiles.configFiles || []).includes(checkName) ||
+    (supportedFiles.extensions || []).includes(nodePath.extname(checkName))
   );
 };
 

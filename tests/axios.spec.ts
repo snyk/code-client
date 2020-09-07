@@ -1,11 +1,8 @@
 import { AxiosError, AxiosRequestConfig } from 'axios';
 
 import axios from '../src/modules/axios';
-// import startMockServer from './mocks/mock-server';
 
 import { defaultBaseURL as baseURL, apiPath } from '../src/constants/common';
-
-// startMockServer();
 
 describe('axios', () => {
   it('makes successful request', async () => {

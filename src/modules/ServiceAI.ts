@@ -1,4 +1,4 @@
-import Files from './Files';
+import { getFilesData, buildBundle } from './Files';
 import Queues from './Queues';
 import Http from './Http';
 import Emitter from './Emitter';
@@ -9,7 +9,6 @@ import { IQueueDebugInfo } from '../interfaces/queue.interface';
 import AnalyseRequestDto from '../dto/analyse.request.dto';
 
 export default class ServiceAI {
-  private files = new Files();
   private queues = new Queues();
   public http = new Http();
   public bundleId = '';
@@ -101,8 +100,8 @@ export default class ServiceAI {
   public async analyse(options: AnalyseRequestDto): Promise<void> {
     try {
       const { baseURL, sessionToken, baseDir, files, removedFiles = [] } = options;
-      const fullFilesInfo = this.files.getFilesData(baseDir, files);
-      const bundle = await this.files.buildBundle(fullFilesInfo);
+      const fullFilesInfo = getFilesData(baseDir, files);
+      const bundle = await buildBundle(fullFilesInfo);
       let missingFiles: string[] = [];
 
       if (!this.bundleId) {

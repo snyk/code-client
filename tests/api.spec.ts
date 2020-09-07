@@ -1,9 +1,8 @@
 
 import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
-import { sessionToken, bundleId, expiredBundleId } from './mocks/base-config';
+import { sessionToken, bundleId } from './mocks/base-config';
 
-// import startMockServer from './mocks/mock-server';
 import {
   createBundleRequest,
   extendBundleRequest,
@@ -20,8 +19,6 @@ import {
   extendBundleError404,
 } from './mocks/responses';
 import { supportedFiles } from '../src/utils/filesUtils';
-
-// startMockServer();
 
 describe('Requests to public API', () => {
   const AI = new ServiceAI();
@@ -142,7 +139,7 @@ describe('Requests to public API', () => {
     const options = {
       baseURL,
       sessionToken,
-      bundleId: expiredBundleId,
+      bundleId: 'mock-expired-bundle-id',
     };
 
     const response = await api.checkBundle(options);

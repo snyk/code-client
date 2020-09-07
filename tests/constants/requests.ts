@@ -3,57 +3,12 @@ import path from 'path';
 import { IFiles } from '../../src/interfaces/files.interface';
 
 import { defaultBaseURL as baseURL } from '../../src/constants/common';
-import { sessionToken, bundleId, expiredBundleId } from './base-config';
+import { sessionToken, bundleId } from './base';
 
 const hashMain = '3e297985';
 const hashApp = 'c8bc6452';
 
-const root = __dirname;
-export const mockProjectPath = path.resolve(root, '../mocked_data');
-const analysedFile = `/sample_repository/main.js`;
-
-export const mockFiles = [
-  analysedFile,
-  `/sample_repository/sub_folder/test2.js`,
-  `/sample_repository/utf8.js`,
-  `/test.java`,
-];
-
-export const mockAnalysisResults = {
-  [analysedFile]: { '0': [{ rows: [1, 2], cols: [3, 4], markers: [] }] },
-  suggestions: {
-    '0': {
-      id: 'TestSuggestion',
-      message: 'some message',
-      severity: 1,
-    },
-  },
-};
-
-export const mockNewAnalysisResults = {
-  analysisResults: {
-    suggestions: {
-      '0': {
-        id: 'TestSuggestion',
-        message: 'Some message',
-        severity: 1,
-      },
-    },
-    files: {
-      [analysedFile]: {
-        0: [
-          {
-            cols: [120, 150],
-            rows: [140, 140],
-            markers: [],
-          },
-        ],
-      },
-    },
-  },
-  progress: 80,
-  analysisURL: 'mock-analysis-url',
-};
+export const mockProjectPath = path.resolve(__dirname, '../mocked_data');
 
 const files: IFiles = {
   '/home/user/repo/main.js': hashMain,

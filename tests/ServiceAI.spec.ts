@@ -3,7 +3,6 @@ import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
 import { sessionToken } from './mocks/base-config';
 
-// import startMockServer from './mocks/mock-server';
 import {
   mockProjectPath,
   mockFiles,
@@ -11,8 +10,6 @@ import {
 } from './mocks/requests';
 
 import { IQueueAnalysisCheckResult } from '../src/interfaces/queue.interface';
-
-// startMockServer();
 
 async function sleep(timeout: number): Promise<void> {
   return new Promise(resolve => {

@@ -1,17 +1,13 @@
 
 import path from 'path';
 
-import { bundleId, sessionToken } from './base-config';
+import { bundleId } from './base-config';
 
 import { AnalysisStatus } from '../../src/dto/get-analysis.response.dto';
 
 import { ERRORS, RequestTypes } from '../../src/constants/errors';
 
-const bundleResponse = {
-  bundleId,
-  missingFiles: [],
-  uploadURL: `https://www.deepcode.ai/publicapi/file/${bundleId}`,
-};
+export const bundleUploadURL = `https://www.deepcode.ai/publicapi/file/${bundleId}`;
 
 const root = __dirname;
 const mockProjectPath = path.resolve(root, '../mocked_data');
@@ -20,22 +16,6 @@ const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
 /**
  * Successful responses
  */
-export const startSessionResponse = {
-  loginURL: 'mock-login-url',
-  sessionToken: bundleId
-};
-
-export const createBundleResponse = {
-  ...bundleResponse,
-};
-
-export const checkBundleResponse = {
-  ...bundleResponse,
-};
-
-export const extendBundleResponse = {
-  ...bundleResponse,
-};
 
 export const getAnalysisResponse = {
   status: AnalysisStatus.done,

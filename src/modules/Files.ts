@@ -15,56 +15,52 @@ type FileInfo = {
   content: string;
 };
 
-export default class Files {
-  public getFilesData(baseDir: string, files: string[]): IFileInfo[] {
-    return files.map(file => {
-      const info = this.getFileInfo(baseDir + file);
-      const path = !isWindows ? file : file.replace('\\', '/');
+export function getFilesData(baseDir: string, files: string[]): IFileInfo[] {
+  return files.map(file => {
+    const info = getFileInfo(baseDir + file);
+    const path = !isWindows ? file : file.replace('\\', '/');
 
-      return { path, ...info };
-    });
-  }
+    return { path, ...info };
+  });
+}
 
-  // eslint-disable-next-line class-methods-use-this
-  private getFileInfo(filePath: string): FileInfo {
-    const fileSize = fs.lstatSync(filePath).size;
+function getFileInfo(filePath: string): FileInfo {
+  const fileSize = fs.lstatSync(filePath).size;
 
-    if (fileSize > maxPayload) {
-      return {
-        hash: '',
-        size: 0,
-        content: '',
-      };
-    }
-
-    const fileContent = fs.readFileSync(filePath).toString('utf8');
-    const fileHash = crypto
-      .createHash(CRYPTO.algorithm)
-      .update(fileContent)
-      .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
-
+  if (fileSize > maxPayload) {
     return {
-      hash: fileHash,
-      size: fileSize,
-      content: fileContent,
+      hash: '',
+      size: 0,
+      content: '',
     };
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  public async buildBundle(files: IFileInfo[]): Promise<IFiles> {
-    const emitResult = throttle(Emitter.buildBundleProgress.bind(Emitter), 1000);
-    const total = files.length;
-    const result = files.reduce((res, fileInfo, idx) => {
-      const processed = idx + 1;
+  const fileContent = fs.readFileSync(filePath).toString('utf8');
+  const fileHash = crypto
+    .createHash(CRYPTO.algorithm)
+    .update(fileContent)
+    .digest(CRYPTO.hashEncode as HexBase64Latin1Encoding);
 
-      emitResult(processed, total);
+  return {
+    hash: fileHash,
+    size: fileSize,
+    content: fileContent,
+  };
+}
 
-      res[fileInfo.path] = fileInfo.hash;
-      return res;
-    }, {});
+export async function buildBundle(files: IFileInfo[]): Promise<IFiles> {
+  const emitResult = throttle(Emitter.buildBundleProgress.bind(Emitter), 1000);
+  const total = files.length;
+  const result = files.reduce((res, fileInfo, idx) => {
+    const processed = idx + 1;
 
-    Emitter.buildBundleFinish();
+    emitResult(processed, total);
 
-    return Promise.resolve(result);
-  }
+    res[fileInfo.path] = fileInfo.hash;
+    return res;
+  }, {});
+
+  Emitter.buildBundleFinish();
+
+  return Promise.resolve(result);
 }

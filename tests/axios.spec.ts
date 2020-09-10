@@ -1,6 +1,6 @@
 import { AxiosError, AxiosRequestConfig } from 'axios';
 
-import axios from '../src/modules/axios';
+import axios from '../src/axios';
 
 import { defaultBaseURL as baseURL, apiPath } from '../src/constants/common';
 

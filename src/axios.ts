@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 const axios_ = axios.create({
   responseType: 'json',
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json;charset=utf-8',
   },
 });
 

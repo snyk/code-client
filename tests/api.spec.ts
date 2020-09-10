@@ -1,7 +1,7 @@
 
 import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
-import { sessionToken, bundleId } from './mocks/base-config';
+import { sessionToken, bundleId } from './constants/base';
 
 import {
   createBundleRequest,

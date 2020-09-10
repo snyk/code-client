@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events';
 
-import { IQueueAnalysisCheckResult } from '../interfaces/queue.interface';
+import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
 
 // eslint-disable-next-line no-shadow
-enum CUSTOM_EVENTS {
+export enum CUSTOM_EVENTS {
   buildBundleProgress = 'buildBundleProgress',
   buildBundleFinish = 'buildBundleFinish',
   createBundleProgress = 'createBundleProgress',
@@ -49,6 +49,4 @@ class Emitter extends EventEmitter {
   }
 }
 
-const EmitterInstance = new Emitter();
-
-export default EmitterInstance;
+export const emitter = new Emitter();

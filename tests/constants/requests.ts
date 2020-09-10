@@ -8,7 +8,7 @@ import { sessionToken, bundleId } from './base';
 const hashMain = '3e297985';
 const hashApp = 'c8bc6452';
 
-export const mockProjectPath = path.resolve(__dirname, '../mocked_data');
+export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 
 const files: IFiles = {
   '/home/user/repo/main.js': hashMain,
@@ -32,7 +32,7 @@ export const extendBundleRequest = {
 export const extendBundleRequestExpired = {
   baseURL,
   sessionToken,
-  bundleId: expiredBundleId,
+  bundleId: 'expired-bundle-id',
   files,
   removedFiles: [],
 };

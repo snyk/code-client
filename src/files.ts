@@ -1,27 +1,38 @@
-import * as crypto from 'crypto';
 import * as nodePath from 'path';
 import { Buffer } from 'buffer';
 import * as fs from 'fs';
+import crypto, { HexBase64Latin1Encoding } from 'crypto';
+import { throttle } from 'lodash';
 import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
+
 import {
   HASH_ALGORITHM,
   ENCODE_TYPE,
   GITIGNORE_FILENAME,
   DCIGNORE_FILENAME,
   FILE_CURRENT_STATUS,
-  ALLOWED_PAYLOAD_SIZE,
-} from '../constants/files';
+  MAX_PAYLOAD,
+} from './constants';
 
-import { PayloadMissingFileInterface, ISupportedFiles } from '../interfaces/files.interface';
+import emitter from './emitter';
+import { IFiles, IFileInfo, PayloadMissingFileInterface, ISupportedFiles } from './interfaces/files.interface';
+
+export const isWindows = nodePath.sep === '\\';
+
+type FileInfo = {
+  hash: string;
+  size: number;
+  content: string;
+};
 
 export const DCIGNORE_DRAFTS = {
   custom: CustomDCIgnore,
   default: DefaultDCIgnore,
 };
 
-// The file limit was hardcoded to 2mb but seems to be a function of ALLOWED_PAYLOAD_SIZE
+// The file limit was hardcoded to 2mb but seems to be a function of MAX_PAYLOAD
 // TODO what exactly is transmitted eventually and what is a good exact limit?
-const SAFE_PAYLOAD_SIZE = ALLOWED_PAYLOAD_SIZE / 2; // safe size for requests
+const SAFE_PAYLOAD_SIZE = MAX_PAYLOAD / 2; // safe size for requests
 
 export const createFileHash = (file: string): string => {
   return crypto.createHash(HASH_ALGORITHM).update(file).digest(ENCODE_TYPE);
@@ -191,8 +202,73 @@ export const processPayloadSize = (
   const buffer = Buffer.from(JSON.stringify(payload));
   const payloadByteSize = Buffer.byteLength(buffer);
 
-  if (payloadByteSize < ALLOWED_PAYLOAD_SIZE) {
+  if (payloadByteSize < MAX_PAYLOAD) {
     return { chunks: false, payload };
   }
   return splitPayloadIntoChunks(payload);
 };
+
+
+export function getFilesData(baseDir: string, files: string[]): IFileInfo[] {
+  return files.map(file => {
+    const info = getFileInfo(baseDir + file);
+    const path = !isWindows ? file : file.replace('\\', '/');
+
+    return { path, ...info };
+  });
+}
+
+function getFileInfo(filePath: string): FileInfo {
+  const fileSize = fs.lstatSync(filePath).size;
+
+  if (fileSize > MAX_PAYLOAD) {
+    return {
+      hash: '',
+      size: 0,
+      content: '',
+    };
+  }
+
+  const fileContent = fs.readFileSync(filePath).toString('utf8');
+  const fileHash = crypto
+    .createHash(HASH_ALGORITHM)
+    .update(fileContent)
+    .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
+
+  return {
+    hash: fileHash,
+    size: fileSize,
+    content: fileContent,
+  };
+}
+
+export async function buildBundle(files: IFileInfo[]): Promise<IFiles> {
+  const emitResult = throttle(Emitter.buildBundleProgress.bind(Emitter), 1000);
+  const total = files.length;
+  const result = files.reduce((res, fileInfo, idx) => {
+    const processed = idx + 1;
+
+    emitResult(processed, total);
+
+    res[fileInfo.path] = fileInfo.hash;
+    return res;
+  }, {});
+
+  Emitter.buildBundleFinish();
+
+  return Promise.resolve(result);
+}
+
+export function getMissingFilesInfo(missingFiles: string[], filesInfo: IFileInfo[]): IFileInfo[] {
+  const missingFilesData: IFileInfo[] = [];
+
+  return missingFiles.reduce((resultArr, missingFile) => {
+    const fullInfo = filesInfo.find(fileInfo => fileInfo.path === missingFile);
+
+    if (fullInfo) {
+      resultArr.push(fullInfo);
+    }
+
+    return resultArr;
+  }, missingFilesData);
+}

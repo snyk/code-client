@@ -1,13 +1,13 @@
 
 import { ServiceAI } from '../src/index';
 import { defaultBaseURL as baseURL } from '../src/constants/common';
-import { sessionToken } from './mocks/base-config';
+import { sessionToken } from './constants/base';
 
 import {
   mockProjectPath,
   mockFiles,
   mockNewAnalysisResults,
-} from './mocks/requests';
+} from './constants/requests';
 
 import { IQueueAnalysisCheckResult } from '../src/interfaces/queue.interface';
 

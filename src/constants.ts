@@ -1,3 +1,22 @@
+
+export const MAX_PAYLOAD = 4 * 1024 * 1024;
+export const defaultBaseURL = 'https://www.deepcode.ai';
+export const apiPath = '/publicapi';
+export const HASH_ALGORITHM = 'sha256';
+export const ENCODE_TYPE = 'hex';
+export const GIT_FILENAME = '.git';
+export const GITIGNORE_FILENAME = '.gitignore';
+export const DCIGNORE_FILENAME = '.dcignore';
+export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENAME];
+
+// eslint-disable-next-line no-shadow
+export enum FILE_CURRENT_STATUS {
+  modified = 'modified',
+  deleted = 'deleted',
+  same = 'same',
+  created = 'created',
+}
+
 // eslint-disable-next-line no-shadow
 export enum RequestTypes {
   startSession = 'startSession',

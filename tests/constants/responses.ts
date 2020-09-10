@@ -1,17 +1,14 @@
 
 import path from 'path';
 
-import { bundleId } from './base-config';
+import { bundleId } from './base';
 
-import { AnalysisStatus } from '../../src/dto/get-analysis.response.dto';
-
-import { ERRORS, RequestTypes } from '../../src/constants/errors';
+import { ERRORS, RequestTypes } from '../../src/constants';
 
 export const bundleUploadURL = `https://www.deepcode.ai/publicapi/file/${bundleId}`;
 
-const root = __dirname;
-const mockProjectPath = path.resolve(root, '../mocked_data');
-const analysedFile = `${mockProjectPath}/sample_repository/main.js`;
+const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
+const analysedFile = `${sampleProjectPath}/sample_repository/app.js`;
 
 /**
  * Successful responses

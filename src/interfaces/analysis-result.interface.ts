@@ -1,10 +1,10 @@
 export type Point = [number, number];
 
 // eslint-disable-next-line no-shadow
-enum AnalysisSeverity {
+export enum AnalysisSeverity {
   info = 1,
-  warning,
-  critical,
+  warning = 2,
+  critical = 3,
 }
 
 export interface ISuggestion {

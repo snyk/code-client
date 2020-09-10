@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
-import { ExclusionRule, ExclusionFilter } from './ignoreUtils';
-import { parseGitignoreFile, acceptFileToBundle } from './filesUtils';
-import { DCIGNORE_FILENAME, GITIGNORE_FILENAME, EXCLUDED_NAMES, ALLOWED_PAYLOAD_SIZE } from '../constants/files';
+import { parseGitignoreFile, acceptFileToBundle } from './files';
+import { DCIGNORE_FILENAME, GITIGNORE_FILENAME, EXCLUDED_NAMES, MAX_PAYLOAD } from './constants';
 
-const SAFE_PAYLOAD_SIZE = ALLOWED_PAYLOAD_SIZE / 2;
+const SAFE_PAYLOAD_SIZE = MAX_PAYLOAD / 2;
 
 interface ProgressInterface {
   onProgress: (value: number) => void;

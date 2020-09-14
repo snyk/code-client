@@ -16,7 +16,7 @@ type ResultError = { type: 'error'; error: ErrorResponseDto };
 
 export type IResult<T> = ResultSuccess<T> | ResultError;
 
-function createErrorResponse(error: AxiosError, type: RequestTypes): ErrorResponseDto {
+export function createErrorResponse(error: AxiosError, type: RequestTypes): ErrorResponseDto {
   let statusCode: number | null = null;
   if (error && error.response) {
     statusCode = error.response.status || null;
@@ -92,9 +92,9 @@ export async function getFilters(baseURL: string): Promise<IResult<ISupportedFil
   }
 }
 
-type CreateBundleResponseDto = {
+export type RemoteBundle = {
   readonly bundleId: string;
-  readonly missingFiles?: string[];
+  readonly missingFiles: string[];
   readonly uploadURL?: string;
 };
 
@@ -102,7 +102,7 @@ export async function createBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly files: IFiles;
-}): Promise<IResult<CreateBundleResponseDto>> {
+}): Promise<IResult<RemoteBundle>> {
   const { baseURL, sessionToken, files } = options;
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
@@ -114,24 +114,18 @@ export async function createBundle(options: {
   };
 
   try {
-    const response = await axios.request<CreateBundleResponseDto>(config);
+    const response = await axios.request<RemoteBundle>(config);
     return { type: 'success', value: response.data };
   } catch (error) {
     return { type: 'error', error: createErrorResponse(error, RequestTypes.createBundle) };
   }
 }
 
-type CheckBundleResponseDto = {
-  readonly bundleId: string;
-  readonly missingFiles?: string[];
-  readonly uploadURL?: string;
-};
-
 export async function checkBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly bundleId: string;
-}): Promise<IResult<CheckBundleResponseDto>> {
+}): Promise<IResult<RemoteBundle>> {
   const { baseURL, sessionToken, bundleId } = options;
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
@@ -140,18 +134,12 @@ export async function checkBundle(options: {
   };
 
   try {
-    const response = await axios.request<CheckBundleResponseDto>(config);
+    const response = await axios.request<RemoteBundle>(config);
     return { type: 'success', value: response.data };
   } catch (error) {
     return { type: 'error', error: createErrorResponse(error, RequestTypes.checkBundle) };
   }
 }
-
-type ExtendBundleResponseDto = {
-  readonly bundleId: string;
-  readonly missingFiles: string[];
-  readonly uploadURL: string;
-};
 
 export async function extendBundle(options: {
   readonly baseURL: string;
@@ -159,8 +147,8 @@ export async function extendBundle(options: {
   readonly bundleId: string;
   readonly files: IFiles;
   readonly removedFiles?: string[];
-}): Promise<IResult<ExtendBundleResponseDto>> {
-  const { baseURL, sessionToken, bundleId, files, removedFiles } = options;
+}): Promise<IResult<RemoteBundle>> {
+  const { baseURL, sessionToken, bundleId, files, removedFiles = [] } = options;
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
     url: `${baseURL}${apiPath}/bundle/${bundleId}`,
@@ -172,7 +160,7 @@ export async function extendBundle(options: {
   };
 
   try {
-    const response = await axios.request<ExtendBundleResponseDto>(config);
+    const response = await axios.request<RemoteBundle>(config);
     return { type: 'success', value: response.data };
   } catch (error) {
     return { type: 'error', error: createErrorResponse(error, RequestTypes.extendBundle) };
@@ -212,21 +200,32 @@ export enum AnalysisStatus {
   failed = 'FAILED',
 }
 
-export type GetAnalysisResponseDto = {
-  readonly status: AnalysisStatus;
+export type AnalysisResponseProgress = {
+  readonly status: AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.dcDone;
   readonly progress: number;
-  readonly analysisURL: string;
-  readonly analysisResults?: IAnalysisResult;
 };
+
+export type AnalysisFailedResponse = {
+  readonly status: AnalysisStatus.failed;
+};
+
+export type AnalysisFinishedResponse = {
+  readonly status: AnalysisStatus.done;
+  readonly analysisURL: string;
+  readonly analysisResults: IAnalysisResult;
+};
+
+export type GetAnalysisResponseDto = AnalysisFinishedResponse | AnalysisFailedResponse | AnalysisResponseProgress;
 
 export async function getAnalysis(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly bundleId: string;
   readonly useLinters?: boolean;
+  readonly severity: number;
 }): Promise<IResult<GetAnalysisResponseDto>> {
-  const { baseURL, sessionToken, bundleId, useLinters } = options;
-  const params = useLinters ? { linters: true } : {};
+  const { baseURL, sessionToken, bundleId, useLinters, severity } = options;
+  const params = { severity, linters: useLinters };
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
     ...params,

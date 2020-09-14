@@ -55,6 +55,7 @@
     "no-underscore-dangle": "off",
     "max-classes-per-file": "off",
     "no-use-before-define": "off",
+    "no-continue": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/no-unsafe-assignment": "warn"
   },

@@ -1,13 +1,11 @@
 
 import path from 'path';
 
-import { bundleId } from './base';
-
 import { ERRORS, RequestTypes } from '../../src/constants';
+import { AnalysisStatus } from '../../src/http';
 
-export const bundleUploadURL = `https://www.deepcode.ai/publicapi/file/${bundleId}`;
+import { sampleProjectPath } from './base';
 
-const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 const analysedFile = `${sampleProjectPath}/sample_repository/app.js`;
 
 /**

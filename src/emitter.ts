@@ -1,43 +1,36 @@
 import { EventEmitter } from 'events';
 
-import { IQueueAnalysisCheckResult } from './interfaces/queue.interface';
+import { AnalysisResponseProgress } from './http';
 
 // eslint-disable-next-line no-shadow
 export enum CUSTOM_EVENTS {
-  buildBundleProgress = 'buildBundleProgress',
-  buildBundleFinish = 'buildBundleFinish',
+  scanFilesProgress = 'scanFilesProgress',
+  computeHashProgress = 'computeHashProgress',
   createBundleProgress = 'createBundleProgress',
-  createBundleFinish = 'createBundleFinish',
   uploadBundleProgress = 'uploadBundleProgress',
-  uploadFilesFinish = 'uploadFilesFinish',
   analyseProgress = 'analyseProgress',
-  analyseFinish = 'analyseFinish',
   error = 'error',
 }
 
 class Emitter extends EventEmitter {
-  buildBundleProgress(processed: number, total: number): void {
-    this.emit(CUSTOM_EVENTS.buildBundleProgress, processed, total);
+  scanFilesProgress(processed: number): void {
+    this.emit(CUSTOM_EVENTS.scanFilesProgress, processed);
   }
 
-  buildBundleFinish(): void {
-    this.emit(CUSTOM_EVENTS.buildBundleFinish, true);
+  computeHashProgress(processed: number, total: number): void {
+    this.emit(CUSTOM_EVENTS.computeHashProgress, processed, total);
+  }
+
+  createBundleProgress(processed: number, total: number): void {
+    this.emit(CUSTOM_EVENTS.createBundleProgress, processed, total);
   }
 
   uploadBundleProgress(processed: number, total: number): void {
     this.emit(CUSTOM_EVENTS.uploadBundleProgress, processed, total);
   }
 
-  uploadBundleFinish(): void {
-    this.emit(CUSTOM_EVENTS.uploadFilesFinish, true);
-  }
-
-  analyseProgress(analysisResults: IQueueAnalysisCheckResult): void {
-    this.emit(CUSTOM_EVENTS.analyseProgress, analysisResults);
-  }
-
-  analyseFinish(analysisResults: IQueueAnalysisCheckResult): void {
-    this.emit(CUSTOM_EVENTS.analyseFinish, analysisResults);
+  analyseProgress(data: AnalysisResponseProgress): void {
+    this.emit(CUSTOM_EVENTS.analyseProgress, data);
   }
 
   sendError(error: Error): void {

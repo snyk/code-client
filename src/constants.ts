@@ -9,13 +9,17 @@ export const GITIGNORE_FILENAME = '.gitignore';
 export const DCIGNORE_FILENAME = '.dcignore';
 export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENAME];
 
-// eslint-disable-next-line no-shadow
-export enum FILE_CURRENT_STATUS {
-  modified = 'modified',
-  deleted = 'deleted',
-  same = 'same',
-  created = 'created',
-}
+export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}`];
+
+export const IGNORE_FILES_NAMES = [GITIGNORE_FILENAME, DCIGNORE_FILENAME];
+
+// // eslint-disable-next-line no-shadow
+// export enum FILE_CURRENT_STATUS {
+//   modified = 'modified',
+//   deleted = 'deleted',
+//   same = 'same',
+//   created = 'created',
+// }
 
 // eslint-disable-next-line no-shadow
 export enum RequestTypes {

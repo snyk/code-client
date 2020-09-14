@@ -59,11 +59,12 @@
     "typescript": "^4.0.2"
   },
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.19.0",
     "@types/lodash": "^4.14.159",
     "lodash": "^4.17.19",
     "ignore": "^5.1.8",
     "@deepcode/dcignore": "^1.0.2",
-    "queue": "^6.0.1"
+    "queue": "^6.0.1",
+    "fast-glob": "^3.2.4"
   }
 }

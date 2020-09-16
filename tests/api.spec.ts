@@ -1,6 +1,4 @@
-
-import { defaultBaseURL as baseURL } from '../src/constants';
-import { sessionToken, bundleFiles, sampleProjectPath } from './constants/base';
+import { baseURL, sessionToken, bundleFiles, sampleProjectPath } from './constants/base';
 
 import {
   getFilters,
@@ -12,18 +10,12 @@ import {
   extendBundle,
   getAnalysis,
   AnalysisStatus,
+  reportError,
+  reportEvent,
 } from '../src/http';
 import { prepareFilePath, getFileMeta } from '../src/files';
 
-// import {
-//   extendBundleRequestExpired,
-//   reportTelemetryRequest,
-// } from './mocks/requests';
-import {
-  // getAnalysisResponse,
-  checkBundleError404,
-  extendBundleError404,
-} from './constants/responses';
+import { checkBundleError404, extendBundleError404 } from './constants/errors';
 // import { supportedFiles } from '../src/utils/filesUtils';
 
 const fakeBundleId = 'aa64f67b74231558ca67874621882ea728230c4cc0f70929f8a4b512ac9795a0';
@@ -31,27 +23,43 @@ let fakeBundleIdFull = '';
 const realBundleId = 'a4e83d44b91ddd1c3e3be3932b68725e80dd813eb7bc7a660c769b9439b4b220';
 let realBundleIdFull = '';
 
-describe('Requests to public API', () => {
+const reportTelemetryRequest = {
+  baseURL,
+  sessionToken,
+  bundleId: fakeBundleId,
+  source: 'testSource',
+  type: 'testType',
+  message: 'testMessage',
+  path: '/test/path',
+  data: {
+    foo: 'bar',
+    bar: ['fo', 'foo', 'fooo'],
+  },
+};
 
+
+describe('Requests to public API', () => {
   it('gets filters successfully', async () => {
     const response = await getFilters(baseURL);
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value).toEqual({
-      configFiles: [
+    expect(new Set(response.value.configFiles)).toEqual(
+      new Set([
         '.dcignore',
         '.gitignore',
-        '.eslintrc.js',
-        '.eslintrc.json',
-        '.eslintrc.yml',
         '.pylintrc',
         'pylintrc',
         '.pmdrc.xml',
         '.ruleset.xml',
         'ruleset.xml',
         'tslint.json',
-      ],
-      'extensions': [
+        '.eslintrc.js',
+        '.eslintrc.json',
+        '.eslintrc.yml',
+      ]),
+    );
+    expect(new Set(response.value.extensions)).toEqual(
+      new Set([
         '.es',
         '.es6',
         '.htm',
@@ -61,28 +69,28 @@ describe('Requests to public API', () => {
         '.ts',
         '.tsx',
         '.vue',
-        '.py',
         '.c',
         '.cc',
         '.cpp',
         '.cxx',
         '.h',
         '.hpp',
-        ".hxx",
-        ".java",
-      ],
-    });
+        '.hxx',
+        '.py',
+        '.java',
+      ]),
+    );
   });
 
-  // it('reports error successfully', async () => {
-  //   const response = await api.reportError(reportTelemetryRequest);
-  //   expect(response.type).toEqual('success');
-  // });
+  it('reports error successfully', async () => {
+    const response = await reportError(reportTelemetryRequest);
+    expect(response.type).toEqual('success');
+  });
 
-  // it('reports event successfully', async () => {
-  //   const response = await api.reportEvent(reportTelemetryRequest);
-  //   expect(response.type).toEqual('success');
-  // });
+  it('reports event successfully', async () => {
+    const response = await reportEvent(reportTelemetryRequest);
+    expect(response.type).toEqual('success');
+  });
 
   it('starts session successfully', async () => {
     const startSessionResponse = await startSession({
@@ -92,7 +100,9 @@ describe('Requests to public API', () => {
     expect(startSessionResponse.type).toEqual('success');
     if (startSessionResponse.type === 'error') return;
 
-    expect(startSessionResponse.value.loginURL).toMatch(/https:\/\/www.deepcode.ai\/login-api\?sessionToken=.*&source=atom/);
+    expect(startSessionResponse.value.loginURL).toMatch(
+      /https:\/\/www.deepcoded.com\/login-api\?sessionToken=.*&source=atom/,
+    );
     const draftToken = startSessionResponse.value.sessionToken;
 
     // This token is just a draft and not ready to be used permanently
@@ -123,7 +133,6 @@ describe('Requests to public API', () => {
   });
 
   it('creates bundle successfully', async () => {
-
     const files = Object.fromEntries([...bundleFiles.entries()].map(([i, d]) => [prepareFilePath(d), `${i}`]));
 
     const response = await createBundle({
@@ -215,10 +224,10 @@ describe('Requests to public API', () => {
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value.bundleId).toEqual('gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/28f6535914390760cdf36801719204a159bdfc699031701e7236b91f3df5d171');
-    expect(response.value.missingFiles).toEqual([
-      `${sampleProjectPath}/new.js`,
-    ]);
+    expect(response.value.bundleId).toEqual(
+      'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/28f6535914390760cdf36801719204a159bdfc699031701e7236b91f3df5d171',
+    );
+    expect(response.value.missingFiles).toEqual([`${sampleProjectPath}/new.js`]);
   });
 
   it('extends expired bundle successfully', async () => {
@@ -318,6 +327,58 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-  });
 
+    if (response.value.status === AnalysisStatus.done) {
+      expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
+      expect(response.value.analysisResults.suggestions[0]).toEqual({
+        categories: {
+          Check: 1,
+          InTest: 1,
+        },
+        id: 'cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse',
+        lead_url: '',
+        message: 'The expression will always evaluate to false because both sides always hold the same value.',
+        rule: 'CppSameEvalBinaryExpressionfalse',
+        severity: 2,
+        tags: [],
+      });
+      expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
+      expect(response.value.analysisResults.files[`${sampleProjectPath}/AnnotatorTest.cpp`]).toEqual({
+        '0': [
+          {
+            cols: [8, 27],
+            markers: [],
+            rows: [5, 5],
+          },
+        ],
+        '1': [
+          {
+            cols: [6, 25],
+            markers: [
+              {
+                msg: [25, 36],
+                pos: [
+                  {
+                    cols: [7, 14],
+                    rows: [8, 8],
+                  },
+                ],
+              },
+              {
+                msg: [45, 57],
+                pos: [
+                  {
+                    cols: [6, 25],
+                    rows: [10, 10],
+                  },
+                ],
+              },
+            ],
+            rows: [10, 10],
+          },
+        ],
+      });
+    }
+  });
 });

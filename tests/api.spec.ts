@@ -1,9 +1,19 @@
 
 import { defaultBaseURL as baseURL } from '../src/constants';
-import { sessionToken, bundleId, bundleFiles, sampleProjectPath } from './constants/base';
+import { sessionToken, bundleFiles, sampleProjectPath } from './constants/base';
 
-import { getFilters, startSession, checkSession, createBundle, checkBundle, uploadFiles, extendBundle, getAnalysis } from '../src/http';
-import { prepareFilePath } from '../src/files';
+import {
+  getFilters,
+  startSession,
+  checkSession,
+  createBundle,
+  checkBundle,
+  uploadFiles,
+  extendBundle,
+  getAnalysis,
+  AnalysisStatus,
+} from '../src/http';
+import { prepareFilePath, getFileMeta } from '../src/files';
 
 // import {
 //   extendBundleRequestExpired,
@@ -16,7 +26,10 @@ import {
 } from './constants/responses';
 // import { supportedFiles } from '../src/utils/filesUtils';
 
-const fakeBundleId = 'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/aa64f67b74231558ca67874621882ea728230c4cc0f70929f8a4b512ac9795a0';
+const fakeBundleId = 'aa64f67b74231558ca67874621882ea728230c4cc0f70929f8a4b512ac9795a0';
+let fakeBundleIdFull = '';
+const realBundleId = 'a4e83d44b91ddd1c3e3be3932b68725e80dd813eb7bc7a660c769b9439b4b220';
+let realBundleIdFull = '';
 
 describe('Requests to public API', () => {
 
@@ -120,8 +133,8 @@ describe('Requests to public API', () => {
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value.bundleId).toEqual(fakeBundleId);
-    expect(response.value.uploadURL).toEqual(`https://www.deepcode.ai/publicapi/file/${fakeBundleId}`);
+    expect(response.value.bundleId).toContain(fakeBundleId);
+    fakeBundleIdFull = response.value.bundleId;
     expect(response.value.missingFiles).toEqual([
       `${sampleProjectPath}/AnnotatorTest.cpp`,
       `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
@@ -137,12 +150,11 @@ describe('Requests to public API', () => {
     const response = await checkBundle({
       baseURL,
       sessionToken,
-      bundleId: fakeBundleId,
+      bundleId: fakeBundleIdFull,
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value.bundleId).toEqual(fakeBundleId);
-    expect(response.value.uploadURL).toEqual(`https://www.deepcode.ai/publicapi/file/${fakeBundleId}`);
+    expect(response.value.bundleId).toEqual(fakeBundleIdFull);
     expect(response.value.missingFiles).toEqual([
       `${sampleProjectPath}/AnnotatorTest.cpp`,
       `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
@@ -167,24 +179,27 @@ describe('Requests to public API', () => {
     expect(response.error.statusText).toEqual(checkBundleError404.statusText);
   });
 
-  // it('request analysis with missing files', async () => {
-  //   const response = await getAnalysis({
-  //     baseURL,
-  //     sessionToken,
-  //     bundleId: fakeBundleId,
-  //     useLinters: false,
-  //     severity: 1
-  //   });
-  //   expect(response.type).toEqual('error');
-  //   if (response.type === 'success') return;
-  //   expect(response.error).toEqual({});
-  // });
+  it('request analysis with missing files', async () => {
+    const response = await getAnalysis({
+      baseURL,
+      sessionToken,
+      bundleId: fakeBundleIdFull,
+      useLinters: false,
+      severity: 1,
+    });
+    expect(response.type).toEqual('error');
+    if (response.type === 'success') return;
+    expect(response.error).toEqual({
+      statusCode: 500,
+      statusText: 'Getting analysis failed',
+    });
+  });
 
   it('extends bundle successfully', async () => {
     const response = await extendBundle({
       baseURL,
       sessionToken,
-      bundleId: fakeBundleId,
+      bundleId: fakeBundleIdFull,
       files: {
         [`${sampleProjectPath}/new.js`]: 'new123',
       },
@@ -223,42 +238,86 @@ describe('Requests to public API', () => {
     expect(response.error.statusText).toEqual(extendBundleError404.statusText);
   });
 
-  /**
-   * Upload Files
-   */
-  // it('uploads files successfully', async () => {
-  //   const response = await uploadFiles({
-  //     baseURL,
-  //     sessionToken,
-  //     bundleId,
-  //     content: [
-  //       {
-  //         fileHash: hashMain,
-  //         fileContent: 'const module = new Module();',
-  //       },
-  //       {
-  //         fileHash: hashApp,
-  //         fileContent: 'const App = new App();',
-  //       },
-  //     ],
-  //   });
-  //   expect(response.type).toEqual('success');
-  // });
+  it('uploads fake files to fake bundle', async () => {
+    const response = await uploadFiles({
+      baseURL,
+      sessionToken,
+      bundleId: fakeBundleIdFull,
+      content: [
+        {
+          fileHash: 'df',
+          fileContent: 'const module = new Module();',
+        },
+        {
+          fileHash: 'sdfs',
+          fileContent: 'const App = new App();',
+        },
+      ],
+    });
+    expect(response.type).toEqual('error');
+    if (response.type === 'success') return;
+    expect(response.error).toEqual({
+      statusCode: 400,
+      statusText:
+        'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',
+    });
+  });
 
-  // /**
-  //  * Get Analysis
-  //  */
-  // it('gets analysis successfully', async () => {
-  //   const options = {
-  //     baseURL,
-  //     sessionToken,
-  //     bundleId,
-  //   };
+  it('test successful workflow', async () => {
+    // Create a bundle first
+    const files = Object.fromEntries(bundleFiles.map(d => [prepareFilePath(d), getFileMeta(d).hash]));
 
-  //   const response = await api.getAnalysis(options);
-  //   expect(response.type).toEqual('success');
-  //   if (response.type === 'error') return;
-  //   expect(response.value).toEqual(getAnalysisResponse);
-  // });
+    const bundleResponse = await createBundle({
+      baseURL,
+      sessionToken,
+      files,
+    });
+    expect(bundleResponse.type).toEqual('success');
+    if (bundleResponse.type === 'error') return;
+    expect(bundleResponse.value.bundleId).toContain(realBundleId);
+    realBundleIdFull = bundleResponse.value.bundleId;
+
+    const content = bundleFiles.map(d => {
+      const fileData = getFileMeta(d);
+      return {
+        fileHash: fileData.hash,
+        fileContent: fileData.content || '',
+      };
+    });
+
+    // Upload files
+    const uploadResponse = await uploadFiles({
+      baseURL,
+      sessionToken,
+      bundleId: realBundleIdFull,
+      content: content,
+    });
+    expect(uploadResponse.type).toEqual('success');
+    if (uploadResponse.type === 'error') return;
+    expect(uploadResponse.value).toEqual(true);
+
+    // Check missing files
+    const checkResponse = await checkBundle({
+      baseURL,
+      sessionToken,
+      bundleId: realBundleIdFull,
+    });
+    expect(checkResponse.type).toEqual('success');
+    if (checkResponse.type === 'error') return;
+    expect(checkResponse.value.bundleId).toEqual(realBundleIdFull);
+    expect(checkResponse.value.missingFiles).toEqual([]);
+
+    // Get analysis results
+    const response = await getAnalysis({
+      baseURL,
+      sessionToken,
+      bundleId: realBundleIdFull,
+      useLinters: false,
+      severity: 1,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+  });
 
 });

@@ -23,7 +23,7 @@ export function createErrorResponse(error: AxiosError, type: RequestTypes): Erro
   }
 
   const errorMessages = ERRORS[type];
-  const statusText: string = statusCode ? errorMessages[statusCode] : errorMessages.other;
+  const statusText: string = (statusCode && errorMessages[statusCode]) || errorMessages.other;
 
   return { statusCode, statusText };
 }
@@ -167,14 +167,12 @@ export async function extendBundle(options: {
   }
 }
 
-type UploadFilesRequestDto = {
+export async function uploadFiles(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly bundleId: string;
   readonly content: IFileContent[];
-};
-
-export async function uploadFiles(options: UploadFilesRequestDto): Promise<IResult<boolean>> {
+}): Promise<IResult<boolean>> {
   const { baseURL, sessionToken, bundleId, content } = options;
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },

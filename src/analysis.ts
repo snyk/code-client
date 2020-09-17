@@ -1,10 +1,11 @@
 import { chunk } from 'lodash';
 
 import { collectBundleFiles, prepareBundleHashes, prepareFilePath, composeFilePayloads } from './files';
-
+import parseGitUri from './gitUtils';
 import {
   getFilters,
   createBundle,
+  createGitBundle,
   extendBundle,
   uploadFiles,
   checkBundle,
@@ -16,7 +17,7 @@ import {
   AnalysisFailedResponse,
   AnalysisFinishedResponse,
 } from './http';
-import { emitter } from './emitter';
+import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD } from './constants';
 
 import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
@@ -165,7 +166,8 @@ export async function analyzeFolders(
   includeLint = false,
   severity = AnalysisSeverity.info,
   paths: string[],
-): Promise<Bundle> {
+  maxPayload = MAX_PAYLOAD,
+): Promise<FileBundle> {
   // Get supported filters and test baseURL for correctness and availability
   const resp = await getFilters(baseURL);
   if (resp.type === 'error') {
@@ -183,14 +185,14 @@ export async function analyzeFolders(
   const fileHashes = [];
   let filesCount = 0;
   emitter.computeHashProgress(0, bundleFiles.length);
-  for (const h of prepareBundleHashes(bundleFiles)) {
+  for (const h of prepareBundleHashes(bundleFiles, maxPayload)) {
     fileHashes.push(h);
     filesCount += 1;
     emitter.computeHashProgress(filesCount, bundleFiles.length);
   }
 
   // Create remote bundle
-  let bundleResponse = await createRemoteBundle(baseURL, sessionToken, fileHashes);
+  let bundleResponse = await createRemoteBundle(baseURL, sessionToken, fileHashes, maxPayload);
   if (bundleResponse === null) {
     throw new Error('File list is empty');
   } else if (bundleResponse.type === 'error') {
@@ -225,35 +227,68 @@ export async function analyzeFolders(
     throw new Error('Analysis has failed');
   }
 
-  const { analysisResults, analysisURL } = analysisData.value;
-
   // Create bundle instance to handle extensions
-  const bundle = new Bundle(
+  const bundle = new FileBundle(
     baseURL,
     sessionToken,
     includeLint,
     severity,
-    supportedFiles,
-    paths,
     remoteBundle.bundleId,
-    analysisResults,
-    analysisURL,
+    analysisData.value.analysisResults,
+    analysisData.value.analysisURL,
   );
 
+  bundle.supportedFiles = supportedFiles;
+  bundle.paths = paths;
   return bundle;
 }
 
-export async function analyzeRemote() {
-  // TODO
+export async function analyzeGit(
+  baseURL = defaultBaseURL,
+  sessionToken = '',
+  includeLint = false,
+  severity = AnalysisSeverity.info,
+  gitUri: string,
+): Promise<GitBundle> {
+  const repoKey = parseGitUri(gitUri);
+  if (!repoKey) {
+    throw new Error('Failed to parse git uri');
+  }
+
+  const bundleResponse = await createGitBundle({ baseURL, sessionToken, ...repoKey });
+  if (bundleResponse.type === 'error') {
+    throw new Error('Failed to find last commit hash');
+  }
+  const { bundleId } = bundleResponse.value;
+
+  // Call remote bundle for analysis results and emit intermediate progress
+  const analysisData = await pollAnalysis(baseURL, sessionToken, bundleId, includeLint, severity);
+
+  if (analysisData.type === 'error') {
+    throw analysisData.error;
+  } else if (analysisData.value.status === AnalysisStatus.failed) {
+    throw new Error('Analysis has failed');
+  }
+
+  // Create bundle instance to handle extensions
+  const bundle = new GitBundle(
+    baseURL,
+    sessionToken,
+    includeLint,
+    severity,
+    bundleId,
+    analysisData.value.analysisResults,
+    analysisData.value.analysisURL,
+  );
+  bundle.gitUri = gitUri;
+  return bundle;
 }
 
-class Bundle {
+class BundleBase {
   private readonly baseURL: string;
   private readonly sessionToken: string;
   private readonly includeLint: boolean;
   private readonly severity: AnalysisSeverity;
-  private readonly paths: string[];
-  public readonly supportedFiles: ISupportedFiles;
   public readonly bundleId: string;
   public readonly analysisResults: IAnalysisResult;
   public readonly analysisUrl: string;
@@ -263,8 +298,6 @@ class Bundle {
     sessionToken: string,
     includeLint: boolean,
     severity: AnalysisSeverity,
-    supportedFiles: ISupportedFiles,
-    paths: string[],
     bundleId: string,
     analysisResults: IAnalysisResult,
     analysisUrl: string,
@@ -273,15 +306,21 @@ class Bundle {
     this.sessionToken = sessionToken;
     this.includeLint = includeLint;
     this.severity = severity;
-    this.supportedFiles = supportedFiles;
-    this.paths = paths;
-
     this.bundleId = bundleId;
     this.analysisResults = analysisResults;
     this.analysisUrl = analysisUrl;
   }
+}
 
-  // public async extend(files: string[], removedFiles: string[]): Promise<Bundle> {
+class GitBundle extends BundleBase {
+  public gitUri: string;
+}
+
+class FileBundle extends BundleBase {
+  public paths: string[];
+  public supportedFiles: ISupportedFiles;
+
+  // public async extend(files: string[], removedFiles: string[]): Promise<FileBundle> {
   //   return this;
   // }
 

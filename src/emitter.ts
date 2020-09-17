@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { AnalysisResponseProgress } from './http';
 
 // eslint-disable-next-line no-shadow
-export enum CUSTOM_EVENTS {
+enum CUSTOM_EVENTS {
   scanFilesProgress = 'scanFilesProgress',
   computeHashProgress = 'computeHashProgress',
   createBundleProgress = 'createBundleProgress',
@@ -12,7 +12,9 @@ export enum CUSTOM_EVENTS {
   error = 'error',
 }
 
-class Emitter extends EventEmitter {
+class EmitterDC extends EventEmitter {
+  events = CUSTOM_EVENTS;
+
   scanFilesProgress(processed: number): void {
     this.emit(CUSTOM_EVENTS.scanFilesProgress, processed);
   }
@@ -42,4 +44,5 @@ class Emitter extends EventEmitter {
   }
 }
 
-export const emitter = new Emitter();
+const emitter = new EmitterDC();
+export default emitter;

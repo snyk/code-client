@@ -167,6 +167,35 @@ export async function extendBundle(options: {
   }
 }
 
+export async function createGitBundle(options: {
+  readonly baseURL: string;
+  readonly sessionToken: string;
+  readonly platform: string;
+  readonly owner: string;
+  readonly repo: string;
+  readonly oid?: string;
+}): Promise<IResult<RemoteBundle>> {
+  const { baseURL, sessionToken, platform, owner, repo, oid } = options;
+  const config: AxiosRequestConfig = {
+    headers: { 'Session-Token': sessionToken },
+    url: `${baseURL}${apiPath}/bundle`,
+    method: 'POST',
+    data: {
+      platform,
+      owner,
+      repo,
+      oid,
+    },
+  };
+
+  try {
+    const response = await axios.request<RemoteBundle>(config);
+    return { type: 'success', value: response.data };
+  } catch (error) {
+    return { type: 'error', error: createErrorResponse(error, RequestTypes.createBundle) };
+  }
+}
+
 export async function uploadFiles(options: {
   readonly baseURL: string;
   readonly sessionToken: string;

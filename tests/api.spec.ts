@@ -5,6 +5,7 @@ import {
   startSession,
   checkSession,
   createBundle,
+  createGitBundle,
   checkBundle,
   uploadFiles,
   extendBundle,
@@ -379,6 +380,53 @@ describe('Requests to public API', () => {
           },
         ],
       });
+    }
+  });
+
+  it('create git bundle', async () => {
+    const bundleResponse = await createGitBundle({
+      baseURL,
+      sessionToken,
+      platform: 'github.com',
+      owner: 'DeepcodeAI',
+      repo: 'cli',
+    });
+    expect(bundleResponse.type).toEqual('success');
+    if (bundleResponse.type === 'error') return;
+    expect(bundleResponse.value.bundleId).toBeTruthy();
+  });
+
+  it('git analysis', async () => {
+    const bundleId = 'gh/DeepcodeAI/cli/320d98a6896f5376efe6cefefb6e70b46b97d566';
+
+    // Get analysis results
+    const response = await getAnalysis({
+      baseURL,
+      sessionToken,
+      bundleId,
+      useLinters: false,
+      severity: 1,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+
+    if (response.value.status === AnalysisStatus.done) {
+      expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
+      expect(response.value.analysisResults.suggestions[0]).toEqual({
+        categories: {
+          Defect: 1,
+          InTest: 1,
+        },
+        id: 'python%2Fdc%2FDuplicateKey%2Ftest',
+        lead_url: '',
+        message: 'Constructing a dictionary with the same key appearing twice: "format" and "format"',
+        rule: 'DuplicateKey/test',
+        severity: 1,
+        tags: ['maintenance', 'tests', 'type', 'duplicate'],
+      });
+      expect(Object.keys(response.value.analysisResults.files).length).toEqual(2);
     }
   });
 });

@@ -1,3 +1,5 @@
+import { ISupportedFiles } from './files.interface';
+
 export type Point = [number, number];
 
 // eslint-disable-next-line no-shadow
@@ -44,4 +46,24 @@ export interface IAnalysisFiles {
 export interface IAnalysisResult {
   suggestions: ISuggestions;
   files: IAnalysisFiles;
+}
+
+
+interface IBundleBase {
+  readonly baseURL: string;
+  readonly sessionToken: string;
+  readonly includeLint: boolean;
+  readonly severity: AnalysisSeverity;
+  readonly bundleId: string;
+  readonly analysisResults: IAnalysisResult;
+  readonly analysisURL: string;
+}
+
+export interface IGitBundle extends IBundleBase {
+  readonly gitUri: string;
+}
+
+export interface IFileBundle extends IBundleBase {
+  readonly paths: string[];
+  readonly supportedFiles: ISupportedFiles;
 }

@@ -62,7 +62,7 @@ tsc.events.on('sendError', error => {
 
 const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
 
-const { analysisResults, analysisUrl, bundleId } = bundle;
+const { analysisResults, analysisURL, bundleId } = bundle;
 ```
 
 ### Creates a new bundle based on a previously uploaded one
@@ -86,7 +86,7 @@ const { bundleId, missingFiles, uploadURL } = result;
 
 const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
 
-const { analysisResults, analysisUrl, bundleId } = bundle;
+const { analysisResults, analysisURL, bundleId } = bundle;
 ```
 
 ### Errors

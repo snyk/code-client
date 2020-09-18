@@ -1,14 +1,15 @@
-import { analyzeFolders, analyzeGit } from './analysis';
+import * as analysis from './analysis';
 import emitter from './emitter';
 import { startSession, checkSession } from './http';
-import { DCIGNORE_FILENAME, DCIGNORE_DRAFTS } from './constants';
+import * as constants from './constants';
+
+import { IFileBundle } from './interfaces/analysis-result.interface';
 
 export default {
-  analyzeFolders,
-  analyzeGit,
+  analysis,
   startSession,
   checkSession,
   emitter,
-  DCIGNORE_FILENAME,
-  DCIGNORE_DRAFTS,
+  constants,
+  IFileBundle,
 };

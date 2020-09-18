@@ -20,8 +20,8 @@ import {
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD } from './constants';
 
-import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
-import { AnalysisSeverity, IAnalysisResult } from './interfaces/analysis-result.interface';
+import { IFileInfo } from './interfaces/files.interface';
+import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
 
 // 1. Create a bundle for paths from scratch. Return bundle info together with request details and analysis results. Create a class Bundle for this
 // 2. class Bundle will implement method extend, that will conduct analysis and return another Bundle instance
@@ -167,7 +167,7 @@ export async function analyzeFolders(
   severity = AnalysisSeverity.info,
   paths: string[],
   maxPayload = MAX_PAYLOAD,
-): Promise<FileBundle> {
+): Promise<IFileBundle> {
   // Get supported filters and test baseURL for correctness and availability
   const resp = await getFilters(baseURL);
   if (resp.type === 'error') {
@@ -228,19 +228,17 @@ export async function analyzeFolders(
   }
 
   // Create bundle instance to handle extensions
-  const bundle = new FileBundle(
+  return {
     baseURL,
     sessionToken,
     includeLint,
     severity,
-    remoteBundle.bundleId,
-    analysisData.value.analysisResults,
-    analysisData.value.analysisURL,
-  );
-
-  bundle.supportedFiles = supportedFiles;
-  bundle.paths = paths;
-  return bundle;
+    supportedFiles,
+    paths,
+    bundleId: remoteBundle.bundleId,
+    analysisResults: analysisData.value.analysisResults,
+    analysisURL: analysisData.value.analysisURL,
+  };
 }
 
 export async function analyzeGit(
@@ -249,7 +247,7 @@ export async function analyzeGit(
   includeLint = false,
   severity = AnalysisSeverity.info,
   gitUri: string,
-): Promise<GitBundle> {
+): Promise<IGitBundle> {
   const repoKey = parseGitUri(gitUri);
   if (!repoKey) {
     throw new Error('Failed to parse git uri');
@@ -271,56 +269,20 @@ export async function analyzeGit(
   }
 
   // Create bundle instance to handle extensions
-  const bundle = new GitBundle(
+  return {
     baseURL,
     sessionToken,
     includeLint,
     severity,
     bundleId,
-    analysisData.value.analysisResults,
-    analysisData.value.analysisURL,
-  );
-  bundle.gitUri = gitUri;
-  return bundle;
+    gitUri,
+    analysisResults: analysisData.value.analysisResults,
+    analysisURL: analysisData.value.analysisURL,
+  };
 }
 
-class BundleBase {
-  private readonly baseURL: string;
-  private readonly sessionToken: string;
-  private readonly includeLint: boolean;
-  private readonly severity: AnalysisSeverity;
-  public readonly bundleId: string;
-  public readonly analysisResults: IAnalysisResult;
-  public readonly analysisUrl: string;
 
-  constructor(
-    baseURL: string,
-    sessionToken: string,
-    includeLint: boolean,
-    severity: AnalysisSeverity,
-    bundleId: string,
-    analysisResults: IAnalysisResult,
-    analysisUrl: string,
-  ) {
-    this.baseURL = baseURL;
-    this.sessionToken = sessionToken;
-    this.includeLint = includeLint;
-    this.severity = severity;
-    this.bundleId = bundleId;
-    this.analysisResults = analysisResults;
-    this.analysisUrl = analysisUrl;
-  }
-}
-
-class GitBundle extends BundleBase {
-  public gitUri: string;
-}
-
-class FileBundle extends BundleBase {
-  public paths: string[];
-  public supportedFiles: ISupportedFiles;
-
-  // public async extend(files: string[], removedFiles: string[]): Promise<FileBundle> {
+  // public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
   //   return this;
   // }
 
@@ -333,4 +295,3 @@ class FileBundle extends BundleBase {
   //     throw error;
   //   }
   // }
-}

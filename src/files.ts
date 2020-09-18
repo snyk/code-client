@@ -8,6 +8,7 @@ import { union } from 'lodash';
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES } from './constants';
 
 import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
+import { relative } from 'path';
 
 const isWindows = nodePath.sep === '\\';
 
@@ -45,7 +46,7 @@ function* scanDir(
   globPatterns: string[],
   symlinksEnabled = false,
   fileIgnores: string[] = IGNORES_DEFAULT,
-): Generator<string> {
+): Generator<fg.Entry> {
   let localFileIgnores = [...fileIgnores];
 
   // Check ignore files inside this directory
@@ -81,8 +82,8 @@ function* scanDir(
     caseSensitiveMatch: false,
     followSymbolicLinks: symlinksEnabled,
     onlyFiles: true,
-    objectMode: false,
-    stats: false,
+    objectMode: true,
+    stats: true,
   });
 
   for (const f of localFiles) {
@@ -110,38 +111,53 @@ function* scanDir(
   }
 }
 
+export function determineBaseDir(paths: string[]): string {
+  if (paths.length) {
+    const path = paths[0];
+    const stats = fs.statSync(path);
+    if (stats.isFile()) {
+      return nodePath.dirname(path);
+    }
+
+    return path;
+  }
+  return '';
+}
+
 /**
  * Returns bundle files from requested paths
  * */
-export function collectBundleFiles(
+export function* collectBundleFiles(
+  baseDir: string,
   paths: string[],
   supportedFiles: ISupportedFiles,
+  maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
   fileIgnores: string[] = IGNORES_DEFAULT,
-): string[] {
+): Generator<IFileInfo> {
   const globPatterns = getGlobPatterns(supportedFiles);
-  const files: string[] = [];
 
   for (const path of paths) {
-    // Check if symlink and exclude if requested
-
     // TODO: check lstatSync
     const fileStats = fs.statSync(path);
+    // Check if symlink and exclude if requested
     if (fileStats.isSymbolicLink() && !symlinksEnabled) continue;
 
     if (fileStats.isFile() && isFileSupported(path, supportedFiles)) {
-      files.push(path);
+
+      if (fileStats.size > maxFileSize) continue;
+      yield getFileInfo(path, baseDir);
     } else if (fileStats.isDirectory()) {
-      for (const f of scanDir(path, globPatterns, symlinksEnabled, fileIgnores)) {
-        files.push(f);
+      for (const entry of scanDir(path, globPatterns, symlinksEnabled, fileIgnores)) {
+        if (entry.stats && entry.stats.size > maxFileSize) continue;
+
+        yield getFileInfo(entry.path, baseDir);
       }
     }
   }
-
-  return files;
 }
 
-export function getFileMeta(filePath: string): IFileInfo {
+export function getFileInfo(filePath: string, baseDir: string): IFileInfo {
   const fileStats = fs.statSync(filePath);
 
   const fileContent = fs.readFileSync(filePath).toString('utf8');
@@ -150,23 +166,16 @@ export function getFileMeta(filePath: string): IFileInfo {
     .update(fileContent)
     .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
 
+  const relPath = nodePath.relative(baseDir, filePath);
+  const bundlePath = prepareFilePath(relPath);
   return {
+    filePath,
+    bundlePath,
+    // path: filePath,
     size: fileStats.size,
-    path: filePath,
     hash: fileHash,
     content: fileContent,
   };
-}
-
-export function* prepareBundleHashes(files: string[], maxFileSize = MAX_PAYLOAD): Generator<IFileInfo> {
-  // Read all files and return list of objects with path and hash
-  let info: IFileInfo | null = null;
-  for (const filePath of files) {
-    info = getFileMeta(filePath);
-    if (info.size <= maxFileSize) {
-      yield info;
-    }
-  }
 }
 
 export function prepareFilePath(filePath: string): string {
@@ -175,18 +184,19 @@ export function prepareFilePath(filePath: string): string {
   return `/${relpath}`;
 }
 
-export function resolveFilePath(bundleFilepath: string): string {
-  let path = bundleFilepath.slice(1);
+export function resolveMissingFiles(baseDir: string, bundleMissingFiles: string[]): IFileInfo[] {
+  return bundleMissingFiles.map(mf => {
+    let relPath = mf.slice(1);
 
-  if (isWindows) {
-    path = path.replace('/', '\\');
-  }
+    if (isWindows) {
+      relPath = relPath.replace('/', '\\');
+    }
 
-  // return os.path.abspath(path)
-  return path;
+    return getFileInfo(nodePath.join(baseDir, relPath), baseDir);
+  });
 }
 
-export function* composeFilePayloads(missingFiles: string[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {
+export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {
   type Bucket = {
     size: number;
     files: IFileInfo[];
@@ -194,18 +204,15 @@ export function* composeFilePayloads(missingFiles: string[], bucketSize = MAX_PA
   const buckets: Bucket[] = [{ size: bucketSize, files: [] }];
 
   let bucketIndex = -1;
-  let fileData: IFileInfo;
-  const isLowerSize = (bucket: Bucket) => bucket.size >= fileData.size;
-  for (const rawFilePath of missingFiles) {
-    fileData = getFileMeta(resolveFilePath(rawFilePath));
-
+  const isLowerSize = (bucket: Bucket, fileData: IFileInfo) => bucket.size >= fileData.size;
+  for (let fileData of files) {
     if (fileData.size > bucketSize) {
       // This file is too large. but it should not be here as previosly checked
       fileData = { ...fileData, size: 1, content: '' };
     }
 
     // Find suitable bucket
-    bucketIndex = buckets.findIndex(isLowerSize);
+    bucketIndex = buckets.findIndex(b => isLowerSize(b, fileData));
 
     if (bucketIndex === -1) {
       // Create a new bucket

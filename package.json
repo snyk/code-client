@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rollup -c",
     "compile": "tsc -p ./",
@@ -59,8 +61,10 @@
     "@types/lodash": "^4.14.159",
     "lodash": "^4.17.19",
     "ignore": "^5.1.8",
-    "@deepcode/dcignore": "^1.0.2",
     "queue": "^6.0.1",
     "fast-glob": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@deepcode/dcignore": "^1.0.2"
   }
 }

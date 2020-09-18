@@ -11,12 +11,12 @@ export const supportedFiles = {
   configFiles: ['.eslintrc.json'],
 };
 
-export const bundleFiles = [
-  `${sampleProjectPath}/AnnotatorTest.cpp`,
-  `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
-  `${sampleProjectPath}/app.js`,
-  `${sampleProjectPath}/db.js`,
-  `${sampleProjectPath}/main.js`,
-  `${sampleProjectPath}/routes/index.js`,
-  `${sampleProjectPath}/routes/sharks.js`,
+export const bundleFilePaths = [
+  `AnnotatorTest.cpp`,
+  `GitHubAccessTokenScrambler12.java`,
+  `app.js`,
+  `db.js`,
+  `main.js`,
+  `routes/index.js`,
+  `routes/sharks.js`,
 ];

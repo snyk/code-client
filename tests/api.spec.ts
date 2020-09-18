@@ -1,4 +1,5 @@
-import { baseURL, sessionToken, bundleFiles, sampleProjectPath } from './constants/base';
+import * as nodePath from 'path';
+import { baseURL, sessionToken, sampleProjectPath, bundleFilePaths } from './constants/base';
 
 import {
   getFilters,
@@ -14,15 +15,17 @@ import {
   reportError,
   reportEvent,
 } from '../src/http';
-import { prepareFilePath, getFileMeta } from '../src/files';
+import { getFileInfo } from '../src/files';
 
 import { checkBundleError404, extendBundleError404 } from './constants/errors';
 // import { supportedFiles } from '../src/utils/filesUtils';
 
-const fakeBundleId = 'aa64f67b74231558ca67874621882ea728230c4cc0f70929f8a4b512ac9795a0';
+const fakeBundleId = 'f031acaa1a98b1cccf09868f31e8a9692063be59a1e8bf2502cf5f56f575a759';
 let fakeBundleIdFull = '';
-const realBundleId = 'a4e83d44b91ddd1c3e3be3932b68725e80dd813eb7bc7a660c769b9439b4b220';
+const realBundleId = '705e49a9a8d5cd4be71e496c5eb36c7ec5c150ab998d6b75fa009cd66799bda1';
 let realBundleIdFull = '';
+
+const bundleFiles = bundleFilePaths.map(f => getFileInfo(nodePath.join(sampleProjectPath, f), sampleProjectPath));
 
 const reportTelemetryRequest = {
   baseURL,
@@ -134,7 +137,7 @@ describe('Requests to public API', () => {
   });
 
   it('creates bundle successfully', async () => {
-    const files = Object.fromEntries([...bundleFiles.entries()].map(([i, d]) => [prepareFilePath(d), `${i}`]));
+    const files = Object.fromEntries([...bundleFiles.entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
 
     const response = await createBundle({
       baseURL,
@@ -146,13 +149,13 @@ describe('Requests to public API', () => {
     expect(response.value.bundleId).toContain(fakeBundleId);
     fakeBundleIdFull = response.value.bundleId;
     expect(response.value.missingFiles).toEqual([
-      `${sampleProjectPath}/AnnotatorTest.cpp`,
-      `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
-      `${sampleProjectPath}/app.js`,
-      `${sampleProjectPath}/db.js`,
-      `${sampleProjectPath}/main.js`,
-      `${sampleProjectPath}/routes/index.js`,
-      `${sampleProjectPath}/routes/sharks.js`,
+      `/AnnotatorTest.cpp`,
+      `/GitHubAccessTokenScrambler12.java`,
+      `/app.js`,
+      `/db.js`,
+      `/main.js`,
+      `/routes/index.js`,
+      `/routes/sharks.js`,
     ]);
   });
 
@@ -166,13 +169,13 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(response.value.bundleId).toEqual(fakeBundleIdFull);
     expect(response.value.missingFiles).toEqual([
-      `${sampleProjectPath}/AnnotatorTest.cpp`,
-      `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
-      `${sampleProjectPath}/app.js`,
-      `${sampleProjectPath}/db.js`,
-      `${sampleProjectPath}/main.js`,
-      `${sampleProjectPath}/routes/index.js`,
-      `${sampleProjectPath}/routes/sharks.js`,
+      `/AnnotatorTest.cpp`,
+      `/GitHubAccessTokenScrambler12.java`,
+      `/app.js`,
+      `/db.js`,
+      `/main.js`,
+      `/routes/index.js`,
+      `/routes/sharks.js`,
     ]);
   });
 
@@ -211,24 +214,24 @@ describe('Requests to public API', () => {
       sessionToken,
       bundleId: fakeBundleIdFull,
       files: {
-        [`${sampleProjectPath}/new.js`]: 'new123',
+        [`/new.js`]: 'new123',
       },
       removedFiles: [
-        `${sampleProjectPath}/app.js`,
-        `${sampleProjectPath}/AnnotatorTest.cpp`,
-        `${sampleProjectPath}/GitHubAccessTokenScrambler12.java`,
-        `${sampleProjectPath}/db.js`,
-        `${sampleProjectPath}/main.js`,
-        `${sampleProjectPath}/routes/index.js`,
-        `${sampleProjectPath}/routes/sharks.js`,
+        `/app.js`,
+        `/AnnotatorTest.cpp`,
+        `/GitHubAccessTokenScrambler12.java`,
+        `/db.js`,
+        `/main.js`,
+        `/routes/index.js`,
+        `/routes/sharks.js`,
       ],
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(response.value.bundleId).toEqual(
-      'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/28f6535914390760cdf36801719204a159bdfc699031701e7236b91f3df5d171',
+      'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
     );
-    expect(response.value.missingFiles).toEqual([`${sampleProjectPath}/new.js`]);
+    expect(response.value.missingFiles).toEqual([`/new.js`]);
   });
 
   it('extends expired bundle successfully', async () => {
@@ -237,7 +240,7 @@ describe('Requests to public API', () => {
       sessionToken,
       bundleId: 'wrong-bundle-id',
       files: {
-        [`${sampleProjectPath}/new2.js`]: 'new1234',
+        [`/new2.js`]: 'new1234',
       },
     });
 
@@ -275,7 +278,7 @@ describe('Requests to public API', () => {
 
   it('test successful workflow', async () => {
     // Create a bundle first
-    const files = Object.fromEntries(bundleFiles.map(d => [prepareFilePath(d), getFileMeta(d).hash]));
+    const files = Object.fromEntries(bundleFiles.map(d => [d.bundlePath, d.hash]));
 
     const bundleResponse = await createBundle({
       baseURL,
@@ -288,10 +291,9 @@ describe('Requests to public API', () => {
     realBundleIdFull = bundleResponse.value.bundleId;
 
     const content = bundleFiles.map(d => {
-      const fileData = getFileMeta(d);
       return {
-        fileHash: fileData.hash,
-        fileContent: fileData.content || '',
+        fileHash: d.hash,
+        fileContent: d.content || '',
       };
     });
 
@@ -345,7 +347,7 @@ describe('Requests to public API', () => {
         tags: [],
       });
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-      expect(response.value.analysisResults.files[`${sampleProjectPath}/AnnotatorTest.cpp`]).toEqual({
+      expect(response.value.analysisResults.files[`/AnnotatorTest.cpp`]).toEqual({
         '0': [
           {
             cols: [8, 27],

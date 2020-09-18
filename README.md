@@ -41,8 +41,8 @@ const { isLoggedIn } = await tsc.checkSession({ baseURL, sessionToken });
 ### Can subscribe to the following events:
 ```javascript
 /** Building bundle process started with provided data */
-tsc.events.on('computeHashProgress', (processed: number, total: number) = {
-  console.log(processed, total);
+tsc.events.on('scanFilesProgress', (processed: number) = {
+  console.log(`Indexed ${processed} files`);
 });
 
 /** Bundle upload process is started with provided data */

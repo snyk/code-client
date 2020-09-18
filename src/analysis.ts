@@ -1,6 +1,6 @@
 import { chunk } from 'lodash';
 
-import { collectBundleFiles, prepareBundleHashes, prepareFilePath, composeFilePayloads } from './files';
+import { collectBundleFiles, composeFilePayloads, determineBaseDir, resolveMissingFiles } from './files';
 import parseGitUri from './gitUtils';
 import {
   getFilters,
@@ -30,22 +30,22 @@ import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis
 async function createRemoteBundle(
   baseURL: string,
   sessionToken: string,
-  fileHashes: IFileInfo[],
+  files: IFileInfo[],
   maxPayload = MAX_PAYLOAD,
 ): Promise<IResult<RemoteBundle> | null> {
   let response: IResult<RemoteBundle> | null = null;
 
-  const fileChunks = chunk(fileHashes, maxPayload / 300);
+  const fileChunks = chunk(files, maxPayload / 300);
   emitter.createBundleProgress(0, fileChunks.length);
   for (const [i, chunkedFiles] of fileChunks.entries()) {
-    const files = Object.fromEntries(chunkedFiles.map(d => [prepareFilePath(d.path), d.hash]));
+    const paramFiles = Object.fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
 
     if (response === null) {
       // eslint-disable-next-line no-await-in-loop
       response = await createBundle({
         baseURL,
         sessionToken,
-        files,
+        files: paramFiles,
       });
     } else {
       // eslint-disable-next-line no-await-in-loop
@@ -53,11 +53,11 @@ async function createRemoteBundle(
         baseURL,
         sessionToken,
         bundleId: response.value.bundleId,
-        files,
+        files: paramFiles,
       });
     }
 
-    emitter.createBundleProgress(i, fileChunks.length);
+    emitter.createBundleProgress(i + 1, fileChunks.length);
 
     if (response.type === 'error') {
       // TODO: process Error
@@ -77,16 +77,18 @@ async function createRemoteBundle(
 export async function uploadRemoteBundle(
   baseURL: string,
   sessionToken: string,
-  remoteBundle: RemoteBundle,
+  bundleId: string,
+  files: IFileInfo[],
+  maxPayload = MAX_PAYLOAD,
 ): Promise<boolean> {
   let uploadedFiles = 0;
-  emitter.uploadBundleProgress(0, remoteBundle.missingFiles.length);
+  emitter.uploadBundleProgress(0, files.length);
 
   const uploadFileChunks = async (bucketFiles: IFileInfo[]): Promise<boolean> => {
     const resp = await uploadFiles({
       baseURL,
       sessionToken,
-      bundleId: remoteBundle.bundleId,
+      bundleId,
       content: bucketFiles.map(f => {
         return { fileHash: f.hash, fileContent: f.content || '' };
       }),
@@ -94,7 +96,7 @@ export async function uploadRemoteBundle(
 
     if (resp.type !== 'error') {
       uploadedFiles += bucketFiles.length;
-      emitter.uploadBundleProgress(uploadedFiles, remoteBundle.missingFiles.length);
+      emitter.uploadBundleProgress(uploadedFiles, files.length);
       return true;
     }
 
@@ -102,7 +104,7 @@ export async function uploadRemoteBundle(
   };
 
   const tasks = [];
-  for (const bucketFiles of composeFilePayloads(remoteBundle.missingFiles)) {
+  for (const bucketFiles of composeFilePayloads(files, maxPayload)) {
     tasks.push(uploadFileChunks(bucketFiles));
   }
 
@@ -127,6 +129,7 @@ async function pollAnalysis(
     progress: 0,
   });
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
     analysisResponse = await getAnalysis({
@@ -176,23 +179,19 @@ export async function analyzeFolders(
   const supportedFiles = resp.value;
 
   // Scan directories and find all suitable files
+  const baseDir = determineBaseDir(paths);
 
-  emitter.scanFilesProgress(0); // TODO: report progress on scanning too
-  const bundleFiles = collectBundleFiles(paths, supportedFiles);
-  emitter.scanFilesProgress(bundleFiles.length); // TODO: report progress on scanning too
-
-  // Annotate all suitable files with meta information including hashe
-  const fileHashes = [];
-  let filesCount = 0;
-  emitter.computeHashProgress(0, bundleFiles.length);
-  for (const h of prepareBundleHashes(bundleFiles, maxPayload)) {
-    fileHashes.push(h);
-    filesCount += 1;
-    emitter.computeHashProgress(filesCount, bundleFiles.length);
+  emitter.scanFilesProgress(0);
+  const bundleFiles = [];
+  let totalFiles = 0;
+  for (const f of collectBundleFiles(baseDir, paths, supportedFiles)) {
+    bundleFiles.push(f);
+    totalFiles += 1;
+    emitter.scanFilesProgress(totalFiles);
   }
 
   // Create remote bundle
-  let bundleResponse = await createRemoteBundle(baseURL, sessionToken, fileHashes, maxPayload);
+  let bundleResponse = await createRemoteBundle(baseURL, sessionToken, bundleFiles, maxPayload);
   if (bundleResponse === null) {
     throw new Error('File list is empty');
   } else if (bundleResponse.type === 'error') {
@@ -203,7 +202,8 @@ export async function analyzeFolders(
   // Check remove bundle to make sure no missing files left
   let remoteBundle = bundleResponse.value;
   if (remoteBundle.missingFiles.length) {
-    const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle);
+    const missingFiles = resolveMissingFiles(baseDir, remoteBundle.missingFiles);
+    const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
     if (!isUploaded) {
       throw new Error('Failed to upload some files');
     }
@@ -281,17 +281,16 @@ export async function analyzeGit(
   };
 }
 
+// public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
+//   return this;
+// }
 
-  // public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
-  //   return this;
-  // }
-
-  //     await startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
-  //       emitter.sendError(error);
-  //       throw error;
-  //     });
-  //   } catch (error) {
-  //     emitter.sendError(error);
-  //     throw error;
-  //   }
-  // }
+//     await startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
+//       emitter.sendError(error);
+//       throw error;
+//     });
+//   } catch (error) {
+//     emitter.sendError(error);
+//     throw error;
+//   }
+// }

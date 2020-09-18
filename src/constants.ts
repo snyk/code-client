@@ -19,14 +19,6 @@ export const DCIGNORE_DRAFTS = {
   default: DefaultDCIgnore,
 };
 
-// // eslint-disable-next-line no-shadow
-// export enum FILE_CURRENT_STATUS {
-//   modified = 'modified',
-//   deleted = 'deleted',
-//   same = 'same',
-//   created = 'created',
-// }
-
 // eslint-disable-next-line no-shadow
 export enum RequestTypes {
   startSession = 'startSession',

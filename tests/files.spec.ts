@@ -1,48 +1,61 @@
 
 import * as fs from 'fs';
+import * as nodePath from 'path';
 
-import { collectBundleFiles, prepareBundleHashes, prepareFilePath, composeFilePayloads, parseFileIgnores, getFileMeta } from '../src/files';
+import { collectBundleFiles, prepareFilePath, composeFilePayloads, parseFileIgnores, getFileInfo } from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles } from './constants/base';
+import { sampleProjectPath, supportedFiles, bundleFilePaths } from './constants/base';
+
+const bundleFiles = bundleFilePaths.map(f => getFileInfo(nodePath.join(sampleProjectPath, f), sampleProjectPath));
 
 describe('files', () => {
-
   it('collect bundle files', async () => {
-    const bundleFiles = collectBundleFiles([sampleProjectPath], supportedFiles);
-    expect(bundleFiles).toEqual(bundleFiles);
+    const files = [...collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles)];
+    expect(files).toEqual(bundleFiles);
+
+    const firstFile = files[0];
+    expect(firstFile.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
+    expect(firstFile.bundlePath).toEqual('/AnnotatorTest.cpp');
+    expect(firstFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
+    expect(firstFile.size).toEqual(239);
+    expect(firstFile.content).toEqual(fs.readFileSync(firstFile.filePath).toString('utf8'));
   });
 
-  it('prepare bundle hashes', async () => {
-    const filesData = [...prepareBundleHashes(bundleFiles)];
-    expect(filesData.length).toEqual(7);
-    expect(filesData[0].hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
-    expect(filesData[0].path).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
-    expect(filesData[0].size).toEqual(239);
-    expect(filesData[0].content).toEqual(fs.readFileSync(filesData[0].path).toString('utf8'));
-
+  it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
-    const smallFiles = [...prepareBundleHashes(bundleFiles, 500)];
+    const smallFiles = [...collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, 500)];
     expect(smallFiles.length).toEqual(3);
   });
 
-  // TODO: refactor it with relative path
+  it('collect bundle files with multiple folders', async () => {
+    // Limit size and we get fewer files
+    const folders = [
+      nodePath.join(sampleProjectPath, 'models'),
+      nodePath.join(sampleProjectPath, 'controllers')
+    ];
+    const smallFiles = [...collectBundleFiles(sampleProjectPath, folders, supportedFiles)];
+    expect(smallFiles.length).toEqual(2);
+    expect(smallFiles.map(f => [f.filePath, f.bundlePath])).toEqual([
+      [`${sampleProjectPath}/models/sharks.js`, "/models/sharks.js"],
+      [`${sampleProjectPath}/controllers/sharks.js`, "/controllers/sharks.js"],
+    ]);
+  });
+
   it('prepare file path', () => {
-    const relpath = prepareFilePath(`${sampleProjectPath}/AnnotatorTest.cpp`);
-    expect(relpath).toEqual(`/${sampleProjectPath}/AnnotatorTest.cpp`);
+    const relpath = prepareFilePath(`AnnotatorTest.cpp`);
+    expect(relpath).toEqual(`/AnnotatorTest.cpp`);
   });
 
   it('compose file payloads', () => {
-
     // Prepare all missing files first
-    const missingFiles = bundleFiles.map(prepareFilePath);
-
-    const payloads = [...composeFilePayloads(missingFiles, 1024)];
+    const payloads = [...composeFilePayloads(bundleFiles, 1024)];
     expect(payloads.length).toEqual(4); // 4 chunks
     expect(payloads[0].length).toEqual(3);
-    expect(payloads[0][0].path).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
+    expect(payloads[0][0].filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
+    expect(payloads[0][0].bundlePath).toEqual(`/AnnotatorTest.cpp`);
     expect(payloads[0][0].size).toEqual(239);
     expect(payloads[0][0].hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
-    expect(payloads[0][0].content).toEqual(fs.readFileSync(payloads[0][0].path).toString('utf8'));
+    expect(payloads[0][0].content).toEqual(fs.readFileSync(payloads[0][0].filePath).toString('utf8'));
   });
 
   it('parse dc ignore file', () => {
@@ -53,14 +66,13 @@ describe('files', () => {
   it('support of utf-8 encoding', () => {
     // fs.readFileSync(payloads[0][0].path).toString('utf8')
     const filePath = `${sampleProjectPath}/app.js`;
-    const fileMeta = getFileMeta(filePath);
+    const fileMeta = getFileInfo(filePath, sampleProjectPath);
     expect(fileMeta.hash).toEqual('577ccb10a08ec72a2a8b794b773e1d31b24b99b0e92fc0a3c2a01fef9bf820b8');
   });
 
   it('support of iso8859 encoding', () => {
     const filePath = `${sampleProjectPath}/main.js`;
-    const fileMeta = getFileMeta(filePath);
+    const fileMeta = getFileInfo(filePath, sampleProjectPath);
     expect(fileMeta.hash).toEqual('3e2979852cc2e97f48f7e7973a8b0837eb73ed0485c868176bc3aa58c499f534');
   });
-
 });

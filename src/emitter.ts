@@ -12,7 +12,7 @@ enum CUSTOM_EVENTS {
   error = 'error',
 }
 
-class EmitterDC extends EventEmitter {
+export class EmitterDC extends EventEmitter {
   events = CUSTOM_EVENTS;
 
   scanFilesProgress(processed: number): void {
@@ -37,10 +37,6 @@ class EmitterDC extends EventEmitter {
 
   sendError(error: Error): void {
     this.emit(CUSTOM_EVENTS.error, error);
-  }
-
-  removeListeners(): void {
-    this.removeAllListeners();
   }
 }
 

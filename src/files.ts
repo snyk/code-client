@@ -4,18 +4,12 @@ import * as fs from 'fs';
 import fg from 'fast-glob';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 import { union } from 'lodash';
-import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES } from './constants';
 
 import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
 
 const isWindows = nodePath.sep === '\\';
-
-const DCIGNORE_DRAFTS = {
-  custom: CustomDCIgnore,
-  default: DefaultDCIgnore,
-};
 
 export function isFileSupported(path: string, supportedFiles: ISupportedFiles): boolean {
   return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));

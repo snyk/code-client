@@ -1,3 +1,4 @@
+import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 
 export const MAX_PAYLOAD = 4 * 1024 * 1024;
 export const defaultBaseURL = 'https://www.deepcode.ai';
@@ -12,6 +13,11 @@ export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENA
 export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}`];
 
 export const IGNORE_FILES_NAMES = [GITIGNORE_FILENAME, DCIGNORE_FILENAME];
+
+export const DCIGNORE_DRAFTS = {
+  custom: CustomDCIgnore,
+  default: DefaultDCIgnore,
+};
 
 // // eslint-disable-next-line no-shadow
 // export enum FILE_CURRENT_STATUS {

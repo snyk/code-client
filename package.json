@@ -2,11 +2,10 @@
   "name": "@deepcode/tsc",
   "version": "2.0.0",
   "description": "Typescript consumer of Deepcode public API",
-  "main": "build/index.js",
-  "engines": {
-    "node": ">=14.9.0"
-  },
-  "type": "commonjs",
+  "main": "dist/index.es.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "rollup -c",
     "compile": "tsc -p ./",
@@ -15,9 +14,6 @@
     "watch": "rollup -w -c",
     "test": "jest --coverage"
   },
-  "files": [
-    "build"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeepCodeAI/tsc.git"

@@ -48,7 +48,6 @@ export interface IAnalysisResult {
   files: IAnalysisFiles;
 }
 
-
 interface IBundleBase {
   readonly baseURL: string;
   readonly sessionToken: string;

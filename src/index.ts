@@ -3,7 +3,14 @@ import emitter from './emitter';
 import { startSession, checkSession, reportEvent, reportError } from './http';
 import * as constants from './constants';
 
-import { IFileBundle } from './interfaces/analysis-result.interface';
+import {
+  IFileSuggestion,
+  IFilePath,
+  ISuggestion,
+  ISuggestions,
+  IAnalysisResult,
+  IFileBundle,
+} from './interfaces/analysis-result.interface';
 
 export {
   analyzeFolders,
@@ -14,5 +21,10 @@ export {
   reportError,
   emitter,
   constants,
+  IFileSuggestion,
+  IFilePath,
+  ISuggestion,
+  ISuggestions,
+  IAnalysisResult,
   IFileBundle,
 };

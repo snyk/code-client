@@ -9,11 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c",
     "compile": "tsc -p ./",
     "lint": "npx eslint src/**/*.ts",
     "lint:fix": "npx eslint --fix src/**/*.ts",
-    "watch": "rollup -w -c",
+    "watch": "tsc -watch -p ./",
     "test": "jest --coverage"
   },
   "repository": {
@@ -47,24 +46,16 @@
     "jest": "^26.4.2",
     "nock": "^13.0.4",
     "prettier": "^2.1.1",
-    "rollup": "^2.26.9",
-    "rollup-plugin-peer-deps-external": "^2.2.3",
-    "rollup-plugin-typescript2": "^0.27.2",
-    "@rollup/plugin-commonjs": "^15.0.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^9.0.0",
     "ts-jest": "^26.3.0",
     "typescript": "^4.0.2"
   },
   "dependencies": {
+    "@deepcode/dcignore": "^1.0.2",
     "axios": "^0.19.0",
     "@types/lodash": "^4.14.159",
     "lodash": "^4.17.19",
     "ignore": "^5.1.8",
     "queue": "^6.0.1",
     "fast-glob": "^3.2.4"
-  },
-  "peerDependencies": {
-    "@deepcode/dcignore": "^1.0.2"
   }
 }

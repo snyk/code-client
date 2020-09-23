@@ -1,5 +1,6 @@
-import * as nodePath from 'path';
-import { baseURL, sessionToken, sampleProjectPath, bundleFilePaths } from './constants/base';
+
+import { baseURL, sessionToken } from './constants/base';
+import { bundleFiles } from './constants/sample';
 
 import {
   getFilters,
@@ -24,8 +25,6 @@ const fakeBundleId = 'f031acaa1a98b1cccf09868f31e8a9692063be59a1e8bf2502cf5f56f5
 let fakeBundleIdFull = '';
 const realBundleId = '705e49a9a8d5cd4be71e496c5eb36c7ec5c150ab998d6b75fa009cd66799bda1';
 let realBundleIdFull = '';
-
-const bundleFiles = bundleFilePaths.map(f => getFileInfo(nodePath.join(sampleProjectPath, f), sampleProjectPath));
 
 const reportTelemetryRequest = {
   baseURL,
@@ -137,7 +136,7 @@ describe('Requests to public API', () => {
   });
 
   it('creates bundle successfully', async () => {
-    const files = Object.fromEntries([...bundleFiles.entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
+    const files = Object.fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
 
     const response = await createBundle({
       baseURL,
@@ -278,7 +277,7 @@ describe('Requests to public API', () => {
 
   it('test successful workflow', async () => {
     // Create a bundle first
-    const files = Object.fromEntries(bundleFiles.map(d => [d.bundlePath, d.hash]));
+    const files = Object.fromEntries((await bundleFiles).map(d => [d.bundlePath, d.hash]));
 
     const bundleResponse = await createBundle({
       baseURL,
@@ -290,7 +289,7 @@ describe('Requests to public API', () => {
     expect(bundleResponse.value.bundleId).toContain(realBundleId);
     realBundleIdFull = bundleResponse.value.bundleId;
 
-    const content = bundleFiles.map(d => {
+    const content = (await bundleFiles).map(d => {
       return {
         fileHash: d.hash,
         fileContent: d.content || '',
@@ -334,18 +333,15 @@ describe('Requests to public API', () => {
     if (response.value.status === AnalysisStatus.done) {
       expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
-      expect(response.value.analysisResults.suggestions[0]).toEqual({
-        categories: {
-          Check: 1,
-          InTest: 1,
-        },
-        id: 'cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse',
-        lead_url: '',
-        message: 'The expression will always evaluate to false because both sides always hold the same value.',
-        rule: 'CppSameEvalBinaryExpressionfalse',
-        severity: 2,
-        tags: [],
-      });
+      const suggestion = response.value.analysisResults.suggestions[0];
+      expect(suggestion.id).toEqual('cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse');
+      expect(suggestion.leadURL).toEqual('');
+      expect(suggestion.message).toEqual(
+        'The expression will always evaluate to false because both sides always hold the same value.',
+      );
+      expect(suggestion.rule).toEqual('CppSameEvalBinaryExpressionfalse');
+      expect(suggestion.severity).toEqual(2);
+      expect(suggestion.tags).toEqual([]);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
       expect(response.value.analysisResults.files[`/AnnotatorTest.cpp`]).toEqual({
         '0': [
@@ -416,18 +412,22 @@ describe('Requests to public API', () => {
     if (response.value.status === AnalysisStatus.done) {
       expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(response.value.analysisResults.suggestions[0]).toEqual({
-        categories: {
-          Defect: 1,
-          InTest: 1,
-        },
-        id: 'python%2Fdc%2FDuplicateKey%2Ftest',
-        lead_url: '',
-        message: 'Constructing a dictionary with the same key appearing twice: "format" and "format"',
-        rule: 'DuplicateKey/test',
-        severity: 1,
-        tags: ['maintenance', 'tests', 'type', 'duplicate'],
-      });
+
+      const suggestion = response.value.analysisResults.suggestions[0];
+      // expect(suggestion.categories).toEqual({
+      //   Defect: 1,
+      //   InTest: 1,
+      // });
+      expect(suggestion).toHaveProperty('exampleCommitDescriptions');
+      expect(suggestion).toHaveProperty('exampleCommitFixes');
+      expect(suggestion.leadURL).toEqual('');
+      expect(suggestion.id).toEqual('python%2Fdc%2FDuplicateKey%2Ftest');
+      expect(suggestion.message).toEqual(
+        'Constructing a dictionary with the same key appearing twice: "format" and "format"',
+      );
+      expect(suggestion.rule).toEqual('DuplicateKey/test');
+      expect(suggestion.severity).toEqual(1);
+      expect(suggestion.tags).toEqual(['maintenance', 'tests', 'type', 'duplicate']);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(2);
     }
   });

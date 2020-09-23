@@ -13,6 +13,9 @@ export interface ISuggestion {
   id: string;
   message: string;
   severity: AnalysisSeverity;
+  leadURL?: string;
+  rule: string;
+  tags: string[];
 }
 
 export interface ISuggestions {
@@ -29,10 +32,8 @@ export interface IMarker {
   pos: IPosition;
 }
 
-export interface IFileSuggestion {
-  cols: Point;
-  rows: Point;
-  markers: IMarker[];
+export interface IFileSuggestion extends IPosition {
+  markers?: IMarker[];
 }
 
 export interface IFilePath {
@@ -63,6 +64,7 @@ export interface IGitBundle extends IBundleBase {
 }
 
 export interface IFileBundle extends IBundleBase {
+  readonly baseDir: string;
   readonly paths: string[];
   readonly supportedFiles: ISupportedFiles;
 }

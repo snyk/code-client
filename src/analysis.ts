@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { chunk } from 'lodash';
 
 import { collectBundleFiles, composeFilePayloads, determineBaseDir, resolveMissingFiles } from './files';
@@ -184,7 +185,7 @@ export async function analyzeFolders(
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
   let totalFiles = 0;
-  for (const f of collectBundleFiles(baseDir, paths, supportedFiles)) {
+  for await (const f of collectBundleFiles(baseDir, paths, supportedFiles)) {
     bundleFiles.push(f);
     totalFiles += 1;
     emitter.scanFilesProgress(totalFiles);
@@ -201,8 +202,8 @@ export async function analyzeFolders(
   // Fulfill remove bundle by uploading only missing files (splitted in chunks)
   // Check remove bundle to make sure no missing files left
   let remoteBundle = bundleResponse.value;
-  if (remoteBundle.missingFiles.length) {
-    const missingFiles = resolveMissingFiles(baseDir, remoteBundle.missingFiles);
+  while (remoteBundle.missingFiles.length) {
+    const missingFiles = await resolveMissingFiles(baseDir, remoteBundle.missingFiles);
     const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
     if (!isUploaded) {
       throw new Error('Failed to upload some files');
@@ -234,6 +235,7 @@ export async function analyzeFolders(
     includeLint,
     severity,
     supportedFiles,
+    baseDir,
     paths,
     bundleId: remoteBundle.bundleId,
     analysisResults: analysisData.value.analysisResults,
@@ -283,14 +285,4 @@ export async function analyzeGit(
 
 // public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
 //   return this;
-// }
-
-//     await startAnalysisLoop({ baseURL, sessionToken, bundleId: this.bundleId }).catch(error => {
-//       emitter.sendError(error);
-//       throw error;
-//     });
-//   } catch (error) {
-//     emitter.sendError(error);
-//     throw error;
-//   }
 // }

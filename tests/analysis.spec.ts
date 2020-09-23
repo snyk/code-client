@@ -1,18 +1,16 @@
-import * as nodePath from 'path';
 import { analyzeFolders, uploadRemoteBundle } from '../src/analysis';
-import { getFileInfo } from '../src/files';
-import { baseURL, sessionToken, sampleProjectPath, bundleFilePaths } from './constants/base';
+import { baseURL, sessionToken } from './constants/base';
+import { sampleProjectPath, bundleFiles } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 
-const bundleFiles = bundleFilePaths.map(f => getFileInfo(nodePath.join(sampleProjectPath, f), sampleProjectPath));
-
 describe('Functional test of analysis', () => {
   it('analyze folder', async () => {
+    const bFiles = await bundleFiles;
     const onScanFilesProgress = jest.fn((processed: number) => {
       expect(typeof processed).toBe('number');
       expect(processed).toBeGreaterThanOrEqual(0);
-      expect(processed).toBeLessThanOrEqual(bundleFiles.length);;
+      expect(processed).toBeLessThanOrEqual(bFiles.length);
     });
     emitter.on(emitter.events.scanFilesProgress, onScanFilesProgress);
 
@@ -52,14 +50,14 @@ describe('Functional test of analysis', () => {
 
     const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
       expect(typeof processed).toBe('number');
-      expect(total).toEqual(bundleFiles.length);
+      expect(total).toEqual(bFiles.length);
 
       expect(processed).toBeLessThanOrEqual(total);
     });
     emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
     // Forse uploading files one more time
-    uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, bundleFiles);
+    uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, bFiles);
 
     expect(uploaded).toEqual(true);
 

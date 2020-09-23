@@ -1,16 +1,18 @@
 import * as nodePath from 'path';
-// import { Buffer } from 'buffer';
 import * as fs from 'fs';
 import fg from 'fast-glob';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 import { union } from 'lodash';
+import util from 'util';
 
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES } from './constants';
 
 import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
-import { relative } from 'path';
 
 const isWindows = nodePath.sep === '\\';
+
+const lStat = util.promisify(fs.lstat);
+const readFile = util.promisify(fs.readFile);
 
 export function isFileSupported(path: string, supportedFiles: ISupportedFiles): boolean {
   return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));
@@ -114,7 +116,7 @@ function* scanDir(
 export function determineBaseDir(paths: string[]): string {
   if (paths.length) {
     const path = paths[0];
-    const stats = fs.statSync(path);
+    const stats = fs.lstatSync(path);
     if (stats.isFile()) {
       return nodePath.dirname(path);
     }
@@ -127,24 +129,23 @@ export function determineBaseDir(paths: string[]): string {
 /**
  * Returns bundle files from requested paths
  * */
-export function* collectBundleFiles(
+export async function* collectBundleFiles(
   baseDir: string,
   paths: string[],
   supportedFiles: ISupportedFiles,
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
   fileIgnores: string[] = IGNORES_DEFAULT,
-): Generator<IFileInfo> {
+): AsyncGenerator<IFileInfo> {
   const globPatterns = getGlobPatterns(supportedFiles);
 
   for (const path of paths) {
-    // TODO: check lstatSync
-    const fileStats = fs.statSync(path);
+    // eslint-disable-next-line no-await-in-loop
+    const fileStats = await lStat(path);
     // Check if symlink and exclude if requested
     if (fileStats.isSymbolicLink() && !symlinksEnabled) continue;
 
     if (fileStats.isFile() && isFileSupported(path, supportedFiles)) {
-
       if (fileStats.size > maxFileSize) continue;
       yield getFileInfo(path, baseDir);
     } else if (fileStats.isDirectory()) {
@@ -157,35 +158,29 @@ export function* collectBundleFiles(
   }
 }
 
-export function getFileInfo(filePath: string, baseDir: string): IFileInfo {
-  const fileStats = fs.statSync(filePath);
+export async function getFileInfo(filePath: string, baseDir: string): Promise<IFileInfo> {
+  const fileStats = await lStat(filePath);
 
-  const fileContent = fs.readFileSync(filePath).toString('utf8');
+  const fileContent = await readFile(filePath, 'utf8');
   const fileHash = crypto
     .createHash(HASH_ALGORITHM)
     .update(fileContent)
     .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
 
   const relPath = nodePath.relative(baseDir, filePath);
-  const bundlePath = prepareFilePath(relPath);
+  const posixPath = !isWindows ? relPath : relPath.replace('\\', '/');
+
   return {
     filePath,
-    bundlePath,
-    // path: filePath,
+    bundlePath: `/${posixPath}`,
     size: fileStats.size,
     hash: fileHash,
     content: fileContent,
   };
 }
 
-export function prepareFilePath(filePath: string): string {
-  // os.path.relpath(filepath)
-  const relpath = !isWindows ? filePath : filePath.replace('\\', '/');
-  return `/${relpath}`;
-}
-
-export function resolveMissingFiles(baseDir: string, bundleMissingFiles: string[]): IFileInfo[] {
-  return bundleMissingFiles.map(mf => {
+export async function resolveMissingFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
+  const tasks = bundleMissingFiles.map(mf => {
     let relPath = mf.slice(1);
 
     if (isWindows) {
@@ -194,6 +189,8 @@ export function resolveMissingFiles(baseDir: string, bundleMissingFiles: string[
 
     return getFileInfo(nodePath.join(baseDir, relPath), baseDir);
   });
+
+  return Promise.all(tasks);
 }
 
 export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {

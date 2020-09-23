@@ -6,6 +6,7 @@ import * as constants from './constants';
 import {
   IFileSuggestion,
   IFilePath,
+  IMarker,
   ISuggestion,
   ISuggestions,
   IAnalysisResult,
@@ -23,6 +24,7 @@ export {
   constants,
   IFileSuggestion,
   IFilePath,
+  IMarker,
   ISuggestion,
   ISuggestions,
   IAnalysisResult,

@@ -29,7 +29,7 @@ export interface IPosition {
 
 export interface IMarker {
   msg: Point;
-  pos: IPosition;
+  pos: IPosition[];
 }
 
 export interface IFileSuggestion extends IPosition {

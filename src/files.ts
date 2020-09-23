@@ -179,18 +179,23 @@ export async function getFileInfo(filePath: string, baseDir: string): Promise<IF
   };
 }
 
-export async function resolveMissingFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
+export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
   const tasks = bundleMissingFiles.map(mf => {
-    let relPath = mf.slice(1);
-
-    if (isWindows) {
-      relPath = relPath.replace('/', '\\');
-    }
-
-    return getFileInfo(nodePath.join(baseDir, relPath), baseDir);
+    const filePath = resolveBundleFilePath(baseDir, mf);
+    return getFileInfo(filePath, baseDir);
   });
 
   return Promise.all(tasks);
+}
+
+export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): string {
+  let relPath = bundleFilePath.slice(1);
+
+  if (isWindows) {
+    relPath = relPath.replace('/', '\\');
+  }
+
+  return nodePath.resolve(baseDir, relPath);
 }
 
 export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {

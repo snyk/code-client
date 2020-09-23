@@ -1,7 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import { chunk } from 'lodash';
 
-import { collectBundleFiles, composeFilePayloads, determineBaseDir, resolveMissingFiles } from './files';
+import {
+  collectBundleFiles,
+  composeFilePayloads,
+  determineBaseDir,
+  resolveBundleFiles,
+  resolveBundleFilePath,
+} from './files';
 import parseGitUri from './gitUtils';
 import {
   getFilters,
@@ -203,7 +209,7 @@ export async function analyzeFolders(
   // Check remove bundle to make sure no missing files left
   let remoteBundle = bundleResponse.value;
   while (remoteBundle.missingFiles.length) {
-    const missingFiles = await resolveMissingFiles(baseDir, remoteBundle.missingFiles);
+    const missingFiles = await resolveBundleFiles(baseDir, remoteBundle.missingFiles);
     const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
     if (!isUploaded) {
       throw new Error('Failed to upload some files');
@@ -228,6 +234,15 @@ export async function analyzeFolders(
     throw new Error('Analysis has failed');
   }
 
+  const { analysisResults } = analysisData.value;
+
+  const filesPositions = Object.fromEntries(
+    Object.entries(analysisResults.files).map(([path, positions]) => {
+      const filePath = resolveBundleFilePath(baseDir, path);
+      return [filePath, positions];
+    }),
+  );
+
   // Create bundle instance to handle extensions
   return {
     baseURL,
@@ -238,7 +253,10 @@ export async function analyzeFolders(
     baseDir,
     paths,
     bundleId: remoteBundle.bundleId,
-    analysisResults: analysisData.value.analysisResults,
+    analysisResults: {
+      files: filesPositions,
+      suggestions: analysisResults.suggestions,
+    },
     analysisURL: analysisData.value.analysisURL,
   };
 }

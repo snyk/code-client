@@ -36,6 +36,7 @@ describe('Functional test of analysis', () => {
     expect(bundle).toHaveProperty('supportedFiles');
     expect(bundle).toHaveProperty('analysisURL');
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(4);
+    expect(Object.keys(bundle.analysisResults.files)[0]).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
 
     // Check if emitter event happened

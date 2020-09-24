@@ -30,10 +30,6 @@ import { defaultBaseURL, MAX_PAYLOAD } from './constants';
 import { IFileInfo } from './interfaces/files.interface';
 import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
 
-// 1. Create a bundle for paths from scratch. Return bundle info together with request details and analysis results. Create a class Bundle for this
-// 2. class Bundle will implement method extend, that will conduct analysis and return another Bundle instance
-// 3. Create a queue, that would manage bundle extensions
-
 async function createRemoteBundle(
   baseURL: string,
   sessionToken: string,
@@ -179,11 +175,13 @@ export async function analyzeFolders(
   maxPayload = MAX_PAYLOAD,
 ): Promise<IFileBundle> {
   // Get supported filters and test baseURL for correctness and availability
+  emitter.supportedFilesLoaded(null);
   const resp = await getFilters(baseURL);
   if (resp.type === 'error') {
     throw new Error('baseURL is incorrect or server is not reachable now');
   }
   const supportedFiles = resp.value;
+  emitter.supportedFilesLoaded(supportedFiles);
 
   // Scan directories and find all suitable files
   const baseDir = determineBaseDir(paths);

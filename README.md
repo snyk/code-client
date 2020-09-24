@@ -35,7 +35,12 @@ const { sessionToken, loginURL } = await tsc.startSession({
 
 ### Checks status of the login process
 ```javascript
-const { isLoggedIn } = await tsc.checkSession({ baseURL, sessionToken });
+const sessionResponse = await tsc.checkSession({ baseURL, sessionToken });
+if (sessionResponse.type === 'error') {
+  // Handle error and alert user
+}
+
+const isLoggedIn = sessionResponse.value; // boolean
 ```
 
 ### Can subscribe to the following events:
@@ -47,7 +52,7 @@ tsc.events.on('scanFilesProgress', (processed: number) = {
 
 /** Bundle upload process is started with provided data */
 tsc.events.on('uploadBundleProgress', (processed: number, total: number) => {
-  console.log(processed, total);
+  console.log(`Upload bundle progress: ${processed}/${total}`);
 });
 
 /** Receives an error object and logs an error message */
@@ -60,7 +65,7 @@ tsc.events.on('sendError', error => {
 
 ```javascript
 
-const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
+const bundle = await tsc.analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
 
 const { analysisResults, analysisURL, bundleId } = bundle;
 ```
@@ -84,9 +89,12 @@ const { bundleId, missingFiles, uploadURL } = result;
 
 ```javascript
 
-const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
+const responseGit = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
 
-const { analysisResults, analysisURL, bundleId } = bundle;
+if (responseGit.type === 'error') {
+  // Alert user about this error with responseGit.error
+}
+const bundleData = responseGit.value;
 ```
 
 ### Errors

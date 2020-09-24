@@ -13,7 +13,7 @@
     "lint": "npx eslint src/**/*.ts",
     "lint:fix": "npx eslint --fix src/**/*.ts",
     "watch": "tsc -watch -p ./",
-    "test": "jest --coverage"
+    "test": "jest --coverage --runInBand --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -44,10 +44,10 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
     "jest": "^26.4.2",
-    "nock": "^13.0.4",
     "prettier": "^2.1.1",
     "ts-jest": "^26.3.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "yalc": "^1.0.0-pre.44"
   },
   "dependencies": {
     "@deepcode/dcignore": "^1.0.2",

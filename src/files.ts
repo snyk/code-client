@@ -37,7 +37,7 @@ export function parseFileIgnores(path: string): string[] {
   return results;
 }
 
-function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
+export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
   return [...supportedFiles.extensions.map(e => `*${e}`), ...supportedFiles.configFiles];
 
   // return `**/\{${patterns.join(',')}\}`;

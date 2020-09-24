@@ -3,9 +3,18 @@ import { baseURL, sessionToken } from './constants/base';
 import { sampleProjectPath, bundleFiles } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
+import { ISupportedFiles } from '../src/interfaces/files.interface';
 
 describe('Functional test of analysis', () => {
   it('analyze folder', async () => {
+
+    const onSupportedFilesLoaded = jest.fn((data: ISupportedFiles | null) => {
+      if (data === null) {
+        // all good
+      }
+    });
+    emitter.on(emitter.events.supportedFilesLoaded, onSupportedFilesLoaded);
+
     const bFiles = await bundleFiles;
     const onScanFilesProgress = jest.fn((processed: number) => {
       expect(typeof processed).toBe('number');
@@ -40,6 +49,7 @@ describe('Functional test of analysis', () => {
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
 
     // Check if emitter event happened
+    expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
     expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
     expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
     expect(onAnalyseProgress).toHaveBeenCalled();

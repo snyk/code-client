@@ -4,6 +4,7 @@ import fg from 'fast-glob';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 import { union } from 'lodash';
 import util from 'util';
+import flatCache from 'flat-cache';
 
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES } from './constants';
 
@@ -13,6 +14,8 @@ const isWindows = nodePath.sep === '\\';
 
 const lStat = util.promisify(fs.lstat);
 const readFile = util.promisify(fs.readFile);
+
+type CachedData = [number, number, string];
 
 export function isFileSupported(path: string, supportedFiles: ISupportedFiles): boolean {
   return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));
@@ -138,6 +141,8 @@ export async function* collectBundleFiles(
   fileIgnores: string[] = IGNORES_DEFAULT,
 ): AsyncGenerator<IFileInfo> {
   const globPatterns = getGlobPatterns(supportedFiles);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  const cache = flatCache.load('.dccache', baseDir);
 
   for (const path of paths) {
     // eslint-disable-next-line no-await-in-loop
@@ -147,27 +152,60 @@ export async function* collectBundleFiles(
 
     if (fileStats.isFile() && isFileSupported(path, supportedFiles)) {
       if (fileStats.size > maxFileSize) continue;
-      yield getFileInfo(path, baseDir);
+      yield getFileInfo(path, baseDir, false, cache);
     } else if (fileStats.isDirectory()) {
       for (const entry of scanDir(path, globPatterns, symlinksEnabled, fileIgnores)) {
         if (entry.stats && entry.stats.size > maxFileSize) continue;
 
-        yield getFileInfo(entry.path, baseDir);
+        yield getFileInfo(entry.path, baseDir, false, cache);
       }
     }
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  cache.save();
 }
 
-export async function getFileInfo(filePath: string, baseDir: string): Promise<IFileInfo> {
+export async function getFileInfo(
+  filePath: string,
+  baseDir: string,
+  withContent = false,
+  cache: flatCache.Cache | null = null,
+): Promise<IFileInfo> {
   const fileStats = await lStat(filePath);
 
-  const fileContent = await readFile(filePath, 'utf8');
-  const fileHash = crypto
-    .createHash(HASH_ALGORITHM)
-    .update(fileContent)
-    .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
-
   const relPath = nodePath.relative(baseDir, filePath);
+
+  const calcHash = (content: string) => {
+    return crypto
+      .createHash(HASH_ALGORITHM)
+      .update(content)
+      .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
+  };
+
+  let fileContent = '';
+  let fileHash = '';
+  if (!withContent && !!cache) {
+    // Try to get hash from cache
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const cachedData: CachedData | null = cache.getKey(relPath);
+    if (cachedData) {
+      if (cachedData[0] === fileStats.size && cachedData[1] === fileStats.mtimeMs) {
+        // eslint-disable-next-line prefer-destructuring
+        fileHash = cachedData[2];
+      } else {
+        // console.log(`did not match cache for: ${relPath} | ${cachedData} !== ${[fileStats.size, fileStats.mtime]}`);
+      }
+    }
+  }
+
+  if (!fileHash) {
+    fileContent = await readFile(filePath, 'utf8');
+    fileHash = calcHash(fileContent);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    cache?.setKey(relPath, [fileStats.size, fileStats.mtimeMs, fileHash]);
+  }
+
   const posixPath = !isWindows ? relPath : relPath.replace('\\', '/');
 
   return {
@@ -180,12 +218,17 @@ export async function getFileInfo(filePath: string, baseDir: string): Promise<IF
 }
 
 export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  const cache = flatCache.load('.dccache', baseDir);
   const tasks = bundleMissingFiles.map(mf => {
     const filePath = resolveBundleFilePath(baseDir, mf);
-    return getFileInfo(filePath, baseDir);
+    return getFileInfo(filePath, baseDir, true, cache);
   });
 
-  return Promise.all(tasks);
+  const res = await Promise.all(tasks);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  cache.save(true);
+  return res;
 }
 
 export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): string {

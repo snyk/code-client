@@ -56,6 +56,8 @@
     "lodash": "^4.17.19",
     "ignore": "^5.1.8",
     "queue": "^6.0.1",
-    "fast-glob": "^3.2.4"
+    "fast-glob": "^3.2.4",
+    "@types/flat-cache": "^2.0.0",
+    "flat-cache": "^2.0.1"
   }
 }

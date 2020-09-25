@@ -206,7 +206,7 @@ export async function getFileInfo(
     cache?.setKey(relPath, [fileStats.size, fileStats.mtimeMs, fileHash]);
   }
 
-  const posixPath = !isWindows ? relPath : relPath.replace('\\', '/');
+  const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
 
   return {
     filePath,
@@ -235,7 +235,7 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
   let relPath = bundleFilePath.slice(1);
 
   if (isWindows) {
-    relPath = relPath.replace('/', '\\');
+    relPath = relPath.replace(/\//g, '\\');
   }
 
   return nodePath.resolve(baseDir, relPath);

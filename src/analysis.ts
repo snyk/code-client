@@ -159,7 +159,7 @@ async function pollAnalysis(
     } else if (analysisData.status === AnalysisStatus.done) {
       // Return data of analysis
       return analysisResponse as IResult<AnalysisFinishedResponse>;
-    // deepcode ignore DuplicateIfBody: false positive it seems that interface is not taken into account
+      // deepcode ignore DuplicateIfBody: false positive it seems that interface is not taken into account
     } else if (analysisData.status === AnalysisStatus.failed) {
       // Report failure of analysing
       return analysisResponse as IResult<AnalysisFailedResponse>;
@@ -300,6 +300,4 @@ export async function analyzeGit(
   };
 }
 
-// public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
-//   return this;
-// }
+// async function extendAnalysis(bundle: IFileBundle, files: string[]): Promise<IFileBundle> {}

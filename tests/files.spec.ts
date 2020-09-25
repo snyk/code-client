@@ -2,18 +2,35 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
 
-import { collectBundleFiles, composeFilePayloads, parseFileIgnores, getFileInfo } from '../src/files';
+import {
+  collectIgnoreRules,
+  collectBundleFiles,
+  composeFilePayloads,
+  parseFileIgnores,
+  getFileInfo,
+} from '../src/files';
 
 import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull } from './constants/sample';
 
 describe('files', async () => {
+
+  it('collect ignore rules', async () => {
+    const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
+    expect(ignoreRules).toEqual([
+      '**/.git',
+      `${sampleProjectPath}/models`,
+      `${sampleProjectPath}/**/models`,
+      `${sampleProjectPath}/controllers`,
+      `${sampleProjectPath}/**/controllers`,
+    ]);
+  });
+
   it('collect bundle files', async () => {
     const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles);
     const files = [];
     for await (const f of collector) {
       files.push(f);
     }
-
     expect(files).toEqual(await bundleFiles);
 
     const firstFile = files[0];
@@ -62,7 +79,7 @@ describe('files', async () => {
 
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns.length).toEqual(1384);
+    expect(patterns.length).toEqual(4);
   });
 
   it('support of utf-8 encoding', async () => {

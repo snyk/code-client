@@ -6,17 +6,17 @@ import { getFileInfo } from '../../src/files';
 export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 export const supportedFiles = {
   extensions: ['.js', '.cpp', '.java'],
-  configFiles: ['.eslintrc.json'],
+  configFiles: ['.eslintrc.json', '.dcignore'],
 };
 
 export const bundleFilePaths = [
-  `AnnotatorTest.cpp`,
-  `GitHubAccessTokenScrambler12.java`,
-  `app.js`,
-  `db.js`,
-  `main.js`,
-  `routes/index.js`,
-  `routes/sharks.js`,
+  'AnnotatorTest.cpp',
+  'GitHubAccessTokenScrambler12.java',
+  'app.js',
+  'db.js',
+  'main.js',
+  'routes/index.js',
+  'routes/sharks.js',
 ];
 
 function getBundleFiles(withContent: boolean) {

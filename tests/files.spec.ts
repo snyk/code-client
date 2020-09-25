@@ -4,7 +4,7 @@ import * as nodePath from 'path';
 
 import { collectBundleFiles, composeFilePayloads, parseFileIgnores, getFileInfo } from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles } from './constants/sample';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull } from './constants/sample';
 
 describe('files', async () => {
   it('collect bundle files', async () => {
@@ -21,7 +21,6 @@ describe('files', async () => {
     expect(firstFile.bundlePath).toEqual('/AnnotatorTest.cpp');
     expect(firstFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
     expect(firstFile.size).toEqual(239);
-    expect(firstFile.content).toEqual(fs.readFileSync(firstFile.filePath).toString('utf8'));
   });
 
   it('collect bundle files with small max payload', async () => {
@@ -51,7 +50,7 @@ describe('files', async () => {
 
   it('compose file payloads', async () => {
     // Prepare all missing files first
-    const payloads = [...composeFilePayloads(await bundleFiles, 1024)];
+    const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
     expect(payloads.length).toEqual(4); // 4 chunks
     expect(payloads[0].length).toEqual(3);
     expect(payloads[0][0].filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);

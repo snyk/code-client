@@ -213,7 +213,7 @@ export async function getFileInfo(
     bundlePath: `/${posixPath}`,
     size: fileStats.size,
     hash: fileHash,
-    content: fileContent,
+    content: withContent ? fileContent : undefined,
   };
 }
 

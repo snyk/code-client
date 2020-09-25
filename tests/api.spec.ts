@@ -1,6 +1,6 @@
 
 import { baseURL, sessionToken } from './constants/base';
-import { bundleFiles } from './constants/sample';
+import { bundleFiles, bundleFilesFull } from './constants/sample';
 
 import {
   getFilters,
@@ -277,7 +277,7 @@ describe('Requests to public API', () => {
 
   it('test successful workflow', async () => {
     // Create a bundle first
-    const files = Object.fromEntries((await bundleFiles).map(d => [d.bundlePath, d.hash]));
+    const files = Object.fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
     const bundleResponse = await createBundle({
       baseURL,
@@ -289,7 +289,7 @@ describe('Requests to public API', () => {
     expect(bundleResponse.value.bundleId).toContain(realBundleId);
     realBundleIdFull = bundleResponse.value.bundleId;
 
-    const content = (await bundleFiles).map(d => {
+    const content = (await bundleFilesFull).map(d => {
       return {
         fileHash: d.hash,
         fileContent: d.content || '',

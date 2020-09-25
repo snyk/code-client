@@ -19,8 +19,11 @@ export const bundleFilePaths = [
   `routes/sharks.js`,
 ];
 
-function getBundleFiles() {
-  return Promise.all(bundleFilePaths.map(f => getFileInfo(path.join(sampleProjectPath, f), sampleProjectPath)));
+function getBundleFiles(withContent: boolean) {
+  return Promise.all(
+    bundleFilePaths.map(f => getFileInfo(path.join(sampleProjectPath, f), sampleProjectPath, withContent)),
+  );
 }
 
-export const bundleFiles: Promise<IFileInfo[]> = getBundleFiles();
+export const bundleFiles: Promise<IFileInfo[]> = getBundleFiles(false);
+export const bundleFilesFull: Promise<IFileInfo[]> = getBundleFiles(true);

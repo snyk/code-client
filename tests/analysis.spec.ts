@@ -1,6 +1,6 @@
 import { analyzeFolders, uploadRemoteBundle } from '../src/analysis';
 import { baseURL, sessionToken } from './constants/base';
-import { sampleProjectPath, bundleFiles } from './constants/sample';
+import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { ISupportedFiles } from '../src/interfaces/files.interface';
@@ -15,7 +15,7 @@ describe('Functional test of analysis', () => {
     });
     emitter.on(emitter.events.supportedFilesLoaded, onSupportedFilesLoaded);
 
-    const bFiles = await bundleFiles;
+    const bFiles = await bundleFilesFull;
     const onScanFilesProgress = jest.fn((processed: number) => {
       expect(typeof processed).toBe('number');
       expect(processed).toBeGreaterThanOrEqual(0);

@@ -65,6 +65,7 @@ export async function checkSession(options: {
     method: 'GET',
   };
 
+  // deepcode ignore PromiseNotCaughtGeneral: typescript makes it all a bit complex here
   return axios
     .request(config)
     .catch((err: AxiosError) => {

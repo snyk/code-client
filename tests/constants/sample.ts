@@ -9,6 +9,8 @@ export const supportedFiles = {
   configFiles: ['.eslintrc.json', '.dcignore'],
 };
 
+export const bundleFileIgnores = ['**/.git', `${sampleProjectPath}/**/models`, `${sampleProjectPath}/**/controllers`];
+
 export const bundleFilePaths = [
   'AnnotatorTest.cpp',
   'GitHubAccessTokenScrambler12.java',

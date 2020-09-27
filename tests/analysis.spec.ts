@@ -25,7 +25,7 @@ describe('Functional test of analysis', () => {
 
     const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
       expect(typeof processed).toBe('number');
-      expect(total).toEqual(3);
+      expect(total).toEqual(2);
 
       expect(processed).toBeLessThanOrEqual(total);
     });
@@ -39,7 +39,7 @@ describe('Functional test of analysis', () => {
     });
     emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
-    const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [sampleProjectPath], 1000);
+    const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [sampleProjectPath], false, 1000);
     expect(bundle).toHaveProperty('baseURL');
     expect(bundle).toHaveProperty('sessionToken');
     expect(bundle).toHaveProperty('supportedFiles');
@@ -50,8 +50,8 @@ describe('Functional test of analysis', () => {
 
     // Check if emitter event happened
     expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-    expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
-    expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
+    expect(onScanFilesProgress).toHaveBeenCalledTimes(7);
+    expect(onCreateBundleProgress).toHaveBeenCalledTimes(3);
     expect(onAnalyseProgress).toHaveBeenCalled();
 
     // Test uploadRemoteBundle with empty list of files

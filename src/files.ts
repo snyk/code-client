@@ -13,7 +13,6 @@ import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
 const isWindows = nodePath.sep === '\\';
 
 const lStat = util.promisify(fs.lstat);
-const readFile = util.promisify(fs.readFile);
 
 type CachedData = [number, number, string];
 
@@ -32,8 +31,9 @@ export function parseFileIgnores(path: string): string[] {
 
   const results: string[] = [];
   for (const rule of rules) {
-    results.push(nodePath.posix.join(dirname, rule));
-    if (!rule.startsWith('/')) {
+    if (rule.startsWith('/') || rule.startsWith('**')) {
+      results.push(nodePath.posix.join(dirname, rule));
+    } else {
       results.push(nodePath.posix.join(dirname, '**', rule));
     }
   }
@@ -54,6 +54,10 @@ export async function collectIgnoreRules(
   fileIgnores: string[] = IGNORES_DEFAULT,
 ): Promise<string[]> {
   const tasks = dirs.map(async folder => {
+    const fileStats = await lStat(folder);
+    // Check if symlink and exclude if requested
+    if ((fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
+
     // Find ignore files inside this directory
     const localIgnoreFiles = await fg(
       IGNORE_FILES_NAMES.map(f => `${folder}**/${f}`),
@@ -129,9 +133,9 @@ export async function* collectBundleFiles(
   baseDir: string,
   paths: string[],
   supportedFiles: ISupportedFiles,
+  fileIgnores: string[] = IGNORES_DEFAULT,
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
-  fileIgnores: string[] = IGNORES_DEFAULT,
 ): AsyncGenerator<IFileInfo> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const cache = flatCache.load(CACHE_KEY, baseDir);
@@ -153,22 +157,19 @@ export async function* collectBundleFiles(
     }
   }
 
-  // Scan for custom ignore rules
-  const customIgnoreRules = await collectIgnoreRules(dirs, symlinksEnabled, fileIgnores);
-
   const globPatterns = getGlobPatterns(supportedFiles).map(p => `**/${p}`);
 
   // Scan folders
   for (const folder of dirs) {
     // eslint-disable-next-line no-await-in-loop
-    for await (const entry of searchFiles(globPatterns, folder, maxFileSize, symlinksEnabled, customIgnoreRules)) {
+    for await (const entry of searchFiles(globPatterns, folder, maxFileSize, symlinksEnabled, fileIgnores)) {
       yield getFileInfo(entry.path, baseDir, false, cache);
     }
   }
 
   // Sanitize files
   if (files.length) {
-    for await (const entry of searchFiles(files, baseDir, maxFileSize, symlinksEnabled, customIgnoreRules)) {
+    for await (const entry of searchFiles(files, baseDir, maxFileSize, symlinksEnabled, fileIgnores)) {
       if (isFileSupported(entry.path, supportedFiles)) {
         yield getFileInfo(entry.path, baseDir, false, cache);
       }
@@ -225,7 +226,8 @@ export async function getFileInfo(
   }
 
   if (!fileHash) {
-    fileContent = await readFile(filePath, 'utf8');
+    // fileContent = await readFile(filePath, 'utf8'); // causes error -24 when many files
+    fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
     fileHash = calcHash(fileContent);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     cache?.setKey(relPath, [fileStats.size, fileStats.mtimeMs, fileHash]);

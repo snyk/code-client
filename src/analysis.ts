@@ -2,6 +2,7 @@
 import { chunk } from 'lodash';
 
 import {
+  collectIgnoreRules,
   collectBundleFiles,
   composeFilePayloads,
   determineBaseDir,
@@ -25,7 +26,7 @@ import {
   AnalysisFinishedResponse,
 } from './http';
 import emitter from './emitter';
-import { defaultBaseURL, MAX_PAYLOAD } from './constants';
+import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 
 import { IFileInfo } from './interfaces/files.interface';
 import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
@@ -173,7 +174,9 @@ export async function analyzeFolders(
   includeLint = false,
   severity = AnalysisSeverity.info,
   paths: string[],
+  symlinksEnabled = false,
   maxPayload = MAX_PAYLOAD,
+  defaultFileIgnores = IGNORES_DEFAULT,
 ): Promise<IFileBundle> {
   // Get supported filters and test baseURL for correctness and availability
   emitter.supportedFilesLoaded(null);
@@ -187,10 +190,21 @@ export async function analyzeFolders(
   // Scan directories and find all suitable files
   const baseDir = determineBaseDir(paths);
 
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores);
+
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
   let totalFiles = 0;
-  for await (const f of collectBundleFiles(baseDir, paths, supportedFiles)) {
+  const bundleFileCollector = collectBundleFiles(
+    baseDir,
+    paths,
+    supportedFiles,
+    fileIgnores,
+    maxPayload,
+    symlinksEnabled,
+  );
+  for await (const f of bundleFileCollector) {
     bundleFiles.push(f);
     totalFiles += 1;
     emitter.scanFilesProgress(totalFiles);
@@ -251,6 +265,7 @@ export async function analyzeFolders(
     supportedFiles,
     baseDir,
     paths,
+    fileIgnores,
     bundleId: remoteBundle.bundleId,
     analysisResults: {
       files: filesPositions,

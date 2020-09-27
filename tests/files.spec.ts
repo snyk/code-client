@@ -10,23 +10,17 @@ import {
   getFileInfo,
 } from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull } from './constants/sample';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
 describe('files', async () => {
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
-    expect(ignoreRules).toEqual([
-      '**/.git',
-      `${sampleProjectPath}/models`,
-      `${sampleProjectPath}/**/models`,
-      `${sampleProjectPath}/controllers`,
-      `${sampleProjectPath}/**/controllers`,
-    ]);
+    expect(ignoreRules).toEqual(bundleFileIgnores);
   });
 
   it('collect bundle files', async () => {
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles);
+    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
     const files = [];
     for await (const f of collector) {
       files.push(f);
@@ -42,7 +36,13 @@ describe('files', async () => {
 
   it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, 500);
+    const collector = collectBundleFiles(
+      sampleProjectPath,
+      [sampleProjectPath],
+      supportedFiles,
+      bundleFileIgnores,
+      500,
+    );
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -53,7 +53,7 @@ describe('files', async () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles);
+    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles, bundleFileIgnores);
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -79,7 +79,7 @@ describe('files', async () => {
 
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns.length).toEqual(4);
+    expect(patterns.length).toEqual(2);
   });
 
   it('support of utf-8 encoding', async () => {

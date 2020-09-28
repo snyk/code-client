@@ -1,10 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { chunk } from 'lodash';
 
 import {
   collectIgnoreRules,
   collectBundleFiles,
-  composeFilePayloads,
+  prepareExtendingBundle,
   determineBaseDir,
   resolveBundleFiles,
   resolveBundleFilePath,
@@ -12,111 +11,20 @@ import {
 import parseGitUri from './gitUtils';
 import {
   getFilters,
-  createBundle,
   createGitBundle,
-  extendBundle,
-  uploadFiles,
   checkBundle,
   getAnalysis,
   AnalysisStatus,
   IResult,
-  RemoteBundle,
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   AnalysisFinishedResponse,
 } from './http';
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
+import { createRemoteBundle, uploadRemoteBundle } from './bundles';
 
-import { IFileInfo } from './interfaces/files.interface';
 import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
-
-async function createRemoteBundle(
-  baseURL: string,
-  sessionToken: string,
-  files: IFileInfo[],
-  maxPayload = MAX_PAYLOAD,
-): Promise<IResult<RemoteBundle> | null> {
-  let response: IResult<RemoteBundle> | null = null;
-
-  const fileChunks = chunk(files, maxPayload / 300);
-  emitter.createBundleProgress(0, fileChunks.length);
-  for (const [i, chunkedFiles] of fileChunks.entries()) {
-    const paramFiles = Object.fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
-
-    if (response === null) {
-      // eslint-disable-next-line no-await-in-loop
-      response = await createBundle({
-        baseURL,
-        sessionToken,
-        files: paramFiles,
-      });
-    } else {
-      // eslint-disable-next-line no-await-in-loop
-      response = await extendBundle({
-        baseURL,
-        sessionToken,
-        bundleId: response.value.bundleId,
-        files: paramFiles,
-      });
-    }
-
-    emitter.createBundleProgress(i + 1, fileChunks.length);
-
-    if (response.type === 'error') {
-      // TODO: process Error
-      return response;
-    }
-  }
-
-  return response;
-}
-
-/**
- * Splits files in buckets and upload in parallel
- * @param baseURL
- * @param sessionToken
- * @param remoteBundle
- */
-export async function uploadRemoteBundle(
-  baseURL: string,
-  sessionToken: string,
-  bundleId: string,
-  files: IFileInfo[],
-  maxPayload = MAX_PAYLOAD,
-): Promise<boolean> {
-  let uploadedFiles = 0;
-  emitter.uploadBundleProgress(0, files.length);
-
-  const uploadFileChunks = async (bucketFiles: IFileInfo[]): Promise<boolean> => {
-    const resp = await uploadFiles({
-      baseURL,
-      sessionToken,
-      bundleId,
-      content: bucketFiles.map(f => {
-        return { fileHash: f.hash, fileContent: f.content || '' };
-      }),
-    });
-
-    if (resp.type !== 'error') {
-      uploadedFiles += bucketFiles.length;
-      emitter.uploadBundleProgress(uploadedFiles, files.length);
-      return true;
-    }
-
-    return false;
-  };
-
-  const tasks = [];
-  for (const bucketFiles of composeFilePayloads(files, maxPayload)) {
-    tasks.push(uploadFileChunks(bucketFiles));
-  }
-
-  if (tasks.length) {
-    return (await Promise.all(tasks)).some(r => !!r);
-  }
-  return true;
-}
 
 async function pollAnalysis(
   baseURL: string,
@@ -266,6 +174,7 @@ export async function analyzeFolders(
     baseDir,
     paths,
     fileIgnores,
+    symlinksEnabled,
     bundleId: remoteBundle.bundleId,
     analysisResults: {
       files: filesPositions,
@@ -274,6 +183,27 @@ export async function analyzeFolders(
     analysisURL: analysisData.value.analysisURL,
   };
 }
+
+// export async function extendAnalysis(
+//   bundle: IFileBundle,
+//   filePaths: string[],
+//   maxPayload = MAX_PAYLOAD,
+// ): Promise<IFileBundle> {
+//   bundle.fileIgnores;
+
+//   const { files, removedFiles } = await prepareExtendingBundle(
+//     bundle.baseDir,
+//     filePaths,
+//     bundle.supportedFiles,
+//     bundle.fileIgnores,
+//     maxPayload,
+//     bundle.symlinksEnabled,
+//   );
+
+//   if (!files.length && !removedFiles.length) {
+//     return bundle; // nothing to extend, just return previous bundle
+//   }
+// }
 
 export async function analyzeGit(
   baseURL = defaultBaseURL,
@@ -314,5 +244,3 @@ export async function analyzeGit(
     analysisURL: analysisData.value.analysisURL,
   };
 }
-
-// async function extendAnalysis(bundle: IFileBundle, files: string[]): Promise<IFileBundle> {}

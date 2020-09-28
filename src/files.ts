@@ -1,6 +1,7 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
 import fg from 'fast-glob';
+import micromatch from 'micromatch';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 import { union } from 'lodash';
 import util from 'util';
@@ -14,10 +15,21 @@ const isWindows = nodePath.sep === '\\';
 
 const lStat = util.promisify(fs.lstat);
 
+const microMatchOptions = { basename: true, dot: true, posixSlashes: true };
+const fgOptions = {
+  dot: true,
+  absolute: true,
+  caseSensitiveMatch: true,
+  baseNameMatch: true,
+  onlyFiles: true,
+};
+
 type CachedData = [number, number, string];
 
-export function isFileSupported(path: string, supportedFiles: ISupportedFiles): boolean {
-  return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));
+function filterSupportedFiles(files: string[], supportedFiles: ISupportedFiles): string[] {
+  const patters = getGlobPatterns(supportedFiles);
+  return micromatch(files, patters, microMatchOptions);
+  // return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));
 }
 
 export function parseFileIgnores(path: string): string[] {
@@ -59,19 +71,12 @@ export async function collectIgnoreRules(
     if ((fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
 
     // Find ignore files inside this directory
-    const localIgnoreFiles = await fg(
-      IGNORE_FILES_NAMES.map(f => `${folder}**/${f}`),
-      {
-        dot: true,
-        absolute: true,
-        ignore: fileIgnores,
-        caseSensitiveMatch: true,
-        followSymbolicLinks: symlinksEnabled,
-        onlyFiles: true,
-        objectMode: false,
-        stats: false,
-      },
-    );
+    const localIgnoreFiles = await fg(IGNORE_FILES_NAMES, {
+      ...fgOptions,
+      cwd: folder,
+      ignore: fileIgnores,
+      followSymbolicLinks: symlinksEnabled,
+    });
 
     // Read ignore files and merge new patterns
     return union(...localIgnoreFiles.map(p => parseFileIgnores(p)));
@@ -81,7 +86,7 @@ export async function collectIgnoreRules(
 }
 
 export function determineBaseDir(paths: string[]): string {
-  if (paths.length) {
+  if (paths.length === 1) {
     const path = paths[0];
     const stats = fs.lstatSync(path);
     if (stats.isFile()) {
@@ -93,13 +98,12 @@ export function determineBaseDir(paths: string[]): string {
   return '';
 }
 
-async function* searchFiles(
+function searchFiles(
   patterns: string[],
   cwd: string,
-  maxFileSize = MAX_PAYLOAD,
   symlinksEnabled: boolean,
   ignores: string[],
-): AsyncGenerator<fg.Entry> {
+): NodeJS.ReadableStream {
   const relIgnores = ignores.map(i => {
     if (i.startsWith(cwd)) {
       return i.slice(cwd.length + 1);
@@ -107,23 +111,12 @@ async function* searchFiles(
     return i;
   });
 
-  const entries = await fg(patterns, {
-    dot: true,
-    absolute: true,
+  return fg.stream(patterns, {
+    ...fgOptions,
     cwd,
     ignore: relIgnores,
-    caseSensitiveMatch: true,
     followSymbolicLinks: symlinksEnabled,
-    onlyFiles: true,
-    objectMode: true,
-    stats: true,
   });
-
-  for (const entry of entries) {
-    if (entry.stats && entry.stats.size <= maxFileSize) {
-      yield entry;
-    }
-  }
 }
 
 /**
@@ -157,21 +150,25 @@ export async function* collectBundleFiles(
     }
   }
 
-  const globPatterns = getGlobPatterns(supportedFiles).map(p => `**/${p}`);
-
   // Scan folders
+  const globPatterns = getGlobPatterns(supportedFiles);
   for (const folder of dirs) {
     // eslint-disable-next-line no-await-in-loop
-    for await (const entry of searchFiles(globPatterns, folder, maxFileSize, symlinksEnabled, fileIgnores)) {
-      yield getFileInfo(entry.path, baseDir, false, cache);
+    for await (const filePath of searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores)) {
+      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
+      if (fileInfo.size <= maxFileSize) {
+        yield fileInfo;
+      }
     }
   }
 
   // Sanitize files
   if (files.length) {
-    for await (const entry of searchFiles(files, baseDir, maxFileSize, symlinksEnabled, fileIgnores)) {
-      if (isFileSupported(entry.path, supportedFiles)) {
-        yield getFileInfo(entry.path, baseDir, false, cache);
+    const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, fileIgnores);
+    for await (const filePath of searcher) {
+      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
+      if (fileInfo.size <= maxFileSize) {
+        yield fileInfo;
       }
     }
   }
@@ -180,17 +177,70 @@ export async function* collectBundleFiles(
   cache.save();
 }
 
-// export async function prepareExtendingBundle(
-//   baseDir: string,
-//   files: string[],
-//   supportedFiles: ISupportedFiles,
-//   maxFileSize = MAX_PAYLOAD,
-//   symlinksEnabled = false,
-//   fileIgnores: string[] = IGNORES_DEFAULT,
-// ) {
-//   for (const f of files) {
-//   }
-// }
+export async function prepareExtendingBundle(
+  baseDir: string,
+  files: string[],
+  supportedFiles: ISupportedFiles,
+  fileIgnores: string[] = IGNORES_DEFAULT,
+  maxFileSize = MAX_PAYLOAD,
+  symlinksEnabled = false,
+): Promise<{ files: IFileInfo[]; removedFiles: string[] }> {
+  let removedFiles: string[] = [];
+  let bundleFiles: IFileInfo[] = [];
+  const cache = flatCache.load(CACHE_KEY, baseDir);
+
+  // Filter for supported extensions/files only
+  let processingFiles: string[] = filterSupportedFiles(files, supportedFiles);
+
+  // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed
+  processingFiles = micromatch(
+    processingFiles,
+    fileIgnores.map(p => `!${p}`),
+    microMatchOptions,
+  );
+
+  if (processingFiles.length) {
+    // Determine existing files (minus removed)
+    const entries = await fg(processingFiles, {
+      ...fgOptions,
+      cwd: baseDir,
+      ignore: fileIgnores,
+      followSymbolicLinks: symlinksEnabled,
+      objectMode: true,
+      stats: true,
+    });
+
+    let foundFiles: Set<string> = new Set(); // This initialization is needed to help Typescript checker
+    foundFiles = entries.reduce((s, e) => {
+      if (e.stats && e.stats.size <= maxFileSize) {
+        s.add(e.path);
+      }
+      return s;
+    }, foundFiles);
+
+    removedFiles = processingFiles.reduce((s, p) => {
+      if (!foundFiles.has(p)) {
+        s.push(getBundleFilePath(p, baseDir));
+      }
+      return s;
+    }, [] as string[]);
+
+    if (foundFiles.size) {
+      bundleFiles = await Promise.all([...foundFiles].map(async (p: string) => getFileInfo(p, baseDir, false, cache)));
+    }
+  }
+
+  return {
+    files: bundleFiles,
+    removedFiles,
+  };
+}
+
+function getBundleFilePath(filePath: string, baseDir: string) {
+  const relPath = nodePath.relative(baseDir, filePath);
+  const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
+  return `/${posixPath}`;
+}
 
 export async function getFileInfo(
   filePath: string,
@@ -200,7 +250,7 @@ export async function getFileInfo(
 ): Promise<IFileInfo> {
   const fileStats = await lStat(filePath);
 
-  const relPath = nodePath.relative(baseDir, filePath);
+  const bundlePath = getBundleFilePath(filePath, baseDir);
 
   const calcHash = (content: string) => {
     return crypto
@@ -214,13 +264,13 @@ export async function getFileInfo(
   if (!withContent && !!cache) {
     // Try to get hash from cache
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const cachedData: CachedData | null = cache.getKey(relPath);
+    const cachedData: CachedData | null = cache.getKey(filePath);
     if (cachedData) {
       if (cachedData[0] === fileStats.size && cachedData[1] === fileStats.mtimeMs) {
         // eslint-disable-next-line prefer-destructuring
         fileHash = cachedData[2];
       } else {
-        // console.log(`did not match cache for: ${relPath} | ${cachedData} !== ${[fileStats.size, fileStats.mtime]}`);
+        // console.log(`did not match cache for: ${filePath} | ${cachedData} !== ${[fileStats.size, fileStats.mtime]}`);
       }
     }
   }
@@ -230,14 +280,12 @@ export async function getFileInfo(
     fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
     fileHash = calcHash(fileContent);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    cache?.setKey(relPath, [fileStats.size, fileStats.mtimeMs, fileHash]);
+    cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
   }
-
-  const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
 
   return {
     filePath,
-    bundlePath: `/${posixPath}`,
+    bundlePath,
     size: fileStats.size,
     hash: fileHash,
     content: withContent ? fileContent : undefined,

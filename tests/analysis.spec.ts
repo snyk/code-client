@@ -1,4 +1,5 @@
-import { analyzeFolders, uploadRemoteBundle } from '../src/analysis';
+import { analyzeFolders } from '../src/analysis';
+import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken } from './constants/base';
 import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
 import emitter from '../src/emitter';

@@ -68,4 +68,5 @@ export interface IFileBundle extends IBundleBase {
   readonly paths: string[];
   readonly supportedFiles: ISupportedFiles;
   readonly fileIgnores: string[];
+  readonly symlinksEnabled: boolean;
 }

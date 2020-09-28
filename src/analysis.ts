@@ -5,14 +5,12 @@ import {
   collectBundleFiles,
   prepareExtendingBundle,
   determineBaseDir,
-  resolveBundleFiles,
   resolveBundleFilePath,
 } from './files';
 import parseGitUri from './gitUtils';
 import {
   getFilters,
   createGitBundle,
-  checkBundle,
   getAnalysis,
   AnalysisStatus,
   IResult,
@@ -22,9 +20,9 @@ import {
 } from './http';
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
-import { createRemoteBundle, uploadRemoteBundle } from './bundles';
+import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
 
-import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
+import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';
 
 async function pollAnalysis(
   baseURL: string,
@@ -76,6 +74,43 @@ async function pollAnalysis(
   }
 }
 
+export async function analyzeBundle(
+  baseURL = defaultBaseURL,
+  sessionToken = '',
+  includeLint = false,
+  severity = AnalysisSeverity.info,
+  bundleId: string,
+  baseDir = '',
+): Promise<IBundleResult> {
+  // Call remote bundle for analysis results and emit intermediate progress
+  const analysisData = await pollAnalysis(baseURL, sessionToken, bundleId, includeLint, severity);
+
+  if (analysisData.type === 'error') {
+    throw analysisData.error;
+  } else if (analysisData.value.status === AnalysisStatus.failed) {
+    throw new Error('Analysis has failed');
+  }
+
+  const { analysisResults } = analysisData.value;
+
+  const filesPositions = Object.fromEntries(
+    Object.entries(analysisResults.files).map(([path, positions]) => {
+      const filePath = resolveBundleFilePath(baseDir, path);
+      return [filePath, positions];
+    }),
+  );
+
+  // Create bundle instance to handle extensions
+  return {
+    bundleId,
+    analysisResults: {
+      files: filesPositions,
+      suggestions: analysisResults.suggestions,
+    },
+    analysisURL: analysisData.value.analysisURL,
+  };
+}
+
 export async function analyzeFolders(
   baseURL = defaultBaseURL,
   sessionToken = '',
@@ -119,49 +154,25 @@ export async function analyzeFolders(
   }
 
   // Create remote bundle
-  let bundleResponse = await createRemoteBundle(baseURL, sessionToken, bundleFiles, maxPayload);
+  const bundleResponse = await prepareRemoteBundle(baseURL, sessionToken, bundleFiles, [], null, maxPayload);
   if (bundleResponse === null) {
     throw new Error('File list is empty');
   } else if (bundleResponse.type === 'error') {
     throw bundleResponse.error;
   }
 
-  // Fulfill remove bundle by uploading only missing files (splitted in chunks)
-  // Check remove bundle to make sure no missing files left
-  let remoteBundle = bundleResponse.value;
-  while (remoteBundle.missingFiles.length) {
-    const missingFiles = await resolveBundleFiles(baseDir, remoteBundle.missingFiles);
-    const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
-    if (!isUploaded) {
-      throw new Error('Failed to upload some files');
-    }
-    bundleResponse = await checkBundle({
-      baseURL,
-      sessionToken,
-      bundleId: remoteBundle.bundleId,
-    });
-    if (bundleResponse.type === 'error') {
-      throw new Error('Failed to get remote bundle');
-    }
-    remoteBundle = bundleResponse.value;
+  const remoteBundle = await fullfillRemoteBundle(baseURL, sessionToken, baseDir, bundleResponse.value, maxPayload);
+  if (remoteBundle.missingFiles.length) {
+    throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
   }
 
-  // Call remote bundle for analysis results and emit intermediate progress
-  const analysisData = await pollAnalysis(baseURL, sessionToken, remoteBundle.bundleId, includeLint, severity);
-
-  if (analysisData.type === 'error') {
-    throw analysisData.error;
-  } else if (analysisData.value.status === AnalysisStatus.failed) {
-    throw new Error('Analysis has failed');
-  }
-
-  const { analysisResults } = analysisData.value;
-
-  const filesPositions = Object.fromEntries(
-    Object.entries(analysisResults.files).map(([path, positions]) => {
-      const filePath = resolveBundleFilePath(baseDir, path);
-      return [filePath, positions];
-    }),
+  const analysisData = await analyzeBundle(
+    baseURL,
+    sessionToken,
+    includeLint,
+    severity,
+    bundleResponse.value.bundleId,
+    baseDir,
   );
 
   // Create bundle instance to handle extensions
@@ -175,35 +186,70 @@ export async function analyzeFolders(
     paths,
     fileIgnores,
     symlinksEnabled,
-    bundleId: remoteBundle.bundleId,
-    analysisResults: {
-      files: filesPositions,
-      suggestions: analysisResults.suggestions,
-    },
-    analysisURL: analysisData.value.analysisURL,
+    ...analysisData,
   };
 }
 
-// export async function extendAnalysis(
-//   bundle: IFileBundle,
-//   filePaths: string[],
-//   maxPayload = MAX_PAYLOAD,
-// ): Promise<IFileBundle> {
-//   bundle.fileIgnores;
+export async function extendAnalysis(
+  bundle: IFileBundle,
+  filePaths: string[],
+  maxPayload = MAX_PAYLOAD,
+): Promise<IFileBundle | null> {
+  const { files, removedFiles } = await prepareExtendingBundle(
+    bundle.baseDir,
+    filePaths,
+    bundle.supportedFiles,
+    bundle.fileIgnores,
+    maxPayload,
+    bundle.symlinksEnabled,
+  );
 
-//   const { files, removedFiles } = await prepareExtendingBundle(
-//     bundle.baseDir,
-//     filePaths,
-//     bundle.supportedFiles,
-//     bundle.fileIgnores,
-//     maxPayload,
-//     bundle.symlinksEnabled,
-//   );
+  if (!files.length && !removedFiles.length) {
+    return null; // nothing to extend, just return previous bundle
+  }
 
-//   if (!files.length && !removedFiles.length) {
-//     return bundle; // nothing to extend, just return previous bundle
-//   }
-// }
+  // Extend remote bundle
+  const bundleResponse = await prepareRemoteBundle(
+    bundle.baseURL,
+    bundle.sessionToken,
+    files,
+    removedFiles,
+    bundle.bundleId,
+    maxPayload,
+  );
+
+  if (bundleResponse === null) {
+    throw new Error('File list is empty');
+  } else if (bundleResponse.type === 'error') {
+    throw bundleResponse.error;
+  }
+
+  const remoteBundle = await fullfillRemoteBundle(
+    bundle.baseURL,
+    bundle.sessionToken,
+    bundle.baseDir,
+    bundleResponse.value,
+    maxPayload,
+  );
+  if (remoteBundle.missingFiles.length) {
+    throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
+  }
+
+  const analysisData = await analyzeBundle(
+    bundle.baseURL,
+    bundle.sessionToken,
+    bundle.includeLint,
+    bundle.severity,
+    bundleResponse.value.bundleId,
+    bundle.baseDir,
+  );
+
+  // Create bundle instance to handle extensions
+  return {
+    ...bundle,
+    ...analysisData,
+  };
+}
 
 export async function analyzeGit(
   baseURL = defaultBaseURL,
@@ -223,14 +269,7 @@ export async function analyzeGit(
   }
   const { bundleId } = bundleResponse.value;
 
-  // Call remote bundle for analysis results and emit intermediate progress
-  const analysisData = await pollAnalysis(baseURL, sessionToken, bundleId, includeLint, severity);
-
-  if (analysisData.type === 'error') {
-    throw analysisData.error;
-  } else if (analysisData.value.status === AnalysisStatus.failed) {
-    throw new Error('Analysis has failed');
-  }
+  const analysisData = await analyzeBundle(baseURL, sessionToken, includeLint, severity, bundleId);
 
   // Create bundle instance to handle extensions
   return {
@@ -238,9 +277,7 @@ export async function analyzeGit(
     sessionToken,
     includeLint,
     severity,
-    bundleId,
     gitUri,
-    analysisResults: analysisData.value.analysisResults,
-    analysisURL: analysisData.value.analysisURL,
+    ...analysisData,
   };
 }

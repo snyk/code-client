@@ -19,7 +19,6 @@ const microMatchOptions = { basename: true, dot: true, posixSlashes: true };
 const fgOptions = {
   dot: true,
   absolute: true,
-  caseSensitiveMatch: true,
   baseNameMatch: true,
   onlyFiles: true,
 };
@@ -71,18 +70,20 @@ export async function collectIgnoreRules(
     if ((fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
 
     // Find ignore files inside this directory
-    const localIgnoreFiles = await fg(IGNORE_FILES_NAMES, {
-      ...fgOptions,
-      cwd: folder,
-      ignore: fileIgnores,
-      followSymbolicLinks: symlinksEnabled,
-    });
-
+    const localIgnoreFiles = await fg(
+      IGNORE_FILES_NAMES.map(i => `*${i}`),
+      {
+        ...fgOptions,
+        ignore: fileIgnores,
+        cwd: folder,
+        followSymbolicLinks: symlinksEnabled,
+      },
+    );
     // Read ignore files and merge new patterns
-    return union(...localIgnoreFiles.map(p => parseFileIgnores(p)));
+    return union(...localIgnoreFiles.map(parseFileIgnores));
   });
-
-  return union(fileIgnores, ...(await Promise.all(tasks)));
+  const customRules = await Promise.all(tasks);
+  return union(fileIgnores, ...customRules);
 }
 
 export function determineBaseDir(paths: string[]): string {
@@ -276,7 +277,6 @@ export async function getFileInfo(
   }
 
   if (!fileHash) {
-    // fileContent = await readFile(filePath, 'utf8'); // causes error -24 when many files
     fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
     fileHash = calcHash(fileContent);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access

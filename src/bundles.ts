@@ -4,9 +4,21 @@ import { chunk } from 'lodash';
 import { IFileInfo } from './interfaces/files.interface';
 
 import { composeFilePayloads, resolveBundleFiles } from './files';
-import { createBundle, extendBundle, checkBundle, uploadFiles, IResult, RemoteBundle } from './http';
+import {
+  CreateBundleErrorCodes,
+  CheckBundleErrorCodes,
+  ExtendBundleErrorCodes,
+  createBundle,
+  extendBundle,
+  checkBundle,
+  uploadFiles,
+  IResult,
+  RemoteBundle,
+} from './http';
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
+
+type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
 export async function prepareRemoteBundle(
   baseURL: string,
@@ -15,8 +27,8 @@ export async function prepareRemoteBundle(
   removedFiles: string[] = [],
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
-): Promise<IResult<RemoteBundle> | null> {
-  let response: IResult<RemoteBundle> | null = null;
+): Promise<IResult<RemoteBundle, BundleErrorCodes> | null> {
+  let response: IResult<RemoteBundle, BundleErrorCodes> | null = null;
   let bundleId = existingBundleId;
 
   const fileChunks = chunk(files, maxPayload / 300);

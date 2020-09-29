@@ -11,6 +11,7 @@ import parseGitUri from './gitUtils';
 import {
   getFilters,
   createGitBundle,
+  GetAnalysisErrorCodes,
   getAnalysis,
   AnalysisStatus,
   IResult,
@@ -19,7 +20,7 @@ import {
   AnalysisFinishedResponse,
 } from './http';
 import emitter from './emitter';
-import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
+import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT, GenericErrorTypes } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
 
 import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';
@@ -30,8 +31,8 @@ async function pollAnalysis(
   bundleId: string,
   useLinters: boolean,
   severity: AnalysisSeverity,
-): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse>> {
-  let analysisResponse: IResult<GetAnalysisResponseDto>;
+): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
+  let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
 
   emitter.analyseProgress({
@@ -65,11 +66,11 @@ async function pollAnalysis(
       emitter.analyseProgress(analysisData);
     } else if (analysisData.status === AnalysisStatus.done) {
       // Return data of analysis
-      return analysisResponse as IResult<AnalysisFinishedResponse>;
+      return analysisResponse as IResult<AnalysisFinishedResponse, GetAnalysisErrorCodes>;
       // deepcode ignore DuplicateIfBody: false positive it seems that interface is not taken into account
     } else if (analysisData.status === AnalysisStatus.failed) {
       // Report failure of analysing
-      return analysisResponse as IResult<AnalysisFailedResponse>;
+      return analysisResponse as IResult<AnalysisFailedResponse, GetAnalysisErrorCodes>;
     }
   }
 }
@@ -125,7 +126,7 @@ export async function analyzeFolders(
   emitter.supportedFilesLoaded(null);
   const resp = await getFilters(baseURL);
   if (resp.type === 'error') {
-    throw new Error('baseURL is incorrect or server is not reachable now');
+    throw resp.error;
   }
   const supportedFiles = resp.value;
   emitter.supportedFilesLoaded(supportedFiles);
@@ -265,7 +266,7 @@ export async function analyzeGit(
 
   const bundleResponse = await createGitBundle({ baseURL, sessionToken, ...repoKey });
   if (bundleResponse.type === 'error') {
-    throw new Error('Failed to find last commit hash');
+    throw bundleResponse.error;
   }
   const { bundleId } = bundleResponse.value;
 

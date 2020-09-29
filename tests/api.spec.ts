@@ -18,9 +18,6 @@ import {
 } from '../src/http';
 import { getFileInfo } from '../src/files';
 
-import { checkBundleError404, extendBundleError404 } from './constants/errors';
-// import { supportedFiles } from '../src/utils/filesUtils';
-
 const fakeBundleId = 'f031acaa1a98b1cccf09868f31e8a9692063be59a1e8bf2502cf5f56f575a759';
 let fakeBundleIdFull = '';
 const realBundleId = '705e49a9a8d5cd4be71e496c5eb36c7ec5c150ab998d6b75fa009cd66799bda1';
@@ -187,8 +184,8 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     // dummy to cheat typescript compiler
     if (response.type == 'success') return;
-    expect(response.error.statusCode).toEqual(checkBundleError404.statusCode);
-    expect(response.error.statusText).toEqual(checkBundleError404.statusText);
+    expect(response.error.statusCode).toEqual(404);
+    expect(response.error.statusText).toEqual('Uploaded bundle has expired');
   });
 
   it('request analysis with missing files', async () => {
@@ -202,6 +199,7 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     if (response.type === 'success') return;
     expect(response.error).toEqual({
+      apiName: 'getAnalysis',
       statusCode: 500,
       statusText: 'Getting analysis failed',
     });
@@ -246,8 +244,9 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     // dummy to cheat typescript compiler
     if (response.type == 'success') return;
-    expect(response.error.statusCode).toEqual(extendBundleError404.statusCode);
-    expect(response.error.statusText).toEqual(extendBundleError404.statusText);
+
+    expect(response.error.statusCode).toEqual(404);
+    expect(response.error.statusText).toEqual('Parent bundle has expired');
   });
 
   it('uploads fake files to fake bundle', async () => {
@@ -269,6 +268,7 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     if (response.type === 'success') return;
     expect(response.error).toEqual({
+      apiName: 'uploadFiles',
       statusCode: 400,
       statusText:
         'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',

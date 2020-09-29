@@ -20,7 +20,7 @@ import {
   AnalysisFinishedResponse,
 } from './http';
 import emitter from './emitter';
-import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT, GenericErrorTypes } from './constants';
+import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
 
 import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';

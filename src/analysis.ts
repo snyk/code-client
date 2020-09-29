@@ -28,9 +28,8 @@ import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD } from './constants';
 
 import { IFileInfo } from './interfaces/files.interface';
-import { AnalysisSeverity, IGitBundle, IFileBundle, IAnalysisResult } from './interfaces/analysis-result.interface';
-import { constants } from '.';
-
+import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
+// import Sarif from './sarif_converter';
 // 1. Create a bundle for paths from scratch. Return bundle info together with request details and analysis results. Create a class Bundle for this
 // 2. class Bundle will implement method extend, that will conduct analysis and return another Bundle instance
 // 3. Create a queue, that would manage bundle extensions
@@ -268,7 +267,6 @@ export async function analyzeGit(
   includeLint = false,
   severity = AnalysisSeverity.info,
   gitUri: string,
-  sarifFormat = false,
 ): Promise<IGitBundle> {
   const repoKey = parseGitUri(gitUri);
   if (!repoKey) {
@@ -298,156 +296,10 @@ export async function analyzeGit(
     severity,
     bundleId,
     gitUri,
-    analysisResults: sarifFormat ? sarifConverter(analysisData.value.analysisResults) : analysisData.value.analysisResults,
+    analysisResults: analysisData.value.analysisResults,
     analysisURL: analysisData.value.analysisURL,
   };
 }
-
-// const sarifConverter = (analysisResults: IAnalysisResult): ISarifResult => {
-//   let suggestions = {}
-//   const toolResults = getTools(analysisResults)
-//   const files = Object.keys(analysisResults.files)
-//   for (let file of files){
-//     const issueIds = Object.keys(analysisResults.files[file])
-//     for (let issueId of issueIds){
-//       if (!Object.keys(suggestions).includes(issueId)){
-//         suggestions[issueId] = analysisResults.files[file][issueId][0]
-//         suggestions[issueId].file = file[1:]
-//       }
-//     }
-//   }
-//   suggestions = toolResults.suggestions
-//   let tool = toolResults.tools
-//   const results  = getResults(suggestions)
-//   return {tool, results}
-// }
-
-// const getTools = (analysisResults: IAnalysisResult) =>{
-//   let suggestions = {}
-//   let output = {driver:{name: 'DeepCode'}}
-//   let rules = []
-//   let suggestionNumbers = Object.keys(analysisResults.suggestions)
-//   for (let suggestionNumber of suggestionNumbers ){
-//     const severity = {
-//       3: "error",
-//       2: "warning",
-//       1: "note"
-//     }[analysisResults.suggestions[suggestionNumber].severity]
-//     let suggestionId = analysisResults.suggestions[suggestionNumber].id
-
-//     rules.push({
-//       "id": suggestionId,
-//       "name": analysisResults.suggestions[suggestionNumber].rule,
-//       "shortDescription": {
-//         "text": analysisResults.suggestions[suggestionNumber].message
-//       },
-//       "fullDescription": {
-//         "text": analysisResults.suggestions[suggestionNumber].message
-//       },
-//       "defaultConfiguration": {
-//         "level": severity,
-//       },
-//       "properties": {
-//         "tags": [suggestionId.split("%2F")[0]],
-//         "precision": "very-high"
-//       }
-//     })
-
-//     suggestions[suggestionNumber].level = severity
-//     suggestions[suggestionNumber].id = suggestionId
-//     suggestions[suggestionNumber].text = analysisResults.suggestions[suggestionNumber].message
-//   }
-//   let newOutput = {driver:{...output.driver, rules: rules}}
-//   return { tools: newOutput, suggestions }
-// }
-
-
-// const getResults = (suggestions: any ) =>{
-//   let output = []
-
-//   for (let suggestion of suggestions){
-//     let result = {
-//       "ruleId": suggestions[suggestion].id,
-//       "level": suggestions[suggestion].level,
-//       "message": {
-//         "text": suggestions[suggestion].text
-//       },
-//       "locations": [{
-//         "physicalLocation": {
-//           "artifactLocation": {
-//             "uri": suggestions[suggestion].file,
-//             "uriBaseId": "%SRCROOT%"
-//           },
-//           "region": {
-//             "startLine": suggestions[suggestion].rows[0],
-//             "endLine": suggestions[suggestion].rows[1],
-//             "startColumn": suggestions[suggestion].cols[0],
-//             "endColumn": suggestions[suggestion].cols[1]
-//           }
-//         }
-//       }]
-//     }
-
-//     let code_thread_flows = []
-//     let i = 0
-//     if (suggestions[suggestion].markers.length >= 1){
-//       for (let marker of suggestions[suggestion].markers){
-//         for (let position of marker.pos){
-//           code_thread_flows.push(
-//             {
-//               "location": {
-//                 "physicalLocation": {
-//                   "artifactLocation": {
-//                     "uri": suggestions[suggestion].file,
-//                     "uriBaseId": "%SRCROOT%",
-//                     "index": i
-//                   },
-//                   "region": {
-//                     "startLine": position.rows[0],
-//                     "endLine": position.rows[1],
-//                     "startColumn": position.cols[0],
-//                     "endColumn": position.cols[1]
-//                   }
-//                 }
-//               }
-//             }
-//           )
-//           i = i + 1
-//         }
-//       }
-//     }else{
-//       code_thread_flows.push(
-//         {
-//           "location": {
-//             "physicalLocation": {
-//               "artifactLocation": {
-//                 "uri": suggestions[suggestion].file,
-//                 "uriBaseId": "%SRCROOT%",
-//                 "index": i
-//               },
-//               "region": {
-//                 "startLine": suggestions[suggestion].rows[0],
-//                 "endLine": suggestions[suggestion].rows[1],
-//                 "startColumn": suggestions[suggestion].cols[0],
-//                 "endColumn": suggestions[suggestion].cols[1]
-//               }
-//             }
-//           }
-//         }
-//       )
-//     }
-//     let newResult = {...result, codeFlows: [{
-//       "threadFlows": [
-//         {
-//           "locations": code_thread_flows
-//         }
-//       ]
-//     }]}
-//     output.push(newResult)
-//   }
-//   return output
-// }
-
 
 // public async extend(files: string[], removedFiles: string[]): Promise<IFileBundle> {
 //   return this;

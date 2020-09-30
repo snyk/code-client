@@ -225,8 +225,8 @@ describe('Requests to public API', () => {
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value.bundleId).toEqual(
-      'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
+    expect(response.value.bundleId).toContain(
+      '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
     );
     expect(response.value.missingFiles).toEqual([`/new.js`]);
   });

@@ -18,13 +18,13 @@ $ npm link @deepcode/tsc
 
 ```shell script
 $ cd <package-location>
-$ npm run test
+$ DEEPCODE_API_KEY=<your API key on staging> npm run test
 ```
 
-#### Build and publish
+#### Compile and publish
 
 ```shell script
 $ cd <package-location>
-$ npm run build
+$ npm run compile
 $ npm publish --access public
 ```

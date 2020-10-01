@@ -1,12 +1,22 @@
-import { analyzeFolders, uploadRemoteBundle } from '../src/analysis';
+import { analyzeFolders } from '../src/analysis';
+import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken } from './constants/base';
-import { sampleProjectPath, bundleFiles } from './constants/sample';
+import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
+import { ISupportedFiles } from '../src/interfaces/files.interface';
 
 describe('Functional test of analysis', () => {
   it('analyze folder', async () => {
-    const bFiles = await bundleFiles;
+
+    const onSupportedFilesLoaded = jest.fn((data: ISupportedFiles | null) => {
+      if (data === null) {
+        // all good
+      }
+    });
+    emitter.on(emitter.events.supportedFilesLoaded, onSupportedFilesLoaded);
+
+    const bFiles = await bundleFilesFull;
     const onScanFilesProgress = jest.fn((processed: number) => {
       expect(typeof processed).toBe('number');
       expect(processed).toBeGreaterThanOrEqual(0);
@@ -16,7 +26,7 @@ describe('Functional test of analysis', () => {
 
     const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
       expect(typeof processed).toBe('number');
-      expect(total).toEqual(3);
+      expect(total).toEqual(2);
 
       expect(processed).toBeLessThanOrEqual(total);
     });
@@ -30,7 +40,7 @@ describe('Functional test of analysis', () => {
     });
     emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
-    const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [sampleProjectPath], 1000);
+    const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [sampleProjectPath], false, 1000);
     expect(bundle).toHaveProperty('baseURL');
     expect(bundle).toHaveProperty('sessionToken');
     expect(bundle).toHaveProperty('supportedFiles');
@@ -40,8 +50,9 @@ describe('Functional test of analysis', () => {
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
 
     // Check if emitter event happened
-    expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
-    expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
+    expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
+    expect(onScanFilesProgress).toHaveBeenCalledTimes(7);
+    expect(onCreateBundleProgress).toHaveBeenCalledTimes(3);
     expect(onAnalyseProgress).toHaveBeenCalled();
 
     // Test uploadRemoteBundle with empty list of files

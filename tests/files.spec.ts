@@ -2,18 +2,29 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
 
-import { collectBundleFiles, composeFilePayloads, parseFileIgnores, getFileInfo } from '../src/files';
+import {
+  collectIgnoreRules,
+  collectBundleFiles,
+  composeFilePayloads,
+  parseFileIgnores,
+  getFileInfo,
+} from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles } from './constants/sample';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
 describe('files', async () => {
+
+  it('collect ignore rules', async () => {
+    const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
+    expect(ignoreRules).toEqual(bundleFileIgnores);
+  });
+
   it('collect bundle files', async () => {
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles);
+    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
     const files = [];
     for await (const f of collector) {
       files.push(f);
     }
-
     expect(files).toEqual(await bundleFiles);
 
     const firstFile = files[0];
@@ -21,12 +32,17 @@ describe('files', async () => {
     expect(firstFile.bundlePath).toEqual('/AnnotatorTest.cpp');
     expect(firstFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
     expect(firstFile.size).toEqual(239);
-    expect(firstFile.content).toEqual(fs.readFileSync(firstFile.filePath).toString('utf8'));
   });
 
   it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, 500);
+    const collector = collectBundleFiles(
+      sampleProjectPath,
+      [sampleProjectPath],
+      supportedFiles,
+      bundleFileIgnores,
+      500,
+    );
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -37,7 +53,7 @@ describe('files', async () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles);
+    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles, bundleFileIgnores);
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -51,7 +67,7 @@ describe('files', async () => {
 
   it('compose file payloads', async () => {
     // Prepare all missing files first
-    const payloads = [...composeFilePayloads(await bundleFiles, 1024)];
+    const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
     expect(payloads.length).toEqual(4); // 4 chunks
     expect(payloads[0].length).toEqual(3);
     expect(payloads[0][0].filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
@@ -63,7 +79,7 @@ describe('files', async () => {
 
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns.length).toEqual(1384);
+    expect(patterns.length).toEqual(2);
   });
 
   it('support of utf-8 encoding', async () => {

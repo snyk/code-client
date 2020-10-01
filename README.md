@@ -26,43 +26,73 @@ const baseURL = 'https://www.deepcode.ai';
 ### Requests the creation of a new login session
 
 ```javascript
-const { sessionToken, loginURL } = await tsc.startSession({
+const loginResponse = await tsc.startSession({
   baseURL,
   // An identificator for the editor using the DeepCode APIs
   source: 'atom',
 });
+
+if (loginResponse.type === 'error') {
+  // Handle error and alert user
+}
+
+const { sessionToken, loginURL } = loginResponse.value;
 ```
 
 ### Checks status of the login process
 ```javascript
-const { isLoggedIn } = await tsc.checkSession({ baseURL, sessionToken });
+const sessionResponse = await tsc.checkSession({ baseURL, sessionToken });
+if (sessionResponse.type === 'error') {
+  // Handle error and alert user
+}
+
+const isLoggedIn = sessionResponse.value; // boolean
 ```
 
-### Can subscribe to the following events:
+### Subscribe to events.
+
 ```javascript
 /** Building bundle process started with provided data */
-tsc.events.on('scanFilesProgress', (processed: number) = {
+tsc.emitter.on('scanFilesProgress', (processed: number) = {
   console.log(`Indexed ${processed} files`);
 });
 
 /** Bundle upload process is started with provided data */
-tsc.events.on('uploadBundleProgress', (processed: number, total: number) => {
-  console.log(processed, total);
+tsc.emitter.on('uploadBundleProgress', (processed: number, total: number) => {
+  console.log(`Upload bundle progress: ${processed}/${total}`);
 });
 
 /** Receives an error object and logs an error message */
-tsc.events.on('sendError', error => {
+tsc.emitter.on('sendError', error => {
   console.log(error);
 });
 ```
+
+Complete list of events:
+  - supportedFilesLoaded: uploading supported file extensions, can be also used for instantiating file watcher
+  - scanFilesProgress: emits a number of files being found
+  - createBundleProgress: emits a progress in instantiating packages for analysis
+  - uploadBundleProgress: emits a progress in uploading files
+  - analyseProgress: emits a progress in analysis job
+  - error: emits in case of an error
 
 ### Run analysis
 
 ```javascript
 
-const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
+const bundle = await tsc.analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
 
-const { analysisResults, analysisURL, bundleId } = bundle;
+// bundle implements interface IFileBundle:
+//   readonly baseURL: string;
+//   readonly sessionToken: string;
+//   readonly includeLint: boolean;
+//   readonly severity: AnalysisSeverity;
+//   readonly bundleId: string;
+//   readonly analysisResults: IAnalysisResult;
+//   readonly analysisURL: string;
+//   readonly baseDir: string;
+//   readonly paths: string[];
+//   readonly supportedFiles: ISupportedFiles;
 ```
 
 ### Creates a new bundle based on a previously uploaded one
@@ -86,7 +116,15 @@ const { bundleId, missingFiles, uploadURL } = result;
 
 const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
 
-const { analysisResults, analysisURL, bundleId } = bundle;
+// bundle implements interface IGitBundle
+//   readonly baseURL: string;
+//   readonly sessionToken: string;
+//   readonly includeLint: boolean;
+//   readonly severity: AnalysisSeverity;
+//   readonly bundleId: string;
+//   readonly analysisResults: IAnalysisResult;
+//   readonly analysisURL: string;
+//   readonly gitUri: string;
 ```
 
 ### Errors

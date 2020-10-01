@@ -49,15 +49,20 @@ export interface IAnalysisResult {
   files: IAnalysisFiles;
 }
 
-interface IBundleBase {
+export interface IBundleArgs {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly includeLint: boolean;
   readonly severity: AnalysisSeverity;
+}
+
+export interface IBundleResult {
   readonly bundleId: string;
   readonly analysisResults: IAnalysisResult;
   readonly analysisURL: string;
 }
+
+interface IBundleBase extends IBundleArgs, IBundleResult {}
 
 export interface IGitBundle extends IBundleBase {
   readonly gitUri: string;
@@ -67,4 +72,6 @@ export interface IFileBundle extends IBundleBase {
   readonly baseDir: string;
   readonly paths: string[];
   readonly supportedFiles: ISupportedFiles;
+  readonly fileIgnores: string[];
+  readonly symlinksEnabled: boolean;
 }

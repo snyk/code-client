@@ -9,6 +9,17 @@ export enum AnalysisSeverity {
   critical = 3,
 }
 
+interface CommitChangeLine {
+  line: string;
+  lineNumber: number;
+  lineChange: 'removed' | 'added' | 'none';
+}
+
+interface ExampleCommitFix {
+  commitURL: string;
+  lines: CommitChangeLine[];
+}
+
 export interface ISuggestion {
   id: string;
   message: string;
@@ -16,6 +27,10 @@ export interface ISuggestion {
   leadURL?: string;
   rule: string;
   tags: string[];
+  categories: string[];
+  repoDatasetSize: number;
+  exampleCommitDescriptions: string[];
+  exampleCommitFixes: ExampleCommitFix[];
 }
 
 export interface ISuggestions {

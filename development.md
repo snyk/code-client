@@ -3,6 +3,8 @@
 To use and debug package locally you don't need publish it to NPM registry:
 ```shell script
 $ cd <package-location>
+$ npm install
+$ npm run compile
 $ npm link
 ```
 

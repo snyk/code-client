@@ -40,6 +40,7 @@ describe('Functional test of analysis', () => {
     );
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(2);
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(2);
+    
   });
   it('analyze remote git with oid and return sarif', async () => {
     const bundle = await analyzeGit(
@@ -48,6 +49,7 @@ describe('Functional test of analysis', () => {
       false,
       1,
       'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
+      true,
     );
     console.log(bundle.sarifResults)
     expect(bundle.sarifResults).toEqual(true);

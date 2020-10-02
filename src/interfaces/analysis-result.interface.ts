@@ -58,7 +58,7 @@ export interface IBundleArgs {
 
 export interface IBundleResult {
   readonly bundleId: string;
-  readonly analysisResults?: IAnalysisResult;
+  readonly analysisResults: IAnalysisResult;
   readonly sarifResults?: ISarifResult;
   readonly analysisURL: string;
 }

@@ -24,6 +24,7 @@ import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
 
 import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';
+import Sarif from './sarif_converter';
 
 async function pollAnalysis(
   baseURL: string,
@@ -258,6 +259,7 @@ export async function analyzeGit(
   includeLint = false,
   severity = AnalysisSeverity.info,
   gitUri: string,
+  sarif: boolean = false,
 ): Promise<IGitBundle> {
   const repoKey = parseGitUri(gitUri);
   if (!repoKey) {
@@ -273,12 +275,26 @@ export async function analyzeGit(
   const analysisData = await analyzeBundle(baseURL, sessionToken, includeLint, severity, bundleId);
 
   // Create bundle instance to handle extensions
-  return {
-    baseURL,
-    sessionToken,
-    includeLint,
-    severity,
-    gitUri,
-    ...analysisData,
-  };
+  if(!sarif){
+    return {
+      baseURL,
+      sessionToken,
+      includeLint,
+      severity,
+      gitUri,
+      ...analysisData,
+    };
+  }
+  else {
+    return {
+      baseURL,
+      sessionToken,
+      includeLint,
+      severity,
+      gitUri,
+      ...analysisData,
+      sarifResults: analysisData.analysisResults ? await new Sarif(analysisData.analysisResults).sarifConverter() : undefined,
+      
+  }
+}
 }

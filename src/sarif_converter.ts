@@ -14,33 +14,36 @@ interface ISarifSuggestions {
 }
 class Sarif {
   private analysisResults: IAnalysisResult;
-  private suggestions: ISarifSuggestions;
+  private suggestions: ISarifSuggestions= {}
 
   constructor(analysisResults: IAnalysisResult) {
     this.analysisResults = analysisResults;
-    for (const [file] of Object.entries(analysisResults.files)) {
-      for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(analysisResults.files[file])) {
-        if (!Object.keys(this.suggestions).includes(issueId)) {
+    console.log(this.analysisResults.files, "the analysis results files[0]")
+    for (const [file] of Object.entries(this.analysisResults.files)) {
+      for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(this.analysisResults.files[file])) {
+        if (!this.suggestions || !Object.keys(this.suggestions).includes(issueId)) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          console.log(issue, 'this is the issue');
           this.suggestions[issueId] = { ...issue[0], file: file.substring(1) };
+          console.log(this.suggestions, 'this is the current suggestions')
         }
       }
     }
   }
-  public sarifConverter():ISarifResult {
+  public async sarifConverter():Promise<ISarifResult>{
     return { 
       $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", 
       version: "2.1.0" ,
       runs:[
         {
-          tool: this.getTools(), 
-          results: this.getResults()
+          tool: await this.getTools(), 
+          results: await this.getResults(),
         }
       ] 
     };
   }
 
-  private getTools() {
+  private async getTools() {
     const output = { driver: { name: 'DeepCode' } };
     const rules = [];
     let ruleIndex = 0
@@ -78,16 +81,17 @@ class Sarif {
       }
       rules.push(rule);
 
-      this.suggestions[suggestionName] = { ruleIndex, rule, level: severity, id: suggestionId, text: suggestion.message };
+      this.suggestions[suggestionName] = {...this.suggestions[suggestionName], ruleIndex, rule, level: severity, id: suggestionId, text: suggestion.message };
       ruleIndex ++;
     }
     return { driver: { ...output.driver, rules } };
   }
 
-  private getResults() {
+  private async getResults() {
     const output = [];
 
     for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(this.suggestions)) {
+      console.log('this is the suggestion!!!', suggestion) 
       const result = {
         ruleId: suggestion.id,
         ruleIndex: suggestion.ruleIndex,

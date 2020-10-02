@@ -18,14 +18,10 @@ class Sarif {
 
   constructor(analysisResults: IAnalysisResult) {
     this.analysisResults = analysisResults;
-    console.log(this.analysisResults.files, "the analysis results files[0]")
     for (const [file] of Object.entries(this.analysisResults.files)) {
       for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(this.analysisResults.files[file])) {
         if (!this.suggestions || !Object.keys(this.suggestions).includes(issueId)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          console.log(issue, 'this is the issue');
           this.suggestions[issueId] = { ...issue[0], file: file.substring(1) };
-          console.log(this.suggestions, 'this is the current suggestions')
         }
       }
     }
@@ -50,13 +46,12 @@ class Sarif {
     for (const [suggestionName, suggestion] of <[string, ISuggestion][]>(
       Object.entries(this.analysisResults.suggestions)
     )) {
-      const severityName = suggestion.severity;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const severityNum = suggestion.severity;
       const severity = {
-        critical: 'error',
-        warning: 'warning',
-        info: 'note',
-      }[severityName];
+        3: 'error',
+        2: 'warning',
+        1: 'note',
+      }[severityNum];
 
       const suggestionId = suggestion.id;
       const rule ={
@@ -91,7 +86,6 @@ class Sarif {
     const output = [];
 
     for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(this.suggestions)) {
-      console.log('this is the suggestion!!!', suggestion) 
       const result = {
         ruleId: suggestion.id,
         ruleIndex: suggestion.ruleIndex,

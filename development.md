@@ -3,15 +3,13 @@
 To use and debug package locally you don't need publish it to NPM registry:
 ```shell script
 $ cd <package-location>
-$ npm install
-$ npm run compile
-$ npm link
+$ npm install && npm run compile && npx yalc publish
 ```
 
 After that you have to create symlink to your package in your project folder:
 ```shell script
 $ cd <project-location>
-$ npm link @deepcode/tsc
+$ npx yalc add @deepcode/tsc
 ```
 
 ## Publishing

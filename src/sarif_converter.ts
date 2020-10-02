@@ -1,7 +1,10 @@
 import { IAnalysisResult, ISuggestion, IFileSuggestion } from './interfaces/analysis-result.interface';
+import { ISarifResult, IRule } from './interfaces/sarif.interface';
 
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
+  ruleIndex: number;
+  rule: IRule
   level: string;
   text: string;
   file: string;
@@ -24,13 +27,23 @@ class Sarif {
       }
     }
   }
-  public sarifConverter() {
-    return { tool: this.getTools(), results: this.getResults() };
+  public sarifConverter():ISarifResult {
+    return { 
+      $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", 
+      version: "2.1.0" ,
+      runs:[
+        {
+          tool: this.getTools(), 
+          results: this.getResults()
+        }
+      ] 
+    };
   }
 
   private getTools() {
     const output = { driver: { name: 'DeepCode' } };
     const rules = [];
+    let ruleIndex = 0
     for (const [suggestionName, suggestion] of <[string, ISuggestion][]>(
       Object.entries(this.analysisResults.suggestions)
     )) {
@@ -43,8 +56,7 @@ class Sarif {
       }[severityName];
 
       const suggestionId = suggestion.id;
-
-      rules.push({
+      const rule ={
         id: suggestionId,
         name: suggestion.rule,
         shortDescription: {
@@ -56,13 +68,18 @@ class Sarif {
         defaultConfiguration: {
           level: severity,
         },
+        help: {
+          text: suggestion.message
+        },
         properties: {
           tags: [suggestionId.split('%2F')[0]],
           precision: 'very-high',
         },
-      });
+      }
+      rules.push(rule);
 
-      this.suggestions[suggestionName] = { level: severity, id: suggestionId, text: suggestion.message };
+      this.suggestions[suggestionName] = { ruleIndex, rule, level: severity, id: suggestionId, text: suggestion.message };
+      ruleIndex ++;
     }
     return { driver: { ...output.driver, rules } };
   }
@@ -73,6 +90,8 @@ class Sarif {
     for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(this.suggestions)) {
       const result = {
         ruleId: suggestion.id,
+        ruleIndex: suggestion.ruleIndex,
+        rule: suggestion.rule,
         level: suggestion.level,
         message: {
           text: suggestion.text,
@@ -96,7 +115,7 @@ class Sarif {
       };
 
       const codeThreadFlows = [];
-      let i = 0;
+      // let i = 0;
       if (suggestion.markers && suggestion.markers.length >= 1) {
         for (const marker of suggestion.markers) {
           for (const position of marker.pos) {
@@ -106,7 +125,7 @@ class Sarif {
                   artifactLocation: {
                     uri: suggestion.file,
                     uriBaseId: '%SRCROOT%',
-                    index: i,
+                    // index: i,
                   },
                   region: {
                     startLine: position.rows[0],
@@ -117,7 +136,7 @@ class Sarif {
                 },
               },
             });
-            i += 1;
+            // i += 1;
           }
         }
       } else {
@@ -127,7 +146,7 @@ class Sarif {
               artifactLocation: {
                 uri: suggestion.file,
                 uriBaseId: '%SRCROOT%',
-                index: i,
+                // index: i,
               },
               region: {
                 startLine: suggestion.rows[0],

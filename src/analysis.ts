@@ -28,7 +28,7 @@ import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD } from './constants';
 
 import { IFileInfo } from './interfaces/files.interface';
-import { AnalysisSeverity, IGitBundle, IFileBundle } from './interfaces/analysis-result.interface';
+import { AnalysisSeverity, IGitBundle, IFileBundle,} from './interfaces/analysis-result.interface';
 // import Sarif from './sarif_converter';
 // 1. Create a bundle for paths from scratch. Return bundle info together with request details and analysis results. Create a class Bundle for this
 // 2. class Bundle will implement method extend, that will conduct analysis and return another Bundle instance

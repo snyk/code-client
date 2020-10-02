@@ -336,6 +336,9 @@ describe('Requests to public API', () => {
       const suggestion = response.value.analysisResults.suggestions[0];
       expect(suggestion.id).toEqual('cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse');
       expect(suggestion.leadURL).toEqual('');
+      expect(suggestion.repoDatasetSize).toEqual(0);
+      expect(suggestion.exampleCommitDescriptions).toEqual([]);
+      expect(suggestion.exampleCommitFixes).toEqual([]);
       expect(suggestion.message).toEqual(
         'The expression will always evaluate to false because both sides always hold the same value.',
       );
@@ -414,21 +417,18 @@ describe('Requests to public API', () => {
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(1);
 
       const suggestion = response.value.analysisResults.suggestions[0];
-      // expect(suggestion.categories).toEqual({
-      //   Defect: 1,
-      //   InTest: 1,
-      // });
+      expect(suggestion.categories).toEqual(['Security', 'InTest']);
       expect(suggestion).toHaveProperty('exampleCommitDescriptions');
       expect(suggestion).toHaveProperty('exampleCommitFixes');
       expect(suggestion.leadURL).toEqual('');
-      expect(suggestion.id).toEqual('python%2Fdc%2FDuplicateKey%2Ftest');
-      expect(suggestion.message).toEqual(
-        'Constructing a dictionary with the same key appearing twice: "format" and "format"',
+      expect(suggestion.id).toEqual('python%2Fdc%2FHardcodedNonCryptoSecret%2Ftest');
+      expect(suggestion.message).toContain(
+        'Avoid hardcoding values that are meant to be secret. Found hardcoded string:',
       );
-      expect(suggestion.rule).toEqual('DuplicateKey/test');
+      expect(suggestion.rule).toEqual('HardcodedNonCryptoSecret/test');
       expect(suggestion.severity).toEqual(1);
-      expect(suggestion.tags).toEqual(['maintenance', 'tests', 'type', 'duplicate']);
-      expect(Object.keys(response.value.analysisResults.files).length).toEqual(2);
+      expect(suggestion.tags).toEqual(['maintenance', 'bug', 'key', 'secret', 'credentials']);
+      expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
     }
   });
 });

@@ -38,6 +38,7 @@ describe('Functional test of analysis', () => {
       1,
       'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
     );
+<<<<<<< HEAD
     console.log(bundle.analysisResults.files)
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(1);
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(1);
@@ -54,5 +55,9 @@ describe('Functional test of analysis', () => {
     );
     console.log(bundle.sarifResults)
     expect(!!bundle.sarifResults).toEqual(true);
+=======
+    expect(Object.keys(bundle.analysisResults.files).length).toEqual(1);
+    expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(1);
+>>>>>>> big-refactoring
   });
 });

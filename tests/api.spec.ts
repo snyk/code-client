@@ -411,7 +411,7 @@ describe('Requests to public API', () => {
 
     if (response.value.status === AnalysisStatus.done) {
       expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(1);
 
       const suggestion = response.value.analysisResults.suggestions[0];
       // expect(suggestion.categories).toEqual({

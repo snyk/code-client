@@ -3,7 +3,11 @@ import { ISarifResult } from './sarif.interface'
 export type Point = [number, number];
 
 // eslint-disable-next-line no-shadow
-
+export enum AnalysisSeverity {
+  info = 1,
+  warning = 2,
+  critical = 3,
+}
 
 interface CommitChangeLine {
   line: string;
@@ -19,7 +23,7 @@ interface ExampleCommitFix {
 export interface ISuggestion {
   id: string;
   message: string;
-  severity: string;
+  severity: AnalysisSeverity;
   leadURL?: string;
   rule: string;
   tags: string[];
@@ -64,7 +68,7 @@ export interface IBundleArgs {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly includeLint: boolean;
-  readonly severity: string;
+  readonly severity: AnalysisSeverity;
 }
 
 export interface IBundleResult {

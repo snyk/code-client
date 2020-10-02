@@ -39,13 +39,7 @@ export interface ISarifResult {
   }
   
   interface IRuleDefaultConfiguration{
-    level?: severityLevel
-  }
-  
-  enum severityLevel {
-    note = 1,
-    warning = 2,
-    error = 3,
+    level?: string
   }
   
   interface IRuleHelp {

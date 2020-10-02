@@ -1,6 +1,6 @@
 
 import { baseURL, sessionToken } from './constants/base';
-import { bundleFiles } from './constants/sample';
+import { bundleFiles, bundleFilesFull } from './constants/sample';
 
 import {
   getFilters,
@@ -17,9 +17,6 @@ import {
   reportEvent,
 } from '../src/http';
 import { getFileInfo } from '../src/files';
-
-import { checkBundleError404, extendBundleError404 } from './constants/errors';
-// import { supportedFiles } from '../src/utils/filesUtils';
 
 const fakeBundleId = 'f031acaa1a98b1cccf09868f31e8a9692063be59a1e8bf2502cf5f56f575a759';
 let fakeBundleIdFull = '';
@@ -187,8 +184,8 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     // dummy to cheat typescript compiler
     if (response.type == 'success') return;
-    expect(response.error.statusCode).toEqual(checkBundleError404.statusCode);
-    expect(response.error.statusText).toEqual(checkBundleError404.statusText);
+    expect(response.error.statusCode).toEqual(404);
+    expect(response.error.statusText).toEqual('Uploaded bundle has expired');
   });
 
   it('request analysis with missing files', async () => {
@@ -202,6 +199,7 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     if (response.type === 'success') return;
     expect(response.error).toEqual({
+      apiName: 'getAnalysis',
       statusCode: 500,
       statusText: 'Getting analysis failed',
     });
@@ -227,8 +225,8 @@ describe('Requests to public API', () => {
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value.bundleId).toEqual(
-      'gh/Arvi3d/DEEPCODE_PRIVATE_BUNDLE/587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
+    expect(response.value.bundleId).toContain(
+      '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
     );
     expect(response.value.missingFiles).toEqual([`/new.js`]);
   });
@@ -246,8 +244,9 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     // dummy to cheat typescript compiler
     if (response.type == 'success') return;
-    expect(response.error.statusCode).toEqual(extendBundleError404.statusCode);
-    expect(response.error.statusText).toEqual(extendBundleError404.statusText);
+
+    expect(response.error.statusCode).toEqual(404);
+    expect(response.error.statusText).toEqual('Parent bundle has expired');
   });
 
   it('uploads fake files to fake bundle', async () => {
@@ -269,6 +268,7 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     if (response.type === 'success') return;
     expect(response.error).toEqual({
+      apiName: 'uploadFiles',
       statusCode: 400,
       statusText:
         'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',
@@ -277,7 +277,7 @@ describe('Requests to public API', () => {
 
   it('test successful workflow', async () => {
     // Create a bundle first
-    const files = Object.fromEntries((await bundleFiles).map(d => [d.bundlePath, d.hash]));
+    const files = Object.fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
     const bundleResponse = await createBundle({
       baseURL,
@@ -289,7 +289,7 @@ describe('Requests to public API', () => {
     expect(bundleResponse.value.bundleId).toContain(realBundleId);
     realBundleIdFull = bundleResponse.value.bundleId;
 
-    const content = (await bundleFiles).map(d => {
+    const content = (await bundleFilesFull).map(d => {
       return {
         fileHash: d.hash,
         fileContent: d.content || '',

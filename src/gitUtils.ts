@@ -1,4 +1,11 @@
-const GIT_URI_OBJ = /((git@|https:\/\/)(?<platform>[\w\.@]+)(\/|:))(?<owner>[\w,-,_\/]+)\/(?<repo>[\w\.,-,_]+)\.git((\/){0,1})((@(?<oid>[0-9a-z]+)){0,1})/gisu;
+/**
+ * (git@|https:\/\/) : for protocol ssh vs https
+ * (?<platform>[\w\.]+) : github.com, gitlab.com, etc
+ * (?<owner>[\w\/-]+) : owner or the repository, may contains slash
+ * (?<repo>[\w\.-]+) : repository name, can not contain slash
+ * ((@(?<oid>[0-9a-z]+)){0,1}) : optional oid
+ */
+const GIT_URI_OBJ = /((git@|https:\/\/)(?<platform>[\w\.]+)(\/|:))(?<owner>[\w\/-]+)\/(?<repo>[\w\.-]+)\.git((\/){0,1})((@(?<oid>[0-9a-z]+)){0,1})/gisu;
 
 type RepoKey = {
   platform: string;

@@ -1,9 +1,11 @@
 import { EventEmitter } from 'events';
 
 import { AnalysisResponseProgress } from './http';
+import { ISupportedFiles } from './interfaces/files.interface';
 
 // eslint-disable-next-line no-shadow
 enum CUSTOM_EVENTS {
+  supportedFilesLoaded = 'supportedFilesLoaded',
   scanFilesProgress = 'scanFilesProgress',
   createBundleProgress = 'createBundleProgress',
   uploadBundleProgress = 'uploadBundleProgress',
@@ -13,6 +15,10 @@ enum CUSTOM_EVENTS {
 
 export class EmitterDC extends EventEmitter {
   events = CUSTOM_EVENTS;
+
+  supportedFilesLoaded(data: ISupportedFiles | null): void {
+    this.emit(CUSTOM_EVENTS.supportedFilesLoaded, data);
+  }
 
   scanFilesProgress(processed: number): void {
     this.emit(CUSTOM_EVENTS.scanFilesProgress, processed);

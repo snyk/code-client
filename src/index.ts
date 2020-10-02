@@ -1,7 +1,10 @@
-import { analyzeFolders, analyzeGit } from './analysis';
+import { analyzeFolders, extendAnalysis, analyzeGit } from './analysis';
 import emitter from './emitter';
 import { startSession, checkSession, reportEvent, reportError } from './http';
 import * as constants from './constants';
+import { getGlobPatterns } from './files';
+
+import { ISupportedFiles } from './interfaces/files.interface';
 
 import {
   IFileSuggestion,
@@ -14,7 +17,9 @@ import {
 } from './interfaces/analysis-result.interface';
 
 export {
+  getGlobPatterns,
   analyzeFolders,
+  extendAnalysis,
   analyzeGit,
   startSession,
   checkSession,
@@ -29,4 +34,5 @@ export {
   ISuggestions,
   IAnalysisResult,
   IFileBundle,
+  ISupportedFiles,
 };

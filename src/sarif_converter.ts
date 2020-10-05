@@ -1,11 +1,11 @@
 import { IAnalysisResult, ISuggestion, IFileSuggestion } from './interfaces/analysis-result.interface';
-import { ISarifResult, IRule } from './interfaces/sarif.interface';
+import { Log, ReportingConfiguration, ReportingDescriptor  } from "sarif"
 
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
   ruleIndex: number;
-  rule: IRule
-  level: string;
+  rule: ReportingDescriptor 
+  level: ReportingConfiguration.level;
   text: string;
   file: string;
 }
@@ -26,7 +26,7 @@ class Sarif {
       }
     }
   }
-  public async sarifConverter():Promise<ISarifResult>{
+  public async sarifConverter():Promise<Log>{
     return { 
       $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", 
       version: "2.1.0" ,
@@ -46,12 +46,15 @@ class Sarif {
     for (const [suggestionName, suggestion] of <[string, ISuggestion][]>(
       Object.entries(this.analysisResults.suggestions)
     )) {
-      const severityNum = suggestion.severity;
-      const severity = {
-        3: 'error',
-        2: 'warning',
-        1: 'note',
-      }[severityNum];
+      let severity
+      const severityNum: number = suggestion.severity
+      if (severityNum > 0 && severityNum <= 3){
+        severity = {
+          3: 'error',
+          2: 'warning',
+          1: 'note',
+        }[severityNum];
+      }
 
       const suggestionId = suggestion.id;
       const rule ={
@@ -90,7 +93,7 @@ class Sarif {
         ruleId: suggestion.id,
         ruleIndex: suggestion.ruleIndex,
         rule: suggestion.rule,
-        level: suggestion.level,
+        level: suggestion.level ? suggestion.level : "none",
         message: {
           text: suggestion.text,
         },

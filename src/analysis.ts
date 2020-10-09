@@ -24,7 +24,7 @@ import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
 
 import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';
-import Sarif from './sarif_converter';
+import { getSarif }from './sarif_converter';
 
 async function pollAnalysis(
   baseURL: string,
@@ -293,7 +293,7 @@ export async function analyzeGit(
       severity,
       gitUri,
       ...analysisData,
-      sarifResults: analysisData.analysisResults ? await new Sarif(analysisData.analysisResults).sarifConverter() : undefined,
+      sarifResults: analysisData.analysisResults ? getSarif(analysisData.analysisResults) : undefined,
       
   }
 }

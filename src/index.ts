@@ -14,6 +14,7 @@ import {
   ISuggestions,
   IAnalysisResult,
   IFileBundle,
+  IGitBundle,
 } from './interfaces/analysis-result.interface';
 
 export {
@@ -34,5 +35,6 @@ export {
   ISuggestions,
   IAnalysisResult,
   IFileBundle,
+  IGitBundle,
   ISupportedFiles,
 };

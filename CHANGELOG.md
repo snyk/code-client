@@ -1,4 +1,4 @@
-## [2.0.0] - 2020-09-25
+## [2.0.0] - 2020-10-12
 - Major release. Huge refactoring. Backwards incompartible version.
 
 ## [1.3.1] - 2020-08-24

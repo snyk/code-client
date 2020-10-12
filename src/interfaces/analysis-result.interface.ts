@@ -1,11 +1,36 @@
-import { AnalysisSeverity } from '../enums/analysis-severity.enum';
+import { ISupportedFiles } from './files.interface';
 
 export type Point = [number, number];
+
+// eslint-disable-next-line no-shadow
+export enum AnalysisSeverity {
+  info = 1,
+  warning = 2,
+  critical = 3,
+}
+
+interface CommitChangeLine {
+  line: string;
+  lineNumber: number;
+  lineChange: 'removed' | 'added' | 'none';
+}
+
+interface ExampleCommitFix {
+  commitURL: string;
+  lines: CommitChangeLine[];
+}
 
 export interface ISuggestion {
   id: string;
   message: string;
   severity: AnalysisSeverity;
+  leadURL?: string;
+  rule: string;
+  tags: string[];
+  categories: string[];
+  repoDatasetSize: number;
+  exampleCommitDescriptions: string[];
+  exampleCommitFixes: ExampleCommitFix[];
 }
 
 export interface ISuggestions {
@@ -19,13 +44,11 @@ export interface IPosition {
 
 export interface IMarker {
   msg: Point;
-  pos: IPosition;
+  pos: IPosition[];
 }
 
-export interface IFileSuggestion {
-  cols: Point;
-  rows: Point;
-  markers: IMarker[];
+export interface IFileSuggestion extends IPosition {
+  markers?: IMarker[];
 }
 
 export interface IFilePath {
@@ -39,4 +62,31 @@ export interface IAnalysisFiles {
 export interface IAnalysisResult {
   suggestions: ISuggestions;
   files: IAnalysisFiles;
+}
+
+export interface IBundleArgs {
+  readonly baseURL: string;
+  readonly sessionToken: string;
+  readonly includeLint: boolean;
+  readonly severity: AnalysisSeverity;
+}
+
+export interface IBundleResult {
+  readonly bundleId: string;
+  readonly analysisResults: IAnalysisResult;
+  readonly analysisURL: string;
+}
+
+interface IBundleBase extends IBundleArgs, IBundleResult {}
+
+export interface IGitBundle extends IBundleBase {
+  readonly gitUri: string;
+}
+
+export interface IFileBundle extends IBundleBase {
+  readonly baseDir: string;
+  readonly paths: string[];
+  readonly supportedFiles: ISupportedFiles;
+  readonly fileIgnores: string[];
+  readonly symlinksEnabled: boolean;
 }

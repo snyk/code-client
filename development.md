@@ -1,37 +1,15 @@
-# Development
+# Package development notes
 
 To use and debug package locally you don't need publish it to NPM registry:
 ```shell script
 $ cd <package-location>
-$ npm link
+$ npm install && npm run compile && npx yalc publish
 ```
 
 After that you have to create symlink to your package in your project folder:
 ```shell script
 $ cd <project-location>
-$ npm link @deepcode/tsc
-```
-
-Add package to your `package.json`:
-```json
-"dependencies": {
-  "@deepcode/tsc": "^1.0.0"
-}
-```
-
-Now you can use this package as usual:
-```javascript
-import { ServiceAI } from '@deepcode/tsc';
-
-const AI = new ServiceAI();
-
-async login() {
-  const { sessionToken } = await AI.startSession({
-    baseURL: 'https://www.deepcode.ai',
-    source: 'atom'
-  });
-  return Promise.resolve(sessionToken);
-}
+$ npx yalc add @deepcode/tsc
 ```
 
 ## Publishing
@@ -40,13 +18,13 @@ async login() {
 
 ```shell script
 $ cd <package-location>
-$ npm run test
+$ DEEPCODE_API_KEY=<your API key on staging> npm run test
 ```
 
-#### Build and publish
+#### Compile and publish
 
 ```shell script
 $ cd <package-location>
-$ npm run build
+$ npm run compile
 $ npm publish --access public
 ```

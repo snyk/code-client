@@ -8,7 +8,8 @@ export interface IFileContent {
 }
 
 export interface IFileInfo {
-  path: string;
+  filePath: string;
+  bundlePath: string;
   size: number;
   hash: string;
   content?: string;
@@ -22,3 +23,8 @@ export interface IFileQueue {
   on: Function;
   start: Function;
 }
+
+export type ISupportedFiles = {
+  configFiles: string[];
+  extensions: string[];
+};

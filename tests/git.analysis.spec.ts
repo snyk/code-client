@@ -62,8 +62,9 @@ describe('Functional test of analysis', () => {
       });
       it('should match sarif schema', () => {
         const validationResult = jsonschema.validate(sarifResults , sarifSchema);
+        // this is to debug any errors found
         // const json = JSON.stringify(validationResult)
-        // fs.writeFile('myjsonfile.json', json, 'utf8', ()=>null);
+        // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
         expect(validationResult.errors.length).toEqual(0);
       });
     });

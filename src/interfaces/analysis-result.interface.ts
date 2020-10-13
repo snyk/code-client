@@ -1,5 +1,5 @@
 import { ISupportedFiles } from './files.interface';
-
+import { Log } from "sarif"
 export type Point = [number, number];
 
 // eslint-disable-next-line no-shadow
@@ -74,6 +74,7 @@ export interface IBundleArgs {
 export interface IBundleResult {
   readonly bundleId: string;
   readonly analysisResults: IAnalysisResult;
+  readonly sarifResults?: Log;
   readonly analysisURL: string;
 }
 

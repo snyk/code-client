@@ -22,7 +22,7 @@ import {
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
-
+import { getSarif } from './sarif_converter';
 import {
   AnalysisSeverity,
   IGitBundle,
@@ -259,6 +259,7 @@ export async function analyzeGit(
   includeLint = false,
   severity = AnalysisSeverity.info,
   gitUri: string,
+  sarif = false,
 ): Promise<IGitBundle> {
   const repoKey = parseGitUri(gitUri);
   if (!repoKey) {
@@ -273,8 +274,7 @@ export async function analyzeGit(
 
   const analysisData = await analyzeBundle(baseURL, sessionToken, includeLint, severity, bundleId);
 
-  // Create bundle instance to handle extensions
-  return {
+  const result = {
     baseURL,
     sessionToken,
     includeLint,
@@ -282,4 +282,12 @@ export async function analyzeGit(
     gitUri,
     ...analysisData,
   };
+
+  // Create bundle instance to handle extensions
+  if (sarif && analysisData.analysisResults) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    result.sarifResults = getSarif(analysisData.analysisResults);
+  }
+
+  return result;
 }

@@ -1,4 +1,4 @@
-## [2.0.1] - 2020-10-13
+## [2.0.2] - 2020-10-13
 - Added an option to format results in SARIF format
 
 ## [2.0.0] - 2020-10-12

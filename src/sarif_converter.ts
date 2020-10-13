@@ -41,7 +41,7 @@ const getSuggestions= (analysisResults: IAnalysisResult)=> {
 }
 
 const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestions) => {
-  const output = { driver: { name: 'DeepCode' } };
+  const output = { driver: { name: 'DeepCode', semanticVersion: "1.0.0", } };
   const rules = [];
   let ruleIndex = 0
   for (const [suggestionName, suggestion] of <[string, ISuggestion][]>(
@@ -93,7 +93,6 @@ const getResults = (suggestions: ISarifSuggestions) => {
     const result = {
       ruleId: suggestion.id,
       ruleIndex: suggestion.ruleIndex,
-      rule: suggestion.rule,
       level: suggestion.level ? suggestion.level : "none",
       message: {
         text: suggestion.text,

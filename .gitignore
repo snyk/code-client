@@ -1,7 +1,7 @@
 .yalc
 node_modules
 dist
-.dccache
+**/.dccache
 .idea
 coverage
 tsc.iml

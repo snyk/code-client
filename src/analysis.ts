@@ -22,9 +22,14 @@ import {
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
-
-import { AnalysisSeverity, IGitBundle, IFileBundle, IBundleResult } from './interfaces/analysis-result.interface';
-import { getSarif }from './sarif_converter';
+import { getSarif } from './sarif_converter';
+import {
+  AnalysisSeverity,
+  IGitBundle,
+  IAnalysisFiles,
+  IFileBundle,
+  IBundleResult,
+} from './interfaces/analysis-result.interface';
 
 async function pollAnalysis(
   baseURL: string,
@@ -82,7 +87,6 @@ export async function analyzeBundle(
   includeLint = false,
   severity = AnalysisSeverity.info,
   bundleId: string,
-  baseDir = '',
 ): Promise<IBundleResult> {
   // Call remote bundle for analysis results and emit intermediate progress
   const analysisData = await pollAnalysis(baseURL, sessionToken, bundleId, includeLint, severity);
@@ -95,22 +99,24 @@ export async function analyzeBundle(
 
   const { analysisResults } = analysisData.value;
 
-  const filesPositions = Object.fromEntries(
-    Object.entries(analysisResults.files).map(([path, positions]) => {
-      const filePath = resolveBundleFilePath(baseDir, path);
-      return [filePath, positions];
-    }),
-  );
-
   // Create bundle instance to handle extensions
   return {
     bundleId,
-    analysisResults: {
-      files: filesPositions,
-      suggestions: analysisResults.suggestions,
-    },
+    analysisResults,
     analysisURL: analysisData.value.analysisURL,
   };
+}
+
+function normalizeResultFiles(files: IAnalysisFiles, baseDir: string) {
+  if (baseDir) {
+    return Object.fromEntries(
+      Object.entries(files).map(([path, positions]) => {
+        const filePath = resolveBundleFilePath(baseDir, path);
+        return [filePath, positions];
+      }),
+    );
+  }
+  return files;
 }
 
 export async function analyzeFolders(
@@ -168,14 +174,8 @@ export async function analyzeFolders(
     throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
   }
 
-  const analysisData = await analyzeBundle(
-    baseURL,
-    sessionToken,
-    includeLint,
-    severity,
-    bundleResponse.value.bundleId,
-    baseDir,
-  );
+  const analysisData = await analyzeBundle(baseURL, sessionToken, includeLint, severity, bundleResponse.value.bundleId);
+  analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
 
   // Create bundle instance to handle extensions
   return {
@@ -243,8 +243,8 @@ export async function extendAnalysis(
     bundle.includeLint,
     bundle.severity,
     bundleResponse.value.bundleId,
-    bundle.baseDir,
   );
+  analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
   // Create bundle instance to handle extensions
   return {
@@ -259,7 +259,7 @@ export async function analyzeGit(
   includeLint = false,
   severity = AnalysisSeverity.info,
   gitUri: string,
-  sarif: boolean = false,
+  sarif = false,
 ): Promise<IGitBundle> {
   const repoKey = parseGitUri(gitUri);
   if (!repoKey) {
@@ -274,27 +274,20 @@ export async function analyzeGit(
 
   const analysisData = await analyzeBundle(baseURL, sessionToken, includeLint, severity, bundleId);
 
+  const result = {
+    baseURL,
+    sessionToken,
+    includeLint,
+    severity,
+    gitUri,
+    ...analysisData,
+  };
+
   // Create bundle instance to handle extensions
-  if(!sarif){
-    return {
-      baseURL,
-      sessionToken,
-      includeLint,
-      severity,
-      gitUri,
-      ...analysisData,
-    };
+  if (sarif && analysisData.analysisResults) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    result.sarifResults = getSarif(analysisData.analysisResults);
   }
-  else {
-    return {
-      baseURL,
-      sessionToken,
-      includeLint,
-      severity,
-      gitUri,
-      ...analysisData,
-      sarifResults: analysisData.analysisResults ? getSarif(analysisData.analysisResults) : undefined,
-      
-  }
-}
+
+  return result;
 }

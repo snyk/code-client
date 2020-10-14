@@ -1,3 +1,6 @@
+## [2.0.3] - 2020-10-14
+- Bugfix release
+
 ## [2.0.2] - 2020-10-13
 - Added an option to format results in SARIF format
 

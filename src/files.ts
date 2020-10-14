@@ -5,7 +5,7 @@ import micromatch from 'micromatch';
 import crypto, { HexBase64Latin1Encoding } from 'crypto';
 import { union } from 'lodash';
 import util from 'util';
-import flatCache from 'flat-cache';
+import * as flatCache from 'flat-cache';
 
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
 

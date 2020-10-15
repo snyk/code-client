@@ -1,9 +1,8 @@
-
 import { baseURL, sessionToken } from './constants/base';
 import parseGitUri from '../src/gitUtils';
 import { analyzeGit } from '../src/analysis';
-import jsonschema from 'jsonschema'
-import { Log } from 'sarif'
+import jsonschema from 'jsonschema';
+import { Log } from 'sarif';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 // import fs from 'fs';
 
@@ -44,7 +43,6 @@ describe('Functional test of analysis', () => {
     );
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(1);
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(1);
-    
   });
   describe('detailed sarif tests', () => {
     let sarifResults: Log | undefined;
@@ -56,16 +54,16 @@ describe('Functional test of analysis', () => {
         1,
         'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
         true,
-        );
-        sarifResults = bundle.sarifResults;
-        expect(!!bundle.sarifResults).toEqual(true);
-      });
-      it('should match sarif schema', () => {
-        const validationResult = jsonschema.validate(sarifResults , sarifSchema);
-        // this is to debug any errors found
-        // const json = JSON.stringify(validationResult)
-        // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
-        expect(validationResult.errors.length).toEqual(0);
-      });
+      );
+      sarifResults = bundle.sarifResults;
+      expect(!!bundle.sarifResults).toEqual(true);
     });
+    it('should match sarif schema', () => {
+      const validationResult = jsonschema.validate(sarifResults, sarifSchema);
+      // this is to debug any errors found
+      // const json = JSON.stringify(validationResult)
+      // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
+      expect(validationResult.errors.length).toEqual(0);
+    });
+  });
 });

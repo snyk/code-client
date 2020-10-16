@@ -290,10 +290,6 @@ export async function createGitBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly oAuthToken?: string;
-  // readonly platform: string;
-  // readonly owner: string;
-  // readonly repo: string;
-  // readonly oid?: string;
   readonly gitUri: string,
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
   const { baseURL, sessionToken, oAuthToken, gitUri } = options;
@@ -304,12 +300,6 @@ export async function createGitBundle(options: {
     url: `${baseURL}${apiPath}/bundle`,
     method: 'POST',
     data: { gitURI: gitUri },
-    // data: {
-    //   platform,
-    //   owner,
-    //   repo,
-    //   oid,
-    // },
   };
 
   try {

@@ -389,9 +389,6 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       gitUri: 'git@github.com:DeepCodeAI/cli.git',
-      // platform: 'github.com',
-      // owner: 'DeepcodeAI',
-      // repo: 'cli',
     });
     expect(bundleResponse.type).toEqual('success');
     if (bundleResponse.type === 'error') return;

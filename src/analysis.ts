@@ -7,7 +7,6 @@ import {
   determineBaseDir,
   resolveBundleFilePath,
 } from './files';
-// import parseGitUri from './gitUtils';
 import {
   getFilters,
   createGitBundle,
@@ -279,10 +278,6 @@ export async function analyzeGit(
   sarif = false,
   oAuthToken?: string,
 ): Promise<IGitBundle> {
-  // const repoKey = parseGitUri(gitUri);
-  // if (!repoKey) {
-  //   throw new Error('Failed to parse git uri');
-  // }
   const bundleResponse = await createGitBundle({ baseURL, sessionToken, oAuthToken, gitUri });
   if (bundleResponse.type === 'error') {
     throw bundleResponse.error;

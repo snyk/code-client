@@ -289,22 +289,27 @@ const CREATE_GIT_BUNDLE_ERROR_MESSAGES: { [P in CreateGitBundleErrorCodes]: stri
 export async function createGitBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
-  readonly platform: string;
-  readonly owner: string;
-  readonly repo: string;
-  readonly oid?: string;
+  readonly oAuthToken?: string;
+  // readonly platform: string;
+  // readonly owner: string;
+  // readonly repo: string;
+  // readonly oid?: string;
+  readonly gitUri: string,
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, platform, owner, repo, oid } = options;
+  const { baseURL, sessionToken, oAuthToken, gitUri } = options;
+  const params = { oAuthToken };
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
+    params,
     url: `${baseURL}${apiPath}/bundle`,
     method: 'POST',
-    data: {
-      platform,
-      owner,
-      repo,
-      oid,
-    },
+    data: { gitURI: gitUri },
+    // data: {
+    //   platform,
+    //   owner,
+    //   repo,
+    //   oid,
+    // },
   };
 
   try {
@@ -397,15 +402,16 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
 export async function getAnalysis(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
+  readonly oAuthToken?: string;
   readonly bundleId: string;
   readonly useLinters?: boolean;
   readonly severity: number;
 }): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, useLinters, severity } = options;
-  const params = { severity, linters: useLinters };
+  const { baseURL, sessionToken, oAuthToken, bundleId, useLinters, severity } = options;
+  const params = { severity, linters: useLinters, oAuthToken };
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
-    ...params,
+    params,
     url: `${baseURL}${apiPath}/analysis/${bundleId}`,
     method: 'GET',
   };

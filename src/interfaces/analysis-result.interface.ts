@@ -67,6 +67,7 @@ export interface IAnalysisResult {
 export interface IBundleArgs {
   readonly baseURL: string;
   readonly sessionToken: string;
+  readonly oAuthToken?: string,
   readonly includeLint: boolean;
   readonly severity: AnalysisSeverity;
 }

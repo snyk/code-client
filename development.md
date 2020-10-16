@@ -12,13 +12,20 @@ $ cd <project-location>
 $ npx yalc add @deepcode/tsc
 ```
 
+### Testing on local environment
+
+```shell script
+$ cd <package-location>
+$ DEEPCODE_URL=http://localhost:8080 DEEPCODE_API_KEY=<your API key on staging> DEEPCODE_AUTH_KEY=<personal access token for your member of DeepCodeAI> npm run test
+```
+
 ## Publishing
 
 ### Before publishing make sure test pass
 
 ```shell script
 $ cd <package-location>
-$ DEEPCODE_API_KEY=<your API key on staging> npm run test
+$ DEEPCODE_API_KEY=<your API key on staging> DEEPCODE_AUTH_KEY=<personal access token for your member of DeepCodeAI> npm run test
 ```
 
 #### Compile and publish

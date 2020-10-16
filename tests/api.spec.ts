@@ -101,7 +101,7 @@ describe('Requests to public API', () => {
     if (startSessionResponse.type === 'error') return;
 
     expect(startSessionResponse.value.loginURL).toMatch(
-      /https:\/\/www.deepcoded.com\/login-api\?sessionToken=.*&source=atom/,
+      /.*\/login-api\?sessionToken=.*&source=atom/,
     );
     const draftToken = startSessionResponse.value.sessionToken;
 
@@ -388,9 +388,10 @@ describe('Requests to public API', () => {
     const bundleResponse = await createGitBundle({
       baseURL,
       sessionToken,
-      platform: 'github.com',
-      owner: 'DeepcodeAI',
-      repo: 'cli',
+      gitUri: 'git@github.com:DeepCodeAI/cli.git',
+      // platform: 'github.com',
+      // owner: 'DeepcodeAI',
+      // repo: 'cli',
     });
     expect(bundleResponse.type).toEqual('success');
     if (bundleResponse.type === 'error') return;
@@ -414,7 +415,7 @@ describe('Requests to public API', () => {
 
     if (response.value.status === AnalysisStatus.done) {
       expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(1);
+      expect(response.value.analysisResults.suggestions).toBeTruthy();
 
       const suggestion = response.value.analysisResults.suggestions[0];
       expect(suggestion.categories).toEqual(['Security', 'InTest']);

@@ -114,7 +114,7 @@ const { bundleId, missingFiles, uploadURL } = result;
 
 ```javascript
 
-const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566', oAuthToken);
+const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
 
 // bundle implements interface IGitBundle
 //   readonly baseURL: string;
@@ -125,6 +125,7 @@ const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com
 //   readonly bundleId: string;
 //   readonly analysisResults: IAnalysisResult;
 //   readonly analysisURL: string;
+//   readonly sarifResults?: Log;
 //   readonly gitUri: string;
 ```
 

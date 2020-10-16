@@ -23,9 +23,15 @@ $ DEEPCODE_URL=http://localhost:8080 DEEPCODE_API_KEY=<your API key on staging> 
 
 ### Before publishing make sure test pass
 
+Test variables:
+- `DEEPCODE_URL` is the DC server URL (staging deployment if not provided)
+- `DEEPCODE_API_KEY` is a sessionToken of a user with access to the DeepCodeAI organization
+- `DEEPCODE_API_KEY_NO_ACCESS` is a sessionToken of a user with no access to the DeepCodeAI organization (even better if on a different platform than GitHub)
+- `DEEPCODE_OAUTH_KEY` is a GitHub personal access token of a user with access to the DeepCodeAI organization
+
 ```shell script
 $ cd <package-location>
-$ DEEPCODE_API_KEY=<your API key on staging> DEEPCODE_AUTH_KEY=<personal access token for your member of DeepCodeAI> npm run test
+$ DEEPCODE_URL=... DEEPCODE_API_KEY=... DEEPCODE_API_KEY_NO_ACCESS=... DEEPCODE_AUTH_KEY=... npm run test
 ```
 
 #### Compile and publish

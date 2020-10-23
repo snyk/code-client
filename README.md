@@ -4,6 +4,9 @@ Typescript consumer of public API
 
 [![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6IkRlZXBDb2RlQUkiLCJyZXBvMSI6InRzYyIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjEyNDY5LCJpYXQiOjE1OTYwOTY3MTJ9.I7rfzfZLPc-SMEModrFPFTMbKpnCkQ5ztPzrPOdruhU)](https://www.deepcode.ai/app/gh/DeepCodeAI/tsc/_/dashboard?utm_content=gh%2FDeepCodeAI%2Ftsc)
 
+[![npm version](https://img.shields.io/npm/v/@deepcode/tsc.svg?style=flat-square)](https://www.npmjs.org/package/@deepcode/tsc)
+[![npm downloads](https://img.shields.io/npm/dm/@deepcode/tsc.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@deepcode/tsc)
+
 # Installation
 
 ```shell script
@@ -79,7 +82,6 @@ Complete list of events:
 ### Run analysis
 
 ```javascript
-
 const bundle = await tsc.analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
 
 // bundle implements interface IFileBundle:

@@ -1,3 +1,6 @@
+## [2.0.3] - 2020-10-23
+- Added tags to suggestions in __serif__ format
+
 ## [2.0.3] - 2020-10-14
 - Bugfix release
 

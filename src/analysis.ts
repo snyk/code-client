@@ -61,7 +61,7 @@ async function pollAnalysis({
       sessionToken,
       oAuthToken,
       bundleId,
-      useLinters: includeLint,
+      includeLint,
       severity,
     });
 

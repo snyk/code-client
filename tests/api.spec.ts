@@ -198,7 +198,7 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       bundleId: fakeBundleIdFull,
-      useLinters: false,
+      includeLint: false,
       severity: 1,
     });
     expect(response.type).toEqual('error');
@@ -329,7 +329,7 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       bundleId: realBundleIdFull,
-      useLinters: false,
+      includeLint: false,
       severity: 1,
     });
     expect(response.type).toEqual('success');
@@ -394,7 +394,7 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       bundleId: realBundleIdFull,
-      useLinters: false,
+      includeLint: false,
       severity: 3,
     });
     expect(response.type).toEqual('success');
@@ -426,7 +426,7 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       bundleId,
-      useLinters: false,
+      includeLint: false,
       severity: 1,
     });
     expect(response.type).toEqual('success');

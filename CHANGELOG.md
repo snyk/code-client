@@ -1,3 +1,6 @@
+## [2.0.7] - 2020-10-26
+- Optimized batch processing of huge repositories
+
 ## [2.0.6] - 2020-10-26
 - Added a possibility to supply custom oAuthToken for private repository analysis
 

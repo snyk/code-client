@@ -20,15 +20,15 @@ import emitter from './emitter';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
-export async function prepareRemoteBundle(
+async function* prepareRemoteBundle(
   baseURL: string,
   sessionToken: string,
   files: IFileInfo[],
   removedFiles: string[] = [],
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
-): Promise<IResult<RemoteBundle, BundleErrorCodes> | null> {
-  let response: IResult<RemoteBundle, BundleErrorCodes> | null = null;
+): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
+  let response: IResult<RemoteBundle, BundleErrorCodes>;
   let bundleId = existingBundleId;
 
   const fileChunks = chunk(files, maxPayload / 300);
@@ -58,12 +58,13 @@ export async function prepareRemoteBundle(
 
     if (response.type === 'error') {
       // TODO: process Error
-      return response;
+      yield response;
+      break;
     }
     bundleId = response.value.bundleId;
-  }
 
-  return response;
+    yield response;
+  }
 }
 
 /**
@@ -112,7 +113,7 @@ export async function uploadRemoteBundle(
   return true;
 }
 
-export async function fullfillRemoteBundle(
+async function fullfillRemoteBundle(
   baseURL: string,
   sessionToken: string,
   baseDir: string,
@@ -120,7 +121,7 @@ export async function fullfillRemoteBundle(
   maxPayload = MAX_PAYLOAD,
   maxAttempts = MAX_UPLOAD_ATTEMPTS,
 ): Promise<RemoteBundle> {
-  // Fulfill remove bundle by uploading only missing files (splitted in chunks)
+  // Fulfill remote bundle by uploading only missing files (splitted in chunks)
   // Check remove bundle to make sure no missing files left
   let attempts = 0;
   while (remoteBundle.missingFiles.length && attempts < maxAttempts) {
@@ -141,5 +142,31 @@ export async function fullfillRemoteBundle(
     remoteBundle = bundleResponse.value;
     attempts += 1;
   }
+  return remoteBundle;
+}
+
+export async function remoteBundleFactory(
+  baseURL: string,
+  sessionToken: string,
+  files: IFileInfo[],
+  removedFiles: string[] = [],
+  baseDir: string,
+  existingBundleId: string | null = null,
+  maxPayload = MAX_PAYLOAD,
+): Promise<RemoteBundle | null> {
+  const bundleFactory = prepareRemoteBundle(baseURL, sessionToken, files, removedFiles, existingBundleId, maxPayload);
+  let remoteBundle: RemoteBundle | null = null;
+
+  for await (const response of bundleFactory) {
+    if (response.type === 'error') {
+      throw response.error;
+    }
+
+    remoteBundle = await fullfillRemoteBundle(baseURL, sessionToken, baseDir, response.value, maxPayload);
+    if (remoteBundle.missingFiles.length) {
+      throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
+    }
+  }
+
   return remoteBundle;
 }

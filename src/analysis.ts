@@ -20,7 +20,7 @@ import {
 } from './http';
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
-import { prepareRemoteBundle, fullfillRemoteBundle } from './bundles';
+import { remoteBundleFactory } from './bundles';
 import { getSarif } from './sarif_converter';
 import {
   AnalysisSeverity,
@@ -178,16 +178,9 @@ export async function analyzeFolders(
   }
 
   // Create remote bundle
-  const bundleResponse = await prepareRemoteBundle(baseURL, sessionToken, bundleFiles, [], null, maxPayload);
-  if (bundleResponse === null) {
+  const remoteBundle = await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload);
+  if (remoteBundle === null) {
     throw new Error('File list is empty');
-  } else if (bundleResponse.type === 'error') {
-    throw bundleResponse.error;
-  }
-
-  const remoteBundle = await fullfillRemoteBundle(baseURL, sessionToken, baseDir, bundleResponse.value, maxPayload);
-  if (remoteBundle.missingFiles.length) {
-    throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
   }
 
   const analysisData = await analyzeBundle({
@@ -195,7 +188,7 @@ export async function analyzeFolders(
     sessionToken,
     includeLint,
     severity,
-    bundleId: bundleResponse.value.bundleId,
+    bundleId: remoteBundle.bundleId,
   });
   analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
 
@@ -233,30 +226,18 @@ export async function extendAnalysis(
   }
 
   // Extend remote bundle
-  const bundleResponse = await prepareRemoteBundle(
+  const remoteBundle = await remoteBundleFactory(
     bundle.baseURL,
     bundle.sessionToken,
     files,
     removedFiles,
+    bundle.baseDir,
     bundle.bundleId,
     maxPayload,
   );
 
-  if (bundleResponse === null) {
+  if (remoteBundle === null) {
     throw new Error('File list is empty');
-  } else if (bundleResponse.type === 'error') {
-    throw bundleResponse.error;
-  }
-
-  const remoteBundle = await fullfillRemoteBundle(
-    bundle.baseURL,
-    bundle.sessionToken,
-    bundle.baseDir,
-    bundleResponse.value,
-    maxPayload,
-  );
-  if (remoteBundle.missingFiles.length) {
-    throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
   }
 
   const analysisData = await analyzeBundle({
@@ -264,7 +245,7 @@ export async function extendAnalysis(
     sessionToken: bundle.sessionToken,
     includeLint: bundle.includeLint,
     severity: bundle.severity,
-    bundleId: bundleResponse.value.bundleId,
+    bundleId: remoteBundle.bundleId,
   });
   analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 

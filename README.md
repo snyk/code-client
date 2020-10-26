@@ -121,11 +121,13 @@ const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com
 // bundle implements interface IGitBundle
 //   readonly baseURL: string;
 //   readonly sessionToken: string;
+//   readonly oAuthToken?: string;
 //   readonly includeLint: boolean;
 //   readonly severity: AnalysisSeverity;
 //   readonly bundleId: string;
 //   readonly analysisResults: IAnalysisResult;
 //   readonly analysisURL: string;
+//   readonly sarifResults?: Log;
 //   readonly gitUri: string;
 ```
 

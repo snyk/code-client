@@ -1,3 +1,6 @@
+## [2.0.6] - 2020-10-26
+- Added a possibility to supply custom oAuthToken for private repository analysis
+
 ## [2.0.5] - 2020-10-23
 - Upgraded axios to v0.21.0
 - Added tags to suggestions in __serif__ format

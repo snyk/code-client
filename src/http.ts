@@ -289,22 +289,17 @@ const CREATE_GIT_BUNDLE_ERROR_MESSAGES: { [P in CreateGitBundleErrorCodes]: stri
 export async function createGitBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
-  readonly platform: string;
-  readonly owner: string;
-  readonly repo: string;
-  readonly oid?: string;
+  readonly oAuthToken?: string;
+  readonly gitUri: string;
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, platform, owner, repo, oid } = options;
+  const { baseURL, sessionToken, oAuthToken, gitUri } = options;
+  const params = { oAuthToken };
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
+    params,
     url: `${baseURL}${apiPath}/bundle`,
     method: 'POST',
-    data: {
-      platform,
-      owner,
-      repo,
-      oid,
-    },
+    data: { gitURI: gitUri },
   };
 
   try {
@@ -397,15 +392,17 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
 export async function getAnalysis(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
+  readonly oAuthToken?: string;
   readonly bundleId: string;
-  readonly useLinters?: boolean;
+  readonly includeLint?: boolean;
   readonly severity: number;
 }): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, useLinters, severity } = options;
-  const params = { severity, linters: useLinters };
+  const { baseURL, sessionToken, oAuthToken, bundleId, includeLint, severity } = options;
+  // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
+  const params = { severity, linters: includeLint || undefined, oAuthToken };
   const config: AxiosRequestConfig = {
     headers: { 'Session-Token': sessionToken },
-    ...params,
+    params,
     url: `${baseURL}${apiPath}/analysis/${bundleId}`,
     method: 'GET',
   };

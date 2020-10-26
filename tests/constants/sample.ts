@@ -12,6 +12,7 @@ export const supportedFiles = {
 export const bundleFileIgnores = ['**/.git', `${sampleProjectPath}/**/models`, `${sampleProjectPath}/**/controllers`];
 
 export const bundleFilePaths = [
+  '/.eslintrc.json',
   'AnnotatorTest.cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',

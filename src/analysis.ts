@@ -17,7 +17,6 @@ import {
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   AnalysisFinishedResponse,
-  RemoteBundle,
 } from './http';
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';

@@ -401,7 +401,7 @@ export async function getAnalysis(options: {
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
   const params = { severity, linters: includeLint || undefined };
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken, 'Custom-oAuthToken': oAuthToken },
+    headers: { 'Session-Token': sessionToken, 'X-OAuthToken': oAuthToken },
     params,
     url: `${baseURL}${apiPath}/analysis/${bundleId}`,
     method: 'GET',

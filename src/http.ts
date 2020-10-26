@@ -400,8 +400,13 @@ export async function getAnalysis(options: {
   const { baseURL, sessionToken, oAuthToken, bundleId, includeLint, severity } = options;
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
   const params = { severity, linters: includeLint || undefined };
+
+  const headers = { 'Session-Token': sessionToken };
+  if (oAuthToken) {
+    headers['X-OAuthToken'] = oAuthToken;
+  }
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken, 'X-OAuthToken': oAuthToken },
+    headers,
     params,
     url: `${baseURL}${apiPath}/analysis/${bundleId}`,
     method: 'GET',

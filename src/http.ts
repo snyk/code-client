@@ -290,7 +290,7 @@ export async function createGitBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly oAuthToken?: string;
-  readonly gitUri: string,
+  readonly gitUri: string;
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
   const { baseURL, sessionToken, oAuthToken, gitUri } = options;
   const params = { oAuthToken };

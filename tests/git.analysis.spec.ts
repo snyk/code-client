@@ -1,11 +1,17 @@
 
-import { baseURL, sessionToken, sessionToken2, oAuthToken } from './constants/base';
+import { baseURL, sessionToken } from './constants/base';
 import { analyzeGit } from '../src/analysis';
 import jsonschema from 'jsonschema';
 import { Log } from 'sarif';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import { ErrorCodes } from '../src/constants';
 import { IGitBundle } from '../src/interfaces/analysis-result.interface';
+
+const oAuthToken = process.env.DEEPCODE_OAUTH_KEY || '';
+const sessionTokenNoRepoAccess = process.env.DEEPCODE_API_KEY_NO_ACCESS || '';
+
+// This trick is for automatic tests, where real oauth token is not available
+const itif = (condition: any) => condition ? it : it.skip;
 
 describe('Functional test of analysis', () => {
   it('analyze remote git without oid', async () => {
@@ -14,7 +20,7 @@ describe('Functional test of analysis', () => {
     expect(bundle.analysisResults.suggestions).toBeTruthy();
   });
 
-  it('analyze remote git with oid', async () => {
+  itif(oAuthToken)('analyze remote git with oid', async () => {
     const bundle = await analyzeGit(
       baseURL,
       sessionToken,
@@ -28,12 +34,13 @@ describe('Functional test of analysis', () => {
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(1);
   });
 
-  it('analyze private remote git with oAuthToken', async () => {
+  itif(oAuthToken && sessionTokenNoRepoAccess)('analyze private remote git with oAuthToken', async () => {
+
     let failedGit: IGitBundle | undefined;
     try {
       failedGit = await analyzeGit(
         baseURL,
-        sessionToken2,
+        sessionTokenNoRepoAccess,
         false,
         1,
         'git@github.com:DeepCodeAI/testcrepo.git',
@@ -45,7 +52,7 @@ describe('Functional test of analysis', () => {
 
     const bundle = await analyzeGit(
       baseURL,
-      sessionToken2,
+      sessionTokenNoRepoAccess,
       false,
       1,
       'git@github.com:DeepCodeAI/testcrepo.git',

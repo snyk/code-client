@@ -16,11 +16,10 @@ import {
   reportError,
   reportEvent,
 } from '../src/http';
-import { getFileInfo } from '../src/files';
 
-const fakeBundleId = 'f031acaa1a98b1cccf09868f31e8a9692063be59a1e8bf2502cf5f56f575a759';
+const fakeBundleId = '646c61854ef8ef5634d9caf2580352bc416b3d066f800832b47088d4169cf231';
 let fakeBundleIdFull = '';
-const realBundleId = '705e49a9a8d5cd4be71e496c5eb36c7ec5c150ab998d6b75fa009cd66799bda1';
+const realBundleId = 'e03ac612f79b73ef6f55bdd3e32d324fb43dc138f9883bbb41085a6db59d67f5';
 let realBundleIdFull = '';
 
 const reportTelemetryRequest = {
@@ -78,6 +77,10 @@ describe('Requests to public API', () => {
         '.hxx',
         '.py',
         '.java',
+        '.CS',
+        '.Cs',
+        '.cs',
+        '.php',
       ]),
     );
   });
@@ -145,6 +148,7 @@ describe('Requests to public API', () => {
     expect(response.value.bundleId).toContain(fakeBundleId);
     fakeBundleIdFull = response.value.bundleId;
     expect(response.value.missingFiles).toEqual([
+      '/.eslintrc.json',
       `/AnnotatorTest.cpp`,
       `/GitHubAccessTokenScrambler12.java`,
       `/app.js`,
@@ -165,6 +169,7 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(response.value.bundleId).toEqual(fakeBundleIdFull);
     expect(response.value.missingFiles).toEqual([
+      '/.eslintrc.json',
       `/AnnotatorTest.cpp`,
       `/GitHubAccessTokenScrambler12.java`,
       `/app.js`,
@@ -214,6 +219,7 @@ describe('Requests to public API', () => {
         [`/new.js`]: 'new123',
       },
       removedFiles: [
+        '/.eslintrc.json',
         `/app.js`,
         `/AnnotatorTest.cpp`,
         `/GitHubAccessTokenScrambler12.java`,
@@ -275,7 +281,7 @@ describe('Requests to public API', () => {
     });
   });
 
-  it('test successful workflow', async () => {
+  it('test successful workflow with and without linters', async () => {
     // Create a bundle first
     const files = Object.fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
@@ -318,8 +324,8 @@ describe('Requests to public API', () => {
     expect(checkResponse.value.bundleId).toEqual(realBundleIdFull);
     expect(checkResponse.value.missingFiles).toEqual([]);
 
-    // Get analysis results
-    const response = await getAnalysis({
+    // Get analysis results without linters
+    let response = await getAnalysis({
       baseURL,
       sessionToken,
       bundleId: realBundleIdFull,
@@ -382,6 +388,23 @@ describe('Requests to public API', () => {
         ],
       });
     }
+
+    // Get analysis results without linters but with severity 3
+    response = await getAnalysis({
+      baseURL,
+      sessionToken,
+      bundleId: realBundleIdFull,
+      useLinters: false,
+      severity: 3,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+    if (response.value.status === AnalysisStatus.done) {
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
+      expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
+    }
+
   });
 
   it('create git bundle', async () => {

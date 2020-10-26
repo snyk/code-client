@@ -26,7 +26,7 @@ describe('Functional test of analysis', () => {
 
     const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
       expect(typeof processed).toBe('number');
-      expect(total).toEqual(2);
+      expect(total).toEqual(3);
 
       expect(processed).toBeLessThanOrEqual(total);
     });
@@ -51,8 +51,8 @@ describe('Functional test of analysis', () => {
 
     // Check if emitter event happened
     expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-    expect(onScanFilesProgress).toHaveBeenCalledTimes(7);
-    expect(onCreateBundleProgress).toHaveBeenCalledTimes(3);
+    expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
+    expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
     expect(onAnalyseProgress).toHaveBeenCalled();
 
     // Test uploadRemoteBundle with empty list of files

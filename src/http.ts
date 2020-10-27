@@ -293,10 +293,12 @@ export async function createGitBundle(options: {
   readonly gitUri: string;
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
   const { baseURL, sessionToken, oAuthToken, gitUri } = options;
-  const params = { oAuthToken };
+  const headers = { 'Session-Token': sessionToken };
+  if (oAuthToken) {
+    headers['X-OAuthToken'] = oAuthToken;
+  }
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
-    params,
+    headers,
     url: `${baseURL}${apiPath}/bundle`,
     method: 'POST',
     data: { gitURI: gitUri },

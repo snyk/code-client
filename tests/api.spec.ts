@@ -206,7 +206,6 @@ describe('Requests to public API', () => {
     } while (response.type === 'success');
 
     expect(response.type).toEqual('error');
-    // if (response.type === 'success') return;
     expect(response.error).toEqual({
       apiName: 'getAnalysis',
       statusCode: 500,

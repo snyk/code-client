@@ -194,20 +194,25 @@ describe('Requests to public API', () => {
   });
 
   it('request analysis with missing files', async () => {
-    const response = await getAnalysis({
-      baseURL,
-      sessionToken,
-      bundleId: fakeBundleIdFull,
-      includeLint: false,
-      severity: 1,
-    });
+    let response;
+    do {
+      response = await getAnalysis({
+        baseURL,
+        sessionToken,
+        bundleId: fakeBundleIdFull,
+        includeLint: false,
+        severity: 1,
+      });
+    } while (response.type === 'success');
+
     expect(response.type).toEqual('error');
-    if (response.type === 'success') return;
+    // if (response.type === 'success') return;
     expect(response.error).toEqual({
       apiName: 'getAnalysis',
       statusCode: 500,
       statusText: 'Getting analysis failed',
     });
+
   });
 
   it('extends bundle successfully', async () => {
@@ -444,7 +449,7 @@ describe('Requests to public API', () => {
       expect(suggestion.leadURL).toEqual('');
       expect(suggestion.id).toEqual('python%2Fdc%2FHardcodedNonCryptoSecret%2Ftest');
       expect(suggestion.message).toContain(
-        'Avoid hardcoding values that are meant to be secret. Found hardcoded string:',
+        'Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.',
       );
       expect(suggestion.rule).toEqual('HardcodedNonCryptoSecret/test');
       expect(suggestion.severity).toEqual(1);

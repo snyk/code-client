@@ -33,7 +33,7 @@ describe('Functional test of analysis', () => {
     emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
 
     const onAnalyseProgress = jest.fn((data: AnalysisResponseProgress) => {
-      expect(['FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
+      expect(['WAITING', 'FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
       expect(typeof data.progress).toBe('number');
       expect(data.progress).toBeGreaterThanOrEqual(0);
       expect(data.progress).toBeLessThanOrEqual(100);

@@ -49,7 +49,7 @@ async function pollAnalysis({
   let analysisData: GetAnalysisResponseDto;
 
   emitter.analyseProgress({
-    status: AnalysisStatus.fetching,
+    status: AnalysisStatus.waiting,
     progress: 0,
   });
 
@@ -72,6 +72,7 @@ async function pollAnalysis({
     analysisData = analysisResponse.value;
 
     if (
+      analysisData.status === AnalysisStatus.waiting ||
       analysisData.status === AnalysisStatus.fetching ||
       analysisData.status === AnalysisStatus.analyzing ||
       analysisData.status === AnalysisStatus.dcDone

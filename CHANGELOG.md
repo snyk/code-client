@@ -1,3 +1,6 @@
+## [2.0.8-2.0.10] - 2020-10-27
+- Bug fixing
+
 ## [2.0.7] - 2020-10-26
 - Optimized batch processing of huge repositories
 

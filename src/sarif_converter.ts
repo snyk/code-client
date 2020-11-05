@@ -72,7 +72,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         text: suggestion.message,
       },
       properties: {
-        tags: [suggestionId.split('%2F')[0], ...suggestion.tags],
+        tags: [suggestionId.split('%2F')[0], ...suggestion.tags, ...suggestion.categories],
         precision: 'very-high',
       },
     };

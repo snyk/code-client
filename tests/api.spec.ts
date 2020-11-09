@@ -208,8 +208,8 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('error');
     expect(response.error).toEqual({
       apiName: 'getAnalysis',
-      statusCode: 500,
-      statusText: 'Getting analysis failed',
+      statusCode: 404,
+      statusText: 'Not found',
     });
 
   });

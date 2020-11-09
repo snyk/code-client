@@ -30,6 +30,8 @@ import {
   IBundleResult,
 } from './interfaces/analysis-result.interface';
 
+const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
+
 async function pollAnalysis({
   baseURL,
   sessionToken,
@@ -87,6 +89,8 @@ async function pollAnalysis({
       // Report failure of analysing
       return analysisResponse as IResult<AnalysisFailedResponse, GetAnalysisErrorCodes>;
     }
+
+    await sleep(500);
   }
 }
 

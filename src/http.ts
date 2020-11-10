@@ -353,6 +353,7 @@ export async function uploadFiles(options: {
 
 // eslint-disable-next-line no-shadow
 export enum AnalysisStatus {
+  waiting = 'WAITING',
   fetching = 'FETCHING',
   analyzing = 'ANALYZING',
   dcDone = 'DC_DONE',
@@ -361,7 +362,7 @@ export enum AnalysisStatus {
 }
 
 export type AnalysisResponseProgress = {
-  readonly status: AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.dcDone;
+  readonly status: AnalysisStatus.waiting | AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.dcDone;
   readonly progress: number;
 };
 

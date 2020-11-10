@@ -30,6 +30,8 @@ import {
   IBundleResult,
 } from './interfaces/analysis-result.interface';
 
+const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
+
 async function pollAnalysis({
   baseURL,
   sessionToken,
@@ -49,7 +51,7 @@ async function pollAnalysis({
   let analysisData: GetAnalysisResponseDto;
 
   emitter.analyseProgress({
-    status: AnalysisStatus.fetching,
+    status: AnalysisStatus.waiting,
     progress: 0,
   });
 
@@ -72,6 +74,7 @@ async function pollAnalysis({
     analysisData = analysisResponse.value;
 
     if (
+      analysisData.status === AnalysisStatus.waiting ||
       analysisData.status === AnalysisStatus.fetching ||
       analysisData.status === AnalysisStatus.analyzing ||
       analysisData.status === AnalysisStatus.dcDone
@@ -86,6 +89,8 @@ async function pollAnalysis({
       // Report failure of analysing
       return analysisResponse as IResult<AnalysisFailedResponse, GetAnalysisErrorCodes>;
     }
+
+    await sleep(500);
   }
 }
 

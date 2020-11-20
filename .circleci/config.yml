@@ -1,7 +1,16 @@
+jobs:
+  test:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run: npm run test
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@4.1.0
 workflows:
-  node-tests:
+  test_tsc:
     jobs:
-      - node/test
+      - tsc-test

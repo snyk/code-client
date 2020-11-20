@@ -31,6 +31,11 @@ export function determineErrorCode(error: AxiosError | any): ErrorCodes {
     // set connectionRefused item
     return ErrorCodes.connectionRefused;
   }
+  if (errno === 'ECONNRESET') {
+    // set connectionRefused item
+    return ErrorCodes.connectionRefused;
+  }
+
   if (code === 'ENOTFOUND') {
     return ErrorCodes.dnsNotFound;
   }

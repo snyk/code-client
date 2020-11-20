@@ -227,7 +227,7 @@ export async function extendAnalysis(
   );
 
   if (!files.length && !removedFiles.length) {
-    return null; // nothing to extend, just return previous bundle
+    return null; // nothing to extend, just return null
   }
 
   // Extend remote bundle
@@ -242,7 +242,9 @@ export async function extendAnalysis(
   );
 
   if (remoteBundle === null) {
-    throw new Error('File list is empty');
+    // File list is empty
+    // nothing to extend, just return null
+    return null;
   }
 
   const analysisData = await analyzeBundle({

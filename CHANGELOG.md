@@ -1,3 +1,7 @@
+## [2.0.12] - 2020-10-27
+- Error-tolerant handling of issues with file access permissions
+- Additional handling of "socket hangup" network issue
+
 ## [2.0.8-2.0.10] - 2020-10-27
 - Bug fixing
 

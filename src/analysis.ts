@@ -242,7 +242,9 @@ export async function extendAnalysis(
   );
 
   if (remoteBundle === null) {
-    throw new Error('File list is empty');
+    // File list is empty
+    // nothing to extend, just return previous bundle
+    return null;
   }
 
   const analysisData = await analyzeBundle({

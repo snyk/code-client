@@ -21,6 +21,7 @@ const fgOptions = {
   absolute: true,
   baseNameMatch: true,
   onlyFiles: true,
+  suppressErrors: true,
 };
 
 type CachedData = [number, number, string];
@@ -32,23 +33,32 @@ function filterSupportedFiles(files: string[], supportedFiles: ISupportedFiles):
 }
 
 export function parseFileIgnores(path: string): string[] {
+  let rules: string[] = [];
+
   const dirname = nodePath.dirname(path);
-  const f = fs.readFileSync(path, { encoding: 'utf8' });
+  try {
+    const f = fs.readFileSync(path, { encoding: 'utf8' });
 
-  const rules = f
-    .split('\n')
-    .map(l => l.trim().replace(/\/$/, '')) // Remove white spaces and trim slashes
-    .filter(l => !!l && !l.startsWith('#'));
-
-  const results: string[] = [];
-  for (const rule of rules) {
-    if (rule.startsWith('/') || rule.startsWith('**')) {
-      results.push(nodePath.posix.join(dirname, rule));
-    } else {
-      results.push(nodePath.posix.join(dirname, '**', rule));
+    rules = f
+      .split('\n')
+      .map(l => l.trim().replace(/\/$/, '')) // Remove white spaces and trim slashes
+      .filter(l => !!l && !l.startsWith('#'));
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (err.code === 'EACCES') {
+      console.log(
+        `${path} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
+      );
     }
   }
-  return results;
+
+  return rules.map(rule => {
+    if (rule.startsWith('/') || rule.startsWith('**')) {
+      return nodePath.posix.join(dirname, rule);
+    }
+
+    return nodePath.posix.join(dirname, '**', rule);
+  });
 }
 
 export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
@@ -277,10 +287,19 @@ export async function getFileInfo(
   }
 
   if (!fileHash) {
-    fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
-    fileHash = calcHash(fileContent);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
+    try {
+      fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
+      fileHash = calcHash(fileContent);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (err.code === 'EACCES') {
+        console.log(
+          `${filePath} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
+        );
+      }
+    }
   }
 
   return {

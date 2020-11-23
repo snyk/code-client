@@ -1,5 +1,4 @@
-
-import { baseURL, sessionToken } from './constants/base';
+import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
 
 import {
@@ -38,6 +37,7 @@ const reportTelemetryRequest = {
 
 
 describe('Requests to public API', () => {
+
   it('gets filters successfully', async () => {
     const response = await getFilters(baseURL);
     expect(response.type).toEqual('success');
@@ -157,7 +157,7 @@ describe('Requests to public API', () => {
       `/routes/index.js`,
       `/routes/sharks.js`,
     ]);
-  });
+  }, TEST_TIMEOUT);
 
   it('checks bundle successfully', async () => {
     const response = await checkBundle({
@@ -178,7 +178,7 @@ describe('Requests to public API', () => {
       `/routes/index.js`,
       `/routes/sharks.js`,
     ]);
-  });
+  }, TEST_TIMEOUT);
 
   it('checks expired bundle successfully', async () => {
     const response = await checkBundle({
@@ -191,7 +191,7 @@ describe('Requests to public API', () => {
     if (response.type == 'success') return;
     expect(response.error.statusCode).toEqual(404);
     expect(response.error.statusText).toEqual('Uploaded bundle has expired');
-  });
+  }, TEST_TIMEOUT);
 
   it('request analysis with missing files', async () => {
     let response;
@@ -212,7 +212,7 @@ describe('Requests to public API', () => {
       statusText: 'Not found',
     });
 
-  });
+  }, TEST_TIMEOUT);
 
   it('extends bundle successfully', async () => {
     const response = await extendBundle({
@@ -239,7 +239,7 @@ describe('Requests to public API', () => {
       '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1',
     );
     expect(response.value.missingFiles).toEqual([`/new.js`]);
-  });
+  }, TEST_TIMEOUT);
 
   it('extends expired bundle successfully', async () => {
     const response = await extendBundle({
@@ -257,7 +257,7 @@ describe('Requests to public API', () => {
 
     expect(response.error.statusCode).toEqual(404);
     expect(response.error.statusText).toEqual('Parent bundle has expired');
-  });
+  }, TEST_TIMEOUT);
 
   it('uploads fake files to fake bundle', async () => {
     const response = await uploadFiles({
@@ -283,7 +283,7 @@ describe('Requests to public API', () => {
       statusText:
         'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',
     });
-  });
+  }, TEST_TIMEOUT);
 
   it('test successful workflow with and without linters', async () => {
     // Create a bundle first
@@ -409,7 +409,7 @@ describe('Requests to public API', () => {
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
     }
 
-  });
+  }, TEST_TIMEOUT);
 
   it('create git bundle', async () => {
     const bundleResponse = await createGitBundle({
@@ -455,5 +455,5 @@ describe('Requests to public API', () => {
       expect(suggestion.tags).toEqual(['maintenance', 'bug', 'key', 'secret', 'credentials']);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
     }
-  });
+  }, TEST_TIMEOUT);
 });

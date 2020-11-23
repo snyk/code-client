@@ -1,6 +1,6 @@
 import { analyzeFolders } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
-import { baseURL, sessionToken } from './constants/base';
+import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
@@ -74,5 +74,5 @@ describe('Functional test of analysis', () => {
     expect(uploaded).toEqual(true);
 
     expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
-  });
+  }, TEST_TIMEOUT);
 });

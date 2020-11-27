@@ -63,6 +63,31 @@ describe('Functional test of analysis', () => {
     expect(bundle.analysisResults.suggestions).toBeTruthy();
   }, TEST_TIMEOUT);
 
+  it('CWE fields in analysis results', async () => {
+    const bundle = await analyzeGit(
+      baseURL,
+      sessionToken,
+      false,
+      1,
+      'git@github.com:eclipse/che.git@75889e8c33601e8986e75bad74456cff39e511c0',
+      true,
+    );
+
+    // Test DC JSON format first
+    expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(91);
+
+    let cweSuggestion = Object.values(bundle.analysisResults.suggestions)
+                                .find(s => s.id === 'java%2Fdc_interfile_project%2FPT');
+
+    expect(cweSuggestion.cwe).toEqual(['CWE-23']);
+    expect(cweSuggestion.title).toBeTruthy();
+    expect(cweSuggestion.text).toBeTruthy();
+
+    expect(bundle.sarifResults?.runs[0].results?.length).toEqual(91);
+
+  }, TEST_TIMEOUT);
+
+
   describe('detailed sarif tests', () => {
     let sarifResults: Log | undefined;
     it('analyze remote git with oid and return sarif', async () => {

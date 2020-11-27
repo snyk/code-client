@@ -344,6 +344,22 @@ describe('Requests to public API', () => {
       expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
       const suggestion = response.value.analysisResults.suggestions[0];
+      expect(Object.keys(suggestion)).toEqual([
+        'id',
+        'rule',
+        'message',
+        'severity',
+        'lead_url',
+        'leadURL',
+        'categories',
+        'tags',
+        'title',
+        'cwe',
+        'text',
+        'repoDatasetSize',
+        'exampleCommitDescriptions',
+        'exampleCommitFixes',
+      ]);
       expect(suggestion.id).toEqual('cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse');
       expect(suggestion.leadURL).toEqual('');
       expect(suggestion.repoDatasetSize).toEqual(0);
@@ -354,6 +370,7 @@ describe('Requests to public API', () => {
       );
       expect(suggestion.rule).toEqual('CppSameEvalBinaryExpressionfalse');
       expect(suggestion.severity).toEqual(2);
+
       expect(suggestion.tags).toEqual([]);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
       expect(response.value.analysisResults.files[`/AnnotatorTest.cpp`]).toEqual({

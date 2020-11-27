@@ -28,7 +28,7 @@ export const getSarif = (analysisResults: IAnalysisResult): Log => {
   };
 };
 
-const getSuggestions = (analysisResults: IAnalysisResult) => {
+const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
   const suggestions = {};
   for (const [file] of Object.entries(analysisResults.files)) {
     for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(analysisResults.files[file])) {

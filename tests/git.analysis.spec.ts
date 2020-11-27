@@ -1,5 +1,5 @@
 
-import { baseURL, sessionToken } from './constants/base';
+import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { analyzeGit } from '../src/analysis';
 import jsonschema from 'jsonschema';
 import { Log } from 'sarif';
@@ -18,7 +18,7 @@ describe('Functional test of analysis', () => {
     const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git');
     expect(bundle.analysisResults.files).toBeTruthy();
     expect(bundle.analysisResults.suggestions).toBeTruthy();
-  });
+  }, TEST_TIMEOUT);
 
   itif(!!oAuthToken)('analyze remote git with oid', async () => {
     const bundle = await analyzeGit(
@@ -32,7 +32,7 @@ describe('Functional test of analysis', () => {
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(1);
     expect(bundle.analysisResults.suggestions).toBeTruthy();
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(1);
-  });
+  }, TEST_TIMEOUT);
 
   itif(!!(oAuthToken && sessionTokenNoRepoAccess))('analyze private remote git with oAuthToken', async () => {
 
@@ -61,7 +61,7 @@ describe('Functional test of analysis', () => {
     );
     expect(bundle.analysisResults.files).toBeTruthy();
     expect(bundle.analysisResults.suggestions).toBeTruthy();
-  });
+  }, TEST_TIMEOUT);
 
   describe('detailed sarif tests', () => {
     let sarifResults: Log | undefined;
@@ -76,7 +76,8 @@ describe('Functional test of analysis', () => {
       );
       sarifResults = bundle.sarifResults;
       expect(!!bundle.sarifResults).toEqual(true);
-    });
+    }, TEST_TIMEOUT);
+
     it('should match sarif schema', () => {
       const validationResult = jsonschema.validate(sarifResults, sarifSchema);
       // this is to debug any errors found

@@ -12,7 +12,7 @@ import {
 
 import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
-describe('files', async () => {
+describe('files', () => {
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);

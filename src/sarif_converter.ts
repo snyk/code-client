@@ -60,7 +60,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       id: suggestionId,
       name: suggestion.rule,
       shortDescription: {
-        text: suggestion.message,
+        text: suggestion.title || suggestion.message,
       },
       fullDescription: {
         text: suggestion.message,
@@ -69,10 +69,11 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         level: severity,
       },
       help: {
+        markdown: suggestion.text,
         text: suggestion.message,
       },
       properties: {
-        tags: [suggestionId.split('%2F')[0], ...suggestion.tags, ...suggestion.categories],
+        tags: [suggestionId.split('%2F')[0], ...suggestion.cwe, ...suggestion.tags, ...suggestion.categories],
         precision: 'very-high',
       },
     };
@@ -86,7 +87,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       id: suggestionId,
       text: suggestion.message,
     };
-    ruleIndex++;
+    ruleIndex += 1;
   }
   return { tool: { driver: { ...output.driver, rules } }, suggestions };
 };

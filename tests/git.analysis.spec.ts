@@ -76,7 +76,7 @@ describe('Functional test of analysis', () => {
     // Test DC JSON format first
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(91);
 
-    let cweSuggestion = Object.values(bundle.analysisResults.suggestions)
+    const cweSuggestion = Object.values(bundle.analysisResults.suggestions)
                                 .find(s => s.id === 'java%2Fdc_interfile_project%2FPT');
 
     expect(cweSuggestion.cwe).toEqual(['CWE-23']);

@@ -60,7 +60,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       id: suggestionId,
       name: suggestion.rule,
       shortDescription: {
-        text: suggestion.title || suggestion.message,
+        text: suggestion.title || suggestion.rule,
       },
       fullDescription: {
         text: suggestion.message,

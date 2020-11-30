@@ -84,6 +84,11 @@ describe('Functional test of analysis', () => {
     expect(cweSuggestion.text).toBeTruthy();
 
     expect(bundle.sarifResults?.runs[0].results?.length).toEqual(91);
+    expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(91);
+
+    const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java%2Fdc_interfile_project%2FPT');
+    expect(cweRule?.properties?.tags).toContain('CWE-23');
+    expect(cweRule?.shortDescription?.text).toEqual('Path Traversal');
 
   }, TEST_TIMEOUT);
 

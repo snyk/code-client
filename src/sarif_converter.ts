@@ -1,5 +1,5 @@
 import { IAnalysisResult, ISuggestion, IFileSuggestion } from './interfaces/analysis-result.interface';
-import { Log, ReportingConfiguration, ReportingDescriptor } from 'sarif';
+import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif';
 
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
@@ -13,7 +13,7 @@ interface ISarifSuggestions {
   [suggestionIndex: number]: ISarifSuggestion;
 }
 
-export const getSarif = (analysisResults: IAnalysisResult): Log => {
+export default function getSarif(analysisResults: IAnalysisResult): Log {
   const { tool, suggestions } = getTools(analysisResults, getSuggestions(analysisResults));
   const results = getResults(suggestions);
   return {
@@ -26,7 +26,7 @@ export const getSarif = (analysisResults: IAnalysisResult): Log => {
       },
     ],
   };
-};
+}
 
 const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
   const suggestions = {};
@@ -45,15 +45,11 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
   const rules = [];
   let ruleIndex = 0;
   for (const [suggestionName, suggestion] of <[string, ISuggestion][]>Object.entries(analysisResults.suggestions)) {
-    let severity;
-    const severityNum: number = suggestion.severity;
-    if (severityNum > 0 && severityNum <= 3) {
-      severity = {
-        3: 'error',
-        2: 'warning',
-        1: 'note',
-      }[severityNum];
-    }
+    const severity = <Result.level>{
+      1: 'note',
+      2: 'warning',
+      3: 'error',
+    }[suggestion.severity];
 
     const suggestionId = suggestion.id;
     const rule = {
@@ -70,7 +66,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       },
       help: {
         markdown: suggestion.text,
-        text: suggestion.message,
+        text: '',
       },
       properties: {
         tags: [suggestionId.split('%2F')[0], ...suggestion.cwe, ...suggestion.tags, ...suggestion.categories],

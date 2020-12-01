@@ -69,10 +69,15 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         text: '',
       },
       properties: {
-        tags: [suggestionId.split('%2F')[0], ...suggestion.cwe, ...suggestion.tags, ...suggestion.categories],
+        tags: [suggestionId.split('%2F')[0], ...suggestion.tags, ...suggestion.categories],
         precision: 'very-high',
-      },
+      } as { tags: string[]; precision: string; cwe?: string[] },
     };
+
+    if (suggestion.cwe?.length) {
+      rule.properties.cwe = suggestion.cwe;
+    }
+
     rules.push(rule);
 
     suggestions[suggestionName] = {

@@ -58,9 +58,6 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       shortDescription: {
         text: suggestion.title || suggestion.rule,
       },
-      fullDescription: {
-        text: suggestion.message,
-      },
       defaultConfiguration: {
         level: severity,
       },

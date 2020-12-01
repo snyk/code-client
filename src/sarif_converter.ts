@@ -1,5 +1,5 @@
 import { IAnalysisResult, ISuggestion, IFileSuggestion } from './interfaces/analysis-result.interface';
-import { Log, ReportingConfiguration, ReportingDescriptor } from 'sarif';
+import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif';
 
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
@@ -13,7 +13,7 @@ interface ISarifSuggestions {
   [suggestionIndex: number]: ISarifSuggestion;
 }
 
-export const getSarif = (analysisResults: IAnalysisResult): Log => {
+export default function getSarif(analysisResults: IAnalysisResult): Log {
   const { tool, suggestions } = getTools(analysisResults, getSuggestions(analysisResults));
   const results = getResults(suggestions);
   return {
@@ -26,9 +26,9 @@ export const getSarif = (analysisResults: IAnalysisResult): Log => {
       },
     ],
   };
-};
+}
 
-const getSuggestions = (analysisResults: IAnalysisResult) => {
+const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
   const suggestions = {};
   for (const [file] of Object.entries(analysisResults.files)) {
     for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(analysisResults.files[file])) {
@@ -45,37 +45,36 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
   const rules = [];
   let ruleIndex = 0;
   for (const [suggestionName, suggestion] of <[string, ISuggestion][]>Object.entries(analysisResults.suggestions)) {
-    let severity;
-    const severityNum: number = suggestion.severity;
-    if (severityNum > 0 && severityNum <= 3) {
-      severity = {
-        3: 'error',
-        2: 'warning',
-        1: 'note',
-      }[severityNum];
-    }
+    const severity = <Result.level>{
+      1: 'note',
+      2: 'warning',
+      3: 'error',
+    }[suggestion.severity];
 
     const suggestionId = suggestion.id;
     const rule = {
       id: suggestionId,
       name: suggestion.rule,
       shortDescription: {
-        text: suggestion.message,
-      },
-      fullDescription: {
-        text: suggestion.message,
+        text: suggestion.title || suggestion.rule,
       },
       defaultConfiguration: {
         level: severity,
       },
       help: {
-        text: suggestion.message,
+        markdown: suggestion.text,
+        text: '',
       },
       properties: {
         tags: [suggestionId.split('%2F')[0], ...suggestion.tags, ...suggestion.categories],
         precision: 'very-high',
-      },
+      } as { tags: string[]; precision: string; cwe?: string[] },
     };
+
+    if (suggestion.cwe?.length) {
+      rule.properties.cwe = suggestion.cwe;
+    }
+
     rules.push(rule);
 
     suggestions[suggestionName] = {
@@ -86,7 +85,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       id: suggestionId,
       text: suggestion.message,
     };
-    ruleIndex++;
+    ruleIndex += 1;
   }
   return { tool: { driver: { ...output.driver, rules } }, suggestions };
 };

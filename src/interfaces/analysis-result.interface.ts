@@ -33,6 +33,9 @@ export interface ISuggestion {
   repoDatasetSize: number;
   exampleCommitDescriptions: string[];
   exampleCommitFixes: ExampleCommitFix[];
+  cwe: string[];
+  title: string;
+  text: string;
 }
 
 export interface ISuggestions {

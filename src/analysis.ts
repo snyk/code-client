@@ -21,7 +21,7 @@ import {
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { remoteBundleFactory } from './bundles';
-import { getSarif } from './sarif_converter';
+import getSarif from './sarif_converter';
 import {
   AnalysisSeverity,
   IGitBundle,

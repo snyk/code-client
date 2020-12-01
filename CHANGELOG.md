@@ -1,3 +1,6 @@
+## [2.0.13] - 2020-12-01
+- New fields related to CWE in analysis results
+
 ## [2.0.12] - 2020-10-27
 - Error-tolerant handling of issues with file access permissions
 - Additional handling of "socket hangup" network issue

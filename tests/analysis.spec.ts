@@ -49,6 +49,27 @@ describe('Functional test of analysis', () => {
     expect(Object.keys(bundle.analysisResults.files)[0]).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
 
+    expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(bundle.analysisResults.timing.fetchingCode);
+    expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
+    expect(bundle.analysisResults.coverage).toEqual({
+      "C++ (beta)": {
+        "files": 1,
+        "isSupported": true,
+      },
+      "JSON": {
+        "files": 1,
+        "isSupported": false,
+      },
+      "Java": {
+        "files": 1,
+        "isSupported": true,
+      },
+      "JavaScript": {
+        "files": 4,
+        "isSupported": true,
+      },
+    });
+
     // Check if emitter event happened
     expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
     expect(onScanFilesProgress).toHaveBeenCalledTimes(8);

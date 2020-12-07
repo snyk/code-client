@@ -64,9 +64,22 @@ export interface IAnalysisFiles {
   [filePath: string]: IFilePath;
 }
 
+interface ICoverage {
+  [langIndex: string]: {
+    files: number;
+    isSupported: boolean;
+  };
+}
+
 export interface IAnalysisResult {
   suggestions: ISuggestions;
   files: IAnalysisFiles;
+  timing: {
+    analysis: number;
+    fetchingCode: number;
+    queue: number;
+  };
+  coverage: ICoverage;
 }
 
 export interface IBundleArgs {

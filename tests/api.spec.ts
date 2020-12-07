@@ -408,6 +408,27 @@ describe('Requests to public API', () => {
           },
         ],
       });
+
+      expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(response.value.analysisResults.timing.fetchingCode);
+      expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
+      expect(response.value.analysisResults.coverage).toEqual({
+        "C++ (beta)": {
+          "files": 1,
+          "isSupported": true,
+        },
+        "JSON": {
+          "files": 1,
+          "isSupported": false,
+        },
+        "Java": {
+          "files": 1,
+          "isSupported": true,
+        },
+        "JavaScript": {
+          "files": 5,
+          "isSupported": true,
+        },
+      });
     }
 
     // Get analysis results without linters but with severity 3

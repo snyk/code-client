@@ -39,6 +39,7 @@ async function pollAnalysis({
   severity,
   bundleId,
   oAuthToken,
+  username,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -46,6 +47,7 @@ async function pollAnalysis({
   severity: AnalysisSeverity;
   bundleId: string;
   oAuthToken?: string;
+  username?: string;
 }): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
   let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
@@ -62,6 +64,7 @@ async function pollAnalysis({
       baseURL,
       sessionToken,
       oAuthToken,
+      username,
       bundleId,
       includeLint,
       severity,
@@ -101,6 +104,7 @@ export async function analyzeBundle({
   severity = AnalysisSeverity.info,
   bundleId,
   oAuthToken,
+  username,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -108,9 +112,10 @@ export async function analyzeBundle({
   severity: AnalysisSeverity;
   bundleId: string;
   oAuthToken?: string;
+  username?: string;
 }): Promise<IBundleResult> {
   // Call remote bundle for analysis results and emit intermediate progress
-  const analysisData = await pollAnalysis({ baseURL, sessionToken, oAuthToken, bundleId, includeLint, severity });
+  const analysisData = await pollAnalysis({ baseURL, sessionToken, oAuthToken, username, bundleId, includeLint, severity });
 
   if (analysisData.type === 'error') {
     throw analysisData.error;
@@ -271,14 +276,15 @@ export async function analyzeGit(
   gitUri: string,
   sarif = false,
   oAuthToken?: string,
+  username?: string,
 ): Promise<IGitBundle> {
-  const bundleResponse = await createGitBundle({ baseURL, sessionToken, oAuthToken, gitUri });
+  const bundleResponse = await createGitBundle({ baseURL, sessionToken, oAuthToken, username, gitUri });
   if (bundleResponse.type === 'error') {
     throw bundleResponse.error;
   }
   const { bundleId } = bundleResponse.value;
 
-  const analysisData = await analyzeBundle({ baseURL, sessionToken, oAuthToken, includeLint, severity, bundleId });
+  const analysisData = await analyzeBundle({ baseURL, sessionToken, oAuthToken, username, includeLint, severity, bundleId });
 
   const result = {
     baseURL,

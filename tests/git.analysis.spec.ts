@@ -74,7 +74,7 @@ describe('Functional test of analysis', () => {
     );
 
     // Test DC JSON format first
-    expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(91);
+    expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(118);
 
     const cweSuggestion = Object.values(bundle.analysisResults.suggestions)
                                 .find(s => s.id === 'java%2Fdc_interfile_project%2FPT');
@@ -83,8 +83,8 @@ describe('Functional test of analysis', () => {
     expect(cweSuggestion.title).toBeTruthy();
     expect(cweSuggestion.text).toBeTruthy();
 
-    expect(bundle.sarifResults?.runs[0].results?.length).toEqual(91);
-    expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(91);
+    expect(bundle.sarifResults?.runs[0].results?.length).toEqual(118);
+    expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(118);
 
     const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java%2Fdc_interfile_project%2FPT');
     expect(cweRule?.properties?.cwe).toContain('CWE-23');

@@ -1,3 +1,6 @@
+## [2.0.15] - 2020-12-08
+- Add Username param to analyzeGit
+
 ## [2.0.14] - 2020-12-07
 - New fields with timing and file coverage
 

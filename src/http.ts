@@ -295,12 +295,16 @@ export async function createGitBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly oAuthToken?: string;
+  readonly username?: string;
   readonly gitUri: string;
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, gitUri } = options;
+  const { baseURL, sessionToken, oAuthToken, username, gitUri } = options;
   const headers = { 'Session-Token': sessionToken };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
+  }
+  if (username) {
+    headers['X-UserName'] = username;
   }
   const config: AxiosRequestConfig = {
     headers,
@@ -401,17 +405,21 @@ export async function getAnalysis(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly oAuthToken?: string;
+  readonly username?: string;
   readonly bundleId: string;
   readonly includeLint?: boolean;
   readonly severity: number;
 }): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, bundleId, includeLint, severity } = options;
+  const { baseURL, sessionToken, oAuthToken, username, bundleId, includeLint, severity } = options;
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
   const params = { severity, linters: includeLint || undefined };
 
   const headers = { 'Session-Token': sessionToken };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
+  }
+  if (username) {
+    headers['X-UserName'] = username;
   }
   const config: AxiosRequestConfig = {
     headers,

@@ -51,24 +51,28 @@ describe('Functional test of analysis', () => {
 
     expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(bundle.analysisResults.timing.fetchingCode);
     expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-    expect(bundle.analysisResults.coverage).toEqual({
-      "C++ (beta)": {
+    expect(new Set(bundle.analysisResults.coverage)).toEqual(new Set([
+      {
         "files": 1,
         "isSupported": true,
+        "lang": "C++ (beta)",
       },
-      "JSON": {
+      {
         "files": 1,
         "isSupported": false,
+        "lang": "JSON"
       },
-      "Java": {
+      {
         "files": 1,
         "isSupported": true,
+        "lang": "Java",
       },
-      "JavaScript": {
+      {
         "files": 4,
         "isSupported": true,
+        "lang": "JavaScript",
       },
-    });
+    ]));
 
     // Check if emitter event happened
     expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);

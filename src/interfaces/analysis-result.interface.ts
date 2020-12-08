@@ -65,10 +65,9 @@ export interface IAnalysisFiles {
 }
 
 interface ICoverage {
-  [langIndex: string]: {
-    files: number;
-    isSupported: boolean;
-  };
+  files: number;
+  isSupported: boolean;
+  lang: string;
 }
 
 export interface IAnalysisResult {
@@ -79,7 +78,7 @@ export interface IAnalysisResult {
     fetchingCode: number;
     queue: number;
   };
-  coverage: ICoverage;
+  coverage: ICoverage[];
 }
 
 export interface IBundleArgs {

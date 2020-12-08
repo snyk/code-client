@@ -411,24 +411,28 @@ describe('Requests to public API', () => {
 
       expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(response.value.analysisResults.timing.fetchingCode);
       expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-      expect(response.value.analysisResults.coverage).toEqual({
-        "C++ (beta)": {
+      expect(new Set(response.value.analysisResults.coverage)).toEqual(new Set([
+        {
           "files": 1,
           "isSupported": true,
+          "lang": "C++ (beta)",
         },
-        "JSON": {
+        {
           "files": 1,
           "isSupported": false,
+          "lang": "JSON",
         },
-        "Java": {
+        {
           "files": 1,
           "isSupported": true,
+          "lang": "Java",
         },
-        "JavaScript": {
+        {
           "files": 5,
           "isSupported": true,
+          "lang": "JavaScript",
         },
-      });
+      ]));
     }
 
     // Get analysis results without linters but with severity 3

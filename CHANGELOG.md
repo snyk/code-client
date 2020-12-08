@@ -1,3 +1,6 @@
+## [2.0.14] - 2020-12-07
+- New fields with timing and file coverage
+
 ## [2.0.13] - 2020-12-01
 - New fields related to CWE in analysis results
 

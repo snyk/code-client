@@ -435,21 +435,42 @@ describe('Requests to public API', () => {
       ]));
     }
 
+    // Get analysis results limited to 1 file
+    do {
+      response = await getAnalysis({
+        baseURL,
+        sessionToken,
+        bundleId: realBundleIdFull,
+        includeLint: false,
+        severity: 1,
+        limitToFiles: [`/AnnotatorTest.cpp`],
+      });
+
+      expect(response.type).toEqual('success');
+      if (response.type === 'error') return;
+      expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+
+    } while (response.value.status !== AnalysisStatus.done);
+
+    expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
+    expect(Object.keys(response.value.analysisResults.files)).toEqual(['/AnnotatorTest.cpp']);
+
     // Get analysis results without linters but with severity 3
-    response = await getAnalysis({
-      baseURL,
-      sessionToken,
-      bundleId: realBundleIdFull,
-      includeLint: false,
-      severity: 3,
-    });
-    expect(response.type).toEqual('success');
-    if (response.type === 'error') return;
-    expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-    if (response.value.status === AnalysisStatus.done) {
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
-    }
+    do {
+      response = await getAnalysis({
+        baseURL,
+        sessionToken,
+        bundleId: realBundleIdFull,
+        includeLint: false,
+        severity: 3,
+      });
+      expect(response.type).toEqual('success');
+      if (response.type === 'error') return;
+      expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+    } while (response.value.status !== AnalysisStatus.done);
+
+    expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
+    expect(Object.keys(response.value.analysisResults.files)).toEqual(['/GitHubAccessTokenScrambler12.java']);
 
   }, TEST_TIMEOUT);
 

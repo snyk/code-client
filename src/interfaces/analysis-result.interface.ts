@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { Log } from 'sarif';
 
 import { ISupportedFiles } from './files.interface';
@@ -39,7 +40,7 @@ export interface ISuggestion {
 }
 
 export interface ISuggestions {
-  [suggestionIndex: number]: ISuggestion;
+  [suggestionIndex: string]: ISuggestion;
 }
 
 export interface IPosition {
@@ -57,7 +58,7 @@ export interface IFileSuggestion extends IPosition {
 }
 
 export interface IFilePath {
-  [suggestionIndex: number]: IFileSuggestion[];
+  [suggestionIndex: string]: IFileSuggestion[];
 }
 
 export interface IAnalysisFiles {

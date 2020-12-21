@@ -25,6 +25,9 @@ export default function getSarif(analysisResults: IAnalysisResult): Log {
       {
         tool,
         results,
+        properties: {
+          coverage: analysisResults.coverage,
+        },
       },
     ],
   };
@@ -53,8 +56,9 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
       2: 'warning',
       3: 'error',
     }[suggestion.severity];
-
-    const suggestionId = suggestion.id;
+    // payload comes as URIencoded
+    const language = suggestion.id.split('%2F')[0];
+    const suggestionId = `${language}/${suggestion.rule}`;
     const rule = {
       id: suggestionId,
       name: suggestion.rule,
@@ -69,7 +73,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         text: '',
       },
       properties: {
-        tags: [suggestionId.split('%2F')[0], ...suggestion.tags, ...suggestion.categories],
+        tags: [language, ...suggestion.tags, ...suggestion.categories],
         precision: 'very-high',
       } as { tags: string[]; precision: string; cwe?: string[] },
     };

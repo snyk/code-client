@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import { omit } from 'lodash';
 
 import {
   collectIgnoreRules,
@@ -23,6 +24,7 @@ import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { remoteBundleFactory } from './bundles';
 import getSarif from './sarif_converter';
 import {
+  ISuggestion,
   AnalysisSeverity,
   IGitBundle,
   IAnalysisFiles,
@@ -40,6 +42,7 @@ async function pollAnalysis({
   bundleId,
   oAuthToken,
   username,
+  limitToFiles,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -48,6 +51,7 @@ async function pollAnalysis({
   bundleId: string;
   oAuthToken?: string;
   username?: string;
+  limitToFiles?: string[];
 }): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
   let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
@@ -68,6 +72,7 @@ async function pollAnalysis({
       bundleId,
       includeLint,
       severity,
+      limitToFiles,
     });
 
     if (analysisResponse.type === 'error') {
@@ -105,6 +110,7 @@ export async function analyzeBundle({
   bundleId,
   oAuthToken,
   username,
+  limitToFiles,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -113,9 +119,19 @@ export async function analyzeBundle({
   bundleId: string;
   oAuthToken?: string;
   username?: string;
+  limitToFiles?: string[];
 }): Promise<IBundleResult> {
   // Call remote bundle for analysis results and emit intermediate progress
-  const analysisData = await pollAnalysis({ baseURL, sessionToken, oAuthToken, username, bundleId, includeLint, severity });
+  const analysisData = await pollAnalysis({
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    bundleId,
+    includeLint,
+    severity,
+    limitToFiles,
+  });
 
   if (analysisData.type === 'error') {
     throw analysisData.error;
@@ -133,7 +149,7 @@ export async function analyzeBundle({
   };
 }
 
-function normalizeResultFiles(files: IAnalysisFiles, baseDir: string) {
+function normalizeResultFiles(files: IAnalysisFiles, baseDir: string): IAnalysisFiles {
   if (baseDir) {
     return Object.fromEntries(
       Object.entries(files).map(([path, positions]) => {
@@ -143,6 +159,49 @@ function normalizeResultFiles(files: IAnalysisFiles, baseDir: string) {
     );
   }
   return files;
+}
+
+const moveSuggestionIndexes = <T>(
+  suggestionIndex: number,
+  suggestions: { [index: string]: T },
+): { [index: string]: T } => {
+  const entries = Object.entries(suggestions);
+  return Object.fromEntries(
+    entries.map(([i, s]) => {
+      return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
+    }),
+  );
+};
+
+function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, limitToFiles: string[]): IFileBundle {
+  // Determine max suggestion index in our data
+  const suggestionIndex = Math.max(...Object.keys(bundle.analysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
+
+  // Addup all new suggestions' indexes
+  const newSuggestions = moveSuggestionIndexes<ISuggestion>(suggestionIndex, analysisData.analysisResults.suggestions);
+  const suggestions = { ...bundle.analysisResults.suggestions, ...newSuggestions };
+
+  const newFiles = Object.fromEntries(
+    Object.entries(analysisData.analysisResults.files).map(([fn, s]) => {
+      return [fn, moveSuggestionIndexes(suggestionIndex, s)];
+    }),
+  );
+  const files = {
+    ...omit(bundle.analysisResults.files, limitToFiles),
+    ...newFiles,
+  };
+
+  const analysisResults = {
+    ...analysisData.analysisResults,
+    files,
+    suggestions,
+  };
+
+  return {
+    ...bundle,
+    ...analysisData,
+    analysisResults,
+  };
 }
 
 export async function analyzeFolders(
@@ -258,14 +317,17 @@ export async function extendAnalysis(
     includeLint: bundle.includeLint,
     severity: bundle.severity,
     bundleId: remoteBundle.bundleId,
+    limitToFiles: files.map(f => f.bundlePath),
   });
+  // Transform relative paths into absolute
   analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
-  // Create bundle instance to handle extensions
-  return {
-    ...bundle,
-    ...analysisData,
-  };
+  // Merge into base bundle results
+  return mergeBundleResults(
+    bundle,
+    analysisData,
+    files.map(f => f.filePath),
+  );
 }
 
 export async function analyzeGit(
@@ -284,7 +346,15 @@ export async function analyzeGit(
   }
   const { bundleId } = bundleResponse.value;
 
-  const analysisData = await analyzeBundle({ baseURL, sessionToken, oAuthToken, username, includeLint, severity, bundleId });
+  const analysisData = await analyzeBundle({
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    includeLint,
+    severity,
+    bundleId,
+  });
 
   const result = {
     baseURL,

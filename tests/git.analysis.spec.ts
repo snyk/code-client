@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 
 import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { analyzeGit } from '../src/analysis';
@@ -79,9 +80,9 @@ describe('Functional test of analysis', () => {
     const cweSuggestion = Object.values(bundle.analysisResults.suggestions)
                                 .find(s => s.id === 'java%2Fdc_interfile_project%2FPT');
 
-    expect(cweSuggestion.cwe).toEqual(['CWE-23']);
-    expect(cweSuggestion.title).toBeTruthy();
-    expect(cweSuggestion.text).toBeTruthy();
+    expect(cweSuggestion?.cwe).toEqual(['CWE-23']);
+    expect(cweSuggestion?.title).toBeTruthy();
+    expect(cweSuggestion?.text).toBeTruthy();
 
     expect(bundle.sarifResults?.runs[0].results?.length).toEqual(118);
     expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(118);

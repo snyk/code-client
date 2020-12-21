@@ -2,7 +2,7 @@ import * as nodePath from 'path';
 import * as fs from 'fs';
 import fg from 'fast-glob';
 import micromatch from 'micromatch';
-import crypto, { HexBase64Latin1Encoding } from 'crypto';
+import crypto from 'crypto';
 import { union } from 'lodash';
 import util from 'util';
 import * as flatCache from 'flat-cache';
@@ -264,10 +264,7 @@ export async function getFileInfo(
   const bundlePath = getBundleFilePath(filePath, baseDir);
 
   const calcHash = (content: string) => {
-    return crypto
-      .createHash(HASH_ALGORITHM)
-      .update(content)
-      .digest(ENCODE_TYPE as HexBase64Latin1Encoding);
+    return crypto.createHash(HASH_ALGORITHM).update(content).digest(ENCODE_TYPE);
   };
 
   let fileContent = '';

@@ -1,3 +1,6 @@
+## [2.0.16] - 2020-12-17
+- Performance improvement and stability on events 'file changed'
+
 ## [2.0.15] - 2020-12-08
 - Add Username param to analyzeGit
 

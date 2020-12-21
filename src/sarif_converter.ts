@@ -1,5 +1,7 @@
-import { IAnalysisResult, ISuggestion, IFileSuggestion } from './interfaces/analysis-result.interface';
+// eslint-disable-next-line import/no-unresolved
 import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif';
+
+import { IAnalysisResult, IFileSuggestion } from './interfaces/analysis-result.interface';
 
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
@@ -34,9 +36,9 @@ export default function getSarif(analysisResults: IAnalysisResult): Log {
 const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
   const suggestions = {};
   for (const [file] of Object.entries(analysisResults.files)) {
-    for (const [issueId, issue] of <[string, IFileSuggestion][]>Object.entries(analysisResults.files[file])) {
+    for (const [issueId, issues] of Object.entries(analysisResults.files[file])) {
       if (!suggestions || !Object.keys(suggestions).includes(issueId)) {
-        suggestions[issueId] = { ...issue[0], file: file.substring(1) };
+        suggestions[issueId] = { ...issues[0], file: file.substring(1) };
       }
     }
   }
@@ -47,7 +49,8 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
   const output = { driver: { name: 'DeepCode', semanticVersion: '1.0.0' } };
   const rules = [];
   let ruleIndex = 0;
-  for (const [suggestionName, suggestion] of <[string, ISuggestion][]>Object.entries(analysisResults.suggestions)) {
+  const result: ISarifSuggestions = {};
+  for (const [suggestionIndex, suggestion] of Object.entries(analysisResults.suggestions)) {
     const severity = <Result.level>{
       1: 'note',
       2: 'warning',
@@ -81,8 +84,9 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
 
     rules.push(rule);
 
-    suggestions[suggestionName] = {
-      ...suggestions[suggestionName],
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    result[suggestionIndex] = {
+      ...suggestions[suggestionIndex],
       ruleIndex,
       rule,
       level: severity,
@@ -91,7 +95,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     };
     ruleIndex += 1;
   }
-  return { tool: { driver: { ...output.driver, rules } }, suggestions };
+  return { tool: { driver: { ...output.driver, rules } }, suggestions: result };
 };
 
 const getResults = (suggestions: ISarifSuggestions) => {

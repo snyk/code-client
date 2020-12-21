@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 
 import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { analyzeGit } from '../src/analysis';
@@ -113,8 +114,7 @@ describe('Functional test of analysis', () => {
       // this is to debug any errors found
       // const json = JSON.stringify(validationResult)
       // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
-      // FIXME: fixed serif formatter and uncomment this line
-      // expect(validationResult.errors.length).toEqual(0);
+      expect(validationResult.errors.length).toEqual(0);
     });
   });
 });

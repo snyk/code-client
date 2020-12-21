@@ -36,9 +36,9 @@ export default function getSarif(analysisResults: IAnalysisResult): Log {
 const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
   const suggestions = {};
   for (const [file] of Object.entries(analysisResults.files)) {
-    for (const [issueId, issue] of Object.entries(analysisResults.files[file])) {
+    for (const [issueId, issues] of Object.entries(analysisResults.files[file])) {
       if (!suggestions || !Object.keys(suggestions).includes(issueId)) {
-        suggestions[issueId] = { ...issue[0], file: file.substring(1) };
+        suggestions[issueId] = { ...issues[0], file: file.substring(1) };
       }
     }
   }
@@ -50,7 +50,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
   const rules = [];
   let ruleIndex = 0;
   const result: ISarifSuggestions = {};
-  for (const [suggestionName, suggestion] of Object.entries(analysisResults.suggestions)) {
+  for (const [suggestionIndex, suggestion] of Object.entries(analysisResults.suggestions)) {
     const severity = <Result.level>{
       1: 'note',
       2: 'warning',
@@ -85,8 +85,8 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     rules.push(rule);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    result[suggestionName] = {
-      ...suggestions[suggestionName],
+    result[suggestionIndex] = {
+      ...suggestions[suggestionIndex],
       ruleIndex,
       rule,
       level: severity,
@@ -95,7 +95,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     };
     ruleIndex += 1;
   }
-  return { tool: { driver: { ...output.driver, rules } }, suggestions };
+  return { tool: { driver: { ...output.driver, rules } }, suggestions: result };
 };
 
 const getResults = (suggestions: ISarifSuggestions) => {

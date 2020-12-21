@@ -23,6 +23,9 @@ export default function getSarif(analysisResults: IAnalysisResult): Log {
       {
         tool,
         results,
+        properties: {
+          coverage: analysisResults.coverage,
+        },
       },
     ],
   };

@@ -247,19 +247,37 @@ export async function analyzeFolders(
   }
 
   // Create remote bundle
-  const remoteBundle = await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload);
-  if (remoteBundle === null) {
-    throw new Error('File list is empty');
-  }
+  const remoteBundle = bundleFiles.length
+    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload)
+    : null;
 
-  const analysisData = await analyzeBundle({
-    baseURL,
-    sessionToken,
-    includeLint,
-    severity,
-    bundleId: remoteBundle.bundleId,
-  });
-  analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
+  // Analyze bundle
+  let analysisData;
+  if (remoteBundle === null) {
+    analysisData = {
+      analysisResults: {
+        files: {},
+        suggestions: {},
+        timing: {
+          analysis: 0,
+          fetchingCode: 0,
+          queue: 0,
+        },
+        coverage: [],
+      },
+      analysisURL: '',
+      bundleId: '',
+    };
+  } else {
+    analysisData = await analyzeBundle({
+      baseURL,
+      sessionToken,
+      includeLint,
+      severity,
+      bundleId: remoteBundle.bundleId,
+    });
+    analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
+  }
 
   // Create bundle instance to handle extensions
   return {

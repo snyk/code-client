@@ -88,12 +88,12 @@ describe('files', () => {
     // fs.readFileSync(payloads[0][0].path).toString('utf8')
     const filePath = `${sampleProjectPath}/app.js`;
     const fileMeta = await getFileInfo(filePath, sampleProjectPath);
-    expect(fileMeta.hash).toEqual('40f937553fda7b9986c3a87d39802b96e77fb2ba306dd602f9b2d28949316c98');
+    expect(fileMeta?.hash).toEqual('40f937553fda7b9986c3a87d39802b96e77fb2ba306dd602f9b2d28949316c98');
   });
 
   it('support of iso8859 encoding', async () => {
     const filePath = `${sampleProjectPath}/main.js`;
     const fileMeta = await getFileInfo(filePath, sampleProjectPath);
-    expect(fileMeta.hash).toEqual('3e2979852cc2e97f48f7e7973a8b0837eb73ed0485c868176bc3aa58c499f534');
+    expect(fileMeta?.hash).toEqual('3e2979852cc2e97f48f7e7973a8b0837eb73ed0485c868176bc3aa58c499f534');
   });
 });

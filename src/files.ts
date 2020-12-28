@@ -35,7 +35,7 @@ const lStat = async (path: fs.PathLike): Promise<fs.Stats | null> => {
   return fileStats;
 };
 
-function notEmpty<T>(value: T | null | undefined): value is T {
+export function notEmpty<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 

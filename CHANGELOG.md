@@ -1,3 +1,6 @@
+## [2.0.18] - 2020-12-29
+- Support for special characters in file paths
+
 ## [2.0.17] - 2020-12-29
 - Bug fixing
 

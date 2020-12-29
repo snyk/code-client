@@ -276,7 +276,7 @@ export async function prepareExtendingBundle(
 function getBundleFilePath(filePath: string, baseDir: string) {
   const relPath = nodePath.relative(baseDir, filePath);
   const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
-  return `/${posixPath}`;
+  return encodeURI(`/${posixPath}`);
 }
 
 export async function getFileInfo(
@@ -358,7 +358,7 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
     relPath = relPath.replace(/\//g, '\\');
   }
 
-  return nodePath.resolve(baseDir, relPath);
+  return nodePath.resolve(baseDir, decodeURI(relPath));
 }
 
 export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {

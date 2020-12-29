@@ -1,3 +1,6 @@
+## [2.0.17] - 2020-12-29
+- Bug fixing
+
 ## [2.0.16] - 2020-12-17
 - Performance improvement and stability on events 'file changed'
 

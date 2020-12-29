@@ -164,7 +164,7 @@ export async function remoteBundleFactory(
 
     remoteBundle = await fullfillRemoteBundle(baseURL, sessionToken, baseDir, response.value, maxPayload);
     if (remoteBundle.missingFiles.length) {
-      throw new Error(`Failed to upload files --> ${JSON.stringify(remoteBundle.missingFiles)}`.slice(0, 399));
+      throw new Error(`Failed to upload # files: ${remoteBundle.missingFiles.length}`);
     }
   }
 

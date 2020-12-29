@@ -519,4 +519,43 @@ describe('Requests to public API', () => {
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
     }
   }, TEST_TIMEOUT);
+
+  it('git analysis with empty results', async () => {
+    const bundleId = 'gh/DeepcodeAI/test-bigfiles/e7633ef98fba3ddc24e5bea27ae58d5b08b2f949';
+
+    let response;
+
+    do {
+      // Get analysis results
+      response = await getAnalysis({
+        baseURL,
+        sessionToken,
+        bundleId,
+        includeLint: false,
+        severity: 1,
+      });
+
+      expect(response.type).toEqual('success');
+      if (response.type === 'error') return;
+      expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+    } while (response.value.status !== AnalysisStatus.done)
+
+    expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
+    expect(response.value.analysisResults.suggestions).toEqual({});
+    expect(response.value.analysisResults.files).toEqual({});
+
+    expect(response.value.analysisResults.coverage).toEqual([
+      {
+        files: 3,
+        isSupported: false,
+        lang: 'Text',
+      },
+      {
+        files: 1,
+        isSupported: false,
+        lang: 'Markdown',
+      },
+    ]);
+
+  }, TEST_TIMEOUT);
 });

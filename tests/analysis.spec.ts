@@ -1,3 +1,5 @@
+import path from 'path';
+
 import { analyzeFolders } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
@@ -100,4 +102,12 @@ describe('Functional test of analysis', () => {
 
     expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
   }, TEST_TIMEOUT);
+
+  it('analyze empty folder', async () => {
+    const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [path.join(sampleProjectPath, 'only_text')], false, 1000);
+
+    expect(bundle.analysisResults.files).toEqual({});
+    expect(bundle.analysisResults.suggestions).toEqual({});
+    expect(bundle.analysisResults.coverage).toEqual([]);
+  });
 });

@@ -109,6 +109,29 @@ describe('Functional test of analysis', () => {
       expect(!!bundle.sarifResults).toEqual(true);
     }, TEST_TIMEOUT);
 
+    it('analyze remote git and formatter sarif with zero supported files', async () => {
+      const bundle = await analyzeGit(
+        baseURL,
+        sessionToken,
+        false,
+        1,
+        'git@github.com:DeepCodeAI/test-bigfiles.git@e7633ef98fba3ddc24e5bea27ae58d5b08b2f949',
+        true,
+      );
+      expect(bundle.sarifResults?.runs[0].properties?.coverage).toEqual([
+        {
+          files: 3,
+          isSupported: false,
+          lang: 'Text',
+        },
+        {
+          files: 1,
+          isSupported: false,
+          lang: 'Markdown',
+        },
+      ]);
+    }, TEST_TIMEOUT);
+
     it('should match sarif schema', () => {
       const validationResult = jsonschema.validate(sarifResults, sarifSchema);
       // this is to debug any errors found

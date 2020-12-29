@@ -13,7 +13,31 @@ import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
 
 const isWindows = nodePath.sep === '\\';
 
-const lStat = util.promisify(fs.lstat);
+const asyncLStat = util.promisify(fs.lstat);
+const lStat = async (path: fs.PathLike): Promise<fs.Stats | null> => {
+  let fileStats: fs.Stats | null = null;
+
+  try {
+    // eslint-disable-next-line no-await-in-loop
+    fileStats = await asyncLStat(path);
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
+      console.log(
+        `${path} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (err.code === 'ENOENT') {
+      console.log(`no such file or directory: ${path}`);
+    }
+  }
+  return fileStats;
+};
+
+export function notEmpty<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
 
 const microMatchOptions = { basename: true, dot: true, posixSlashes: true };
 const fgOptions = {
@@ -45,7 +69,7 @@ export function parseFileIgnores(path: string): string[] {
       .filter(l => !!l && !l.startsWith('#'));
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (err.code === 'EACCES') {
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
       console.log(
         `${path} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
       );
@@ -77,7 +101,7 @@ export async function collectIgnoreRules(
   const tasks = dirs.map(async folder => {
     const fileStats = await lStat(folder);
     // Check if symlink and exclude if requested
-    if ((fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
+    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
 
     // Find ignore files inside this directory
     const localIgnoreFiles = await fg(
@@ -152,7 +176,7 @@ export async function* collectBundleFiles(
     // eslint-disable-next-line no-await-in-loop
     const fileStats = await lStat(path);
     // Check if symlink and exclude if requested
-    if (fileStats.isSymbolicLink() && !symlinksEnabled) continue;
+    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled)) continue;
 
     if (fileStats.isFile() && fileStats.size <= maxFileSize) {
       files.push(path);
@@ -167,7 +191,7 @@ export async function* collectBundleFiles(
     // eslint-disable-next-line no-await-in-loop
     for await (const filePath of searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores)) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
-      if (fileInfo.size <= maxFileSize) {
+      if (fileInfo && fileInfo.size <= maxFileSize) {
         yield fileInfo;
       }
     }
@@ -178,7 +202,7 @@ export async function* collectBundleFiles(
     const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, fileIgnores);
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
-      if (fileInfo.size <= maxFileSize) {
+      if (fileInfo && fileInfo.size <= maxFileSize) {
         yield fileInfo;
       }
     }
@@ -237,7 +261,9 @@ export async function prepareExtendingBundle(
     }, [] as string[]);
 
     if (foundFiles.size) {
-      bundleFiles = await Promise.all([...foundFiles].map(async (p: string) => getFileInfo(p, baseDir, false, cache)));
+      bundleFiles = (
+        await Promise.all([...foundFiles].map((p: string) => getFileInfo(p, baseDir, false, cache)))
+      ).filter(notEmpty);
     }
   }
 
@@ -258,8 +284,11 @@ export async function getFileInfo(
   baseDir: string,
   withContent = false,
   cache: flatCache.Cache | null = null,
-): Promise<IFileInfo> {
+): Promise<IFileInfo | null> {
   const fileStats = await lStat(filePath);
+  if (fileStats === null) {
+    return fileStats;
+  }
 
   const bundlePath = getBundleFilePath(filePath, baseDir);
 
@@ -291,7 +320,7 @@ export async function getFileInfo(
       cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (err.code === 'EACCES') {
+      if (err.code === 'EACCES' || err.code === 'EPERM') {
         console.log(
           `${filePath} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
         );
@@ -316,7 +345,7 @@ export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: st
     return getFileInfo(filePath, baseDir, true, cache);
   });
 
-  const res = await Promise.all(tasks);
+  const res = (await Promise.all(tasks)).filter(notEmpty);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   cache.save(true);
   return res;

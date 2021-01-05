@@ -136,7 +136,7 @@ const getResults = (suggestions: ISarifSuggestions) => {
             location: {
               physicalLocation: {
                 artifactLocation: {
-                  uri: suggestion.file,
+                  uri: position.file,
                   uriBaseId: '%SRCROOT%',
                   // index: i,
                 },

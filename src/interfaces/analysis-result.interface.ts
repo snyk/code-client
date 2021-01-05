@@ -48,9 +48,13 @@ export interface IPosition {
   rows: Point;
 }
 
+export interface IMarkerPosition extends IPosition {
+  file: string;
+}
+
 export interface IMarker {
   msg: Point;
-  pos: IPosition[];
+  pos: IMarkerPosition[];
 }
 
 export interface IFileSuggestion extends IPosition {

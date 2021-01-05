@@ -373,7 +373,8 @@ describe('Requests to public API', () => {
 
       expect(suggestion.tags).toEqual([]);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-      expect(response.value.analysisResults.files[`/AnnotatorTest.cpp`]).toEqual({
+      const filePath = `/AnnotatorTest.cpp`;
+      expect(response.value.analysisResults.files[filePath]).toEqual({
         '0': [
           {
             cols: [8, 27],
@@ -391,6 +392,7 @@ describe('Requests to public API', () => {
                   {
                     cols: [7, 14],
                     rows: [8, 8],
+                    file: filePath,
                   },
                 ],
               },
@@ -400,6 +402,7 @@ describe('Requests to public API', () => {
                   {
                     cols: [6, 25],
                     rows: [10, 10],
+                    file: filePath,
                   },
                 ],
               },

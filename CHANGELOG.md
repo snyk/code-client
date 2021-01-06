@@ -1,3 +1,6 @@
+## [2.1.0] - 2021-01-05
+- Added file field to marker positions for inte-file suggestions
+
 ## [2.0.18] - 2020-12-29
 - Support for special characters in file paths
 

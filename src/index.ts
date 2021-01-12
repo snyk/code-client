@@ -1,4 +1,4 @@
-import { analyzeFolders, extendAnalysis, analyzeGit } from './analysis';
+import { analyzeFolders, extendAnalysis, analyzeGit, analyzeGitDiff } from './analysis';
 import emitter from './emitter';
 import { startSession, checkSession, reportEvent, reportError } from './http';
 import * as constants from './constants';
@@ -22,6 +22,7 @@ export {
   analyzeFolders,
   extendAnalysis,
   analyzeGit,
+  analyzeGitDiff,
   startSession,
   checkSession,
   reportEvent,

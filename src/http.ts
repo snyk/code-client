@@ -443,6 +443,59 @@ export async function getAnalysis(options: {
   }
 }
 
+export async function getDiffAnalysis(options: {
+  readonly baseURL: string;
+  readonly sessionToken: string;
+  readonly oldBundleId: string;
+  readonly newBundleId: string;
+  readonly includeLint?: boolean;
+  readonly severity: number;
+  readonly limitToFiles?: string[];
+  readonly oAuthToken?: string;
+  readonly username?: string;
+}): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
+  const {
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    oldBundleId,
+    newBundleId,
+    includeLint,
+    severity,
+    limitToFiles,
+  } = options;
+  // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
+  const params = { severity, linters: includeLint || undefined };
+
+  const headers = { 'Session-Token': sessionToken };
+  if (oAuthToken) {
+    headers['X-OAuthToken'] = oAuthToken;
+  }
+  if (username) {
+    headers['X-UserName'] = username;
+  }
+
+  const config: AxiosRequestConfig = {
+    headers,
+    params,
+    url: `${baseURL}${apiPath}/analysis/${oldBundleId}/${newBundleId}`,
+    method: 'GET',
+  };
+
+  if (limitToFiles && limitToFiles.length) {
+    config.data = { files: limitToFiles };
+    config.method = 'POST';
+  }
+
+  try {
+    const response = await axios.request<GetAnalysisResponseDto>(config);
+    return { type: 'success', value: response.data };
+  } catch (error) {
+    return generateError<GetAnalysisErrorCodes>(error, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
+  }
+}
+
 type ReportTelemetryRequestDto = {
   readonly baseURL: string;
   readonly sessionToken?: string;

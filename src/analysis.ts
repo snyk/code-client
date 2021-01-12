@@ -13,6 +13,7 @@ import {
   createGitBundle,
   GetAnalysisErrorCodes,
   getAnalysis,
+  getDiffAnalysis,
   AnalysisStatus,
   IResult,
   GetAnalysisResponseDto,
@@ -43,6 +44,7 @@ async function pollAnalysis({
   oAuthToken,
   username,
   limitToFiles,
+  newBundleId,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -52,6 +54,7 @@ async function pollAnalysis({
   oAuthToken?: string;
   username?: string;
   limitToFiles?: string[];
+  newBundleId?: string;
 }): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
   let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
@@ -64,16 +67,28 @@ async function pollAnalysis({
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    analysisResponse = await getAnalysis({
-      baseURL,
-      sessionToken,
-      oAuthToken,
-      username,
-      bundleId,
-      includeLint,
-      severity,
-      limitToFiles,
-    });
+    analysisResponse = newBundleId
+      ? await getDiffAnalysis({
+          baseURL,
+          sessionToken,
+          oAuthToken,
+          username,
+          oldBundleId: bundleId,
+          newBundleId,
+          includeLint,
+          severity,
+          limitToFiles,
+        })
+      : await getAnalysis({
+          baseURL,
+          sessionToken,
+          oAuthToken,
+          username,
+          bundleId,
+          includeLint,
+          severity,
+          limitToFiles,
+        });
 
     if (analysisResponse.type === 'error') {
       return analysisResponse;
@@ -149,6 +164,55 @@ export async function analyzeBundle({
   };
 }
 
+export async function analyzeBundles({
+  baseURL = defaultBaseURL,
+  sessionToken = '',
+  includeLint = false,
+  severity = AnalysisSeverity.info,
+  oldBundleId,
+  newBundleId,
+  oAuthToken,
+  username,
+  limitToFiles,
+}: {
+  baseURL: string;
+  sessionToken: string;
+  includeLint: boolean;
+  severity: AnalysisSeverity;
+  oldBundleId: string;
+  newBundleId: string;
+  oAuthToken?: string;
+  username?: string;
+  limitToFiles?: string[];
+}): Promise<IBundleResult> {
+  // Call remote bundle for analysis results and emit intermediate progress
+  const analysisData = await pollAnalysis({
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    bundleId: oldBundleId,
+    includeLint,
+    severity,
+    limitToFiles,
+    newBundleId,
+  });
+
+  if (analysisData.type === 'error') {
+    throw analysisData.error;
+  } else if (analysisData.value.status === AnalysisStatus.failed) {
+    throw new Error('Analysis has failed');
+  }
+
+  const { analysisResults } = analysisData.value;
+
+  // Create bundle instance to handle extensions
+  return {
+    bundleId: oldBundleId,
+    analysisResults,
+    analysisURL: analysisData.value.analysisURL,
+  };
+}
 function normalizeResultFiles(files: IAnalysisFiles, baseDir: string): IAnalysisFiles {
   if (baseDir) {
     return Object.fromEntries(
@@ -381,6 +445,58 @@ export async function analyzeGit(
     includeLint,
     severity,
     gitUri,
+    ...analysisData,
+  };
+
+  // Create bundle instance to handle extensions
+  if (sarif && analysisData.analysisResults) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    result.sarifResults = getSarif(analysisData.analysisResults);
+  }
+
+  return result;
+}
+
+export async function analyzeGitDiff(
+  baseURL = defaultBaseURL,
+  sessionToken = '',
+  includeLint = false,
+  severity = AnalysisSeverity.info,
+  gitUriOld: string,
+  gitUriNew: string,
+  sarif = false,
+  oAuthToken?: string,
+  username?: string,
+): Promise<IGitBundle> {
+  const bundleResponseOld = await createGitBundle({ baseURL, sessionToken, oAuthToken, username, gitUri: gitUriOld });
+  const bundleResponseNew = await createGitBundle({ baseURL, sessionToken, oAuthToken, username, gitUri: gitUriNew });
+  if (bundleResponseOld.type === 'error') {
+    throw bundleResponseOld.error;
+  }
+  if (bundleResponseNew.type === 'error') {
+    throw bundleResponseNew.error;
+  }
+  const { bundleId: oldBundleId } = bundleResponseOld.value;
+  const { bundleId: newBundleId } = bundleResponseNew.value;
+
+  const analysisData = await analyzeBundles({
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    includeLint,
+    severity,
+    oldBundleId,
+    newBundleId,
+  });
+
+  const result = {
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    includeLint,
+    severity,
+    gitUri: gitUriOld,
     ...analysisData,
   };
 

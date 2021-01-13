@@ -46,7 +46,7 @@ const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => 
 };
 
 const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestions) => {
-  const output = { driver: { name: 'DeepCode', semanticVersion: '1.0.0' } };
+  const output = { driver: { name: 'SnykCode', semanticVersion: '1.0.0', version: '1.0.0' } };
   const rules = [];
   let ruleIndex = 0;
   const result: ISarifSuggestions = {};
@@ -136,7 +136,7 @@ const getResults = (suggestions: ISarifSuggestions) => {
             location: {
               physicalLocation: {
                 artifactLocation: {
-                  uri: position.file,
+                  uri: position.file.substring(1),
                   uriBaseId: '%SRCROOT%',
                   // index: i,
                 },

@@ -102,12 +102,15 @@ const getResults = (suggestions: ISarifSuggestions) => {
   const output = [];
 
   for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(suggestions)) {
-    const result = {
+    let helpers: any[] = [];
+    let result = {
       ruleId: suggestion.id,
       ruleIndex: suggestion.ruleIndex,
       level: suggestion.level ? suggestion.level : 'none',
       message: {
         text: suggestion.text,
+        markdown: suggestion.text,
+        arguments: [''],
       },
       locations: [
         {
@@ -128,17 +131,23 @@ const getResults = (suggestions: ISarifSuggestions) => {
     };
 
     const codeThreadFlows = [];
-    // let i = 0;
+    let i = 0;
     if (suggestion.markers && suggestion.markers.length >= 1) {
       for (const marker of suggestion.markers) {
         for (const position of marker.pos) {
+          const helperIndex = helpers.findIndex(helper => helper.msg === marker.msg);
+          if (helperIndex != -1) {
+            helpers[helperIndex].index.push(i);
+          } else {
+            helpers.push({ index: [i], msg: marker.msg });
+          }
           codeThreadFlows.push({
             location: {
+              id: i,
               physicalLocation: {
                 artifactLocation: {
                   uri: position.file.substring(1),
                   uriBaseId: '%SRCROOT%',
-                  // index: i,
                 },
                 region: {
                   startLine: position.rows[0],
@@ -149,12 +158,13 @@ const getResults = (suggestions: ISarifSuggestions) => {
               },
             },
           });
-          // i += 1;
+          i += 1;
         }
       }
     } else {
       codeThreadFlows.push({
         location: {
+          id: 0,
           physicalLocation: {
             artifactLocation: {
               uri: suggestion.file,
@@ -171,6 +181,11 @@ const getResults = (suggestions: ISarifSuggestions) => {
         },
       });
     }
+
+    const { message, argumentArray } = getArgumentsAndMessage(helpers, result.message.text);
+    result.message.text = message;
+    result.message.arguments = argumentArray;
+
     const newResult = {
       ...result,
       codeFlows: [
@@ -187,3 +202,39 @@ const getResults = (suggestions: ISarifSuggestions) => {
   }
   return output;
 };
+
+//custom string splice implementation
+export function stringSplice(str: string, index: number, count: number, add?: string) {
+  // We cannot pass negative indexes directly to the 2nd slicing operation.
+  if (index < 0) {
+    index = str.length + index;
+    if (index < 0) {
+      index = 0;
+    }
+  }
+
+  return str.slice(0, index) + (add || '') + str.slice(index + count);
+}
+
+export function getArgumentsAndMessage(
+  helpers: { index: number[]; msg: number[] }[],
+  message: string,
+): { message: string; argumentArray: string[] } {
+  let negativeOffset = 0;
+  let argumentArray: string[] = [];
+  let sortedArguements = helpers.sort((a: any, b: any) => a.msg[0] - b.msg[0]);
+  sortedArguements.forEach((arg: any, index: number) => {
+    let word = message.substring(arg.msg[0] + negativeOffset, arg.msg[1] + 1 + negativeOffset);
+    argumentArray.push(`[${word}]${arg.index.map((i: number) => `(${i})`)}`);
+    message = stringSplice(
+      message,
+      arg.msg[0] + negativeOffset,
+      arg.msg[1] + 1 + negativeOffset - (arg.msg[0] + negativeOffset),
+      `{${index}}`,
+    );
+    // (2 + index.toString().length) === number of inserted charecters, the 2 = {}
+    negativeOffset += arg.msg[0] - (arg.msg[1] + 1) + (2 + index.toString().length);
+  });
+
+  return { message, argumentArray };
+}

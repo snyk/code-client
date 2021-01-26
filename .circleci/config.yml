@@ -1,12 +1,43 @@
 version: 2.1
-orbs:
-  node: circleci/node@4.1.0
 jobs:
-  build:
-    executor: node/default
+  test:
+    docker:
+      - image: circleci/node:12
     steps:
       - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm install
+      - run:
+          name: Install
+          command: npm install
       - run: npm run test
+  release:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: npm install
+      - run:
+          name: Publish to GitHub
+          command: npx semantic-release
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+          name: Test
+          #context: nodejs-install
+          filters:
+            branches:
+              ignore:
+                - master
+  release:
+    jobs:
+      - release:
+          name: Release
+          #context: nodejs-lib-release
+          filters:
+            branches:
+              only:
+                - master

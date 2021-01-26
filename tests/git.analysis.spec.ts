@@ -7,6 +7,7 @@ import { Log } from 'sarif';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import { ErrorCodes } from '../src/constants';
 import { IGitBundle } from '../src/interfaces/analysis-result.interface';
+import { stringSplice, getArgumentsAndMessage } from '../src/sarif_converter';
 
 const oAuthToken = process.env.DEEPCODE_OAUTH_KEY || '';
 const sessionTokenNoRepoAccess = process.env.DEEPCODE_API_KEY_NO_ACCESS || '';
@@ -88,7 +89,7 @@ describe('Functional test of analysis', () => {
       );
 
       // Test DC JSON format first
-      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(117);
+      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(119);
 
       const cweSuggestion = Object.values(bundle.analysisResults.suggestions).find(
         s => s.id === 'java%2Fdc_interfile_project%2FPT',
@@ -98,8 +99,8 @@ describe('Functional test of analysis', () => {
       expect(cweSuggestion?.title).toBeTruthy();
       expect(cweSuggestion?.text).toBeTruthy();
 
-      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(117);
-      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(117);
+      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(119);
+      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(119);
 
       const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java/PT');
       expect(cweRule?.properties?.cwe).toContain('CWE-23');
@@ -160,6 +161,37 @@ describe('Functional test of analysis', () => {
       // const json = JSON.stringify(validationResult)
       // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
       expect(validationResult.errors.length).toEqual(0);
+    });
+
+    it('should test stringsplice functionality', () => {
+      let message = 'this is a test message';
+      let splicedMessage = stringSplice(message, 8, 1, 'not');
+      expect(splicedMessage === 'this is not a test message');
+    });
+    it('should test message highlighting functionality', () => {
+      let helpers = [
+        {
+          index: [0],
+          msg: [23, 34],
+        },
+        {
+          index: [1, 2, 3, 4, 5, 6, 7],
+          msg: [36, 40],
+        },
+        {
+          index: [8],
+          msg: [47, 47],
+        },
+      ];
+      let messageToEdit =
+        'Unsanitized input from an exception flows into 0, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).';
+      let { message, argumentArray } = getArgumentsAndMessage(helpers, messageToEdit);
+      expect(
+        message ===
+          'Unsanitized input from {0} {1} into {2}, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).',
+      );
+      let expectedArgumentArray = ['[an exception](0)', '[flows](1),(2),(3),(4),(5),(6),(7)', '[0](8)'];
+      argumentArray.forEach((arg, i) => expect(arg === expectedArgumentArray[i]));
     });
   });
 });

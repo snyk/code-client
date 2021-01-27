@@ -50,7 +50,7 @@
     "jsonschema": "^1.2.11"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.159",
+    "@types/lodash": "^4.14.167",
     "@types/micromatch": "^4.0.1",
     "@types/flat-cache": "^2.0.0",
     "@types/sarif": "^2.1.3",

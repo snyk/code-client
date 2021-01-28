@@ -9,7 +9,7 @@ $ npm install && npm run compile && npx yalc publish
 After that you have to create symlink to your package in your project folder:
 ```shell script
 $ cd <project-location>
-$ npx yalc add @deepcode/tsc
+$ npx yalc add @snyk/code-client
 ```
 
 ## Publishing
@@ -17,20 +17,16 @@ $ npx yalc add @deepcode/tsc
 ### Before publishing make sure test pass
 
 Test variables:
-- `DEEPCODE_URL` is the DC server URL (staging deployment if not provided)
-- `DEEPCODE_API_KEY` is a sessionToken of a user with access to the DeepCodeAI organization
-- `DEEPCODE_API_KEY_NO_ACCESS` is a sessionToken of a user with no access to the DeepCodeAI organization (even better if on a different platform than GitHub)
-- `DEEPCODE_OAUTH_KEY` is a GitHub personal access token of a user with access to the DeepCodeAI organization
+- `SNYK_URL` is the DC server URL (staging deployment if not provided)
+- `SNYK_API_KEY` is a sessionToken of a user with access to the Snyk
+- `SNYK_API_KEY_NO_ACCESS` is a sessionToken of a user with no access to the snyk organization (even better if on a different platform than GitHub)
+- `SNYK_OAUTH_KEY` is a GitHub personal access token of a user with access to the snyk organization
 
 ```shell script
 $ cd <package-location>
-$ DEEPCODE_URL=... DEEPCODE_API_KEY=... DEEPCODE_API_KEY_NO_ACCESS=... DEEPCODE_AUTH_KEY=... npm run test
+$ SNYK_URL=... SNYK_API_KEY=... SNYK_API_KEY_NO_ACCESS=... SNYK_AUTH_KEY=... npm run test
 ```
 
 #### Compile and publish
 
-```shell script
-$ cd <package-location>
-$ npm run compile
-$ npm publish --access public
-```
+No need to do anything. We have CircleCI CI/CD pipeline with automatic semantic versioning

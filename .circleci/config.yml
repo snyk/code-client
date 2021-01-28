@@ -4,15 +4,31 @@ jobs:
     docker:
       - image: circleci/node:12
     steps:
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}-{{ .Revision }}
+            - v1-{{ .Branch }}
+            - v1-
       - checkout
       - run:
           name: Install
           command: npm install
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - node_modules
+            - .git
       - run: npm run test
+
   release:
     docker:
       - image: circleci/node:12
     steps:
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}-{{ .Revision }}
+            - v1-{{ .Branch }}
+            - v1-
       - checkout
       - run:
           name: Install
@@ -22,21 +38,14 @@ jobs:
           command: npx semantic-release
 
 workflows:
-  version: 2
-  test:
+  default_workflow:
     jobs:
       - test:
-          name: Test
-          #context: nodejs-install
-          filters:
-            branches:
-              ignore:
-                - master
-  release:
-    jobs:
+          context: nodejs-install
       - release:
-          name: Release
-          #context: nodejs-lib-release
+          context: nodejs-lib-release
+          requires:
+            - test
           filters:
             branches:
               only:

@@ -1,6 +1,6 @@
 {
-  "name": "@deepcode/tsc",
-  "description": "Typescript consumer of Deepcode public API",
+  "name": "@snyk/code-client",
+  "description": "Typescript consumer of SnykCode public API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -16,18 +16,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DeepCodeAI/tsc.git"
+    "url": "git+https://github.com/snyk/code-client.git"
   },
   "keywords": [
-    "deepcode",
+    "snyk",
     "api client"
   ],
-  "author": "DeepCodeAI",
+  "author": "snyk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DeepCodeAI/tsc/issues"
+    "url": "https://github.com/snyk/code-client/issues"
   },
-  "homepage": "https://github.com/DeepCodeAI/tsc#readme",
+  "homepage": "https://github.com/snyk/code-client#readme",
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"

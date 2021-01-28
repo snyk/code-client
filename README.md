@@ -2,15 +2,13 @@
 
 Typescript consumer of public API
 
-[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6IkRlZXBDb2RlQUkiLCJyZXBvMSI6InRzYyIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjEyNDY5LCJpYXQiOjE1OTYwOTY3MTJ9.I7rfzfZLPc-SMEModrFPFTMbKpnCkQ5ztPzrPOdruhU)](https://www.deepcode.ai/app/gh/DeepCodeAI/tsc/_/dashboard?utm_content=gh%2FDeepCodeAI%2Ftsc)
-
-[![npm version](https://img.shields.io/npm/v/@deepcode/tsc.svg?style=flat-square)](https://www.npmjs.org/package/@deepcode/tsc)
-[![npm downloads](https://img.shields.io/npm/dm/@deepcode/tsc.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@deepcode/tsc)
+[![npm version](https://img.shields.io/npm/v/@snyk/code-client.svg?style=flat-square)](https://www.npmjs.org/package/@snyk/code-client)
+[![npm downloads](https://img.shields.io/npm/dm/@snyk/code-client.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@snyk/code-client)
 
 # Installation
 
 ```shell script
-$ npm install --save @deepcode/tsc
+$ npm install --save @snyk/code-client
 ```
 
 # Usage
@@ -18,11 +16,10 @@ $ npm install --save @deepcode/tsc
 ### Creates and initializes an instance
 
 ```javascript
-import tsc from '@deepcode/tsc';
+import tsc from '@snyk/code-client';
 
 // An address of server which will be used in order to send code and analyse it.
-// Default: 'https://www.deepcode.ai'.
-const baseURL = 'https://www.deepcode.ai';
+const baseURL = 'https://www.snyk.io';
 
 ```
 
@@ -31,7 +28,7 @@ const baseURL = 'https://www.deepcode.ai';
 ```javascript
 const loginResponse = await tsc.startSession({
   baseURL,
-  // An identificator for the editor using the DeepCode APIs
+  // An identificator for the editor using the Snyk APIs
   source: 'atom',
 });
 

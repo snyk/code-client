@@ -9,8 +9,8 @@ import { ErrorCodes } from '../src/constants';
 import { IGitBundle } from '../src/interfaces/analysis-result.interface';
 import { stringSplice, getArgumentsAndMessage } from '../src/sarif_converter';
 
-const oAuthToken = process.env.DEEPCODE_OAUTH_KEY || '';
-const sessionTokenNoRepoAccess = process.env.DEEPCODE_API_KEY_NO_ACCESS || '';
+const oAuthToken = process.env.SNYK_OAUTH_KEY || '';
+const sessionTokenNoRepoAccess = process.env.SNYK_API_KEY_NO_ACCESS || '';
 
 // This trick is for automatic tests, where real oauth token is not available
 const itif = (condition: boolean) => (condition ? it : it.skip);

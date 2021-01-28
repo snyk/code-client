@@ -1,3 +1,5 @@
+## [2.2.0] - 2021-01-28
+- @deepcode/tsc is transitioning to @snyk/code-client
 ## [2.1.0] - 2021-01-05
 - Added file field to marker positions for inte-file suggestions
 

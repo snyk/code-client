@@ -2,6 +2,10 @@
 
 Typescript consumer of public API
 
+**This library is deprecated and is transferred to [@snyk/code-client](https://www.npmjs.com/package/@deepcode/tsc)**
+
+No further development or maintance is expected here. Please move to the new library
+
 [![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6IkRlZXBDb2RlQUkiLCJyZXBvMSI6InRzYyIsImluY2x1ZGVMaW50IjpmYWxzZSwiYXV0aG9ySWQiOjEyNDY5LCJpYXQiOjE1OTYwOTY3MTJ9.I7rfzfZLPc-SMEModrFPFTMbKpnCkQ5ztPzrPOdruhU)](https://www.deepcode.ai/app/gh/DeepCodeAI/tsc/_/dashboard?utm_content=gh%2FDeepCodeAI%2Ftsc)
 
 [![npm version](https://img.shields.io/npm/v/@deepcode/tsc.svg?style=flat-square)](https://www.npmjs.org/package/@deepcode/tsc)

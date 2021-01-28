@@ -48,7 +48,7 @@ describe('Functional test of analysis', () => {
     expect(bundle).toHaveProperty('supportedFiles');
     expect(bundle).toHaveProperty('analysisURL');
     expect(Object.keys(bundle.analysisResults.files).length).toEqual(4);
-    expect(Object.keys(bundle.analysisResults.files)[0]).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
+    expect(bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/AnnotatorTest.cpp`)).toBeTruthy();
     expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
 
     expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(bundle.analysisResults.timing.fetchingCode);

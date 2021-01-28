@@ -360,29 +360,38 @@ describe('Requests to public API', () => {
         'exampleCommitDescriptions',
         'exampleCommitFixes',
       ]);
-      expect(suggestion.id).toEqual('cpp%2Fdc%2FCppSameEvalBinaryExpressionfalse');
-      expect(suggestion.leadURL).toEqual('');
-      expect(suggestion.repoDatasetSize).toEqual(0);
-      expect(suggestion.exampleCommitDescriptions).toEqual([]);
-      expect(suggestion.exampleCommitFixes).toEqual([]);
+      expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FDisablePoweredBy');
+      expect(suggestion.leadURL).toEqual('http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header');
+      expect(suggestion.repoDatasetSize).toEqual(874);
+      expect(suggestion.exampleCommitDescriptions).toEqual([
+        "Test without express",
+        "/server tests ()",
+        "secure the api with helmet",
+      ]);
+      expect(suggestion.exampleCommitFixes.length).toEqual(3);
       expect(suggestion.message).toEqual(
-        'The expression will always evaluate to false because both sides always hold the same value.',
+        'Disable X-Powered-By header for your Express app (consider using Helmet middleware), because it exposes information about the used framework to potential attackers.',
       );
-      expect(suggestion.rule).toEqual('CppSameEvalBinaryExpressionfalse');
+      expect(suggestion.rule).toEqual('DisablePoweredBy');
       expect(suggestion.severity).toEqual(2);
 
-      expect(suggestion.tags).toEqual([]);
+      expect(suggestion.tags).toEqual([
+        "maintenance",
+        "express",
+        "server",
+        "helmet",
+      ]);
       expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
       const filePath = `/AnnotatorTest.cpp`;
       expect(response.value.analysisResults.files[filePath]).toEqual({
-        '0': [
+        '2': [
           {
             cols: [8, 27],
             markers: [],
             rows: [5, 5],
           },
         ],
-        '1': [
+        '3': [
           {
             cols: [6, 25],
             markers: [

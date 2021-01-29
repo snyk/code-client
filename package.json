@@ -4,13 +4,13 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
+    "build": "tsc",
     "compile": "tsc -p ./",
     "lint": "npx eslint src/**/*.ts",
     "lint:fix": "npx eslint --fix src/**/*.ts",
+    "prepare": "npm run build",
     "watch": "tsc -watch -p ./",
     "test": "jest --coverage --runInBand --detectOpenHandles"
   },
@@ -18,10 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/snyk/code-client.git"
   },
-  "keywords": [
-    "snyk",
-    "api client"
-  ],
+  "keywords": ["snyk", "api client"],
   "author": "snyk",
   "license": "MIT",
   "bugs": {

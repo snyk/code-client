@@ -3,7 +3,7 @@
 To use and debug package locally you don't need publish it to NPM registry:
 ```shell script
 $ cd <package-location>
-$ npm install && npm run compile && npx yalc publish
+$ npm install && npm run build && npx yalc publish
 ```
 
 After that you have to create symlink to your package in your project folder:
@@ -27,6 +27,6 @@ $ cd <package-location>
 $ SNYK_URL=... SNYK_API_KEY=... SNYK_API_KEY_NO_ACCESS=... SNYK_AUTH_KEY=... npm run test
 ```
 
-#### Compile and publish
+#### Publish
 
 No need to do anything. We have CircleCI CI/CD pipeline with automatic semantic versioning

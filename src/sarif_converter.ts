@@ -3,6 +3,11 @@ import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif'
 
 import { IAnalysisResult, IFileSuggestion } from './interfaces/analysis-result.interface';
 
+interface Fingerprint extends IFileSuggestion {
+  version: number;
+  fingerprint: string;
+}
+
 interface ISarifSuggestion extends IFileSuggestion {
   id: string;
   ruleIndex: number;
@@ -10,7 +15,9 @@ interface ISarifSuggestion extends IFileSuggestion {
   level: ReportingConfiguration.level;
   text: string;
   file: string;
+  fingerprints: Fingerprint[];
 }
+
 interface ISarifSuggestions {
   [suggestionIndex: number]: ISarifSuggestion;
 }
@@ -98,12 +105,12 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
   return { tool: { driver: { ...output.driver, rules } }, suggestions: result };
 };
 
-const getResults = (suggestions: ISarifSuggestions) => {
+function getResults(suggestions: ISarifSuggestions): Result[] {
   const output = [];
 
   for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(suggestions)) {
     let helpers: any[] = [];
-    let result = {
+    let result: Result = {
       ruleId: suggestion.id,
       ruleIndex: suggestion.ruleIndex,
       level: suggestion.level ? suggestion.level : 'none',
@@ -127,9 +134,15 @@ const getResults = (suggestions: ISarifSuggestions) => {
             },
           },
         },
-      ],
+      ]
     };
 
+    if (suggestion.fingerprints) {
+      result.fingerprints = {};
+      suggestion.fingerprints.forEach(fingerprinting => {
+        (result.fingerprints as any)[fingerprinting.version] = fingerprinting.fingerprint;
+      });
+    }
     const codeThreadFlows = [];
     let i = 0;
     if (suggestion.markers && suggestion.markers.length >= 1) {
@@ -169,7 +182,6 @@ const getResults = (suggestions: ISarifSuggestions) => {
             artifactLocation: {
               uri: suggestion.file,
               uriBaseId: '%SRCROOT%',
-              // index: i,
             },
             region: {
               startLine: suggestion.rows[0],
@@ -182,9 +194,11 @@ const getResults = (suggestions: ISarifSuggestions) => {
       });
     }
 
-    const { message, argumentArray } = getArgumentsAndMessage(helpers, result.message.text);
-    result.message.text = message;
-    result.message.arguments = argumentArray;
+    if (result.message.text) {
+      const { message, argumentArray } = getArgumentsAndMessage(helpers, result.message.text);
+      result.message.text = message;
+      result.message.arguments = argumentArray;
+    }
 
     const newResult = {
       ...result,

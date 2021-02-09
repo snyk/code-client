@@ -389,6 +389,12 @@ describe('Requests to public API', () => {
             cols: [8, 27],
             markers: [],
             rows: [5, 5],
+            fingerprints: [
+              {
+                fingerprint: "f8e3391465a47f6586489cffd1f44ae47a1c4885c722de596d6eb931fe43bb16",
+                version: 0,
+              },
+            ]
           },
         ],
         '3': [
@@ -417,6 +423,12 @@ describe('Requests to public API', () => {
               },
             ],
             rows: [10, 10],
+            fingerprints: [
+              {
+                fingerprint: "3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d",
+                version: 0,
+              },
+            ]
           },
         ],
       });

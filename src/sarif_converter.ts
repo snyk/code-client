@@ -3,7 +3,7 @@ import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif'
 
 import { IAnalysisResult, IFileSuggestion } from './interfaces/analysis-result.interface';
 
-interface Fingerprint extends IFileSuggestion {
+interface Fingerprint {
   version: number;
   fingerprint: string;
 }
@@ -140,7 +140,7 @@ function getResults(suggestions: ISarifSuggestions): Result[] {
     if (suggestion.fingerprints) {
       result.fingerprints = {};
       suggestion.fingerprints.forEach(fingerprinting => {
-        (result.fingerprints as any)[fingerprinting.version] = fingerprinting.fingerprint;
+        (result.fingerprints as any)[`${fingerprinting.version}`] = fingerprinting.fingerprint;
       });
     }
     const codeThreadFlows = [];

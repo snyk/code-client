@@ -213,6 +213,7 @@ export async function analyzeFolders(
   symlinksEnabled = false,
   maxPayload = MAX_PAYLOAD,
   defaultFileIgnores = IGNORES_DEFAULT,
+  sarif = false,
 ): Promise<IFileBundle> {
   // Get supported filters and test baseURL for correctness and availability
   emitter.supportedFilesLoaded(null);
@@ -279,8 +280,7 @@ export async function analyzeFolders(
     analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
   }
 
-  // Create bundle instance to handle extensions
-  return {
+  const result = {
     baseURL,
     sessionToken,
     includeLint,
@@ -292,6 +292,11 @@ export async function analyzeFolders(
     symlinksEnabled,
     ...analysisData,
   };
+  if (sarif && analysisData.analysisResults) {
+    result.sarifResults = getSarif(analysisData.analysisResults);
+  }
+
+  return result;
 }
 
 export async function extendAnalysis(

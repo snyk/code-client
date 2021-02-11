@@ -15,6 +15,7 @@ import {
   IAnalysisResult,
   IFileBundle,
   IGitBundle,
+  AnalysisSeverity,
 } from './interfaces/analysis-result.interface';
 
 export {
@@ -28,6 +29,7 @@ export {
   reportError,
   emitter,
   constants,
+  AnalysisSeverity,
   IFileSuggestion,
   IFilePath,
   IMarker,

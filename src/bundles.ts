@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { chunk } from 'lodash';
+import chunk from 'lodash.chunk';
 
 import { IFileInfo } from './interfaces/files.interface';
 

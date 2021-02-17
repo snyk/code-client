@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import fg from 'fast-glob';
 import micromatch from 'micromatch';
 import crypto from 'crypto';
-import { union } from 'lodash';
+import union from 'lodash.union';
 import util from 'util';
 import * as flatCache from 'flat-cache';
 

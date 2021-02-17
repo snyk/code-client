@@ -1,12 +1,14 @@
 # Package development notes
 
 To use and debug package locally you don't need publish it to NPM registry:
+
 ```shell script
 $ cd <package-location>
 $ npm install && npm run build && npx yalc publish
 ```
 
 After that you have to create symlink to your package in your project folder:
+
 ```shell script
 $ cd <project-location>
 $ npx yalc add @snyk/code-client
@@ -17,6 +19,7 @@ $ npx yalc add @snyk/code-client
 ### Before publishing make sure test pass
 
 Test variables:
+
 - `SNYK_URL` is the DC server URL (staging deployment if not provided)
 - `SNYK_API_KEY` is a sessionToken of a user with access to the Snyk
 - `SNYK_API_KEY_NO_ACCESS` is a sessionToken of a user with no access to the snyk organization (even better if on a different platform than GitHub)

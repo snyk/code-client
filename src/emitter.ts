@@ -10,6 +10,7 @@ enum CUSTOM_EVENTS {
   createBundleProgress = 'createBundleProgress',
   uploadBundleProgress = 'uploadBundleProgress',
   analyseProgress = 'analyseProgress',
+  apiRequestLog = 'apiRequestLog',
   error = 'error',
 }
 
@@ -38,6 +39,10 @@ export class EmitterDC extends EventEmitter {
 
   sendError(error: Error): void {
     this.emit(CUSTOM_EVENTS.error, error);
+  }
+
+  apiRequestLog(message: string): void {
+    this.emit(CUSTOM_EVENTS.apiRequestLog, message);
   }
 }
 

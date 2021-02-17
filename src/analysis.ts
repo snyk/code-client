@@ -31,6 +31,12 @@ import {
   IFileBundle,
   IBundleResult,
 } from './interfaces/analysis-result.interface';
+import {
+  FolderOptions,
+  AnalyzeFoldersOptions,
+  AnalyzeGitOptions,
+  GitOptions,
+} from './interfaces/analysis-options.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -43,6 +49,7 @@ async function pollAnalysis({
   oAuthToken,
   username,
   limitToFiles,
+  source,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -52,6 +59,7 @@ async function pollAnalysis({
   oAuthToken?: string;
   username?: string;
   limitToFiles?: string[];
+  source: string;
 }): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
   let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
@@ -73,6 +81,7 @@ async function pollAnalysis({
       includeLint,
       severity,
       limitToFiles,
+      source,
     });
 
     if (analysisResponse.type === 'error') {
@@ -111,6 +120,7 @@ export async function analyzeBundle({
   oAuthToken,
   username,
   limitToFiles,
+  source,
 }: {
   baseURL: string;
   sessionToken: string;
@@ -120,6 +130,7 @@ export async function analyzeBundle({
   oAuthToken?: string;
   username?: string;
   limitToFiles?: string[];
+  source: string;
 }): Promise<IBundleResult> {
   // Call remote bundle for analysis results and emit intermediate progress
   const analysisData = await pollAnalysis({
@@ -131,6 +142,7 @@ export async function analyzeBundle({
     includeLint,
     severity,
     limitToFiles,
+    source,
   });
 
   if (analysisData.type === 'error') {
@@ -203,21 +215,35 @@ function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, li
     analysisResults,
   };
 }
+let analyzeFolderDefaults = {
+  baseURL: defaultBaseURL,
+  sessionToken: '',
+  includeLint: false,
+  severity: AnalysisSeverity.info,
+  symlinksEnabled: false,
+  maxPayload: MAX_PAYLOAD,
+  defaultFileIgnores: IGNORES_DEFAULT,
+  sarif: false,
+  source: '',
+};
+export async function analyzeFolders(options: FolderOptions): Promise<IFileBundle> {
+  const analysisOptions: AnalyzeFoldersOptions = { ...analyzeFolderDefaults, ...options };
+  const {
+    baseURL,
+    sessionToken,
+    includeLint,
+    severity,
+    paths,
+    symlinksEnabled,
+    maxPayload,
+    defaultFileIgnores,
+    sarif,
+    source,
+  } = analysisOptions;
 
-export async function analyzeFolders(
-  baseURL = defaultBaseURL,
-  sessionToken = '',
-  includeLint = false,
-  severity = AnalysisSeverity.info,
-  paths: string[],
-  symlinksEnabled = false,
-  maxPayload = MAX_PAYLOAD,
-  defaultFileIgnores = IGNORES_DEFAULT,
-  sarif = false,
-): Promise<IFileBundle> {
   // Get supported filters and test baseURL for correctness and availability
   emitter.supportedFilesLoaded(null);
-  const resp = await getFilters(baseURL);
+  const resp = await getFilters(baseURL, source);
   if (resp.type === 'error') {
     throw resp.error;
   }
@@ -249,7 +275,7 @@ export async function analyzeFolders(
 
   // Create remote bundle
   const remoteBundle = bundleFiles.length
-    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload)
+    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
     : null;
 
   // Analyze bundle
@@ -271,11 +297,12 @@ export async function analyzeFolders(
     };
   } else {
     analysisData = await analyzeBundle({
-      baseURL,
-      sessionToken,
-      includeLint,
-      severity,
+      baseURL: baseURL,
+      sessionToken: sessionToken,
+      includeLint: includeLint!,
+      severity: severity!,
       bundleId: remoteBundle.bundleId,
+      source,
     });
     analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
   }
@@ -303,6 +330,7 @@ export async function extendAnalysis(
   bundle: IFileBundle,
   filePaths: string[],
   maxPayload = MAX_PAYLOAD,
+  source: string,
 ): Promise<IFileBundle | null> {
   const { files, removedFiles } = await prepareExtendingBundle(
     bundle.baseDir,
@@ -326,6 +354,7 @@ export async function extendAnalysis(
     bundle.baseDir,
     bundle.bundleId,
     maxPayload,
+    source,
   );
 
   if (remoteBundle === null) {
@@ -341,6 +370,7 @@ export async function extendAnalysis(
     severity: bundle.severity,
     bundleId: remoteBundle.bundleId,
     limitToFiles: files.map(f => f.bundlePath),
+    source,
   });
   // Transform relative paths into absolute
   analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
@@ -353,22 +383,30 @@ export async function extendAnalysis(
   );
 }
 
-export async function analyzeGit(
-  baseURL = defaultBaseURL,
-  sessionToken = '',
-  includeLint = false,
-  severity = AnalysisSeverity.info,
-  gitUri: string,
-  sarif = false,
-  oAuthToken?: string,
-  username?: string,
-): Promise<IGitBundle> {
-  const bundleResponse = await createGitBundle({ baseURL, sessionToken, oAuthToken, username, gitUri });
+const analyzeGitDefaults = {
+  baseURL: defaultBaseURL,
+  sessionToken: '',
+  includeLint: false,
+  severity: AnalysisSeverity.info,
+  sarif: false,
+  source: '',
+};
+
+export async function analyzeGit(options: GitOptions): Promise<IGitBundle> {
+  const analysisOptions: AnalyzeGitOptions = { ...analyzeGitDefaults, ...options };
+  const { baseURL, sessionToken, oAuthToken, username, includeLint, severity, gitUri, sarif, source } = analysisOptions;
+  const bundleResponse = await createGitBundle({
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    gitUri,
+    source,
+  });
   if (bundleResponse.type === 'error') {
     throw bundleResponse.error;
   }
   const { bundleId } = bundleResponse.value;
-
   const analysisData = await analyzeBundle({
     baseURL,
     sessionToken,
@@ -377,6 +415,7 @@ export async function analyzeGit(
     includeLint,
     severity,
     bundleId,
+    source,
   });
 
   const result = {

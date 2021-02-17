@@ -27,6 +27,7 @@ async function* prepareRemoteBundle(
   removedFiles: string[] = [],
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
+  source: string,
 ): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
   let response: IResult<RemoteBundle, BundleErrorCodes>;
   let bundleId = existingBundleId;
@@ -42,6 +43,7 @@ async function* prepareRemoteBundle(
         baseURL,
         sessionToken,
         files: paramFiles,
+        source,
       });
     } else {
       // eslint-disable-next-line no-await-in-loop
@@ -153,8 +155,17 @@ export async function remoteBundleFactory(
   baseDir: string,
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
+  source: string,
 ): Promise<RemoteBundle | null> {
-  const bundleFactory = prepareRemoteBundle(baseURL, sessionToken, files, removedFiles, existingBundleId, maxPayload);
+  const bundleFactory = prepareRemoteBundle(
+    baseURL,
+    sessionToken,
+    files,
+    removedFiles,
+    existingBundleId,
+    maxPayload,
+    source,
+  );
   let remoteBundle: RemoteBundle | null = null;
 
   for await (const response of bundleFactory) {

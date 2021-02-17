@@ -46,7 +46,21 @@ describe('Functional test of analysis', () => {
       });
       emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
-      const bundle = await analyzeFolders(baseURL, sessionToken, false, 1, [sampleProjectPath], false, 1000);
+      const onAPIRequestLog = jest.fn((message: string) => {
+        expect(typeof message).toBe('string');
+      });
+      emitter.on(emitter.events.apiRequestLog, onAPIRequestLog);
+
+
+      const bundle = await analyzeFolders({
+        baseURL,
+        sessionToken,
+        includeLint: false,
+        severity: 1,
+        paths: [sampleProjectPath],
+        symlinksEnabled: false,
+        maxPayload: 1000,
+      });
       expect(bundle).toHaveProperty('baseURL');
       expect(bundle).toHaveProperty('sessionToken');
       expect(bundle).toHaveProperty('supportedFiles');
@@ -87,6 +101,7 @@ describe('Functional test of analysis', () => {
       expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
       expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
       expect(onAnalyseProgress).toHaveBeenCalled();
+      expect(onAPIRequestLog).toHaveBeenCalledTimes(10);
 
       // Test uploadRemoteBundle with empty list of files
       let uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, []);
@@ -107,30 +122,31 @@ describe('Functional test of analysis', () => {
       expect(uploaded).toEqual(true);
 
       expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
+      expect(onAPIRequestLog).toHaveBeenCalledTimes(12);
     },
     TEST_TIMEOUT,
   );
 
   it('analyze folder - with sarif returned', async () => {
     const includeLint = false;
-    const severityLevel = AnalysisSeverity.info;
+    const severity = AnalysisSeverity.info;
     const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
     const symlinksEnabled = false;
     const maxPayload = 1000;
     const defaultFileIgnores = undefined;
     const sarif = true;
 
-    const bundle = await analyzeFolders(
+    const bundle = await analyzeFolders({
       baseURL,
       sessionToken,
       includeLint,
-      severityLevel,
+      severity,
       paths,
       symlinksEnabled,
       maxPayload,
       defaultFileIgnores,
       sarif,
-    );
+    });
     const validationResult = jsonschema.validate(bundle.sarifResults, sarifSchema);
 
     expect(validationResult.errors.length).toEqual(0);
@@ -138,20 +154,20 @@ describe('Functional test of analysis', () => {
 
   it('analyze empty folder', async () => {
     const includeLint = false;
-    const severityLevel = AnalysisSeverity.info;
+    const severity = AnalysisSeverity.info;
     const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
     const symlinksEnabled = false;
     const maxPayload = 1000;
 
-    const bundle = await analyzeFolders(
+    const bundle = await analyzeFolders({
       baseURL,
       sessionToken,
       includeLint,
-      severityLevel,
+      severity,
       paths,
       symlinksEnabled,
       maxPayload,
-    );
+    });
 
     expect(bundle.analysisResults.files).toEqual({});
     expect(bundle.analysisResults.suggestions).toEqual({});

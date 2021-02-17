@@ -7,6 +7,7 @@ import { getGlobPatterns } from './files';
 import { ISupportedFiles } from './interfaces/files.interface';
 
 import {
+  AnalysisSeverity,
   IFileSuggestion,
   IFilePath,
   IMarker,
@@ -15,7 +16,6 @@ import {
   IAnalysisResult,
   IFileBundle,
   IGitBundle,
-  AnalysisSeverity,
 } from './interfaces/analysis-result.interface';
 
 export {

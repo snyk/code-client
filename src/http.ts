@@ -141,9 +141,13 @@ export async function checkSession(options: {
     });
 }
 
-export async function getFilters(baseURL: string): Promise<IResult<ISupportedFiles, GenericErrorTypes>> {
+export async function getFilters(
+  baseURL: string,
+  source: string,
+): Promise<IResult<ISupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
   const config: AxiosRequestConfig = {
+    headers: { source },
     url: `${baseURL}${apiPath}/${apiName}`,
     method: 'GET',
   };
@@ -183,10 +187,11 @@ export async function createBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly files: IFiles;
+  readonly source: string;
 }): Promise<IResult<RemoteBundle, CreateBundleErrorCodes>> {
-  const { baseURL, sessionToken, files } = options;
+  const { baseURL, sessionToken, files, source } = options;
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
+    headers: { 'Session-Token': sessionToken, source },
     url: `${baseURL}${apiPath}/bundle`,
     method: 'POST',
     data: {
@@ -297,9 +302,10 @@ export async function createGitBundle(options: {
   readonly oAuthToken?: string;
   readonly username?: string;
   readonly gitUri: string;
+  readonly source: string;
 }): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, username, gitUri } = options;
-  const headers = { 'Session-Token': sessionToken };
+  const { baseURL, sessionToken, oAuthToken, username, gitUri, source } = options;
+  const headers = { 'Session-Token': sessionToken, source };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
   }
@@ -410,12 +416,23 @@ export async function getAnalysis(options: {
   readonly limitToFiles?: string[];
   readonly oAuthToken?: string;
   readonly username?: string;
+  readonly source: string;
 }): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, username, bundleId, includeLint, severity, limitToFiles } = options;
+  const {
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    bundleId,
+    includeLint,
+    severity,
+    limitToFiles,
+    source,
+  } = options;
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
   const params = { severity, linters: includeLint || undefined };
 
-  const headers = { 'Session-Token': sessionToken };
+  const headers = { 'Session-Token': sessionToken, source };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
   }

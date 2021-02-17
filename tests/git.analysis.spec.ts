@@ -18,7 +18,13 @@ describe('Functional test of analysis', () => {
   it(
     'analyze remote git without oid',
     async () => {
-      const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git');
+      const bundle = await analyzeGit({
+        baseURL,
+        sessionToken,
+        includeLint: false,
+        severity: 1,
+        gitUri: 'git@github.com:DeepCodeAI/cli.git',
+      });
       expect(bundle.analysisResults.files).toBeTruthy();
       expect(bundle.analysisResults.suggestions).toBeTruthy();
     },
@@ -28,13 +34,13 @@ describe('Functional test of analysis', () => {
   itif(!!oAuthToken)(
     'analyze remote git with oid',
     async () => {
-      const bundle = await analyzeGit(
+      const bundle = await analyzeGit({
         baseURL,
         sessionToken,
-        false,
-        1,
-        'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
-      );
+        includeLint: false,
+        severity: 1,
+        gitUri: 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
+      });
       expect(bundle.analysisResults.files).toBeTruthy();
       expect(Object.keys(bundle.analysisResults.files).length).toEqual(1);
       expect(bundle.analysisResults.suggestions).toBeTruthy();
@@ -48,27 +54,27 @@ describe('Functional test of analysis', () => {
     async () => {
       let failedGit: IGitBundle | undefined;
       try {
-        failedGit = await analyzeGit(
+        failedGit = await analyzeGit({
           baseURL,
-          sessionTokenNoRepoAccess,
-          false,
-          1,
-          'git@github.com:DeepCodeAI/testcrepo.git',
-        );
+          sessionToken: sessionTokenNoRepoAccess,
+          includeLint: false,
+          severity: 1,
+          gitUri: 'git@github.com:DeepCodeAI/testcrepo.git',
+        });
       } catch (failed) {
         expect(failed.statusCode).toEqual(ErrorCodes.unauthorizedBundleAccess);
       }
       expect(failedGit).toBe(undefined);
 
-      const bundle = await analyzeGit(
+      const bundle = await analyzeGit({
         baseURL,
-        sessionTokenNoRepoAccess,
-        false,
-        1,
-        'git@github.com:DeepCodeAI/testcrepo.git',
-        false,
+        sessionToken: sessionTokenNoRepoAccess,
+        includeLint: false,
+        severity: 1,
+        gitUri: 'git@github.com:DeepCodeAI/testcrepo.git',
+        sarif: false,
         oAuthToken,
-      );
+      });
       expect(bundle.analysisResults.files).toBeTruthy();
       expect(bundle.analysisResults.suggestions).toBeTruthy();
     },
@@ -78,14 +84,14 @@ describe('Functional test of analysis', () => {
   it(
     'CWE fields in analysis results',
     async () => {
-      const bundle = await analyzeGit(
+      const bundle = await analyzeGit({
         baseURL,
         sessionToken,
-        false,
-        1,
-        'git@github.com:eclipse/che.git@75889e8c33601e8986e75bad74456cff39e511c0',
-        true,
-      );
+        includeLint: false,
+        severity: 1,
+        gitUri: 'git@github.com:eclipse/che.git@75889e8c33601e8986e75bad74456cff39e511c0',
+        sarif: true,
+      });
 
       // Test DC JSON format first
       expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(119);
@@ -113,14 +119,14 @@ describe('Functional test of analysis', () => {
     it(
       'analyze remote git with oid and return sarif',
       async () => {
-        const bundle = await analyzeGit(
+        const bundle = await analyzeGit({
           baseURL,
           sessionToken,
-          false,
-          1,
-          'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
-          true,
-        );
+          includeLint: false,
+          severity: 1,
+          gitUri: 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
+          sarif: true,
+        });
         sarifResults = bundle.sarifResults;
         expect(!!bundle.sarifResults).toEqual(true);
       },
@@ -130,14 +136,14 @@ describe('Functional test of analysis', () => {
     it(
       'analyze remote git and formatter sarif with zero supported files',
       async () => {
-        const bundle = await analyzeGit(
+        const bundle = await analyzeGit({
           baseURL,
           sessionToken,
-          false,
-          1,
-          'git@github.com:DeepCodeAI/test-bigfiles.git@e7633ef98fba3ddc24e5bea27ae58d5b08b2f949',
-          true,
-        );
+          includeLint: false,
+          severity: 1,
+          gitUri: 'git@github.com:DeepCodeAI/test-bigfiles.git@e7633ef98fba3ddc24e5bea27ae58d5b08b2f949',
+          sarif: true,
+        });
         expect(bundle.sarifResults?.runs[0].properties?.coverage).toEqual([
           {
             files: 3,

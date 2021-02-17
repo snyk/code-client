@@ -1,4 +1,4 @@
-# tsc
+# code-client
 
 Typescript consumer of public API
 
@@ -16,17 +16,16 @@ $ npm install --save @snyk/code-client
 ### Creates and initializes an instance
 
 ```javascript
-import tsc from '@snyk/code-client';
+import codeClient from '@snyk/code-client';
 
 // An address of server which will be used in order to send code and analyse it.
 const baseURL = 'https://www.snyk.io';
-
 ```
 
 ### Requests the creation of a new login session
 
 ```javascript
-const loginResponse = await tsc.startSession({
+const loginResponse = await codeClient.startSession({
   baseURL,
   // An identificator for the editor using the Snyk APIs
   source: 'atom',
@@ -40,8 +39,9 @@ const { sessionToken, loginURL } = loginResponse.value;
 ```
 
 ### Checks status of the login process
+
 ```javascript
-const sessionResponse = await tsc.checkSession({ baseURL, sessionToken });
+const sessionResponse = await codeClient.checkSession({ baseURL, sessionToken });
 if (sessionResponse.type === 'error') {
   // Handle error and alert user
 }
@@ -53,33 +53,48 @@ const isLoggedIn = sessionResponse.value; // boolean
 
 ```javascript
 /** Building bundle process started with provided data */
-tsc.emitter.on('scanFilesProgress', (processed: number) = {
+codeClient.emitter.on('scanFilesProgress', (processed: number) = {
   console.log(`Indexed ${processed} files`);
 });
 
 /** Bundle upload process is started with provided data */
-tsc.emitter.on('uploadBundleProgress', (processed: number, total: number) => {
+codeClient.emitter.on('uploadBundleProgress', (processed: number, total: number) => {
   console.log(`Upload bundle progress: ${processed}/${total}`);
 });
 
 /** Receives an error object and logs an error message */
-tsc.emitter.on('sendError', error => {
+codeClient.emitter.on('sendError', error => {
   console.log(error);
 });
+
+/** Logs HTTP requests sent to the API **/
+codeClient.emitter.on('apiRequestLog', (message) => {
+  console.log(message);
+});
+
 ```
 
 Complete list of events:
-  - supportedFilesLoaded: uploading supported file extensions, can be also used for instantiating file watcher
-  - scanFilesProgress: emits a number of files being found
-  - createBundleProgress: emits a progress in instantiating packages for analysis
-  - uploadBundleProgress: emits a progress in uploading files
-  - analyseProgress: emits a progress in analysis job
-  - error: emits in case of an error
+
+- supportedFilesLoaded: uploading supported file extensions, can be also used for instantiating file watcher
+- scanFilesProgress: emits a number of files being found
+- createBundleProgress: emits a progress in instantiating packages for analysis
+- uploadBundleProgress: emits a progress in uploading files
+- analyseProgress: emits a progress in analysis job
+- error: emits in case of an error
 
 ### Run analysis
 
 ```javascript
-const bundle = await tsc.analyzeFolders(baseURL, sessionToken, false, 1, ['/home/user/repo']);
+const bundle = await codeClient.analyzeFolders({
+  baseURL,
+  sessionToken,
+  includeLint: false,
+  severity: 1,
+  paths: ['/home/user/repo'],
+  sarif,
+  source,
+});
 
 // bundle implements interface IFileBundle:
 //   readonly baseURL: string;
@@ -97,7 +112,7 @@ const bundle = await tsc.analyzeFolders(baseURL, sessionToken, false, 1, ['/home
 ### Creates a new bundle based on a previously uploaded one
 
 ```javascript
-const result = await tsc.extendBundle({
+const result = await codeClient.extendBundle({
   sessionToken,
   bundleId,
   files: {
@@ -112,8 +127,15 @@ const { bundleId, missingFiles, uploadURL } = result;
 ### Run analysis of remote git repository
 
 ```javascript
-
-const bundle = await analyzeGit(baseURL, sessionToken, false, 1, 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566');
+const bundle = await analyzeGit({
+  baseURL,
+  sessionToken,
+  includeLint: false,
+  severity: 1,
+  gitUri: 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
+  sarif: true,
+  source,
+});
 
 // bundle implements interface IGitBundle
 //   readonly baseURL: string;

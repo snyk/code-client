@@ -1,5 +1,6 @@
 {
   "name": "@snyk/code-client",
+  "version": "0.0.1",
   "description": "Typescript consumer of SnykCode public API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -62,6 +63,8 @@
     "queue": "^6.0.1",
     "fast-glob": "^3.2.4",
     "micromatch": "^4.0.2",
-    "flat-cache": "^3.0.4"
+    "flat-cache": "^3.0.4",
+    "@types/uuid": "^8.3.0",
+    "uuid": "^8.3.2"
   }
 }

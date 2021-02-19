@@ -1,4 +1,5 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 import { apiPath, ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
 import axios from './axios';
@@ -73,7 +74,7 @@ function generateError<E>(error: AxiosError | any, messages: { [c: number]: stri
 }
 
 type StartSessionResponseDto = {
-  readonly sessionToken: string;
+  readonly draftToken: string;
   readonly loginURL: string;
 };
 
@@ -86,26 +87,14 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
   [ErrorCodes.connectionRefused]: DEFAULT_ERROR_MESSAGES[ErrorCodes.connectionRefused],
 };
 
-export async function startSession(options: {
-  readonly baseURL: string;
-  readonly source: string;
-}): Promise<IResult<StartSessionResponseDto, GenericErrorTypes>> {
-  const apiName = 'login';
-  const { source, baseURL } = options;
-  const config: AxiosRequestConfig = {
-    url: `${baseURL}${apiPath}/${apiName}`,
-    method: 'POST',
-    data: {
-      source,
-    },
-  };
+export function startSession(options: { readonly authHost: string; readonly source: string }): StartSessionResponseDto {
+  const { source, authHost } = options;
+  const draftToken = uuidv4() as string;
 
-  try {
-    const response = await axios.request<StartSessionResponseDto>(config);
-    return { type: 'success', value: response.data };
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, apiName);
-  }
+  return {
+    draftToken,
+    loginURL: `${authHost}/login?token=${draftToken}&utm_medium=${source}&utm_source=${source}&utm_campaign=${source}&docker=false`,
+  };
 }
 
 type CheckSessionErrorCodes = GenericErrorTypes | ErrorCodes.unauthorizedUser | ErrorCodes.loginInProgress;
@@ -115,30 +104,43 @@ const CHECK_SESSION_ERROR_MESSAGES: { [P in CheckSessionErrorCodes]: string } = 
   [ErrorCodes.loginInProgress]: DEFAULT_ERROR_MESSAGES[ErrorCodes.loginInProgress],
 };
 
+interface IApiTokenResponse {
+  ok: boolean;
+  api: string;
+}
+
 export async function checkSession(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-}): Promise<IResult<boolean, CheckSessionErrorCodes>> {
-  const { sessionToken, baseURL } = options;
+  readonly authHost: string;
+  readonly draftToken: string;
+}): Promise<IResult<string, CheckSessionErrorCodes>> {
+  const { draftToken, authHost } = options;
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
-    url: `${baseURL}${apiPath}/session?cache=${Math.random() * 1000000}`,
-    method: 'GET',
+    url: `${authHost}/api/v1/verify/callback`,
+    method: 'POST',
+    data: {
+      token: draftToken,
+    },
   };
 
-  // deepcode ignore PromiseNotCaughtGeneral: typescript makes it all a bit complex here
-  return axios
-    .request(config)
-    .catch((err: AxiosError) => {
-      if (err.response && [304, 400, 401].includes(err.response.status)) {
-        return { type: 'success', value: false };
-      }
+  try {
+    const response = await axios.request<IApiTokenResponse>(config);
+    return {
+      type: 'success',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      value: (response.status === 200 && response.data.ok && response.data.api) || '',
+    };
+  } catch (err) {
+    if (
+      [ErrorCodes.loginInProgress, ErrorCodes.unauthorizedContent, ErrorCodes.unauthorizedUser].includes(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        err.response?.status,
+      )
+    ) {
+      return { type: 'success', value: '' };
+    }
 
-      return generateError<CheckSessionErrorCodes>(err, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
-    })
-    .then((response: AxiosResponse) => {
-      return { type: 'success', value: response.status === 200 };
-    });
+    return generateError<CheckSessionErrorCodes>(err, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
+  }
 }
 
 export async function getFilters(

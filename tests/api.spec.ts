@@ -1,4 +1,4 @@
-import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
+import { baseURL, authHost, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
 
 import {
@@ -94,42 +94,40 @@ describe('Requests to public API', () => {
   });
 
   it('starts session successfully', async () => {
-    const startSessionResponse = await startSession({
+    const startSessionResponse = startSession({
       source: 'atom',
-      baseURL,
+      authHost,
     });
-    expect(startSessionResponse.type).toEqual('success');
-    if (startSessionResponse.type === 'error') return;
-
-    expect(startSessionResponse.value.loginURL).toMatch(/.*\/login-api\?sessionToken=.*&source=atom/);
-    const draftToken = startSessionResponse.value.sessionToken;
+    expect(startSessionResponse.loginURL).toMatch(/.*\/login\?token=.*&utm_source=atom/);
+    const draftToken = startSessionResponse.draftToken;
 
     // This token is just a draft and not ready to be used permanently
-    const checkSessionResponse = await checkSession({ baseURL, sessionToken: draftToken });
+    const checkSessionResponse = await checkSession({ authHost, draftToken });
     expect(checkSessionResponse.type).toEqual('success');
-    if (checkSessionResponse.type === 'error') return;
-    expect(checkSessionResponse.value).toEqual(false);
+    if (checkSessionResponse.type == 'error') return;
+    expect(checkSessionResponse.value).toEqual('');
   });
 
   it('checks session unsuccessfully', async () => {
     const response = await checkSession({
-      baseURL,
-      sessionToken: 'dummy-token',
+      authHost,
+      draftToken: 'dummy-token',
     });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(response.value).toEqual(false);
+    expect(response.value).toEqual('');
   });
 
-  it('checks session successfully', async () => {
-    const response = await checkSession({
-      baseURL,
-      sessionToken,
-    });
-    expect(response.type).toEqual('success');
-    if (response.type === 'error') return;
-    expect(response.value).toEqual(true);
-  });
+  // TODO: find a way to test successfull workflow automatically
+  // it('checks session successfully', async () => {
+  //   const response = await checkSession({
+  //     authHost,
+  //     sessionToken,
+  //   });
+  //   expect(response.type).toEqual('success');
+  //   if (response.type === 'error') return;
+  //   expect(response.value).toEqual(true);
+  // });
 
   it(
     'creates bundle successfully',
@@ -140,7 +138,7 @@ describe('Requests to public API', () => {
         baseURL,
         sessionToken,
         files,
-        source: '',
+        source: 'atom',
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -213,7 +211,7 @@ describe('Requests to public API', () => {
           bundleId: fakeBundleIdFull,
           includeLint: false,
           severity: 1,
-          source: '',
+          source: 'atom',
         });
       } while (response.type === 'success');
 
@@ -318,7 +316,7 @@ describe('Requests to public API', () => {
         baseURL,
         sessionToken,
         files,
-        source: '',
+        source: 'atom',
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
@@ -361,7 +359,7 @@ describe('Requests to public API', () => {
         bundleId: realBundleIdFull,
         includeLint: false,
         severity: 1,
-        source: '',
+        source: 'atom',
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -496,7 +494,7 @@ describe('Requests to public API', () => {
           includeLint: false,
           severity: 1,
           limitToFiles: [`/AnnotatorTest.cpp`],
-          source: '',
+          source: 'atom',
         });
 
         expect(response.type).toEqual('success');
@@ -515,7 +513,7 @@ describe('Requests to public API', () => {
           bundleId: realBundleIdFull,
           includeLint: false,
           severity: 3,
-          source: '',
+          source: 'atom',
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
@@ -533,7 +531,7 @@ describe('Requests to public API', () => {
       baseURL,
       sessionToken,
       gitUri: 'git@github.com:DeepCodeAI/cli.git',
-      source: '',
+      source: 'atom',
     });
     expect(bundleResponse.type).toEqual('success');
     if (bundleResponse.type === 'error') return;
@@ -552,7 +550,7 @@ describe('Requests to public API', () => {
         bundleId,
         includeLint: false,
         severity: 1,
-        source: '',
+        source: 'atom',
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -595,7 +593,7 @@ describe('Requests to public API', () => {
           bundleId,
           includeLint: false,
           severity: 1,
-          source: '',
+          source: 'atom',
         });
 
         expect(response.type).toEqual('success');

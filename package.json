@@ -1,6 +1,5 @@
 {
   "name": "@snyk/code-client",
-  "version": "0.0.1",
   "description": "Typescript consumer of SnykCode public API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",

@@ -67,4 +67,38 @@ describe('Sarif Convertor', () => {
     expect((sarifResults.runs[0].results as any)[4].fingerprints[2]).toEqual('78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2');
 
   });
+
+  it('should contain example commit fixes', () => {
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
+    const validationResult = jsonschema.validate(sarifResults, sarifSchema);
+    expect(validationResult.errors.length).toEqual(0);
+
+    const rules = sarifResults?.runs[0].tool?.driver?.rules;
+    let exampleCommitFixes;
+    if (rules !== undefined)
+      exampleCommitFixes = rules[6].properties?.exampleCommitFixes;
+
+    expect(exampleCommitFixes.length).toBeGreaterThan(0);
+    let exampleCommitFix = exampleCommitFixes[0];
+    expect(exampleCommitFix?.commitURL).toBeTruthy();
+    expect(exampleCommitFix?.lines).toBeTruthy();
+
+    const exampleCommitFixLine = exampleCommitFix?.lines[0];
+    expect(exampleCommitFixLine?.line).toBeTruthy();
+    expect(exampleCommitFixLine?.lineNumber).toBeTruthy();
+    expect(exampleCommitFixLine?.lineChange).toBeTruthy();
+  });
+
+  it('should contain example commit descriptions', () => {
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
+    const validationResult = jsonschema.validate(sarifResults, sarifSchema);
+    expect(validationResult.errors.length).toEqual(0);
+
+    const rules = sarifResults?.runs[0].tool?.driver?.rules;
+    let exampleCommitDescriptions;
+    if (rules !== undefined)
+      exampleCommitDescriptions = rules[0].properties?.exampleCommitDescriptions;
+
+    expect(exampleCommitDescriptions.length).toBeGreaterThan(0);
+  });
 });

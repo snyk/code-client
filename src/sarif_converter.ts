@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif';
 
-import { IAnalysisResult, IFileSuggestion } from './interfaces/analysis-result.interface';
+import { IAnalysisResult, IFileSuggestion, RuleProperties } from './interfaces/analysis-result.interface';
 
 interface Fingerprint {
   version: number;
@@ -66,6 +66,13 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     // payload comes as URIencoded
     const language = suggestion.id.split('%2F')[0];
     const suggestionId = `${language}/${suggestion.rule}`;
+    const ruleProperties: RuleProperties = {
+      tags: [language, ...suggestion.tags, ...suggestion.categories],
+      exampleCommitFixes: suggestion.exampleCommitFixes,
+      exampleCommitDescriptions: suggestion.exampleCommitDescriptions,
+      precision: 'very-high'
+    };
+
     const rule = {
       id: suggestionId,
       name: suggestion.rule,
@@ -79,10 +86,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         markdown: suggestion.text,
         text: '',
       },
-      properties: {
-        tags: [language, ...suggestion.tags, ...suggestion.categories],
-        precision: 'very-high',
-      } as { tags: string[]; precision: string; cwe?: string[] },
+      properties: ruleProperties
     };
 
     if (suggestion.cwe?.length) {

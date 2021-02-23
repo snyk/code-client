@@ -33,4 +33,13 @@ $ SNYK_API_HOST=... SNYK_AUTH_HOST=... SNYK_API_KEY=... SNYK_API_KEY_NO_ACCESS=.
 
 #### Publish
 
-No need to do anything. We have CircleCI CI/CD pipeline with automatic semantic versioning
+Make sure you checked documentation about [semantic release prefixes](https://github.com/semantic-release/semantic-release)
+
+For example, to make a major version your message must follow this format:
+```
+feat: <short message>
+
+BREAKING CHANGE: <longer description>
+```
+
+No need to do anything else. We have CircleCI CI/CD pipeline with automatic semantic versioning.

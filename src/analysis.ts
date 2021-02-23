@@ -297,10 +297,10 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     };
   } else {
     analysisData = await analyzeBundle({
-      baseURL: baseURL,
-      sessionToken: sessionToken,
-      includeLint: includeLint!,
-      severity: severity!,
+      baseURL,
+      sessionToken,
+      includeLint,
+      severity,
       bundleId: remoteBundle.bundleId,
       source,
     });

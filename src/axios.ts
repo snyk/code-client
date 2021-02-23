@@ -1,7 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
-import { LOGGING } from './constants';
 import emitter from './emitter';
-const { NODE_ENV } = process.env;
 
 const axios_ = axios.create({
   responseType: 'json',
@@ -15,7 +13,6 @@ axios_.interceptors.request.use(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { method, url, data } = config;
     emitter.apiRequestLog(`=> HTTP ${method?.toUpperCase()} ${url} ${data ? JSON.stringify(data) : ''}`.slice(0, 399));
-
     return config;
   },
   (error: AxiosError) => {

@@ -18,6 +18,14 @@ interface CommitChangeLine {
   lineChange: 'removed' | 'added' | 'none';
 }
 
+export interface RuleProperties {
+  tags: string[];
+  exampleCommitFixes?: ExampleCommitFix[];
+  exampleCommitDescriptions?: string[];
+  precision: string;
+  cwe?: string[];
+}
+
 interface ExampleCommitFix {
   commitURL: string;
   lines: CommitChangeLine[];

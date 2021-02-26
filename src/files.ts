@@ -1,6 +1,6 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
-import fg from 'fast-glob';
+import fg from '@snyk/fast-glob';
 import micromatch from 'micromatch';
 import crypto from 'crypto';
 import union from 'lodash.union';

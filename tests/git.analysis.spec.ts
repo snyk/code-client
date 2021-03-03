@@ -94,7 +94,7 @@ describe('Functional test of analysis', () => {
       });
 
       // Test DC JSON format first
-      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(121);
+      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(120);
 
       const cweSuggestion = Object.values(bundle.analysisResults.suggestions).find(
         s => s.id === 'java%2Fdc_interfile_project%2FPT',
@@ -104,8 +104,8 @@ describe('Functional test of analysis', () => {
       expect(cweSuggestion?.title).toBeTruthy();
       expect(cweSuggestion?.text).toBeTruthy();
 
-      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(121);
-      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(121);
+      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(236);
+      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(120);
 
       const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java/PT');
       expect(cweRule?.properties?.cwe).toContain('CWE-23');
@@ -160,6 +160,27 @@ describe('Functional test of analysis', () => {
       TEST_TIMEOUT,
     );
 
+    it(
+      'analyze remote git and formatter sarif with supported files',
+      async () => {
+        const bundle = await analyzeGit({
+          baseURL,
+          sessionToken,
+          includeLint: false,
+          severity: 1,
+          gitUri: 'git@github.com:OpenRefine/OpenRefine.git@437dc4d74110ce006b9f829fe05f461cc8ed1170',
+          sarif: true,
+        });
+        expect(bundle.sarifResults?.runs[0].properties?.coverage).toMatchSnapshot();
+
+        const numOfIssues = getNumOfIssues(bundle);
+        const numOfIssuesInSarif = bundle.sarifResults?.runs[0].results?.length;
+
+        expect(numOfIssuesInSarif).toEqual(numOfIssues);
+      },
+      TEST_TIMEOUT,
+    );
+
     it('should match sarif schema', () => {
       const validationResult = jsonschema.validate(sarifResults, sarifSchema);
       // this is to debug any errors found
@@ -169,3 +190,14 @@ describe('Functional test of analysis', () => {
     });
   });
 });
+
+function getNumOfIssues(bundle: IGitBundle): number {
+  let numberOfIssues = 0;
+
+  Object.keys(bundle.analysisResults.files).forEach(filePath => {
+    const curFile = bundle.analysisResults.files[filePath];
+    numberOfIssues += Object.keys(curFile).length;
+  });
+
+  return numberOfIssues;
+}

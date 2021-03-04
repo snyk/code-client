@@ -20,6 +20,7 @@ interface CommitChangeLine {
 
 export interface RuleProperties {
   tags: string[];
+  categories: string[];
   exampleCommitFixes?: ExampleCommitFix[];
   exampleCommitDescriptions?: string[];
   precision: string;

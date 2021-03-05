@@ -405,55 +405,7 @@ describe('Requests to public API', () => {
         expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
         expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
         const filePath = `/AnnotatorTest.cpp`;
-        expect(response.value.analysisResults.files[filePath]).toEqual({
-          '2': [
-            {
-              cols: [8, 27],
-              markers: [],
-              rows: [5, 5],
-              fingerprints: [
-                {
-                  fingerprint: 'f8e3391465a47f6586489cffd1f44ae47a1c4885c722de596d6eb931fe43bb16',
-                  version: 0,
-                },
-              ],
-            },
-          ],
-          '3': [
-            {
-              cols: [6, 25],
-              markers: [
-                {
-                  msg: [25, 36],
-                  pos: [
-                    {
-                      cols: [7, 14],
-                      rows: [8, 8],
-                      file: filePath,
-                    },
-                  ],
-                },
-                {
-                  msg: [45, 57],
-                  pos: [
-                    {
-                      cols: [6, 25],
-                      rows: [10, 10],
-                      file: filePath,
-                    },
-                  ],
-                },
-              ],
-              rows: [10, 10],
-              fingerprints: [
-                {
-                  fingerprint: '3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d',
-                  version: 0,
-                },
-              ],
-            },
-          ],
-        });
+        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
 
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,

@@ -5,8 +5,7 @@ import micromatch from 'micromatch';
 import crypto from 'crypto';
 import union from 'lodash.union';
 import util from 'util';
-import * as flatCache from 'flat-cache';
-
+import { Cache } from './cache';
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
 
 import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
@@ -165,8 +164,7 @@ export async function* collectBundleFiles(
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
 ): AsyncGenerator<IFileInfo> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const cache = flatCache.load(CACHE_KEY, baseDir);
+  const cache = new Cache(CACHE_KEY, baseDir);
 
   const files = [];
   const dirs = [];
@@ -208,7 +206,6 @@ export async function* collectBundleFiles(
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   cache.save();
 }
 
@@ -222,7 +219,7 @@ export async function prepareExtendingBundle(
 ): Promise<{ files: IFileInfo[]; removedFiles: string[] }> {
   let removedFiles: string[] = [];
   let bundleFiles: IFileInfo[] = [];
-  const cache = flatCache.load(CACHE_KEY, baseDir);
+  const cache = new Cache(CACHE_KEY, baseDir);
 
   // Filter for supported extensions/files only
   let processingFiles: string[] = filterSupportedFiles(files, supportedFiles);
@@ -283,7 +280,7 @@ export async function getFileInfo(
   filePath: string,
   baseDir: string,
   withContent = false,
-  cache: flatCache.Cache | null = null,
+  cache: Cache | null = null,
 ): Promise<IFileInfo | null> {
   const fileStats = await lStat(filePath);
   if (fileStats === null) {
@@ -300,11 +297,9 @@ export async function getFileInfo(
   let fileHash = '';
   if (!withContent && !!cache) {
     // Try to get hash from cache
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const cachedData: CachedData | null = cache.getKey(filePath);
     if (cachedData) {
       if (cachedData[0] === fileStats.size && cachedData[1] === fileStats.mtimeMs) {
-        // eslint-disable-next-line prefer-destructuring
         fileHash = cachedData[2];
       } else {
         // console.log(`did not match cache for: ${filePath} | ${cachedData} !== ${[fileStats.size, fileStats.mtime]}`);
@@ -316,7 +311,6 @@ export async function getFileInfo(
     try {
       fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
       fileHash = calcHash(fileContent);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -338,15 +332,13 @@ export async function getFileInfo(
 }
 
 export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const cache = flatCache.load('.dccache', baseDir);
+  const cache = new Cache('.dccache', baseDir);
   const tasks = bundleMissingFiles.map(mf => {
     const filePath = resolveBundleFilePath(baseDir, mf);
     return getFileInfo(filePath, baseDir, true, cache);
   });
 
   const res = (await Promise.all(tasks)).filter(notEmpty);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   cache.save(true);
   return res;
 }

@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Requests to public API test successful workflow with and without linters 1`] = `
+Object {
+  "2": Array [
+    Object {
+      "cols": Array [
+        8,
+        27,
+      ],
+      "fingerprints": Array [
+        Object {
+          "fingerprint": "f8e3391465a47f6586489cffd1f44ae47a1c4885c722de596d6eb931fe43bb16",
+          "version": 0,
+        },
+      ],
+      "markers": Array [],
+      "rows": Array [
+        5,
+        5,
+      ],
+    },
+  ],
+  "3": Array [
+    Object {
+      "cols": Array [
+        6,
+        25,
+      ],
+      "fingerprints": Array [
+        Object {
+          "fingerprint": "3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d",
+          "version": 0,
+        },
+        Object {
+          "fingerprint": "57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf.57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf",
+          "version": 1,
+        },
+      ],
+      "markers": Array [
+        Object {
+          "msg": Array [
+            25,
+            36,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                7,
+                14,
+              ],
+              "file": "/AnnotatorTest.cpp",
+              "rows": Array [
+                8,
+                8,
+              ],
+            },
+          ],
+        },
+        Object {
+          "msg": Array [
+            45,
+            57,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                6,
+                25,
+              ],
+              "file": "/AnnotatorTest.cpp",
+              "rows": Array [
+                10,
+                10,
+              ],
+            },
+          ],
+        },
+      ],
+      "rows": Array [
+        10,
+        10,
+      ],
+    },
+  ],
+}
+`;

@@ -17,10 +17,11 @@ import {
 } from './http';
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
+import { fromEntries } from './lib/utils';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
-async function* prepareRemoteBundle(
+async function prepareRemoteBundle(
   baseURL: string,
   sessionToken: string,
   files: IFileInfo[],
@@ -28,14 +29,15 @@ async function* prepareRemoteBundle(
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
   source: string,
-): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
+): Promise<IResult<RemoteBundle, CreateBundleErrorCodes>[]> {
+  const res = []
   let response: IResult<RemoteBundle, BundleErrorCodes>;
   let bundleId = existingBundleId;
 
   const fileChunks = chunk(files, maxPayload / 300);
   emitter.createBundleProgress(0, fileChunks.length);
   for (const [i, chunkedFiles] of fileChunks.entries()) {
-    const paramFiles = Object.fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
+    const paramFiles = fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
 
     if (bundleId === null) {
       // eslint-disable-next-line no-await-in-loop
@@ -60,13 +62,14 @@ async function* prepareRemoteBundle(
 
     if (response.type === 'error') {
       // TODO: process Error
-      yield response;
+      res.push(response);
       break;
     }
     bundleId = response.value.bundleId;
 
-    yield response;
+    res.push(response);
   }
+  return res;
 }
 
 /**
@@ -157,7 +160,7 @@ export async function remoteBundleFactory(
   maxPayload = MAX_PAYLOAD,
   source: string,
 ): Promise<RemoteBundle | null> {
-  const bundleFactory = prepareRemoteBundle(
+  const bundleFactory = await prepareRemoteBundle(
     baseURL,
     sessionToken,
     files,
@@ -168,7 +171,7 @@ export async function remoteBundleFactory(
   );
   let remoteBundle: RemoteBundle | null = null;
 
-  for await (const response of bundleFactory) {
+  for (const response of bundleFactory) {
     if (response.type === 'error') {
       throw response.error;
     }

@@ -20,7 +20,7 @@ describe('files', () => {
   });
 
   it('collect bundle files', async () => {
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
+    const collector = await collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
     const files = [];
     for await (const f of collector) {
       files.push(f);
@@ -36,7 +36,7 @@ describe('files', () => {
 
   it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
-    const collector = collectBundleFiles(
+    const collector = await collectBundleFiles(
       sampleProjectPath,
       [sampleProjectPath],
       supportedFiles,
@@ -53,7 +53,7 @@ describe('files', () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles, bundleFileIgnores);
+    const collector = await collectBundleFiles(sampleProjectPath, folders, supportedFiles, bundleFileIgnores);
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -67,7 +67,7 @@ describe('files', () => {
 
   it('compose file payloads', async () => {
     // Prepare all missing files first
-    const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
+    const payloads = [...await composeFilePayloads(await bundleFilesFull, 1024)];
     expect(payloads.length).toEqual(4); // 4 chunks
     expect(payloads[0].length).toEqual(4);
 

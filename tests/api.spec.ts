@@ -1,6 +1,6 @@
 import { baseURL, authHost, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
-
+import { fromEntries } from '../src/lib/utils';
 import {
   getFilters,
   startSession,
@@ -132,7 +132,7 @@ describe('Requests to public API', () => {
   it(
     'creates bundle successfully',
     async () => {
-      const files = Object.fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
+      const files = fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
 
       const response = await createBundle({
         baseURL,
@@ -310,7 +310,7 @@ describe('Requests to public API', () => {
     'test successful workflow with and without linters',
     async () => {
       // Create a bundle first
-      const files = Object.fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
+      const files = fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
       const bundleResponse = await createBundle({
         baseURL,

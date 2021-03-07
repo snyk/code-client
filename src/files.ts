@@ -156,16 +156,17 @@ function searchFiles(
 /**
  * Returns bundle files from requested paths
  * */
-export async function* collectBundleFiles(
+export async function collectBundleFiles(
   baseDir: string,
   paths: string[],
   supportedFiles: ISupportedFiles,
   fileIgnores: string[] = IGNORES_DEFAULT,
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
-): AsyncGenerator<IFileInfo> {
+): Promise<IFileInfo[]> {
   const cache = new Cache(CACHE_KEY, baseDir);
 
+  const res = [];
   const files = [];
   const dirs = [];
 
@@ -190,7 +191,7 @@ export async function* collectBundleFiles(
     for await (const filePath of searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores)) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       if (fileInfo && fileInfo.size <= maxFileSize) {
-        yield fileInfo;
+        res.push(fileInfo);
       }
     }
   }
@@ -201,12 +202,13 @@ export async function* collectBundleFiles(
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       if (fileInfo && fileInfo.size <= maxFileSize) {
-        yield fileInfo;
+        res.push(fileInfo);
       }
     }
   }
 
   cache.save();
+  return res;
 }
 
 export async function prepareExtendingBundle(
@@ -353,7 +355,8 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
   return nodePath.resolve(baseDir, decodeURI(relPath));
 }
 
-export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {
+export function composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Array<IFileInfo[]> {
+  const arr = [];
   type Bucket = {
     size: number;
     files: IFileInfo[];
@@ -381,13 +384,14 @@ export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOA
     buckets[bucketIndex].size -= fileData.size;
 
     if (buckets[bucketIndex].size < bucketSize * 0.01) {
-      yield buckets[bucketIndex].files; // Give bucket to requester
+      arr.push(buckets[bucketIndex].files); // Give bucket to requester
       buckets.splice(bucketIndex); // Remove it as fullfilled
     }
   }
 
   // Send all left-over buckets
   for (const bucket of buckets.filter(b => b.files.length)) {
-    yield bucket.files;
+    arr.push(bucket.files);
   }
+  return arr;
 }

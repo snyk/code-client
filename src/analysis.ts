@@ -37,6 +37,7 @@ import {
   AnalyzeGitOptions,
   GitOptions,
 } from './interfaces/analysis-options.interface';
+import { fromEntries } from './lib/utils';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -163,7 +164,7 @@ export async function analyzeBundle({
 
 function normalizeResultFiles(files: IAnalysisFiles, baseDir: string): IAnalysisFiles {
   if (baseDir) {
-    return Object.fromEntries(
+    return fromEntries(
       Object.entries(files).map(([path, positions]) => {
         const filePath = resolveBundleFilePath(baseDir, path);
         return [filePath, positions];
@@ -178,7 +179,7 @@ const moveSuggestionIndexes = <T>(
   suggestions: { [index: string]: T },
 ): { [index: string]: T } => {
   const entries = Object.entries(suggestions);
-  return Object.fromEntries(
+  return fromEntries(
     entries.map(([i, s]) => {
       return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
     }),
@@ -193,7 +194,7 @@ function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, li
   const newSuggestions = moveSuggestionIndexes<ISuggestion>(suggestionIndex, analysisData.analysisResults.suggestions);
   const suggestions = { ...bundle.analysisResults.suggestions, ...newSuggestions };
 
-  const newFiles = Object.fromEntries(
+  const newFiles = fromEntries(
     Object.entries(analysisData.analysisResults.files).map(([fn, s]) => {
       return [fn, moveSuggestionIndexes(suggestionIndex, s)];
     }),

@@ -51,9 +51,12 @@ function getSuggestions(analysisResults: IAnalysisResult): ISarifSuggestions {
     }
   }
   return suggestions;
-};
+}
 
-function getRulesAndAllIssues(analysisResults: IAnalysisResult, allIssuesBySuggestions: ISarifSuggestions): { rules: ReportingDescriptor[], allIssues: ISarifSuggestion[] } {
+function getRulesAndAllIssues(
+  analysisResults: IAnalysisResult,
+  allIssuesBySuggestions: ISarifSuggestions,
+): { rules: ReportingDescriptor[]; allIssues: ISarifSuggestion[] } {
   let ruleIndex = 0;
   const rules: ReportingDescriptor[] = [];
   const allIssues: ISarifSuggestion[] = [];
@@ -67,10 +70,11 @@ function getRulesAndAllIssues(analysisResults: IAnalysisResult, allIssuesBySugge
     const language = suggestion.id.split('%2F')[0];
     const suggestionId = `${language}/${suggestion.rule}`;
     const ruleProperties: RuleProperties = {
-      tags: [language, ...suggestion.tags, ...suggestion.categories],
+      tags: [language, ...suggestion.tags],
+      categories: suggestion.categories,
       exampleCommitFixes: suggestion.exampleCommitFixes,
       exampleCommitDescriptions: suggestion.exampleCommitDescriptions,
-      precision: 'very-high'
+      precision: 'very-high',
     };
 
     const rule = {
@@ -86,7 +90,7 @@ function getRulesAndAllIssues(analysisResults: IAnalysisResult, allIssuesBySugge
         markdown: suggestion.text,
         text: '',
       },
-      properties: ruleProperties
+      properties: ruleProperties,
     };
 
     if (suggestion.cwe?.length) {
@@ -106,12 +110,11 @@ function getRulesAndAllIssues(analysisResults: IAnalysisResult, allIssuesBySugge
         id: suggestionId,
         text: suggestion.message,
       });
-      
     });
     ruleIndex += 1;
   }
   return { rules, allIssues };
-};
+}
 
 function getResults(allIssues: ISarifSuggestion[]): Result[] {
   const output = [];
@@ -142,7 +145,7 @@ function getResults(allIssues: ISarifSuggestion[]): Result[] {
             },
           },
         },
-      ]
+      ],
     };
 
     if (issue.fingerprints) {
@@ -223,7 +226,7 @@ function getResults(allIssues: ISarifSuggestion[]): Result[] {
     output.push(newResult);
   }
   return output;
-};
+}
 
 //custom string splice implementation
 export function stringSplice(str: string, index: number, count: number, add?: string) {

@@ -7,6 +7,7 @@ import { Log } from 'sarif';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import { ErrorCodes } from '../src/constants';
 import { IGitBundle } from '../src/interfaces/analysis-result.interface';
+import axios from '../src/axios';
 
 const oAuthToken = process.env.SNYK_OAUTH_KEY || '';
 const sessionTokenNoRepoAccess = process.env.SNYK_API_KEY_NO_ACCESS || '';
@@ -188,6 +189,39 @@ describe('Functional test of analysis', () => {
       // fs.writeFile('sarif_validation_log.json', json, 'utf8', ()=>null);
       expect(validationResult.errors.length).toEqual(0);
     });
+  });
+});
+
+describe('Custom request options', () => {
+  beforeAll(() => {
+    jest.mock('axios');
+    axios.request = jest.fn().mockRejectedValue({});
+  });
+
+  it(
+    'passes custom options correctly',
+    async () => {
+      try {
+        await analyzeGit(
+          {
+            baseURL,
+            sessionToken,
+            includeLint: false,
+            severity: 1,
+            gitUri: 'git@github.com:DeepCodeAI/cli.git',
+          },
+          { headers: { 'X-test-header': 'Snyk' } },
+        );
+      } catch (e) {
+        // expected to fail, we are interested in correct propagation of headers only
+      }
+      expect((axios.request as jest.Mock).mock.calls[0][0]).toMatchObject({headers: { 'X-test-header': 'Snyk' }});
+    },
+    TEST_TIMEOUT,
+  );
+
+  afterAll(() => {
+    jest.resetAllMocks();
   });
 });
 

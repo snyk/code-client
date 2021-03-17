@@ -5,23 +5,24 @@ import * as sarifSchema from './sarif-schema-2.1.0.json';
 import { stringSplice, getArgumentsAndMessage } from '../src/sarif_converter';
 import getSarif from '../src/sarif_converter';
 import * as analysisResultsWithoutFingerprinting from './fixtures/sarif_convertor/analysis-results-without-fingerprinting.json';
-import { IAnalysisResult } from '../src/interfaces/analysis-result.interface';
+import { IAnalysisResult, IFileBundle, IGitBundle } from '../src/interfaces/analysis-result.interface';
 import path from 'path';
-import { analyzeFolders } from '../src/analysis';
+import { analyzeFolders, analyzeGit } from '../src/analysis';
 import { baseURL, sessionToken } from './constants/base';
 import { AnalysisSeverity } from '../src/interfaces/analysis-result.interface';
 
 describe('Sarif Convertor', () => {
-  it.only('should keep us sane that we do not loose issues', async () => {
+  it('should keep us sane that we do not loose issues', async () => {
     const includeLint = false;
     const severity = AnalysisSeverity.info;
-    const paths: string[] = ['tests/fixtures/sarif_convertor/shallow_sast_webgoat'];
+    const paths: string[] = [path.resolve(__dirname, 'fixtures/sarif_convertor/shallow_sast_webgoat')];
     const symlinksEnabled = false;
-    const maxPayload = 1000;
+    const maxPayload = 10000000;
     const defaultFileIgnores = undefined;
     const sarif = true;
-    let bundleResultsCount = 0;
-    const bundle = await analyzeFolders({
+    let folderBundleResultsCount = 0;
+    let gitBundleResultsCount = 0;
+    const folderBundle = await analyzeFolders({
       baseURL,
       sessionToken,
       includeLint,
@@ -32,14 +33,21 @@ describe('Sarif Convertor', () => {
       defaultFileIgnores,
       sarif,
     });
-    Object.keys(bundle.analysisResults.files).forEach(key =>
-      Object.keys(bundle.analysisResults.files[key]).forEach(
-        issueId => (bundleResultsCount += bundle.analysisResults.files[key][issueId].length),
-      ),
-    );
-    console.log(bundle.sarifResults?.runs[0]?.results?.length, bundleResultsCount);
-    expect(bundle.sarifResults?.runs[0]?.results?.length).toEqual(bundleResultsCount);
-  });
+    const gitBundle = await analyzeGit({
+      baseURL,
+      sessionToken,
+      includeLint: false,
+      severity: 1,
+      gitUri: 'git@github.com:DeepcodeAI/shallow_sast_webgoat.git',
+      sarif: true,
+    });
+    folderBundleResultsCount = getNumOfIssues(folderBundle);
+    gitBundleResultsCount = getNumOfIssues(gitBundle);
+    expect(folderBundleResultsCount).toEqual(gitBundleResultsCount);
+    expect(folderBundle.sarifResults?.runs[0]?.results?.length).toEqual(folderBundleResultsCount);
+    expect(gitBundle.sarifResults?.runs[0]?.results?.length).toEqual(gitBundleResultsCount);
+  }, 100000);
+
   it('should test stringsplice functionality', () => {
     let message = 'this is a test message';
     let splicedMessage = stringSplice(message, 8, 1, 'not');
@@ -157,3 +165,15 @@ describe('Sarif Convertor', () => {
     expect(exampleCommitDescriptions.length).toBeGreaterThan(0);
   });
 });
+
+function getNumOfIssues(bundle: IGitBundle | IFileBundle): number {
+  let numberOfIssues = 0;
+
+  Object.keys(bundle.analysisResults.files).forEach(key =>
+    Object.keys(bundle.analysisResults.files[key]).forEach(
+      issueId => (numberOfIssues += bundle.analysisResults.files[key][issueId].length),
+    ),
+  );
+
+  return numberOfIssues;
+}

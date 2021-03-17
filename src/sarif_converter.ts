@@ -47,7 +47,9 @@ function getSuggestions(analysisResults: IAnalysisResult): ISarifSuggestions {
       if (!Object.keys(suggestions).includes(issueId)) {
         suggestions[issueId] = [];
       }
-      suggestions[issueId].push({ ...issues[0], file: file.substring(1) });
+      issues.forEach(issue => {
+        suggestions[issueId].push({ ...issue, file: file.substring(1) });
+      });
     }
   }
   return suggestions;

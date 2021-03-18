@@ -6,6 +6,7 @@ import axios from './axios';
 
 import { IFiles, IFileContent, ISupportedFiles } from './interfaces/files.interface';
 import { IAnalysisResult } from './interfaces/analysis-result.interface';
+import { RequestOptions } from './interfaces/http-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -298,16 +299,19 @@ const CREATE_GIT_BUNDLE_ERROR_MESSAGES: { [P in CreateGitBundleErrorCodes]: stri
   [ErrorCodes.notFound]: 'Unable to found requested repository or commit hash',
 };
 
-export async function createGitBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly oAuthToken?: string;
-  readonly username?: string;
-  readonly gitUri: string;
-  readonly source: string;
-}): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
+export async function createGitBundle(
+  options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly oAuthToken?: string;
+    readonly username?: string;
+    readonly gitUri: string;
+    readonly source: string;
+  },
+  requestOptions?: RequestOptions,
+): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
   const { baseURL, sessionToken, oAuthToken, username, gitUri, source } = options;
-  const headers = { 'Session-Token': sessionToken, source };
+  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
   }
@@ -409,17 +413,20 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
-export async function getAnalysis(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleId: string;
-  readonly includeLint?: boolean;
-  readonly severity: number;
-  readonly limitToFiles?: string[];
-  readonly oAuthToken?: string;
-  readonly username?: string;
-  readonly source: string;
-}): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
+export async function getAnalysis(
+  options: {
+    readonly baseURL: string;
+    readonly sessionToken: string;
+    readonly bundleId: string;
+    readonly includeLint?: boolean;
+    readonly severity: number;
+    readonly limitToFiles?: string[];
+    readonly oAuthToken?: string;
+    readonly username?: string;
+    readonly source: string;
+  },
+  requestOptions?: RequestOptions,
+): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const {
     baseURL,
     sessionToken,
@@ -434,7 +441,7 @@ export async function getAnalysis(options: {
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
   const params = { severity, linters: includeLint || undefined };
 
-  const headers = { 'Session-Token': sessionToken, source };
+  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
   if (oAuthToken) {
     headers['X-OAuthToken'] = oAuthToken;
   }

@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import { Log, ReportingConfiguration, ReportingDescriptor, Result } from 'sarif';
+import { Log, ReportingConfiguration, ReportingDescriptor, Result, Tool } from 'sarif';
 
 import { IAnalysisResult, IFileSuggestion, RuleProperties } from './interfaces/analysis-result.interface';
 
@@ -19,19 +19,19 @@ interface ISarifSuggestion extends IFileSuggestion {
 }
 
 interface ISarifSuggestions {
-  [suggestionIndex: number]: ISarifSuggestion;
+  [suggestionIndex: number]: ISarifSuggestion[];
 }
 
 export default function getSarif(analysisResults: IAnalysisResult): Log {
-  const { tool, suggestions } = getTools(analysisResults, getSuggestions(analysisResults));
-  const results = getResults(suggestions);
+  const allIssuesBySuggestion: ISarifSuggestions = getSuggestions(analysisResults);
+  const { rules, allIssues } = getRulesAndAllIssues(analysisResults, allIssuesBySuggestion);
   return {
     $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
     version: '2.1.0',
     runs: [
       {
-        tool,
-        results,
+        tool: getTool(rules),
+        results: getResults(allIssues),
         properties: {
           coverage: analysisResults.coverage,
         },
@@ -40,23 +40,26 @@ export default function getSarif(analysisResults: IAnalysisResult): Log {
   };
 }
 
-const getSuggestions = (analysisResults: IAnalysisResult): ISarifSuggestions => {
-  const suggestions = {};
+function getSuggestions(analysisResults: IAnalysisResult): ISarifSuggestions {
+  const suggestions: ISarifSuggestions = {};
   for (const [file] of Object.entries(analysisResults.files)) {
     for (const [issueId, issues] of Object.entries(analysisResults.files[file])) {
-      if (!suggestions || !Object.keys(suggestions).includes(issueId)) {
-        suggestions[issueId] = { ...issues[0], file: file.substring(1) };
+      if (!Object.keys(suggestions).includes(issueId)) {
+        suggestions[issueId] = [];
       }
+      suggestions[issueId].push({ ...issues[0], file: file.substring(1) });
     }
   }
   return suggestions;
-};
+}
 
-const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestions) => {
-  const output = { driver: { name: 'SnykCode', semanticVersion: '1.0.0', version: '1.0.0' } };
-  const rules = [];
+function getRulesAndAllIssues(
+  analysisResults: IAnalysisResult,
+  allIssuesBySuggestions: ISarifSuggestions,
+): { rules: ReportingDescriptor[]; allIssues: ISarifSuggestion[] } {
   let ruleIndex = 0;
-  const result: ISarifSuggestions = {};
+  const rules: ReportingDescriptor[] = [];
+  const allIssues: ISarifSuggestion[] = [];
   for (const [suggestionIndex, suggestion] of Object.entries(analysisResults.suggestions)) {
     const severity = <Result.level>{
       1: 'note',
@@ -67,10 +70,11 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     const language = suggestion.id.split('%2F')[0];
     const suggestionId = `${language}/${suggestion.rule}`;
     const ruleProperties: RuleProperties = {
-      tags: [language, ...suggestion.tags, ...suggestion.categories],
+      tags: [language, ...suggestion.tags],
+      categories: suggestion.categories,
       exampleCommitFixes: suggestion.exampleCommitFixes,
       exampleCommitDescriptions: suggestion.exampleCommitDescriptions,
-      precision: 'very-high'
+      precision: 'very-high',
     };
 
     const rule = {
@@ -86,7 +90,7 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
         markdown: suggestion.text,
         text: '',
       },
-      properties: ruleProperties
+      properties: ruleProperties,
     };
 
     if (suggestion.cwe?.length) {
@@ -96,61 +100,64 @@ const getTools = (analysisResults: IAnalysisResult, suggestions: ISarifSuggestio
     rules.push(rule);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    result[suggestionIndex] = {
-      ...suggestions[suggestionIndex],
-      ruleIndex,
-      rule,
-      level: severity,
-      id: suggestionId,
-      text: suggestion.message,
-    };
+    const allIssuesOfSuggestion: ISarifSuggestion[] = allIssuesBySuggestions[suggestionIndex];
+    allIssuesOfSuggestion.forEach(issue => {
+      allIssues.push({
+        ...issue,
+        ruleIndex,
+        rule,
+        level: severity,
+        id: suggestionId,
+        text: suggestion.message,
+      });
+    });
     ruleIndex += 1;
   }
-  return { tool: { driver: { ...output.driver, rules } }, suggestions: result };
-};
+  return { rules, allIssues };
+}
 
-function getResults(suggestions: ISarifSuggestions): Result[] {
+function getResults(allIssues: ISarifSuggestion[]): Result[] {
   const output = [];
 
-  for (const [, suggestion] of <[string, ISarifSuggestion][]>Object.entries(suggestions)) {
+  for (const issue of allIssues) {
     let helpers: any[] = [];
     let result: Result = {
-      ruleId: suggestion.id,
-      ruleIndex: suggestion.ruleIndex,
-      level: suggestion.level ? suggestion.level : 'none',
+      ruleId: issue.id,
+      ruleIndex: issue.ruleIndex,
+      level: issue.level ? issue.level : 'none',
       message: {
-        text: suggestion.text,
-        markdown: suggestion.text,
+        text: issue.text,
+        markdown: issue.text,
         arguments: [''],
       },
       locations: [
         {
           physicalLocation: {
             artifactLocation: {
-              uri: suggestion.file,
+              uri: issue.file,
               uriBaseId: '%SRCROOT%',
             },
             region: {
-              startLine: suggestion.rows[0],
-              endLine: suggestion.rows[1],
-              startColumn: suggestion.cols[0],
-              endColumn: suggestion.cols[1],
+              startLine: issue.rows[0],
+              endLine: issue.rows[1],
+              startColumn: issue.cols[0],
+              endColumn: issue.cols[1],
             },
           },
         },
-      ]
+      ],
     };
 
-    if (suggestion.fingerprints) {
+    if (issue.fingerprints) {
       result.fingerprints = {};
-      suggestion.fingerprints.forEach(fingerprinting => {
+      issue.fingerprints.forEach(fingerprinting => {
         (result.fingerprints as any)[`${fingerprinting.version}`] = fingerprinting.fingerprint;
       });
     }
     const codeThreadFlows = [];
     let i = 0;
-    if (suggestion.markers && suggestion.markers.length >= 1) {
-      for (const marker of suggestion.markers) {
+    if (issue.markers && issue.markers.length >= 1) {
+      for (const marker of issue.markers) {
         for (const position of marker.pos) {
           const helperIndex = helpers.findIndex(helper => helper.msg === marker.msg);
           if (helperIndex != -1) {
@@ -184,14 +191,14 @@ function getResults(suggestions: ISarifSuggestions): Result[] {
           id: 0,
           physicalLocation: {
             artifactLocation: {
-              uri: suggestion.file,
+              uri: issue.file,
               uriBaseId: '%SRCROOT%',
             },
             region: {
-              startLine: suggestion.rows[0],
-              endLine: suggestion.rows[1],
-              startColumn: suggestion.cols[0],
-              endColumn: suggestion.cols[1],
+              startLine: issue.rows[0],
+              endLine: issue.rows[1],
+              startColumn: issue.cols[0],
+              endColumn: issue.cols[1],
             },
           },
         },
@@ -219,7 +226,7 @@ function getResults(suggestions: ISarifSuggestions): Result[] {
     output.push(newResult);
   }
   return output;
-};
+}
 
 //custom string splice implementation
 export function stringSplice(str: string, index: number, count: number, add?: string) {
@@ -255,4 +262,9 @@ export function getArgumentsAndMessage(
   });
 
   return { message, argumentArray };
+}
+
+function getTool(rules: ReportingDescriptor[]): Tool {
+  const output = { driver: { name: 'SnykCode', semanticVersion: '1.0.0', version: '1.0.0' } };
+  return { driver: { ...output.driver, rules } };
 }

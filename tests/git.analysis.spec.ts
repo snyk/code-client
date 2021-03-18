@@ -7,6 +7,7 @@ import { Log } from 'sarif';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import { ErrorCodes } from '../src/constants';
 import { IGitBundle } from '../src/interfaces/analysis-result.interface';
+import axios from '../src/axios';
 
 const oAuthToken = process.env.SNYK_OAUTH_KEY || '';
 const sessionTokenNoRepoAccess = process.env.SNYK_API_KEY_NO_ACCESS || '';
@@ -94,7 +95,7 @@ describe('Functional test of analysis', () => {
       });
 
       // Test DC JSON format first
-      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(119);
+      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(120);
 
       const cweSuggestion = Object.values(bundle.analysisResults.suggestions).find(
         s => s.id === 'java%2Fdc_interfile_project%2FPT',
@@ -104,8 +105,8 @@ describe('Functional test of analysis', () => {
       expect(cweSuggestion?.title).toBeTruthy();
       expect(cweSuggestion?.text).toBeTruthy();
 
-      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(119);
-      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(119);
+      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(236);
+      expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(120);
 
       const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java/PT');
       expect(cweRule?.properties?.cwe).toContain('CWE-23');
@@ -160,6 +161,27 @@ describe('Functional test of analysis', () => {
       TEST_TIMEOUT,
     );
 
+    it(
+      'analyze remote git and formatter sarif with supported files',
+      async () => {
+        const bundle = await analyzeGit({
+          baseURL,
+          sessionToken,
+          includeLint: false,
+          severity: 1,
+          gitUri: 'git@github.com:OpenRefine/OpenRefine.git@437dc4d74110ce006b9f829fe05f461cc8ed1170',
+          sarif: true,
+        });
+        expect(bundle.sarifResults?.runs[0].properties?.coverage).toMatchSnapshot();
+
+        const numOfIssues = getNumOfIssues(bundle);
+        const numOfIssuesInSarif = bundle.sarifResults?.runs[0].results?.length;
+
+        expect(numOfIssuesInSarif).toEqual(numOfIssues);
+      },
+      TEST_TIMEOUT,
+    );
+
     it('should match sarif schema', () => {
       const validationResult = jsonschema.validate(sarifResults, sarifSchema);
       // this is to debug any errors found
@@ -169,3 +191,47 @@ describe('Functional test of analysis', () => {
     });
   });
 });
+
+describe('Custom request options', () => {
+  beforeAll(() => {
+    jest.mock('axios');
+    axios.request = jest.fn().mockRejectedValue({});
+  });
+
+  it(
+    'passes custom options correctly',
+    async () => {
+      try {
+        await analyzeGit(
+          {
+            baseURL,
+            sessionToken,
+            includeLint: false,
+            severity: 1,
+            gitUri: 'git@github.com:DeepCodeAI/cli.git',
+          },
+          { headers: { 'X-test-header': 'Snyk' } },
+        );
+      } catch (e) {
+        // expected to fail, we are interested in correct propagation of headers only
+      }
+      expect((axios.request as jest.Mock).mock.calls[0][0]).toMatchObject({headers: { 'X-test-header': 'Snyk' }});
+    },
+    TEST_TIMEOUT,
+  );
+
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
+});
+
+function getNumOfIssues(bundle: IGitBundle): number {
+  let numberOfIssues = 0;
+
+  Object.keys(bundle.analysisResults.files).forEach(filePath => {
+    const curFile = bundle.analysisResults.files[filePath];
+    numberOfIssues += Object.keys(curFile).length;
+  });
+
+  return numberOfIssues;
+}

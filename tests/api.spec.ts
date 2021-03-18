@@ -1,6 +1,6 @@
 import { baseURL, authHost, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
-
+import { fromEntries } from '../src/lib/utils';
 import {
   getFilters,
   startSession,
@@ -16,9 +16,9 @@ import {
   reportEvent,
 } from '../src/http';
 
-const fakeBundleId = '646c61854ef8ef5634d9caf2580352bc416b3d066f800832b47088d4169cf231';
+const fakeBundleId = '79925ce5d4dbfcb9f7f90f671bfcbdaebf394b3c91b49eb4d2b57f109d2abcc6';
 let fakeBundleIdFull = '';
-const realBundleId = 'e03ac612f79b73ef6f55bdd3e32d324fb43dc138f9883bbb41085a6db59d67f5';
+const realBundleId = '39bc8dbc1e4fd197323fe352231ff3afad2cd2ea191b4abeb3613340c8752ea0';
 let realBundleIdFull = '';
 
 const reportTelemetryRequest = {
@@ -40,46 +40,9 @@ describe('Requests to public API', () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(
-      new Set([
-        '.dcignore',
-        '.gitignore',
-        '.pylintrc',
-        'pylintrc',
-        '.pmdrc.xml',
-        '.ruleset.xml',
-        'ruleset.xml',
-        'tslint.json',
-        '.eslintrc.js',
-        '.eslintrc.json',
-        '.eslintrc.yml',
-      ]),
-    );
+    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set([
-        '.es',
-        '.es6',
-        '.htm',
-        '.html',
-        '.js',
-        '.jsx',
-        '.ts',
-        '.tsx',
-        '.vue',
-        '.c',
-        '.cc',
-        '.cpp',
-        '.cxx',
-        '.h',
-        '.hpp',
-        '.hxx',
-        '.py',
-        '.java',
-        '.CS',
-        '.Cs',
-        '.cs',
-        '.php',
-      ]),
+      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.ts', '.tsx', '.vue', '.java']),
     );
   });
 
@@ -132,7 +95,7 @@ describe('Requests to public API', () => {
   it(
     'creates bundle successfully',
     async () => {
-      const files = Object.fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
+      const files = fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
 
       const response = await createBundle({
         baseURL,
@@ -145,8 +108,6 @@ describe('Requests to public API', () => {
       expect(response.value.bundleId).toContain(fakeBundleId);
       fakeBundleIdFull = response.value.bundleId;
       expect(response.value.missingFiles).toEqual([
-        '/.eslintrc.json',
-        `/AnnotatorTest.cpp`,
         `/GitHubAccessTokenScrambler12.java`,
         `/app.js`,
         `/db.js`,
@@ -170,8 +131,6 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.bundleId).toEqual(fakeBundleIdFull);
       expect(response.value.missingFiles).toEqual([
-        '/.eslintrc.json',
-        `/AnnotatorTest.cpp`,
         `/GitHubAccessTokenScrambler12.java`,
         `/app.js`,
         `/db.js`,
@@ -236,9 +195,7 @@ describe('Requests to public API', () => {
           [`/new.js`]: 'new123',
         },
         removedFiles: [
-          '/.eslintrc.json',
           `/app.js`,
-          `/AnnotatorTest.cpp`,
           `/GitHubAccessTokenScrambler12.java`,
           `/db.js`,
           `/main.js`,
@@ -310,7 +267,7 @@ describe('Requests to public API', () => {
     'test successful workflow with and without linters',
     async () => {
       // Create a bundle first
-      const files = Object.fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
+      const files = fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
       const bundleResponse = await createBundle({
         baseURL,
@@ -367,7 +324,7 @@ describe('Requests to public API', () => {
 
       if (response.value.status === AnalysisStatus.done) {
         expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
-        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
+        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(6);
         const suggestion = response.value.analysisResults.suggestions[0];
         expect(Object.keys(suggestion)).toEqual([
           'id',
@@ -403,74 +360,15 @@ describe('Requests to public API', () => {
         expect(suggestion.severity).toEqual(2);
 
         expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-        const filePath = `/AnnotatorTest.cpp`;
-        expect(response.value.analysisResults.files[filePath]).toEqual({
-          '2': [
-            {
-              cols: [8, 27],
-              markers: [],
-              rows: [5, 5],
-              fingerprints: [
-                {
-                  fingerprint: 'f8e3391465a47f6586489cffd1f44ae47a1c4885c722de596d6eb931fe43bb16',
-                  version: 0,
-                },
-              ],
-            },
-          ],
-          '3': [
-            {
-              cols: [6, 25],
-              markers: [
-                {
-                  msg: [25, 36],
-                  pos: [
-                    {
-                      cols: [7, 14],
-                      rows: [8, 8],
-                      file: filePath,
-                    },
-                  ],
-                },
-                {
-                  msg: [45, 57],
-                  pos: [
-                    {
-                      cols: [6, 25],
-                      rows: [10, 10],
-                      file: filePath,
-                    },
-                  ],
-                },
-              ],
-              rows: [10, 10],
-              fingerprints: [
-                {
-                  fingerprint: '3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d',
-                  version: 0,
-                },
-              ],
-            },
-          ],
-        });
-
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,
         );
+        const filePath = `/GitHubAccessTokenScrambler12.java`;
+        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
         expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
         expect(new Set(response.value.analysisResults.coverage)).toEqual(
           new Set([
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 1,
-              isSupported: false,
-              lang: 'JSON',
-            },
             {
               files: 1,
               isSupported: true,
@@ -493,7 +391,7 @@ describe('Requests to public API', () => {
           bundleId: realBundleIdFull,
           includeLint: false,
           severity: 1,
-          limitToFiles: [`/AnnotatorTest.cpp`],
+          limitToFiles: [`/GitHubAccessTokenScrambler12.java`],
           source: 'atom',
         });
 
@@ -502,8 +400,8 @@ describe('Requests to public API', () => {
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.done);
 
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/AnnotatorTest.cpp']);
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
+      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/GitHubAccessTokenScrambler12.java']);
 
       // Get analysis results without linters but with severity 3
       do {
@@ -526,28 +424,30 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
+describe('git analysis', () => {
+  let goofBundleId: string;
+
   it('create git bundle', async () => {
     const bundleResponse = await createGitBundle({
       baseURL,
       sessionToken,
-      gitUri: 'git@github.com:DeepCodeAI/cli.git',
+      gitUri: 'git@github.com:snyk/goof.git',
       source: 'atom',
     });
     expect(bundleResponse.type).toEqual('success');
     if (bundleResponse.type === 'error') return;
     expect(bundleResponse.value.bundleId).toBeTruthy();
+    goofBundleId = bundleResponse.value.bundleId;
   });
 
   it(
     'git analysis',
     async () => {
-      const bundleId = 'gh/DeepcodeAI/cli/320d98a6896f5376efe6cefefb6e70b46b97d566';
-
       // Get analysis results
       const response = await getAnalysis({
         baseURL,
         sessionToken,
-        bundleId,
+        bundleId: goofBundleId,
         includeLint: false,
         severity: 1,
         source: 'atom',
@@ -557,26 +457,27 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.done) {
-        expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
+        expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
         expect(response.value.analysisResults.suggestions).toBeTruthy();
 
         const suggestion = response.value.analysisResults.suggestions[0];
-        expect(suggestion.categories).toEqual(['Security', 'InTest']);
+        expect(suggestion.categories).toEqual(['Security']);
         expect(suggestion).toHaveProperty('exampleCommitDescriptions');
         expect(suggestion).toHaveProperty('exampleCommitFixes');
         expect(suggestion.leadURL).toEqual('');
-        expect(suggestion.id).toEqual('python%2Fdc%2FHardcodedNonCryptoSecret%2Ftest');
+        expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
         expect(suggestion.message).toContain(
-          'Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.',
+          'http (used in require) is an insecure protocol and should not be used in new code.',
         );
-        expect(suggestion.rule).toEqual('HardcodedNonCryptoSecret/test');
-        expect(suggestion.severity).toEqual(1);
-        expect(suggestion.tags).toEqual(['maintenance', 'bug', 'key', 'secret', 'credentials']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
+        expect(suggestion.rule).toEqual('HttpToHttps');
+        expect(suggestion.severity).toEqual(2);
+        expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
       }
     },
     TEST_TIMEOUT,
   );
+});
 
   it(
     'git analysis with empty results',

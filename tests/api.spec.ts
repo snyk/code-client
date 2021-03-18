@@ -16,9 +16,9 @@ import {
   reportEvent,
 } from '../src/http';
 
-const fakeBundleId = '646c61854ef8ef5634d9caf2580352bc416b3d066f800832b47088d4169cf231';
+const fakeBundleId = '79925ce5d4dbfcb9f7f90f671bfcbdaebf394b3c91b49eb4d2b57f109d2abcc6';
 let fakeBundleIdFull = '';
-const realBundleId = 'e03ac612f79b73ef6f55bdd3e32d324fb43dc138f9883bbb41085a6db59d67f5';
+const realBundleId = '39bc8dbc1e4fd197323fe352231ff3afad2cd2ea191b4abeb3613340c8752ea0';
 let realBundleIdFull = '';
 
 const reportTelemetryRequest = {
@@ -40,46 +40,9 @@ describe('Requests to public API', () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(
-      new Set([
-        '.dcignore',
-        '.gitignore',
-        '.pylintrc',
-        'pylintrc',
-        '.pmdrc.xml',
-        '.ruleset.xml',
-        'ruleset.xml',
-        'tslint.json',
-        '.eslintrc.js',
-        '.eslintrc.json',
-        '.eslintrc.yml',
-      ]),
-    );
+    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set([
-        '.es',
-        '.es6',
-        '.htm',
-        '.html',
-        '.js',
-        '.jsx',
-        '.ts',
-        '.tsx',
-        '.vue',
-        '.c',
-        '.cc',
-        '.cpp',
-        '.cxx',
-        '.h',
-        '.hpp',
-        '.hxx',
-        '.py',
-        '.java',
-        '.CS',
-        '.Cs',
-        '.cs',
-        '.php',
-      ]),
+      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.ts', '.tsx', '.vue', '.java']),
     );
   });
 
@@ -145,8 +108,6 @@ describe('Requests to public API', () => {
       expect(response.value.bundleId).toContain(fakeBundleId);
       fakeBundleIdFull = response.value.bundleId;
       expect(response.value.missingFiles).toEqual([
-        '/.eslintrc.json',
-        `/AnnotatorTest.cpp`,
         `/GitHubAccessTokenScrambler12.java`,
         `/app.js`,
         `/db.js`,
@@ -170,8 +131,6 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.bundleId).toEqual(fakeBundleIdFull);
       expect(response.value.missingFiles).toEqual([
-        '/.eslintrc.json',
-        `/AnnotatorTest.cpp`,
         `/GitHubAccessTokenScrambler12.java`,
         `/app.js`,
         `/db.js`,
@@ -236,9 +195,7 @@ describe('Requests to public API', () => {
           [`/new.js`]: 'new123',
         },
         removedFiles: [
-          '/.eslintrc.json',
           `/app.js`,
-          `/AnnotatorTest.cpp`,
           `/GitHubAccessTokenScrambler12.java`,
           `/db.js`,
           `/main.js`,
@@ -367,7 +324,7 @@ describe('Requests to public API', () => {
 
       if (response.value.status === AnalysisStatus.done) {
         expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
-        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
+        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(6);
         const suggestion = response.value.analysisResults.suggestions[0];
         expect(Object.keys(suggestion)).toEqual([
           'id',
@@ -403,26 +360,15 @@ describe('Requests to public API', () => {
         expect(suggestion.severity).toEqual(2);
 
         expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-        const filePath = `/AnnotatorTest.cpp`;
-        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
-
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,
         );
+        const filePath = `/GitHubAccessTokenScrambler12.java`;
+        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
         expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
         expect(new Set(response.value.analysisResults.coverage)).toEqual(
           new Set([
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 1,
-              isSupported: false,
-              lang: 'JSON',
-            },
             {
               files: 1,
               isSupported: true,
@@ -445,7 +391,7 @@ describe('Requests to public API', () => {
           bundleId: realBundleIdFull,
           includeLint: false,
           severity: 1,
-          limitToFiles: [`/AnnotatorTest.cpp`],
+          limitToFiles: [`/GitHubAccessTokenScrambler12.java`],
           source: 'atom',
         });
 
@@ -454,8 +400,8 @@ describe('Requests to public API', () => {
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.done);
 
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/AnnotatorTest.cpp']);
+      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
+      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/GitHubAccessTokenScrambler12.java']);
 
       // Get analysis results without linters but with severity 3
       do {

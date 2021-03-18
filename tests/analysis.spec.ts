@@ -32,7 +32,7 @@ describe('Functional test of analysis', () => {
 
       const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
         expect(typeof processed).toBe('number');
-        expect(total).toEqual(3);
+        expect(total).toEqual(2);
 
         expect(processed).toBeLessThanOrEqual(total);
       });
@@ -51,7 +51,6 @@ describe('Functional test of analysis', () => {
       });
       emitter.on(emitter.events.apiRequestLog, onAPIRequestLog);
 
-
       const bundle = await analyzeFolders({
         baseURL,
         sessionToken,
@@ -65,24 +64,16 @@ describe('Functional test of analysis', () => {
       expect(bundle).toHaveProperty('sessionToken');
       expect(bundle).toHaveProperty('supportedFiles');
       expect(bundle).toHaveProperty('analysisURL');
-      expect(Object.keys(bundle.analysisResults.files).length).toEqual(4);
-      expect(bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/AnnotatorTest.cpp`)).toBeTruthy();
-      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
+      expect(Object.keys(bundle.analysisResults.files).length).toEqual(3);
+      expect(
+        bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/GitHubAccessTokenScrambler12.java`),
+      ).toBeTruthy();
+      expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(6);
 
       expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(bundle.analysisResults.timing.fetchingCode);
       expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
       expect(new Set(bundle.analysisResults.coverage)).toEqual(
         new Set([
-          {
-            files: 1,
-            isSupported: true,
-            lang: 'C++ (beta)',
-          },
-          {
-            files: 1,
-            isSupported: false,
-            lang: 'JSON',
-          },
           {
             files: 1,
             isSupported: true,
@@ -98,8 +89,8 @@ describe('Functional test of analysis', () => {
 
       // Check if emitter event happened
       expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-      expect(onScanFilesProgress).toHaveBeenCalledTimes(8);
-      expect(onCreateBundleProgress).toHaveBeenCalledTimes(4);
+      expect(onScanFilesProgress).toHaveBeenCalledTimes(6);
+      expect(onCreateBundleProgress).toHaveBeenCalledTimes(3);
       expect(onAnalyseProgress).toHaveBeenCalled();
       expect(onAPIRequestLog).toHaveBeenCalled();
 

@@ -5,81 +5,248 @@ Object {
   "2": Array [
     Object {
       "cols": Array [
-        8,
-        27,
+        39,
+        53,
       ],
       "fingerprints": Array [
         Object {
-          "fingerprint": "f8e3391465a47f6586489cffd1f44ae47a1c4885c722de596d6eb931fe43bb16",
-          "version": 0,
-        },
-      ],
-      "markers": Array [],
-      "rows": Array [
-        5,
-        5,
-      ],
-    },
-  ],
-  "3": Array [
-    Object {
-      "cols": Array [
-        6,
-        25,
-      ],
-      "fingerprints": Array [
-        Object {
-          "fingerprint": "3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d",
+          "fingerprint": "369aebd49780d3608e1ed3c48a88b50d531409e64105fa20b0e9b751f066f87b",
           "version": 0,
         },
         Object {
-          "fingerprint": "57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf.57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf",
+          "fingerprint": "19689298.883ce888.fa1beb9c.44ab356c.f81b5a8d.f7edcf51.0d475b83.41ec51de.19689298.601f8825.fa1beb9c.de031890.f81b5a8d.ce109560.0d475b83.41ec51de",
           "version": 1,
         },
       ],
       "markers": Array [
         Object {
           "msg": Array [
-            25,
-            36,
+            16,
+            21,
           ],
           "pos": Array [
             Object {
               "cols": Array [
-                7,
-                14,
+                40,
+                57,
               ],
-              "file": "/AnnotatorTest.cpp",
+              "file": "/GitHubAccessTokenScrambler12.java",
               "rows": Array [
-                8,
-                8,
+                10,
+                10,
               ],
             },
           ],
         },
         Object {
           "msg": Array [
-            45,
-            57,
+            36,
+            62,
           ],
           "pos": Array [
             Object {
               "cols": Array [
-                6,
-                25,
+                39,
+                53,
               ],
-              "file": "/AnnotatorTest.cpp",
+              "file": "/GitHubAccessTokenScrambler12.java",
               "rows": Array [
-                10,
-                10,
+                15,
+                15,
               ],
             },
           ],
         },
       ],
       "rows": Array [
-        10,
-        10,
+        15,
+        15,
+      ],
+    },
+  ],
+  "3": Array [
+    Object {
+      "cols": Array [
+        42,
+        54,
+      ],
+      "fingerprints": Array [
+        Object {
+          "fingerprint": "e7c159b1f0c8449a86abb7a07127d4f593e958f6a3912221ba564e18d8f7e43b",
+          "version": 0,
+        },
+        Object {
+          "fingerprint": "a75b04d3.0b7f48d1.7a59bef1.44ab356c.a698423b.f7edcf51.c23c997b.41ec51de.a75b04d3.0b7f48d1.3c7d90aa.de031890.8b2d3351.ce109560.c23c997b.41ec51de",
+          "version": 1,
+        },
+      ],
+      "markers": Array [
+        Object {
+          "msg": Array [
+            16,
+            21,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                34,
+                51,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                11,
+                11,
+              ],
+            },
+          ],
+        },
+        Object {
+          "msg": Array [
+            36,
+            45,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                42,
+                54,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                16,
+                16,
+              ],
+            },
+          ],
+        },
+      ],
+      "rows": Array [
+        16,
+        16,
+      ],
+    },
+  ],
+  "4": Array [
+    Object {
+      "cols": Array [
+        37,
+        47,
+      ],
+      "fingerprints": Array [
+        Object {
+          "fingerprint": "b964e2b3c7ac4c5b425b9419abe756f566b7efcc16786e8036d44e33f109d545",
+          "version": 0,
+        },
+        Object {
+          "fingerprint": "19689298.883ce888.fdf08d99.d7919eeb.74c2d841.f7edcf51.5721ebe2.54d46e25.19689298.883ce888.fdf08d99.d7919eeb.74c2d841.f7edcf51.5721ebe2.54d46e25",
+          "version": 1,
+        },
+      ],
+      "markers": Array [
+        Object {
+          "msg": Array [
+            4,
+            6,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                49,
+                70,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                18,
+                18,
+              ],
+            },
+          ],
+        },
+        Object {
+          "msg": Array [
+            21,
+            51,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                37,
+                47,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                18,
+                18,
+              ],
+            },
+          ],
+        },
+      ],
+      "rows": Array [
+        18,
+        18,
+      ],
+    },
+  ],
+  "5": Array [
+    Object {
+      "cols": Array [
+        14,
+        15,
+      ],
+      "fingerprints": Array [
+        Object {
+          "fingerprint": "5af7ed14642e35fa42e5dcbec421163e53f6f8a9b540f1950c0cc520000d85e4",
+          "version": 0,
+        },
+        Object {
+          "fingerprint": "c2e08f55.e9fd9d38.d1699128.f482feb1.a485742e.730a5695.62adb608.e9000d02.c2e08f55.ef94efde.cd271e66.e22980a8.d31a8364.730a5695.bae646e8.54d46e25",
+          "version": 1,
+        },
+      ],
+      "markers": Array [
+        Object {
+          "msg": Array [
+            28,
+            46,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                19,
+                27,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                23,
+                23,
+              ],
+            },
+          ],
+        },
+        Object {
+          "msg": Array [
+            80,
+            94,
+          ],
+          "pos": Array [
+            Object {
+              "cols": Array [
+                17,
+                31,
+              ],
+              "file": "/GitHubAccessTokenScrambler12.java",
+              "rows": Array [
+                24,
+                24,
+              ],
+            },
+          ],
+        },
+      ],
+      "rows": Array [
+        24,
+        24,
       ],
     },
   ],

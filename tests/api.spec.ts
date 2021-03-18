@@ -424,28 +424,30 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
+describe('git analysis', () => {
+  let goofBundleId: string;
+
   it('create git bundle', async () => {
     const bundleResponse = await createGitBundle({
       baseURL,
       sessionToken,
-      gitUri: 'git@github.com:DeepCodeAI/cli.git',
+      gitUri: 'git@github.com:snyk/goof.git',
       source: 'atom',
     });
     expect(bundleResponse.type).toEqual('success');
     if (bundleResponse.type === 'error') return;
     expect(bundleResponse.value.bundleId).toBeTruthy();
+    goofBundleId = bundleResponse.value.bundleId;
   });
 
   it(
     'git analysis',
     async () => {
-      const bundleId = 'gh/DeepcodeAI/cli/320d98a6896f5376efe6cefefb6e70b46b97d566';
-
       // Get analysis results
       const response = await getAnalysis({
         baseURL,
         sessionToken,
-        bundleId,
+        bundleId: goofBundleId,
         includeLint: false,
         severity: 1,
         source: 'atom',
@@ -455,26 +457,27 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.done) {
-        expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
+        expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
         expect(response.value.analysisResults.suggestions).toBeTruthy();
 
         const suggestion = response.value.analysisResults.suggestions[0];
-        expect(suggestion.categories).toEqual(['Security', 'InTest']);
+        expect(suggestion.categories).toEqual(['Security']);
         expect(suggestion).toHaveProperty('exampleCommitDescriptions');
         expect(suggestion).toHaveProperty('exampleCommitFixes');
         expect(suggestion.leadURL).toEqual('');
-        expect(suggestion.id).toEqual('python%2Fdc%2FHardcodedNonCryptoSecret%2Ftest');
+        expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
         expect(suggestion.message).toContain(
-          'Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.',
+          'http (used in require) is an insecure protocol and should not be used in new code.',
         );
-        expect(suggestion.rule).toEqual('HardcodedNonCryptoSecret/test');
-        expect(suggestion.severity).toEqual(1);
-        expect(suggestion.tags).toEqual(['maintenance', 'bug', 'key', 'secret', 'credentials']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(1);
+        expect(suggestion.rule).toEqual('HttpToHttps');
+        expect(suggestion.severity).toEqual(2);
+        expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
       }
     },
     TEST_TIMEOUT,
   );
+});
 
   it(
     'git analysis with empty results',

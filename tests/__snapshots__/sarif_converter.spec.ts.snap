@@ -1,0 +1,2125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sarif Convertor should test no changes have occured in the sarif 1`] = `
+Object {
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": Array [
+    Object {
+      "properties": Object {
+        "coverage": Array [
+          Object {
+            "files": 56,
+            "isSupported": false,
+            "lang": "Shell",
+          },
+          Object {
+            "files": 167,
+            "isSupported": false,
+            "lang": "YAML",
+          },
+          Object {
+            "files": 189,
+            "isSupported": false,
+            "lang": "Unknown",
+          },
+          Object {
+            "files": 47,
+            "isSupported": false,
+            "lang": "Markdown",
+          },
+          Object {
+            "files": 328,
+            "isSupported": false,
+            "lang": "XML",
+          },
+          Object {
+            "files": 22,
+            "isSupported": false,
+            "lang": "Text",
+          },
+          Object {
+            "files": 2557,
+            "isSupported": true,
+            "lang": "Java",
+          },
+          Object {
+            "files": 4,
+            "isSupported": false,
+            "lang": "SVG",
+          },
+          Object {
+            "files": 41,
+            "isSupported": true,
+            "lang": "JavaScript",
+          },
+          Object {
+            "files": 13,
+            "isSupported": false,
+            "lang": "CSS",
+          },
+          Object {
+            "files": 14,
+            "isSupported": true,
+            "lang": "HTML",
+          },
+          Object {
+            "files": 21,
+            "isSupported": false,
+            "lang": "Java Properties",
+          },
+          Object {
+            "files": 89,
+            "isSupported": false,
+            "lang": "SQLPL",
+          },
+          Object {
+            "files": 88,
+            "isSupported": true,
+            "lang": "TypeScript",
+          },
+          Object {
+            "files": 72,
+            "isSupported": false,
+            "lang": "JSON",
+          },
+          Object {
+            "files": 8,
+            "isSupported": false,
+            "lang": "Smarty",
+          },
+          Object {
+            "files": 1,
+            "isSupported": false,
+            "lang": "TOML",
+          },
+          Object {
+            "files": 28,
+            "isSupported": false,
+            "lang": "FreeMarker",
+          },
+          Object {
+            "files": 6,
+            "isSupported": false,
+            "lang": "HTML+ERB",
+          },
+          Object {
+            "files": 3,
+            "isSupported": false,
+            "lang": "PHP (beta)",
+          },
+          Object {
+            "files": 3,
+            "isSupported": false,
+            "lang": "C# (beta)",
+          },
+          Object {
+            "files": 57,
+            "isSupported": false,
+            "lang": "Java Server Pages",
+          },
+          Object {
+            "files": 4,
+            "isSupported": false,
+            "lang": "C++ (beta)",
+          },
+          Object {
+            "files": 1,
+            "isSupported": false,
+            "lang": "C (beta)",
+          },
+          Object {
+            "files": 4,
+            "isSupported": false,
+            "lang": "Python",
+          },
+          Object {
+            "files": 4,
+            "isSupported": false,
+            "lang": "Less",
+          },
+          Object {
+            "files": 4,
+            "isSupported": false,
+            "lang": "Go",
+          },
+        ],
+      },
+      "results": Array [
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 44,
+                            "endLine": 45,
+                            "startColumn": 9,
+                            "startLine": 45,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "ae785dddd67d66083bf565a2ab826535bac183b3c477d249649c6596f2405dd6",
+            "1": "12342",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 44,
+                  "endLine": 45,
+                  "startColumn": 9,
+                  "startLine": 45,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[promise](0)",
+            ],
+            "markdown": "No catch method for promise. This may result in an unhandled promise rejection.",
+            "text": "No catch method for {0}. This may result in an unhandled promise rejection.",
+          },
+          "ruleId": "javascript/PromiseNotCaughtGeneral",
+          "ruleIndex": 0,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 44,
+                            "endLine": 97,
+                            "startColumn": 9,
+                            "startLine": 97,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "1d9d2bce6036443e56e61ffb689caca291b33055d37810ba48423aae6eb29d16",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 44,
+                  "endLine": 97,
+                  "startColumn": 9,
+                  "startLine": 97,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[promise](0)",
+            ],
+            "markdown": "No catch method for promise. This may result in an unhandled promise rejection.",
+            "text": "No catch method for {0}. This may result in an unhandled promise rejection.",
+          },
+          "ruleId": "javascript/PromiseNotCaughtGeneral",
+          "ruleIndex": 0,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/index.html",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 41,
+                            "endLine": 108,
+                            "startColumn": 9,
+                            "startLine": 108,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "c8ede54bd6611ca074c42baf78809b9fe198c762ba8a1a78571befdf191869e5",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-swagger-war/src/main/webapp/index.html",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 41,
+                  "endLine": 108,
+                  "startColumn": 9,
+                  "startLine": 108,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[promise](0)",
+            ],
+            "markdown": "No catch method for promise. This may result in an unhandled promise rejection.",
+            "text": "No catch method for {0}. This may result in an unhandled promise rejection.",
+          },
+          "ruleId": "javascript/PromiseNotCaughtGeneral",
+          "ruleIndex": 0,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 30,
+                            "endLine": 1052,
+                            "startColumn": 17,
+                            "startLine": 1052,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "8105a5e15b9d725e663009985913a6931ba94ddd56f4854d24ba3565067501b4",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 30,
+                  "endLine": 1052,
+                  "startColumn": 17,
+                  "startLine": 1052,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[promise](0)",
+            ],
+            "markdown": "No catch method for promise. This may result in an unhandled promise rejection.",
+            "text": "No catch method for {0}. This may result in an unhandled promise rejection.",
+          },
+          "ruleId": "javascript/PromiseNotCaughtGeneral",
+          "ruleIndex": 0,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 53,
+                            "endLine": 84,
+                            "startColumn": 13,
+                            "startLine": 84,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "8a870ceae63c99fb925bcdcbaca7ce5c8ccf29024898cd1694d930b5d687842e",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 53,
+                  "endLine": 84,
+                  "startColumn": 13,
+                  "startLine": 84,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[promise](0)",
+            ],
+            "markdown": "No catch method for promise. This may result in an unhandled promise rejection.",
+            "text": "No catch method for {0}. This may result in an unhandled promise rejection.",
+          },
+          "ruleId": "javascript/PromiseNotCaughtGeneral",
+          "ruleIndex": 0,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 175,
+                            "startColumn": 14,
+                            "startLine": 175,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 175,
+                            "startColumn": 14,
+                            "startLine": 175,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 2,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 31,
+                            "endLine": 23,
+                            "startColumn": 25,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 3,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 21,
+                            "endLine": 23,
+                            "startColumn": 5,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 4,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 21,
+                            "endLine": 23,
+                            "startColumn": 13,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 5,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 11,
+                            "endLine": 23,
+                            "startColumn": 5,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "c92fd0d8fbb0722ac17a8dfd6b9fd5c0770a64a3f965ed128ecc6ae45c20813b",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 11,
+                  "endLine": 23,
+                  "startColumn": 5,
+                  "startLine": 23,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[an exception](0)",
+              "[flows](1),(2),(3),(4)",
+              "[0](5)",
+            ],
+            "markdown": "Unsanitized input from an exception flows into 0, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
+            "text": "Unsanitized input from {0} {1} into {2}, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
+          },
+          "ruleId": "javascript/DOMXSS",
+          "ruleIndex": 1,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 235,
+                            "startColumn": 14,
+                            "startLine": 235,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 235,
+                            "startColumn": 14,
+                            "startLine": 235,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 2,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 34,
+                            "endLine": 236,
+                            "startColumn": 23,
+                            "startLine": 236,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 3,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 33,
+                            "endLine": 238,
+                            "startColumn": 22,
+                            "startLine": 238,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 4,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 17,
+                            "endLine": 35,
+                            "startColumn": 11,
+                            "startLine": 35,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 5,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 42,
+                            "startColumn": 29,
+                            "startLine": 42,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 6,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 42,
+                            "startColumn": 9,
+                            "startLine": 42,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 7,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 42,
+                            "startColumn": 17,
+                            "startLine": 42,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 8,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 15,
+                            "endLine": 42,
+                            "startColumn": 9,
+                            "startLine": 42,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "2ea8d6c4f7096751e5e6f725a3deeac983fe5fac17cdd64e5f6aa83d49156d67",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-root-war/src/main/webapp/_app/loader.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 20,
+                  "endLine": 238,
+                  "startColumn": 9,
+                  "startLine": 238,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[an exception](0)",
+              "[flows](1),(2),(3),(4),(5),(6),(7)",
+              "[0](8)",
+            ],
+            "markdown": "Unsanitized input from an exception flows into 0, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
+            "text": "Unsanitized input from {0} {1} into {2}, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
+          },
+          "ruleId": "javascript/DOMXSS",
+          "ruleIndex": 1,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/index.html",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 60,
+                            "endLine": 53,
+                            "startColumn": 29,
+                            "startLine": 53,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/index.html",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 21,
+                            "endLine": 51,
+                            "startColumn": 13,
+                            "startLine": 51,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {},
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-swagger-war/src/main/webapp/index.html",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 21,
+                  "endLine": 51,
+                  "startColumn": 13,
+                  "startLine": 51,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[a hardcoded string](0)",
+              "[initOAuth](1)",
+            ],
+            "markdown": "Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in initOAuth.",
+            "text": "Avoid hardcoding values that are meant to be secret. Found {0} used in {1}.",
+          },
+          "ruleId": "javascript/HardcodedNonCryptoSecret",
+          "ruleIndex": 2,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/marked.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 215,
+                            "startColumn": 31,
+                            "startLine": 215,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/marked.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 29,
+                            "endLine": 215,
+                            "startColumn": 16,
+                            "startLine": 215,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 2,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/marked.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 215,
+                            "startColumn": 31,
+                            "startLine": 215,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 3,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/marked.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 215,
+                            "startColumn": 31,
+                            "startLine": 215,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "719d356d9a2efebe9142ca79825c6c0e4b0e6f5013a6e3f3b04630243416ac87",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/marked.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 29,
+                  "endLine": 215,
+                  "startColumn": 16,
+                  "startLine": 215,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[regex](0)",
+              "[replace](1)",
+              "[/\\\\r?\\\\n$/](2)",
+              "[to handle different new lines](3)",
+            ],
+            "markdown": "The pattern regex in replace may be improved to /\\\\r?\\\\n$/to handle different new lines.",
+            "text": "The pattern {0} in {1} may be improved to {2}{3}.",
+          },
+          "ruleId": "javascript/ReplacementRegex",
+          "ruleIndex": 3,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 38,
+                            "endLine": 98,
+                            "startColumn": 3,
+                            "startLine": 98,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2",
+            "1": "asdf",
+            "2": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 38,
+                  "endLine": 98,
+                  "startColumn": 3,
+                  "startLine": 98,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[unbind()](0)",
+            ],
+            "markdown": "Use off() instead of unbind().",
+            "text": "Use off() instead of {0}.",
+          },
+          "ruleId": "javascript/UseInstead",
+          "ruleIndex": 4,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 21,
+                            "endLine": 216,
+                            "startColumn": 3,
+                            "startLine": 216,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "ce5c43465aac96db6e4505f48df1defaa81a38bf7876a1f0e7431c54304d9ea1",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 21,
+                  "endLine": 216,
+                  "startColumn": 3,
+                  "startLine": 216,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[unbind()](0)",
+            ],
+            "markdown": "Use off() instead of unbind().",
+            "text": "Use off() instead of {0}.",
+          },
+          "ruleId": "javascript/UseInstead",
+          "ruleIndex": 4,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 65,
+                            "endLine": 408,
+                            "startColumn": 50,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 65,
+                            "endLine": 408,
+                            "startColumn": 50,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 2,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 48,
+                            "endLine": 408,
+                            "startColumn": 39,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 3,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 66,
+                            "endLine": 408,
+                            "startColumn": 39,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 4,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 408,
+                            "startColumn": 25,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 5,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 35,
+                            "endLine": 408,
+                            "startColumn": 28,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 6,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 26,
+                            "endLine": 408,
+                            "startColumn": 25,
+                            "startLine": 408,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 7,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 45,
+                            "endLine": 409,
+                            "startColumn": 44,
+                            "startLine": 409,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 8,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 10,
+                            "endLine": 421,
+                            "startColumn": 9,
+                            "startLine": 421,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 9,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 10,
+                            "endLine": 438,
+                            "startColumn": 9,
+                            "startLine": 438,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 10,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 10,
+                            "endLine": 529,
+                            "startColumn": 9,
+                            "startLine": 529,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 11,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 25,
+                            "endLine": 540,
+                            "startColumn": 24,
+                            "startLine": 540,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 12,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 54,
+                            "endLine": 347,
+                            "startColumn": 53,
+                            "startLine": 347,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 13,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 63,
+                            "endLine": 347,
+                            "startColumn": 53,
+                            "startLine": 347,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 14,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 66,
+                            "endLine": 367,
+                            "startColumn": 56,
+                            "startLine": 367,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 15,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 66,
+                            "endLine": 367,
+                            "startColumn": 44,
+                            "startLine": 367,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 16,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 42,
+                            "endLine": 367,
+                            "startColumn": 26,
+                            "startLine": 367,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "2cc2fb05feccfae008104250873928e0d9f1de01f5878d485963f2966edc163e",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 67,
+                  "endLine": 367,
+                  "startColumn": 26,
+                  "startLine": 367,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[data from a remote resource](0)",
+              "[flows](1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15)",
+              "[this object](16)",
+            ],
+            "markdown": "Unsanitized input from data from a remote resource flows into a member access and is used to access a property of this object by name. This may allow a malicious user to access methods (e.g. toString) as opposed to regular properties of objects and cause a crash, remote code execution or more serious problems. This is known as a Prototype Pollution vulnerability.",
+            "text": "Unsanitized input from {0} {1} into a member access and is used to access a property of {2} by name. This may allow a malicious user to access methods (e.g. toString) as opposed to regular properties of objects and cause a crash, remote code execution or more serious problems. This is known as a Prototype Pollution vulnerability.",
+          },
+          "ruleId": "javascript/UserControlledProperty",
+          "ruleIndex": 5,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 61,
+                            "endLine": 375,
+                            "startColumn": 44,
+                            "startLine": 375,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 32,
+                            "endLine": 375,
+                            "startColumn": 13,
+                            "startLine": 375,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "4aaff40942701a6acc92fafebea49f718bdc060012ca10a5f30e9462da6143b9",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 61,
+                  "endLine": 375,
+                  "startColumn": 44,
+                  "startLine": 375,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[application/json](0)",
+              "[setRequestHeader](1)",
+            ],
+            "markdown": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
+            "text": "Content-type {0} set in {1} does not specify a charset. Add charset=utf-8 or another charset.",
+          },
+          "ruleId": "javascript/ContentTypeNoCharset",
+          "ruleIndex": 6,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 61,
+                            "endLine": 400,
+                            "startColumn": 44,
+                            "startLine": 400,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 32,
+                            "endLine": 400,
+                            "startColumn": 13,
+                            "startLine": 400,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "51a2aefac0251d664f40c9741ab9a6af0ad1cdd7a51423db9de5891777960016",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 61,
+                  "endLine": 400,
+                  "startColumn": 44,
+                  "startLine": 400,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[application/json](0)",
+              "[setRequestHeader](1)",
+            ],
+            "markdown": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
+            "text": "Content-type {0} set in {1} does not specify a charset. Add charset=utf-8 or another charset.",
+          },
+          "ruleId": "javascript/ContentTypeNoCharset",
+          "ruleIndex": 6,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 65,
+                            "endLine": 737,
+                            "startColumn": 48,
+                            "startLine": 737,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 36,
+                            "endLine": 737,
+                            "startColumn": 17,
+                            "startLine": 737,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "da1a56ce99d2778caea9103d4aba2292543efa487853e8c161c4573aec8b62f1",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 65,
+                  "endLine": 737,
+                  "startColumn": 48,
+                  "startLine": 737,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[application/json](0)",
+              "[setRequestHeader](1)",
+            ],
+            "markdown": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
+            "text": "Content-type {0} set in {1} does not specify a charset. Add charset=utf-8 or another charset.",
+          },
+          "ruleId": "javascript/ContentTypeNoCharset",
+          "ruleIndex": 6,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 73,
+                            "endLine": 794,
+                            "startColumn": 56,
+                            "startLine": 794,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 44,
+                            "endLine": 794,
+                            "startColumn": 25,
+                            "startLine": 794,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "81afc8333354c3ccd0a8264aab07846cb5a69b35bbeff7a9b6bcdb9fcf3689d0",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 73,
+                  "endLine": 794,
+                  "startColumn": 56,
+                  "startLine": 794,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[application/json](0)",
+              "[setRequestHeader](1)",
+            ],
+            "markdown": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
+            "text": "Content-type {0} set in {1} does not specify a charset. Add charset=utf-8 or another charset.",
+          },
+          "ruleId": "javascript/ContentTypeNoCharset",
+          "ruleIndex": 6,
+        },
+      ],
+      "tool": Object {
+        "driver": Object {
+          "name": "SnykCode",
+          "rules": Array [
+            Object {
+              "defaultConfiguration": Object {
+                "level": "note",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/PromiseNotCaughtGeneral",
+              "name": "PromiseNotCaughtGeneral",
+              "properties": Object {
+                "categories": Array [
+                  "API",
+                  "Info",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "*  fix test error",
+                  "testing with promises should return the promise",
+                ],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "maintenance",
+                  "error",
+                  "tests",
+                  "promise",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "PromiseNotCaughtGeneral",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "error",
+              },
+              "help": Object {
+                "markdown": "## Details
+
+A cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.
+
+This is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser's Same Origin Policy.
+
+Injecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.
+
+Escaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, \`<\` can be coded as  \`&lt\`; and \`>\` can be coded as \`&gt\`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses \`<\` and \`>\` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they've been correctly escaped in the application code and in this way the attempted attack is diverted.
+
+The most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware.
+
+### Types of attacks
+There are a few methods by which XSS can be manipulated:
+
+|Type|Origin|Description|
+|--|--|--|
+|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|
+|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user's browser.|
+|**DOM-based**|Client|The attacker forces the user's browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|
+|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|
+
+### Affected environments
+The following environments are susceptible to an XSS attack:
+
+* Web servers
+* Application servers
+* Web application environments
+
+### How to prevent
+This section describes the top best practices designed to specifically protect your code:
+
+* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches.
+* Convert special characters such as \`?\`, \`&\`, \`/\`, \`<\`, \`>\` and spaces to their respective HTML or URL encoded equivalents.
+* Give users the option to disable client-side scripts.
+* Redirect invalid requests.
+* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.
+* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.
+* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.",
+                "text": "",
+              },
+              "id": "javascript/DOMXSS",
+              "name": "DOMXSS",
+              "properties": Object {
+                "categories": Array [
+                  "Security",
+                ],
+                "cwe": Array [
+                  "CWE-79",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "* Ensure that dgrid.css is explicitly loaded in all test pages",
+                  "Added compound test suite and updated QUnit.",
+                  "ExampleWidget for testing LESS compilation and load!",
+                ],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "maintenance",
+                  "usability",
+                  "page",
+                  "QUnit",
+                  "loading",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "Cross-site Scripting (XSS)",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "error",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/HardcodedNonCryptoSecret",
+              "name": "HardcodedNonCryptoSecret",
+              "properties": Object {
+                "categories": Array [
+                  "Security",
+                ],
+                "cwe": Array [
+                  "CWE-547",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "Make address, passphrase and secret in the tests configurable",
+                  "clean console.log + update test for express session",
+                  "use config for tests",
+                ],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "maintenance",
+                  "secret",
+                  "session",
+                  "config",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "Hardcoded Secret",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "warning",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/ReplacementRegex",
+              "name": "ReplacementRegex",
+              "properties": Object {
+                "categories": Array [
+                  "Defect",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "Fix match on ending newline bug",
+                  "Better logging for favicons.",
+                  "* Even better auth switching and timeline syntax",
+                ],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "upgrade",
+                  "maintenance",
+                  "bug",
+                  "newline",
+                  "favicon",
+                  "auth",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "ReplacementRegex",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "warning",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/UseInstead",
+              "name": "UseInstead",
+              "properties": Object {
+                "categories": Array [
+                  "API",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "- Replaced all the $ for jQuery in the tests and suite.",
+                  "new event map and tests",
+                  "testing using on instead of bind",
+                ],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "maintenance",
+                  "bug",
+                  "jQuery",
+                  "event",
+                  "binding",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "UseInstead",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "warning",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/UserControlledProperty",
+              "name": "UserControlledProperty",
+              "properties": Object {
+                "categories": Array [
+                  "Security",
+                ],
+                "exampleCommitDescriptions": Array [],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "UserControlledProperty",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "warning",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "javascript/ContentTypeNoCharset",
+              "name": "ContentTypeNoCharset",
+              "properties": Object {
+                "categories": Array [
+                  "Defect",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "Added charset to content-type headers in tests",
+                ],
+                "exampleCommitFixes": Array [
+                  Object {
+                    "commitURL": "https://github.com/FabMo/FabMo-Engine/commit/25fc0c92e6f6f00e5a30fe8cd6f520599c7a4510?diff=split#diff-87379c668bab67fbe451d528e856c4a7L574",
+                    "lines": Array [
+                      Object {
+                        "line": "if(!(data instanceof FormData)) {",
+                        "lineChange": "none",
+                        "lineNumber": 578,
+                      },
+                      Object {
+                        "line": "  xhr.setRequestHeader('Content-Type', 'application/json');",
+                        "lineChange": "removed",
+                        "lineNumber": 573,
+                      },
+                      Object {
+                        "line": "  xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');",
+                        "lineChange": "added",
+                        "lineNumber": 579,
+                      },
+                      Object {
+                        "line": "  if(typeof data != 'string') {",
+                        "lineChange": "none",
+                        "lineNumber": 580,
+                      },
+                      Object {
+                        "line": "    data = JSON.stringify(data);",
+                        "lineChange": "none",
+                        "lineNumber": 581,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/Inpassor/centrifuge-ts/commit/b00e64314651b6990ba45c3f000a02dcf25dee0f?diff=split#diff-f658bd2547156630632595517b820ecdL458",
+                    "lines": Array [
+                      Object {
+                        "line": "}",
+                        "lineChange": "removed",
+                        "lineNumber": 455,
+                      },
+                      Object {
+                        "line": "xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');",
+                        "lineChange": "removed",
+                        "lineNumber": 456,
+                      },
+                      Object {
+                        "line": "xhr.setRequestHeader('Content-Type', 'application/json');",
+                        "lineChange": "removed",
+                        "lineNumber": 457,
+                      },
+                      Object {
+                        "line": "var _headers = new Headers();",
+                        "lineChange": "added",
+                        "lineNumber": 423,
+                      },
+                      Object {
+                        "line": "_headers.append('X-Requested-With', 'XMLHttpRequest');",
+                        "lineChange": "added",
+                        "lineNumber": 424,
+                      },
+                      Object {
+                        "line": "_headers.append('Content-Type', 'application/json');",
+                        "lineChange": "added",
+                        "lineNumber": 425,
+                      },
+                      Object {
+                        "line": "for (var headerName in headers) {",
+                        "lineChange": "none",
+                        "lineNumber": 458,
+                      },
+                      Object {
+                        "line": "    if (headers.hasOwnProperty(headerName)) {",
+                        "lineChange": "none",
+                        "lineNumber": 459,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/infermedica/js-symptom-checker-example/commit/2763d02a591081da11a6c241feb01bbf1a3a260d?diff=split#diff-424c2d7fee9a65c1537c6183d3d4f1e4L23",
+                    "lines": Array [
+                      Object {
+                        "line": "  req.setRequestHeader('App-Key', this.appKey);",
+                        "lineChange": "removed",
+                        "lineNumber": 20,
+                      },
+                      Object {
+                        "line": "  req.setRequestHeader('Model', this.apiModel);",
+                        "lineChange": "removed",
+                        "lineNumber": 21,
+                      },
+                      Object {
+                        "line": "  req.setRequestHeader('Content-Type', 'application/json');",
+                        "lineChange": "removed",
+                        "lineNumber": 22,
+                      },
+                      Object {
+                        "line": "  req.onload = () => {",
+                        "lineChange": "removed",
+                        "lineNumber": 24,
+                      },
+                      Object {
+                        "line": "headers.append('app-key', this.appKey);",
+                        "lineChange": "added",
+                        "lineNumber": 17,
+                      },
+                      Object {
+                        "line": "headers.append('model', this.apiModel);",
+                        "lineChange": "added",
+                        "lineNumber": 18,
+                      },
+                      Object {
+                        "line": "headers.append('content-type', 'application/json');",
+                        "lineChange": "added",
+                        "lineNumber": 19,
+                      },
+                      Object {
+                        "line": "return fetch(this.apiUrl + url, {",
+                        "lineChange": "added",
+                        "lineNumber": 21,
+                      },
+                    ],
+                  },
+                ],
+                "precision": "very-high",
+                "tags": Array [
+                  "javascript",
+                  "bug",
+                  "maintenance",
+                  "charset",
+                  "contenttype",
+                  "header",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "ContentTypeNoCharset",
+              },
+            },
+          ],
+          "semanticVersion": "1.0.0",
+          "version": "1.0.0",
+        },
+      },
+    },
+  ],
+  "version": "2.1.0",
+}
+`;

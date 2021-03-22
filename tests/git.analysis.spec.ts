@@ -105,7 +105,7 @@ describe('Functional test of analysis', () => {
       expect(cweSuggestion?.title).toBeTruthy();
       expect(cweSuggestion?.text).toBeTruthy();
 
-      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(236);
+      expect(bundle.sarifResults?.runs[0].results?.length).toEqual(402);
       expect(bundle.sarifResults?.runs[0].tool?.driver.rules?.length).toEqual(120);
 
       const cweRule = bundle.sarifResults?.runs[0].tool?.driver.rules?.find(r => r.id === 'java/PT');
@@ -215,7 +215,7 @@ describe('Custom request options', () => {
       } catch (e) {
         // expected to fail, we are interested in correct propagation of headers only
       }
-      expect((axios.request as jest.Mock).mock.calls[0][0]).toMatchObject({headers: { 'X-test-header': 'Snyk' }});
+      expect((axios.request as jest.Mock).mock.calls[0][0]).toMatchObject({ headers: { 'X-test-header': 'Snyk' } });
     },
     TEST_TIMEOUT,
   );
@@ -228,10 +228,11 @@ describe('Custom request options', () => {
 function getNumOfIssues(bundle: IGitBundle): number {
   let numberOfIssues = 0;
 
-  Object.keys(bundle.analysisResults.files).forEach(filePath => {
-    const curFile = bundle.analysisResults.files[filePath];
-    numberOfIssues += Object.keys(curFile).length;
-  });
+  Object.keys(bundle.analysisResults.files).forEach(key =>
+    Object.keys(bundle.analysisResults.files[key]).forEach(
+      issueId => (numberOfIssues += bundle.analysisResults.files[key][issueId].length),
+    ),
+  );
 
   return numberOfIssues;
 }

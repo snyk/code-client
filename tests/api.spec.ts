@@ -424,60 +424,99 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
-describe('git analysis', () => {
-  let goofBundleId: string;
+  describe('git analysis', () => {
+    let goofBundleId: string;
 
-  it('create git bundle', async () => {
-    const bundleResponse = await createGitBundle({
-      baseURL,
-      sessionToken,
-      gitUri: 'git@github.com:snyk/goof.git',
-      source: 'atom',
-    });
-    expect(bundleResponse.type).toEqual('success');
-    if (bundleResponse.type === 'error') return;
-    expect(bundleResponse.value.bundleId).toBeTruthy();
-    goofBundleId = bundleResponse.value.bundleId;
-  });
-
-  it(
-    'git analysis',
-    async () => {
-      // Get analysis results
-      const response = await getAnalysis({
+    it('create git bundle', async () => {
+      const bundleResponse = await createGitBundle({
         baseURL,
         sessionToken,
-        bundleId: goofBundleId,
-        includeLint: false,
-        severity: 1,
+        gitUri: 'git@github.com:snyk/goof.git',
         source: 'atom',
       });
-      expect(response.type).toEqual('success');
-      if (response.type === 'error') return;
-      expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+      expect(bundleResponse.type).toEqual('success');
+      if (bundleResponse.type === 'error') return;
+      expect(bundleResponse.value.bundleId).toBeTruthy();
+      goofBundleId = bundleResponse.value.bundleId;
+    });
 
-      if (response.value.status === AnalysisStatus.done) {
-        expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
-        expect(response.value.analysisResults.suggestions).toBeTruthy();
+    it(
+      'git analysis',
+      async () => {
+        // Get analysis results
+        const response = await getAnalysis({
+          baseURL,
+          sessionToken,
+          bundleId: goofBundleId,
+          includeLint: false,
+          severity: 1,
+          source: 'atom',
+        });
+        expect(response.type).toEqual('success');
+        if (response.type === 'error') return;
+        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
-        const suggestion = response.value.analysisResults.suggestions[0];
-        expect(suggestion.categories).toEqual(['Security']);
-        expect(suggestion).toHaveProperty('exampleCommitDescriptions');
-        expect(suggestion).toHaveProperty('exampleCommitFixes');
-        expect(suggestion.leadURL).toEqual('');
-        expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
-        expect(suggestion.message).toContain(
-          'http (used in require) is an insecure protocol and should not be used in new code.',
-        );
-        expect(suggestion.rule).toEqual('HttpToHttps');
-        expect(suggestion.severity).toEqual(2);
-        expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
-      }
-    },
-    TEST_TIMEOUT,
-  );
-});
+        if (response.value.status === AnalysisStatus.done) {
+          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
+          expect(response.value.analysisResults.suggestions).toBeTruthy();
+
+          const suggestion = response.value.analysisResults.suggestions[0];
+          expect(suggestion.categories).toEqual(['Security']);
+          expect(suggestion).toHaveProperty('exampleCommitDescriptions');
+          expect(suggestion).toHaveProperty('exampleCommitFixes');
+          expect(suggestion.leadURL).toEqual('');
+          expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
+          expect(suggestion.message).toContain(
+            'http (used in require) is an insecure protocol and should not be used in new code.',
+          );
+          expect(suggestion.rule).toEqual('HttpToHttps');
+          expect(suggestion.severity).toEqual(2);
+          expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
+          expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
+        }
+      },
+      TEST_TIMEOUT,
+    );
+    //TODO(Artur): need to adjust this test after we introduce the required changes in api server
+    it.skip(
+      'git analysis with reachability flag',
+      async () => {
+        // Get analysis results
+        const response = await getAnalysis({
+          baseURL,
+          sessionToken,
+          bundleId: goofBundleId,
+          includeLint: false,
+          severity: 1,
+          source: 'atom',
+          reachability: true,
+        });
+        expect(response.type).toEqual('success');
+        if (response.type === 'error') return;
+        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+
+        if (response.value.status === AnalysisStatus.done) {
+          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
+          expect(response.value.analysisResults.suggestions).toBeTruthy();
+
+          const suggestion = response.value.analysisResults.suggestions[0];
+          expect(suggestion.categories).toEqual(['Security']);
+          expect(suggestion).toHaveProperty('exampleCommitDescriptions');
+          expect(suggestion).toHaveProperty('exampleCommitFixes');
+          expect(suggestion.leadURL).toEqual('');
+          expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
+          expect(suggestion.message).toContain(
+            'http (used in require) is an insecure protocol and should not be used in new code.',
+          );
+          expect(suggestion.rule).toEqual('HttpToHttps');
+          expect(suggestion.severity).toEqual(2);
+          expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
+          expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
+        }
+      },
+      TEST_TIMEOUT,
+    );
+  });
 
   it(
     'git analysis with empty results',

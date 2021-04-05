@@ -424,6 +424,7 @@ export async function getAnalysis(
     readonly oAuthToken?: string;
     readonly username?: string;
     readonly source: string;
+    readonly reachability?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
@@ -437,9 +438,11 @@ export async function getAnalysis(
     severity,
     limitToFiles,
     source,
+    reachability,
   } = options;
   // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
-  const params = { severity, linters: includeLint || undefined };
+  // the same applies for reachability
+  const params = { severity, linters: includeLint || undefined, reachability: reachability || undefined };
 
   const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
   if (oAuthToken) {

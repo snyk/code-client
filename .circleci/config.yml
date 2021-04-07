@@ -6,18 +6,17 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - v1-{{ .Branch }}-{{ .Revision }}
-            - v1-{{ .Branch }}
-            - v1-
+            - v2-{{ .Branch }}-{{ .Revision }}
+            - v2-{{ .Branch }}
+            - v2-
       - checkout
       - run:
           name: Install
           command: npm install
       - save_cache:
-          key: v1-{{ .Branch }}-{{ .Revision }}
+          key: v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - node_modules
-            - .git
       - run: npm run test
 
   release:
@@ -26,9 +25,9 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - v1-{{ .Branch }}-{{ .Revision }}
-            - v1-{{ .Branch }}
-            - v1-
+            - v2-{{ .Branch }}-{{ .Revision }}
+            - v2-{{ .Branch }}
+            - v2-
       - checkout
       - run:
           name: Install

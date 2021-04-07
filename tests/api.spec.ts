@@ -42,7 +42,7 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.ts', '.tsx', '.vue', '.java']),
+      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java']),
     );
   });
 

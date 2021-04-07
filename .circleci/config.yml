@@ -1,6 +1,7 @@
 version: 2.1
 jobs:
   test:
+    working_directory: ~/code-sdk
     docker:
       - image: circleci/node:12
     steps:
@@ -20,6 +21,7 @@ jobs:
       - run: npm run test
 
   release:
+    working_directory: ~/code-sdk
     docker:
       - image: circleci/node:12
     steps:

@@ -19,6 +19,7 @@ const axios_ = axios.create({
   // keepAlive pools and reuses TCP connections, so it's faster
   httpAgent: new http.Agent(agentOptions),
   httpsAgent: new https.Agent(agentOptions),
+  proxy: false,
 });
 
 axios_.interceptors.request.use(

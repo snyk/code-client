@@ -477,11 +477,10 @@ describe('Requests to public API', () => {
       },
       TEST_TIMEOUT,
     );
-    //TODO(Artur): need to adjust this test after we introduce the required changes in api server
-    it.skip(
+
+    it(
       'git analysis with reachability flag',
       async () => {
-        // Get analysis results
         const response = await getAnalysis({
           baseURL,
           sessionToken,
@@ -499,19 +498,20 @@ describe('Requests to public API', () => {
           expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
           expect(response.value.analysisResults.suggestions).toBeTruthy();
 
-          const suggestion = response.value.analysisResults.suggestions[0];
-          expect(suggestion.categories).toEqual(['Security']);
-          expect(suggestion).toHaveProperty('exampleCommitDescriptions');
-          expect(suggestion).toHaveProperty('exampleCommitFixes');
-          expect(suggestion.leadURL).toEqual('');
-          expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
-          expect(suggestion.message).toContain(
-            'http (used in require) is an insecure protocol and should not be used in new code.',
+          expect(response.value.analysisResults.coverage).toEqual(
+            expect.arrayContaining([
+              {
+                files: 8,
+                isSupported: true,
+                lang: 'JavaScript',
+              },
+              {
+                files: 1,
+                isSupported: true,
+                lang: 'HTML',
+              },
+            ]),
           );
-          expect(suggestion.rule).toEqual('HttpToHttps');
-          expect(suggestion.severity).toEqual(2);
-          expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
-          expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
         }
       },
       TEST_TIMEOUT,

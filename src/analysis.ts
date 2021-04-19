@@ -55,6 +55,7 @@ async function pollAnalysis(
     username,
     limitToFiles,
     source,
+    reachability,
   }: {
     baseURL: string;
     sessionToken: string;
@@ -65,6 +66,7 @@ async function pollAnalysis(
     username?: string;
     limitToFiles?: string[];
     source: string;
+    reachability?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
@@ -90,6 +92,7 @@ async function pollAnalysis(
         severity,
         limitToFiles,
         source,
+        reachability,
       },
       requestOptions,
     );
@@ -132,6 +135,7 @@ export async function analyzeBundle(
     username,
     limitToFiles,
     source,
+    reachability = false,
   }: {
     baseURL: string;
     sessionToken: string;
@@ -142,6 +146,7 @@ export async function analyzeBundle(
     username?: string;
     limitToFiles?: string[];
     source: string;
+    reachability?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IBundleResult> {
@@ -157,6 +162,7 @@ export async function analyzeBundle(
       severity,
       limitToFiles,
       source,
+      reachability,
     },
     requestOptions,
   );

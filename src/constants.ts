@@ -12,7 +12,7 @@ export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENA
 export const CACHE_KEY = '.dccache';
 export const MAX_UPLOAD_ATTEMPTS = 5;
 
-export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}`];
+export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}/**`];
 
 export const IGNORE_FILES_NAMES = [GITIGNORE_FILENAME, DCIGNORE_FILENAME];
 

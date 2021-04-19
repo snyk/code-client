@@ -5,11 +5,18 @@ import { getFileInfo, notEmpty } from '../../src/files';
 
 export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 export const supportedFiles = {
-  extensions: ['.js', '.cpp', '.java'],
+  extensions: ['.js', '.jsx', '.cpp', '.java'],
   configFiles: ['.eslintrc.json', '.dcignore'],
 };
 
-export const bundleFileIgnores = ['**/.git', `${sampleProjectPath}/**/models`, `${sampleProjectPath}/**/controllers`];
+export const bundleFileIgnores = [
+  '**/.git/**',
+  `${sampleProjectPath}/**/models/**`,
+  `${sampleProjectPath}/**/controllers/**`,
+  `${sampleProjectPath}/**/ignored/**`,
+  `!${sampleProjectPath}/**/not/ignored/**`,
+  `${sampleProjectPath}/**/*.jsx/**`
+];
 
 export const bundleFilePaths = [
   '/.eslintrc.json',
@@ -20,6 +27,7 @@ export const bundleFilePaths = [
   'main.js',
   'routes/index.js',
   'routes/sharks.js',
+  'not/ignored/this_should_not_be_ignored.java',
 ];
 
 async function getBundleFiles(withContent: boolean) {

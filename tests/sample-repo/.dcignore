@@ -1,2 +1,6 @@
 models
 **/controllers
+
+ignored
+!not/ignored
+*.jsx

@@ -4,6 +4,7 @@ import fg from '@snyk/fast-glob';
 import micromatch from 'micromatch';
 import crypto from 'crypto';
 import union from 'lodash.union';
+import difference from 'lodash.difference';
 import util from 'util';
 import { Cache } from './cache';
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
@@ -76,11 +77,14 @@ export function parseFileIgnores(path: string): string[] {
   }
 
   return rules.map(rule => {
-    if (rule.startsWith('/') || rule.startsWith('**')) {
-      return nodePath.posix.join(dirname, rule);
+    let prefix = "";
+    if (rule.startsWith('!')) {
+      rule = rule.substring(1);
+      prefix = "!";
     }
-
-    return nodePath.posix.join(dirname, '**', rule);
+    return rule.startsWith('/') || rule.startsWith('**')
+      ? prefix + nodePath.posix.join(dirname, rule, '**')
+      : prefix + nodePath.posix.join(dirname, '**', rule, '**');
   });
 }
 
@@ -107,7 +111,6 @@ export async function collectIgnoreRules(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
         ...fgOptions,
-        ignore: fileIgnores,
         cwd: folder,
         followSymbolicLinks: symlinksEnabled,
       },
@@ -132,25 +135,22 @@ export function determineBaseDir(paths: string[]): string {
   return '';
 }
 
-function searchFiles(
+async function* searchFiles(
   patterns: string[],
   cwd: string,
   symlinksEnabled: boolean,
   ignores: string[],
-): NodeJS.ReadableStream {
-  const relIgnores = ignores.map(i => {
-    if (i.startsWith(cwd)) {
-      return i.slice(cwd.length + 1);
-    }
-    return i;
-  });
-
-  return fg.stream(patterns, {
+): AsyncGenerator<string | Buffer> {
+  const searcher = fg.stream(patterns, {
     ...fgOptions,
     cwd,
-    ignore: relIgnores,
     followSymbolicLinks: symlinksEnabled,
   });
+  for await (const filePath of searcher) {
+    if (filterIgnoredFiles([filePath.toString()], ignores).length) {
+      yield filePath;
+    }
+  }
 }
 
 /**
@@ -224,19 +224,14 @@ export async function prepareExtendingBundle(
   // Filter for supported extensions/files only
   let processingFiles: string[] = filterSupportedFiles(files, supportedFiles);
 
-  // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed
-  processingFiles = micromatch(
-    processingFiles,
-    fileIgnores.map(p => `!${p}`),
-    microMatchOptions,
-  );
+  // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed.
+  processingFiles = filterIgnoredFiles(processingFiles, fileIgnores);
 
   if (processingFiles.length) {
     // Determine existing files (minus removed)
     const entries = await fg(processingFiles, {
       ...fgOptions,
       cwd: baseDir,
-      ignore: fileIgnores,
       followSymbolicLinks: symlinksEnabled,
       objectMode: true,
       stats: true,
@@ -390,4 +385,12 @@ export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOA
   for (const bucket of buckets.filter(b => b.files.length)) {
     yield bucket.files;
   }
+}
+
+export function filterIgnoredFiles(
+  filePaths: string[],
+  ignores: string[],
+) {
+  const ignored = micromatch(filePaths, ignores, {...microMatchOptions, basename: false});
+  return difference(filePaths, ignored);
 }

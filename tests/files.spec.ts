@@ -5,12 +5,13 @@ import * as nodePath from 'path';
 import {
   collectIgnoreRules,
   collectBundleFiles,
+  prepareExtendingBundle,
   composeFilePayloads,
   parseFileIgnores,
   getFileInfo,
 } from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilePaths, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
 describe('files', () => {
 
@@ -34,6 +35,21 @@ describe('files', () => {
     expect(testFile.size).toEqual(239);
   });
 
+  it('extend bundle files', async () => {
+    const testNewFiles = [
+      `${sampleProjectPath}/app.js`,
+      `${sampleProjectPath}/not/ignored/this_should_not_be_ignored.java`
+    ];
+    const testRemovedFiles = [
+      `${sampleProjectPath}/removed_from_the_parent_bundle.java`,
+      `${sampleProjectPath}/ignored/this_should_be_ignored.java`
+    ];
+    const parentBundle = [...testNewFiles, ...testRemovedFiles]
+    const { files, removedFiles } = await prepareExtendingBundle(sampleProjectPath, parentBundle, supportedFiles, bundleFileIgnores);
+    expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.filePath)));
+    expect(removedFiles).toEqual(['/removed_from_the_parent_bundle.java']);
+  });
+
   it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
     const collector = collectBundleFiles(
@@ -53,7 +69,7 @@ describe('files', () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles, bundleFileIgnores);
+    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles);
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -68,7 +84,7 @@ describe('files', () => {
   it('compose file payloads', async () => {
     // Prepare all missing files first
     const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
-    expect(payloads.length).toEqual(4); // 4 chunks
+    expect(payloads.length).toEqual(5); // 5 chunks
     expect(payloads[0].length).toEqual(4);
 
     const testPayload = payloads[0][1];
@@ -81,7 +97,7 @@ describe('files', () => {
 
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns.length).toEqual(2);
+    expect(patterns.length).toEqual(5);
   });
 
   it('support of utf-8 encoding', async () => {

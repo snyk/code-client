@@ -64,7 +64,7 @@ describe('Functional test of analysis', () => {
       expect(bundle).toHaveProperty('sessionToken');
       expect(bundle).toHaveProperty('supportedFiles');
       expect(bundle).toHaveProperty('analysisURL');
-      expect(Object.keys(bundle.analysisResults.files).length).toEqual(3);
+      expect(Object.keys(bundle.analysisResults.files).length).toEqual(4);
       expect(
         bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/GitHubAccessTokenScrambler12.java`),
       ).toBeTruthy();
@@ -75,7 +75,7 @@ describe('Functional test of analysis', () => {
       expect(new Set(bundle.analysisResults.coverage)).toEqual(
         new Set([
           {
-            files: 1,
+            files: 2,
             isSupported: true,
             lang: 'Java',
           },
@@ -89,7 +89,7 @@ describe('Functional test of analysis', () => {
 
       // Check if emitter event happened
       expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-      expect(onScanFilesProgress).toHaveBeenCalledTimes(6);
+      expect(onScanFilesProgress).toHaveBeenCalledTimes(7);
       expect(onCreateBundleProgress).toHaveBeenCalledTimes(3);
       expect(onAnalyseProgress).toHaveBeenCalled();
       expect(onAPIRequestLog).toHaveBeenCalled();

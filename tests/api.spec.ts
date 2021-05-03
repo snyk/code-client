@@ -42,7 +42,7 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java']),
+      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java', '.java-dummy']),
     );
   });
 
@@ -404,8 +404,9 @@ describe('Requests to public API', () => {
       } while (response.value.status !== AnalysisStatus.done);
 
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
-      expect(new Set(Object.keys(response.value.analysisResults.files)))
-        .toEqual(new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']));
+      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
+        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
+      );
 
       // Get analysis results without linters but with severity 3
       do {
@@ -423,8 +424,9 @@ describe('Requests to public API', () => {
       } while (response.value.status !== AnalysisStatus.done);
 
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(new Set(Object.keys(response.value.analysisResults.files)))
-        .toEqual(new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']));
+      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
+        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
+      );
     },
     TEST_TIMEOUT,
   );

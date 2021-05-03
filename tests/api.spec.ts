@@ -1,5 +1,5 @@
 import { baseURL, authHost, sessionToken, TEST_TIMEOUT } from './constants/base';
-import { bundleFiles, bundleFilesFull } from './constants/sample';
+import { bundleFiles, bundleFilesFull, bundleFilePaths } from './constants/sample';
 import { fromEntries } from '../src/lib/utils';
 import {
   getFilters,
@@ -16,9 +16,9 @@ import {
   reportEvent,
 } from '../src/http';
 
-const fakeBundleId = '79925ce5d4dbfcb9f7f90f671bfcbdaebf394b3c91b49eb4d2b57f109d2abcc6';
+const fakeBundleId = '769e1811db5e98abdb65df9160228ad51646f535af28b80a8913813aec1bd331';
 let fakeBundleIdFull = '';
-const realBundleId = '39bc8dbc1e4fd197323fe352231ff3afad2cd2ea191b4abeb3613340c8752ea0';
+const realBundleId = 'ffdd7b1cb8e28d3859e6b7179bf4b871d1abd8a7a2cacf0002d5174aca3b6841';
 let realBundleIdFull = '';
 
 const reportTelemetryRequest = {
@@ -42,7 +42,7 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java']),
+      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java', '.java-dummy']),
     );
   });
 
@@ -112,6 +112,7 @@ describe('Requests to public API', () => {
         `/app.js`,
         `/db.js`,
         `/main.js`,
+        `/not/ignored/this_should_not_be_ignored.java`,
         `/routes/index.js`,
         `/routes/sharks.js`,
       ]);
@@ -135,6 +136,7 @@ describe('Requests to public API', () => {
         `/app.js`,
         `/db.js`,
         `/main.js`,
+        `/not/ignored/this_should_not_be_ignored.java`,
         `/routes/index.js`,
         `/routes/sharks.js`,
       ]);
@@ -199,6 +201,7 @@ describe('Requests to public API', () => {
           `/GitHubAccessTokenScrambler12.java`,
           `/db.js`,
           `/main.js`,
+          `/not/ignored/this_should_not_be_ignored.java`,
           `/routes/index.js`,
           `/routes/sharks.js`,
         ],
@@ -360,7 +363,7 @@ describe('Requests to public API', () => {
         expect(suggestion.severity).toEqual(2);
 
         expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,
         );
@@ -370,7 +373,7 @@ describe('Requests to public API', () => {
         expect(new Set(response.value.analysisResults.coverage)).toEqual(
           new Set([
             {
-              files: 1,
+              files: 2,
               isSupported: true,
               lang: 'Java',
             },
@@ -401,7 +404,9 @@ describe('Requests to public API', () => {
       } while (response.value.status !== AnalysisStatus.done);
 
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
-      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/GitHubAccessTokenScrambler12.java']);
+      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
+        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
+      );
 
       // Get analysis results without linters but with severity 3
       do {
@@ -419,7 +424,9 @@ describe('Requests to public API', () => {
       } while (response.value.status !== AnalysisStatus.done);
 
       expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(Object.keys(response.value.analysisResults.files)).toEqual(['/GitHubAccessTokenScrambler12.java']);
+      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
+        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
+      );
     },
     TEST_TIMEOUT,
   );

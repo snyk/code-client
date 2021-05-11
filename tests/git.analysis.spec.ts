@@ -182,6 +182,22 @@ describe('Functional test of analysis', () => {
       TEST_TIMEOUT,
     );
 
+    it(
+      'analyze git should return reachability results',
+      async () => {
+        const bundle = await analyzeGit({
+          baseURL,
+          sessionToken,
+          severity: 1,
+          gitUri: 'git@github.com:prestodb/presto.git@6970b6da9f392a8f6eb41c974c7eeb15f69c62da',
+          reachability: true,
+        });
+        expect(Object.values(bundle.analysisResults.suggestions).length).toBeGreaterThanOrEqual(1);
+        Object.values(bundle.analysisResults.suggestions).map(s => s.id).forEach(id => expect(id).toContain('dc_reachability'));
+      },
+      TEST_TIMEOUT,
+    );
+
     it('should match sarif schema', () => {
       const validationResult = jsonschema.validate(sarifResults, sarifSchema);
       // this is to debug any errors found

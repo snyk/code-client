@@ -4,6 +4,7 @@ export interface AnalysisOptions {
   baseURL: string;
   sessionToken: string;
   includeLint: boolean;
+  reachability: boolean;
   severity: AnalysisSeverity;
   sarif: boolean;
   source: string;

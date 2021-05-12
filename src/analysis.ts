@@ -241,6 +241,7 @@ let analyzeFolderDefaults = {
   baseURL: defaultBaseURL,
   sessionToken: '',
   includeLint: false,
+  reachability: false,
   severity: AnalysisSeverity.info,
   symlinksEnabled: false,
   maxPayload: MAX_PAYLOAD,
@@ -254,6 +255,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     baseURL,
     sessionToken,
     includeLint,
+    reachability,
     severity,
     paths,
     symlinksEnabled,
@@ -322,6 +324,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
       baseURL,
       sessionToken,
       includeLint,
+      reachability,
       severity,
       bundleId: remoteBundle.bundleId,
       source,
@@ -333,6 +336,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     baseURL,
     sessionToken,
     includeLint,
+    reachability,
     severity,
     supportedFiles,
     baseDir,
@@ -409,6 +413,7 @@ const analyzeGitDefaults = {
   baseURL: defaultBaseURL,
   sessionToken: '',
   includeLint: false,
+  reachability: false,
   severity: AnalysisSeverity.info,
   sarif: false,
   source: '',
@@ -416,7 +421,18 @@ const analyzeGitDefaults = {
 
 export async function analyzeGit(options: GitOptions, requestOptions?: RequestOptions): Promise<IGitBundle> {
   const analysisOptions: AnalyzeGitOptions = { ...analyzeGitDefaults, ...options };
-  const { baseURL, sessionToken, oAuthToken, username, includeLint, severity, gitUri, sarif, source } = analysisOptions;
+  const {
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    includeLint,
+    reachability,
+    severity,
+    gitUri,
+    sarif,
+    source,
+  } = analysisOptions;
   const bundleResponse = await createGitBundle(
     {
       baseURL,
@@ -439,6 +455,7 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
       oAuthToken,
       username,
       includeLint,
+      reachability,
       severity,
       bundleId,
       source,
@@ -451,6 +468,7 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
     sessionToken,
     oAuthToken,
     includeLint,
+    reachability,
     severity,
     gitUri,
     ...analysisData,

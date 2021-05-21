@@ -48,7 +48,7 @@ function getSuggestions(analysisResults: IAnalysisResult): ISarifSuggestions {
         suggestions[issueId] = [];
       }
       issues.forEach(issue => {
-        suggestions[issueId].push({ ...issue, file: file.substring(1) });
+        suggestions[issueId].push({ ...issue, file: file.charAt(0) === '/' ? file.substring(1) : file });
       });
     }
   }
@@ -172,7 +172,7 @@ function getResults(allIssues: ISarifSuggestion[]): Result[] {
               id: i,
               physicalLocation: {
                 artifactLocation: {
-                  uri: position.file.substring(1),
+                  uri: position.file.charAt(0) === '/' ? position.file.substring(1) : position.file,
                   uriBaseId: '%SRCROOT%',
                 },
                 region: {

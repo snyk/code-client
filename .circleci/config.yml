@@ -1,16 +1,19 @@
 version: 2.1
 jobs:
   test:
+    parameters:
+      node_version:
+        type: string
     working_directory: ~/code-sdk
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:<< parameters.node_version >>
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v2-{{ .Branch }}-{{ .Revision }}
-            - v2-{{ .Branch }}
-            - v2-
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+            - v2-{{ .Branch }}-<< parameters.node_version >>
+            - v2-<< parameters.node_version >>
       - run:
           name: Install
           command: npm install
@@ -21,16 +24,19 @@ jobs:
       - run: npm run test
 
   release:
+    parameters:
+      node_version:
+        type: string
     working_directory: ~/code-sdk
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:<< parameters.node_version >>
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v2-{{ .Branch }}-{{ .Revision }}
-            - v2-{{ .Branch }}
-            - v2-
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+            - v2-{{ .Branch }}-<< parameters.node_version >>
+            - v2-<< parameters.node_version >>
       - run:
           name: Install
           command: npm install
@@ -42,8 +48,12 @@ workflows:
   default_workflow:
     jobs:
       - test:
+          matrix:
+            parameters:
+              node_version: ["10", "12"]
           context: nodejs-install
       - release:
+          node_version: "12"
           context: nodejs-lib-release
           requires:
             - test

@@ -18,6 +18,7 @@ import {
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   AnalysisFinishedResponse,
+  RemoteBundle,
 } from './http';
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
@@ -41,6 +42,7 @@ import {
 import { RequestOptions } from './interfaces/http-options.interface';
 
 import { fromEntries } from './lib/utils';
+import { ISupportedFiles } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -259,20 +261,12 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     severity,
     paths,
     symlinksEnabled,
-    maxPayload,
-    defaultFileIgnores,
     sarif,
+    defaultFileIgnores,
     source,
   } = analysisOptions;
 
-  // Get supported filters and test baseURL for correctness and availability
-  emitter.supportedFilesLoaded(null);
-  const resp = await getFilters(baseURL, source);
-  if (resp.type === 'error') {
-    throw resp.error;
-  }
-  const supportedFiles = resp.value;
-  emitter.supportedFilesLoaded(supportedFiles);
+  const supportedFiles = await getSupportedFiles(baseURL, source);
 
   // Scan directories and find all suitable files
   const baseDir = determineBaseDir(paths);
@@ -280,27 +274,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
   // Scan for custom ignore rules
   const fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores);
 
-  emitter.scanFilesProgress(0);
-  const bundleFiles = [];
-  let totalFiles = 0;
-  const bundleFileCollector = collectBundleFiles(
-    baseDir,
-    paths,
-    supportedFiles,
-    fileIgnores,
-    maxPayload,
-    symlinksEnabled,
-  );
-  for await (const f of bundleFileCollector) {
-    bundleFiles.push(f);
-    totalFiles += 1;
-    emitter.scanFilesProgress(totalFiles);
-  }
-
-  // Create remote bundle
-  const remoteBundle = bundleFiles.length
-    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
-    : null;
+  const remoteBundle = await createBundleFromFolders({ ...analysisOptions, supportedFiles, baseDir, fileIgnores });
 
   // Analyze bundle
   let analysisData;
@@ -421,18 +395,8 @@ const analyzeGitDefaults = {
 
 export async function analyzeGit(options: GitOptions, requestOptions?: RequestOptions): Promise<IGitBundle> {
   const analysisOptions: AnalyzeGitOptions = { ...analyzeGitDefaults, ...options };
-  const {
-    baseURL,
-    sessionToken,
-    oAuthToken,
-    username,
-    includeLint,
-    reachability,
-    severity,
-    gitUri,
-    sarif,
-    source,
-  } = analysisOptions;
+  const { baseURL, sessionToken, oAuthToken, username, includeLint, reachability, severity, gitUri, sarif, source } =
+    analysisOptions;
   const bundleResponse = await createGitBundle(
     {
       baseURL,
@@ -481,4 +445,82 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
   }
 
   return result;
+}
+
+interface CreateBundleFromFolders extends FolderOptions {
+  supportedFiles?: ISupportedFiles;
+  baseDir?: string;
+  fileIgnores?: string[];
+}
+
+let createBundleFromFoldersDefaults = {
+  baseURL: defaultBaseURL,
+  sessionToken: '',
+  symlinksEnabled: false,
+  maxPayload: MAX_PAYLOAD,
+  defaultFileIgnores: IGNORES_DEFAULT,
+  source: '',
+};
+
+/**
+ * Creates a remote bundle and returns response from the bundle API
+ *
+ * @param {CreateBundleFromFolders} options
+ * @returns {Promise<RemoteBundle | null>}
+ */
+export async function createBundleFromFolders(options: CreateBundleFromFolders): Promise<RemoteBundle | null> {
+  const analysisOptions = { ...createBundleFromFoldersDefaults, ...options };
+
+  const {
+    baseURL,
+    source,
+    paths,
+    symlinksEnabled,
+    defaultFileIgnores,
+    maxPayload,
+    sessionToken,
+    supportedFiles = await getSupportedFiles(baseURL, source),
+    baseDir = determineBaseDir(paths),
+    fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores),
+  } = analysisOptions;
+
+  emitter.scanFilesProgress(0);
+  const bundleFiles = [];
+  let totalFiles = 0;
+  const bundleFileCollector = collectBundleFiles(
+    baseDir,
+    paths,
+    supportedFiles,
+    fileIgnores,
+    maxPayload,
+    symlinksEnabled,
+  );
+  for await (const f of bundleFileCollector) {
+    bundleFiles.push(f);
+    totalFiles += 1;
+    emitter.scanFilesProgress(totalFiles);
+  }
+
+  // Create remote bundle
+  return bundleFiles.length
+    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
+    : null;
+}
+
+/**
+ * Get supported filters and test baseURL for correctness and availability
+ *
+ * @param baseURL
+ * @param source
+ * @returns
+ */
+async function getSupportedFiles(baseURL: string, source: string): Promise<ISupportedFiles> {
+  emitter.supportedFilesLoaded(null);
+  const resp = await getFilters(baseURL, source);
+  if (resp.type === 'error') {
+    throw resp.error;
+  }
+  const supportedFiles = resp.value;
+  emitter.supportedFilesLoaded(supportedFiles);
+  return supportedFiles;
 }

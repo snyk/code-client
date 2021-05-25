@@ -1,10 +1,9 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
 import fg from '@snyk/fast-glob';
-import micromatch from 'micromatch';
+import multimatch from 'multimatch';
 import crypto from 'crypto';
 import union from 'lodash.union';
-import difference from 'lodash.difference';
 import util from 'util';
 import { Cache } from './cache';
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
@@ -39,7 +38,7 @@ export function notEmpty<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
-const microMatchOptions = { basename: true, dot: true, posixSlashes: true };
+const miniMatchOptions = { matchBase: true, dot: true };
 const fgOptions = {
   dot: true,
   absolute: true,
@@ -52,8 +51,7 @@ type CachedData = [number, number, string];
 
 function filterSupportedFiles(files: string[], supportedFiles: ISupportedFiles): string[] {
   const patters = getGlobPatterns(supportedFiles);
-  return micromatch(files, patters, microMatchOptions);
-  // return supportedFiles.configFiles.includes(path) || supportedFiles.extensions.includes(nodePath.extname(path));
+  return multimatch(files, patters, miniMatchOptions);
 }
 
 export function parseFileIgnores(path: string): string[] {
@@ -65,7 +63,7 @@ export function parseFileIgnores(path: string): string[] {
 
     rules = f
       .split('\n')
-      .map(l => l.trim().replace(/\/$/, '')) // Remove white spaces and trim slashes
+      .map(l => l.trim())
       .filter(l => !!l && !l.startsWith('#'));
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -76,16 +74,31 @@ export function parseFileIgnores(path: string): string[] {
     }
   }
 
-  return rules.map(rule => {
-    let prefix = "";
+  return rules.reduce((results: string[], rule) => {
+    let prefix = '';
     if (rule.startsWith('!')) {
+      // eslint-disable-next-line no-param-reassign
       rule = rule.substring(1);
-      prefix = "!";
+      prefix = '!';
     }
-    return rule.startsWith('/') || rule.startsWith('**')
-      ? prefix + nodePath.posix.join(dirname, rule, '**')
-      : prefix + nodePath.posix.join(dirname, '**', rule, '**');
-  });
+    // Mappings from .gitignore format to glob format:
+    // `/foo/` => `/foo/**` (meaning: Ignore root (not sub) foo dir and its paths underneath.)
+    // `/foo`	=> `/foo/**`, `/foo` (meaning: Ignore root (not sub) file and dir and its paths underneath.)
+    // `foo/` => `**/foo/**` (meaning: Ignore (root/sub) foo dirs and their paths underneath.)
+    // `foo` => `**/foo/**`, `foo` (meaning: Ignore (root/sub) foo files and dirs and their paths underneath.)
+    const startingSlash = rule.startsWith('/');
+    const startingGlobstar = rule.startsWith('**');
+    const endingSlash = rule.endsWith('/');
+    const endingGlobstar = rule.endsWith('**');
+    if (startingSlash || startingGlobstar) {
+      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(dirname, rule, '**'));
+      if (!endingSlash) results.push(prefix + nodePath.posix.join(dirname, rule));
+    } else {
+      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(dirname, '**', rule, '**'));
+      if (!endingSlash) results.push(prefix + nodePath.posix.join(dirname, '**', rule));
+    }
+    return results;
+  }, []);
 }
 
 export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
@@ -93,7 +106,6 @@ export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
     ...supportedFiles.extensions.map(e => `*${e}`),
     ...supportedFiles.configFiles.filter(e => !IGNORE_FILES_NAMES.includes(e)),
   ];
-  // return `**/\{${patterns.join(',')}\}`;
 }
 
 export async function collectIgnoreRules(
@@ -141,14 +153,37 @@ async function* searchFiles(
   symlinksEnabled: boolean,
   ignores: string[],
 ): AsyncGenerator<string | Buffer> {
+  const positiveIgnores = ignores.filter(rule => !rule.startsWith('!'));
+  const negativeIgnores = ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   const searcher = fg.stream(patterns, {
     ...fgOptions,
     cwd,
     followSymbolicLinks: symlinksEnabled,
+    ignore: positiveIgnores,
   });
   for await (const filePath of searcher) {
-    if (filterIgnoredFiles([filePath.toString()], ignores).length) {
-      yield filePath;
+    yield filePath;
+  }
+  // TODO: This is incorrect because the .gitignore format allows to specify exceptions to previous rules, therefore
+  // the separation between positive and negative ignores is incorrect in a scenario with 2+ exeptions like the one below:
+  // `node_module/` <= ignores everything in a `node_module` folder and it's relative subfolders
+  // `!node_module/my_module/` <= excludes the `my_module` subfolder from the ignore
+  // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
+  if (negativeIgnores.length) {
+    const searcher2 = fg.stream(negativeIgnores, {
+      ...fgOptions,
+      cwd,
+      followSymbolicLinks: symlinksEnabled,
+      baseNameMatch: false,
+    });
+    for await (const filePath of searcher2) {
+      if (
+        isMatch(
+          filePath.toString(),
+          patterns.map(p => `**/${p}`),
+        )
+      )
+        yield filePath;
     }
   }
 }
@@ -186,8 +221,9 @@ export async function* collectBundleFiles(
   // Scan folders
   const globPatterns = getGlobPatterns(supportedFiles);
   for (const folder of dirs) {
+    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores);
     // eslint-disable-next-line no-await-in-loop
-    for await (const filePath of searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores)) {
+    for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       if (fileInfo && fileInfo.size <= maxFileSize) {
         yield fileInfo;
@@ -225,7 +261,7 @@ export async function prepareExtendingBundle(
   let processingFiles: string[] = filterSupportedFiles(files, supportedFiles);
 
   // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed.
-  processingFiles = filterIgnoredFiles(processingFiles, fileIgnores);
+  processingFiles = processingFiles.filter(f => !isMatch(f, fileIgnores));
 
   if (processingFiles.length) {
     // Determine existing files (minus removed)
@@ -387,10 +423,6 @@ export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOA
   }
 }
 
-export function filterIgnoredFiles(
-  filePaths: string[],
-  ignores: string[],
-) {
-  const ignored = micromatch(filePaths, ignores, {...microMatchOptions, basename: false});
-  return difference(filePaths, ignored);
+export function isMatch(filePath: string, rules: string[]): boolean {
+  return !!multimatch([filePath], rules, { ...miniMatchOptions, matchBase: false }).length;
 }

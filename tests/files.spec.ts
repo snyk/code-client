@@ -1,4 +1,3 @@
-
 import * as fs from 'fs';
 import * as nodePath from 'path';
 
@@ -11,9 +10,20 @@ import {
   getFileInfo,
 } from '../src/files';
 
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilePaths, bundleFilesFull, bundleFileIgnores } from './constants/sample';
+import {
+  sampleProjectPath,
+  supportedFiles,
+  bundleFiles,
+  bundleFilePaths,
+  bundleFilesFull,
+  bundleFileIgnores,
+} from './constants/sample';
 
 describe('files', () => {
+  it('parse dc ignore file', () => {
+    const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
+    expect(patterns).toEqual(bundleFileIgnores.slice(1));
+  });
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
@@ -38,14 +48,19 @@ describe('files', () => {
   it('extend bundle files', async () => {
     const testNewFiles = [
       `${sampleProjectPath}/app.js`,
-      `${sampleProjectPath}/not/ignored/this_should_not_be_ignored.java`
+      `${sampleProjectPath}/not/ignored/this_should_not_be_ignored.java`,
     ];
     const testRemovedFiles = [
       `${sampleProjectPath}/removed_from_the_parent_bundle.java`,
-      `${sampleProjectPath}/ignored/this_should_be_ignored.java`
+      `${sampleProjectPath}/ignored/this_should_be_ignored.java`,
     ];
-    const parentBundle = [...testNewFiles, ...testRemovedFiles]
-    const { files, removedFiles } = await prepareExtendingBundle(sampleProjectPath, parentBundle, supportedFiles, bundleFileIgnores);
+    const parentBundle = [...testNewFiles, ...testRemovedFiles];
+    const { files, removedFiles } = await prepareExtendingBundle(
+      sampleProjectPath,
+      parentBundle,
+      supportedFiles,
+      bundleFileIgnores,
+    );
     expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.filePath)));
     expect(removedFiles).toEqual(['/removed_from_the_parent_bundle.java']);
   });
@@ -63,7 +78,7 @@ describe('files', () => {
     for await (const f of collector) {
       smallFiles.push(f);
     }
-    expect(smallFiles.length).toEqual(4);
+    expect(smallFiles.length).toEqual(5);
   });
 
   it('collect bundle files with multiple folders', async () => {
@@ -93,11 +108,6 @@ describe('files', () => {
     expect(testPayload.size).toEqual(239);
     expect(testPayload.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
     expect(testPayload.content).toEqual(fs.readFileSync(testPayload.filePath).toString('utf8'));
-  });
-
-  it('parse dc ignore file', () => {
-    const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns.length).toEqual(5);
   });
 
   it('support of utf-8 encoding', async () => {

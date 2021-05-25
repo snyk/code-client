@@ -1,5 +1,6 @@
-models
-**/controllers
+mode_nodules/
+/models/
+**/controllers/
 
 ignored
 !not/ignored

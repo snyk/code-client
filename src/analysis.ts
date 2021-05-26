@@ -46,6 +46,19 @@ import { ISupportedFiles } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
+const ANALYSIS_OPTIONS_DEFAULTS = {
+  baseURL: defaultBaseURL,
+  sessionToken: '',
+  includeLint: false,
+  reachability: false,
+  severity: AnalysisSeverity.info,
+  symlinksEnabled: false,
+  maxPayload: MAX_PAYLOAD,
+  defaultFileIgnores: IGNORES_DEFAULT,
+  sarif: false,
+  source: '',
+}
+
 async function pollAnalysis(
   {
     baseURL,
@@ -239,20 +252,9 @@ function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, li
     analysisResults,
   };
 }
-let analyzeFolderDefaults = {
-  baseURL: defaultBaseURL,
-  sessionToken: '',
-  includeLint: false,
-  reachability: false,
-  severity: AnalysisSeverity.info,
-  symlinksEnabled: false,
-  maxPayload: MAX_PAYLOAD,
-  defaultFileIgnores: IGNORES_DEFAULT,
-  sarif: false,
-  source: '',
-};
+
 export async function analyzeFolders(options: FolderOptions): Promise<IFileBundle> {
-  const analysisOptions: AnalyzeFoldersOptions = { ...analyzeFolderDefaults, ...options };
+  const analysisOptions: AnalyzeFoldersOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
   const {
     baseURL,
     sessionToken,
@@ -383,18 +385,8 @@ export async function extendAnalysis(
   );
 }
 
-const analyzeGitDefaults = {
-  baseURL: defaultBaseURL,
-  sessionToken: '',
-  includeLint: false,
-  reachability: false,
-  severity: AnalysisSeverity.info,
-  sarif: false,
-  source: '',
-};
-
 export async function analyzeGit(options: GitOptions, requestOptions?: RequestOptions): Promise<IGitBundle> {
-  const analysisOptions: AnalyzeGitOptions = { ...analyzeGitDefaults, ...options };
+  const analysisOptions: AnalyzeGitOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
   const { baseURL, sessionToken, oAuthToken, username, includeLint, reachability, severity, gitUri, sarif, source } =
     analysisOptions;
   const bundleResponse = await createGitBundle(
@@ -447,29 +439,22 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
   return result;
 }
 
-interface CreateBundleFromFolders extends FolderOptions {
+interface CreateBundleFromFoldersOptions extends FolderOptions {
   supportedFiles?: ISupportedFiles;
   baseDir?: string;
   fileIgnores?: string[];
 }
 
-let createBundleFromFoldersDefaults = {
-  baseURL: defaultBaseURL,
-  sessionToken: '',
-  symlinksEnabled: false,
-  maxPayload: MAX_PAYLOAD,
-  defaultFileIgnores: IGNORES_DEFAULT,
-  source: '',
-};
+
 
 /**
  * Creates a remote bundle and returns response from the bundle API
  *
- * @param {CreateBundleFromFolders} options
+ * @param {CreateBundleFromFoldersOptions} options
  * @returns {Promise<RemoteBundle | null>}
  */
-export async function createBundleFromFolders(options: CreateBundleFromFolders): Promise<RemoteBundle | null> {
-  const analysisOptions = { ...createBundleFromFoldersDefaults, ...options };
+export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<RemoteBundle | null> {
+  const analysisOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
 
   const {
     baseURL,

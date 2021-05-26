@@ -11,11 +11,15 @@ export const supportedFiles = {
 
 export const bundleFileIgnores = [
   '**/.git/**',
-  `${sampleProjectPath}/**/models/**`,
+  `${sampleProjectPath}/**/mode_nodules/**`,
+  `${sampleProjectPath}/models/**`,
   `${sampleProjectPath}/**/controllers/**`,
   `${sampleProjectPath}/**/ignored/**`,
+  `${sampleProjectPath}/**/ignored`,
   `!${sampleProjectPath}/**/not/ignored/**`,
-  `${sampleProjectPath}/**/*.jsx/**`
+  `!${sampleProjectPath}/**/not/ignored`,
+  `${sampleProjectPath}/**/*.jsx/**`,
+  `${sampleProjectPath}/**/*.jsx`,
 ];
 
 export const bundleFilePaths = [
@@ -27,14 +31,19 @@ export const bundleFilePaths = [
   'main.js',
   'routes/index.js',
   'routes/sharks.js',
+  // TODO: This should be ignored for consistency with the .gitignore format (see last rule above),
+  // however we decided to tune down correctness in favour of perfomance for now.
+  'not/ignored/this_should_be_ignored.jsx',
   'not/ignored/this_should_not_be_ignored.java',
 ];
 
 async function getBundleFiles(withContent: boolean) {
-  return (await Promise.all(
-    bundleFilePaths.map(f => getFileInfo(path.join(sampleProjectPath, f), sampleProjectPath, withContent)),
-  )).filter(notEmpty);
+  return (
+    await Promise.all(
+      bundleFilePaths.map(f => getFileInfo(path.join(sampleProjectPath, f), sampleProjectPath, withContent)),
+    )
+  ).filter(notEmpty);
 }
 
-export const bundleFiles: Promise<(IFileInfo)[]> = getBundleFiles(false);
+export const bundleFiles: Promise<IFileInfo[]> = getBundleFiles(false);
 export const bundleFilesFull: Promise<IFileInfo[]> = getBundleFiles(true);

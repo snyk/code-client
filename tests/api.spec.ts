@@ -16,10 +16,23 @@ import {
   reportEvent,
 } from '../src/http';
 
-const fakeBundleId = '769e1811db5e98abdb65df9160228ad51646f535af28b80a8913813aec1bd331';
+const fakeBundleId = 'e87a6db9b99f0f91a4ce6d0894eff3f6be7d5c49d9849cbd0258b96d3fe58378';
 let fakeBundleIdFull = '';
-const realBundleId = 'ffdd7b1cb8e28d3859e6b7179bf4b871d1abd8a7a2cacf0002d5174aca3b6841';
+const realBundleId = '1d16a90ae18e96edf2ab21e442a7c0665939613e4a2a9831f98c7cf32bcd5e00';
 let realBundleIdFull = '';
+const extendedBundleId = '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1';
+
+const fakeMissingFiles = [
+  `/GitHubAccessTokenScrambler12.java`,
+  `/app.js`,
+  `/db.js`,
+  `/main.js`,
+  // TODO: This should be ignored
+  `/not/ignored/this_should_be_ignored.jsx`,
+  `/not/ignored/this_should_not_be_ignored.java`,
+  `/routes/index.js`,
+  `/routes/sharks.js`,
+];
 
 const reportTelemetryRequest = {
   baseURL,
@@ -107,15 +120,7 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.bundleId).toContain(fakeBundleId);
       fakeBundleIdFull = response.value.bundleId;
-      expect(response.value.missingFiles).toEqual([
-        `/GitHubAccessTokenScrambler12.java`,
-        `/app.js`,
-        `/db.js`,
-        `/main.js`,
-        `/not/ignored/this_should_not_be_ignored.java`,
-        `/routes/index.js`,
-        `/routes/sharks.js`,
-      ]);
+      expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
   );
@@ -131,15 +136,7 @@ describe('Requests to public API', () => {
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
       expect(response.value.bundleId).toEqual(fakeBundleIdFull);
-      expect(response.value.missingFiles).toEqual([
-        `/GitHubAccessTokenScrambler12.java`,
-        `/app.js`,
-        `/db.js`,
-        `/main.js`,
-        `/not/ignored/this_should_not_be_ignored.java`,
-        `/routes/index.js`,
-        `/routes/sharks.js`,
-      ]);
+      expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
   );
@@ -201,6 +198,7 @@ describe('Requests to public API', () => {
           `/GitHubAccessTokenScrambler12.java`,
           `/db.js`,
           `/main.js`,
+          `/not/ignored/this_should_be_ignored.jsx`,
           `/not/ignored/this_should_not_be_ignored.java`,
           `/routes/index.js`,
           `/routes/sharks.js`,
@@ -208,7 +206,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleId).toContain('587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1');
+      expect(response.value.bundleId).toContain(extendedBundleId);
       expect(response.value.missingFiles).toEqual([`/new.js`]);
     },
     TEST_TIMEOUT,
@@ -381,6 +379,11 @@ describe('Requests to public API', () => {
               files: 5,
               isSupported: true,
               lang: 'JavaScript',
+            },
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'JSX',
             },
           ]),
         );

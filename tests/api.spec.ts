@@ -121,17 +121,6 @@ describe('Requests to public API', () => {
       expect(response.value.bundleId).toContain(fakeBundleId);
       fakeBundleIdFull = response.value.bundleId;
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
-      //   [
-      //   `/GitHubAccessTokenScrambler12.java`,
-      //   `/app.js`,
-      //   `/db.js`,
-      //   `/main.js`,
-      //   // TODO: This should be ignored
-      //   `/not/ignored/this_should_be_ignored.jsx`,
-      //   `/not/ignored/this_should_not_be_ignored.java`,
-      //   `/routes/index.js`,
-      //   `/routes/sharks.js`,
-      // ]);
     },
     TEST_TIMEOUT,
   );
@@ -148,17 +137,6 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.bundleId).toEqual(fakeBundleIdFull);
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
-      // .toEqual([
-      //   `/GitHubAccessTokenScrambler12.java`,
-      //   `/app.js`,
-      //   `/db.js`,
-      //   `/main.js`,
-      //   // TODO: This should be ignored
-      //   `/not/ignored/this_should_be_ignored.jsx`,
-      //   `/not/ignored/this_should_not_be_ignored.java`,
-      //   `/routes/index.js`,
-      //   `/routes/sharks.js`,
-      // ]);
     },
     TEST_TIMEOUT,
   );

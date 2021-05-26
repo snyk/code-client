@@ -38,7 +38,7 @@ export function notEmpty<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
-const miniMatchOptions = { matchBase: true, dot: true };
+const multiMatchOptions = { matchBase: true, dot: true };
 const fgOptions = {
   dot: true,
   absolute: true,
@@ -51,7 +51,44 @@ type CachedData = [number, number, string];
 
 function filterSupportedFiles(files: string[], supportedFiles: ISupportedFiles): string[] {
   const patters = getGlobPatterns(supportedFiles);
-  return multimatch(files, patters, miniMatchOptions);
+  return multimatch(files, patters, multiMatchOptions);
+}
+
+function parseIgnoreRulesToGlobs(rules: string[], baseDir: string): string[] {
+  // Mappings from .gitignore format to glob format:
+  // `/foo/` => `/foo/**` (meaning: Ignore root (not sub) foo dir and its paths underneath.)
+  // `/foo`	=> `/foo/**`, `/foo` (meaning: Ignore root (not sub) file and dir and its paths underneath.)
+  // `foo/` => `**/foo/**` (meaning: Ignore (root/sub) foo dirs and their paths underneath.)
+  // `foo` => `**/foo/**`, `foo` (meaning: Ignore (root/sub) foo files and dirs and their paths underneath.)
+  return rules.reduce((results: string[], rule) => {
+    let prefix = '';
+    if (rule.startsWith('!')) {
+      // eslint-disable-next-line no-param-reassign
+      rule = rule.substring(1);
+      prefix = '!';
+    }
+    const startingSlash = rule.startsWith('/');
+    const startingGlobstar = rule.startsWith('**');
+    const endingSlash = rule.endsWith('/');
+    const endingGlobstar = rule.endsWith('**');
+    if (startingSlash || startingGlobstar) {
+      // case `/foo/`, `/foo` => `{baseDir}/foo/**`
+      // case `**/foo/`, `**/foo` => `{baseDir}/**/foo/**`
+      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(baseDir, rule, '**'));
+      // case `/foo` => `{baseDir}/foo`
+      // case `**/foo` => `{baseDir}/**/foo`
+      // case `/foo/**` => `{baseDir}/foo/**`
+      // case `**/foo/**` => `{baseDir}/**/foo/**`
+      if (!endingSlash) results.push(prefix + nodePath.posix.join(baseDir, rule));
+    } else {
+      // case `foo/`, `foo` => `{baseDir}/**/foo/**`
+      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(baseDir, '**', rule, '**'));
+      // case `foo` => `{baseDir}/**/foo`
+      // case `foo/**` => `{baseDir}/**/foo/**`
+      if (!endingSlash) results.push(prefix + nodePath.posix.join(baseDir, '**', rule));
+    }
+    return results;
+  }, []);
 }
 
 export function parseFileIgnores(path: string): string[] {
@@ -73,32 +110,7 @@ export function parseFileIgnores(path: string): string[] {
       );
     }
   }
-
-  return rules.reduce((results: string[], rule) => {
-    let prefix = '';
-    if (rule.startsWith('!')) {
-      // eslint-disable-next-line no-param-reassign
-      rule = rule.substring(1);
-      prefix = '!';
-    }
-    // Mappings from .gitignore format to glob format:
-    // `/foo/` => `/foo/**` (meaning: Ignore root (not sub) foo dir and its paths underneath.)
-    // `/foo`	=> `/foo/**`, `/foo` (meaning: Ignore root (not sub) file and dir and its paths underneath.)
-    // `foo/` => `**/foo/**` (meaning: Ignore (root/sub) foo dirs and their paths underneath.)
-    // `foo` => `**/foo/**`, `foo` (meaning: Ignore (root/sub) foo files and dirs and their paths underneath.)
-    const startingSlash = rule.startsWith('/');
-    const startingGlobstar = rule.startsWith('**');
-    const endingSlash = rule.endsWith('/');
-    const endingGlobstar = rule.endsWith('**');
-    if (startingSlash || startingGlobstar) {
-      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(dirname, rule, '**'));
-      if (!endingSlash) results.push(prefix + nodePath.posix.join(dirname, rule));
-    } else {
-      if (!endingGlobstar) results.push(prefix + nodePath.posix.join(dirname, '**', rule, '**'));
-      if (!endingSlash) results.push(prefix + nodePath.posix.join(dirname, '**', rule));
-    }
-    return results;
-  }, []);
+  return parseIgnoreRulesToGlobs(rules, dirname);
 }
 
 export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
@@ -155,13 +167,20 @@ async function* searchFiles(
 ): AsyncGenerator<string | Buffer> {
   const positiveIgnores = ignores.filter(rule => !rule.startsWith('!'));
   const negativeIgnores = ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
-  const searcher = fg.stream(patterns, {
+  // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
+  // that should be ignored, leading to performance issues (the parser would look stuck while analyzing each ignored file).
+  // However, fast-glob doesn't address the negative rules in the ignore option correctly.
+  // As a compromise between correctness and performance, we split the search in two streams, the first one using the
+  // extension patterns as a search term and the positive ignore rules in the options, while the second that manually
+  // expands those branches that should be excluded from the ignore rules throught the negative ignores as search term
+  // and then matches the extensions as a second step to exclude any file that should not be analyzed.
+  const positiveSearcher = fg.stream(patterns, {
     ...fgOptions,
     cwd,
     followSymbolicLinks: symlinksEnabled,
     ignore: positiveIgnores,
   });
-  for await (const filePath of searcher) {
+  for await (const filePath of positiveSearcher) {
     yield filePath;
   }
   // TODO: This is incorrect because the .gitignore format allows to specify exceptions to previous rules, therefore
@@ -170,13 +189,13 @@ async function* searchFiles(
   // `!node_module/my_module/` <= excludes the `my_module` subfolder from the ignore
   // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
   if (negativeIgnores.length) {
-    const searcher2 = fg.stream(negativeIgnores, {
+    const negativeSearcher = fg.stream(negativeIgnores, {
       ...fgOptions,
       cwd,
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,
     });
-    for await (const filePath of searcher2) {
+    for await (const filePath of negativeSearcher) {
       if (
         isMatch(
           filePath.toString(),
@@ -424,5 +443,5 @@ export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOA
 }
 
 export function isMatch(filePath: string, rules: string[]): boolean {
-  return !!multimatch([filePath], rules, { ...miniMatchOptions, matchBase: false }).length;
+  return !!multimatch([filePath], rules, { ...multiMatchOptions, matchBase: false }).length;
 }

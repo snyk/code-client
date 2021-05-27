@@ -25,8 +25,8 @@ export class EmitterDC extends EventEmitter {
     this.emit(CUSTOM_EVENTS.scanFilesProgress, processed);
   }
 
-  createBundleProgress(processed: number, total: number): void {
-    this.emit(CUSTOM_EVENTS.createBundleProgress, processed, total);
+  createBundleProgress(processed: number, total: number, analysisId: string): void {
+    this.emit(CUSTOM_EVENTS.createBundleProgress, processed, total, analysisId);
   }
 
   uploadBundleProgress(processed: number, total: number): void {

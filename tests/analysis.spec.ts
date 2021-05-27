@@ -31,11 +31,12 @@ describe('Functional test of analysis', () => {
         });
         emitter.on(emitter.events.scanFilesProgress, onScanFilesProgress);
 
-        const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
+        const onCreateBundleProgress = jest.fn((processed: number, total: number, analysisId: string) => {
           expect(typeof processed).toBe('number');
           expect(total).toEqual(3);
-
           expect(processed).toBeLessThanOrEqual(total);
+          expect(analysisId).toBeDefined()
+          expect(typeof analysisId).toBe('string');
         });
         emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
 

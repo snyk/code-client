@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import omit from 'lodash.omit';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   collectIgnoreRules,
@@ -43,6 +44,7 @@ import { RequestOptions } from './interfaces/http-options.interface';
 
 import { fromEntries } from './lib/utils';
 import { ISupportedFiles } from './interfaces/files.interface';
+import { randomUUID } from 'crypto';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -254,6 +256,7 @@ function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, li
 }
 
 export async function analyzeFolders(options: FolderOptions): Promise<IFileBundle> {
+  const analysisId = uuidv4();
   const analysisOptions: AnalyzeFoldersOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
   const {
     baseURL,
@@ -334,6 +337,7 @@ export async function extendAnalysis(
   maxPayload = MAX_PAYLOAD,
   source: string,
 ): Promise<IFileBundle | null> {
+  const analysisId = uuidv4();
   const { files, removedFiles } = await prepareExtendingBundle(
     bundle.baseDir,
     filePaths,
@@ -357,6 +361,7 @@ export async function extendAnalysis(
     bundle.bundleId,
     maxPayload,
     source,
+    analysisId
   );
 
   if (remoteBundle === null) {
@@ -443,6 +448,7 @@ interface CreateBundleFromFoldersOptions extends FolderOptions {
   supportedFiles?: ISupportedFiles;
   baseDir?: string;
   fileIgnores?: string[];
+  analysisId?: string;
 }
 
 
@@ -467,6 +473,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     supportedFiles = await getSupportedFiles(baseURL, source),
     baseDir = determineBaseDir(paths),
     fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores),
+    analysisId = uuidv4()
   } = analysisOptions;
 
   emitter.scanFilesProgress(0);
@@ -488,7 +495,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
 
   // Create remote bundle
   return bundleFiles.length
-    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
+    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source, analysisId)
     : null;
 }
 

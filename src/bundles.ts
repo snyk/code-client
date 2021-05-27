@@ -29,12 +29,13 @@ async function* prepareRemoteBundle(
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
   source: string,
+  analysisId: string,
 ): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
   let response: IResult<RemoteBundle, BundleErrorCodes>;
   let bundleId = existingBundleId;
 
   const fileChunks = chunk(files, maxPayload / 300);
-  emitter.createBundleProgress(0, fileChunks.length);
+  emitter.createBundleProgress(0, fileChunks.length, analysisId);
   for (const [i, chunkedFiles] of fileChunks.entries()) {
     const paramFiles = fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
 
@@ -57,7 +58,7 @@ async function* prepareRemoteBundle(
       });
     }
 
-    emitter.createBundleProgress(i + 1, fileChunks.length);
+    emitter.createBundleProgress(i + 1, fileChunks.length, analysisId);
 
     if (response.type === 'error') {
       // TODO: process Error
@@ -157,6 +158,7 @@ export async function remoteBundleFactory(
   existingBundleId: string | null = null,
   maxPayload = MAX_PAYLOAD,
   source: string,
+  analysisId: string,
 ): Promise<RemoteBundle | null> {
   const bundleFactory = prepareRemoteBundle(
     baseURL,
@@ -166,6 +168,7 @@ export async function remoteBundleFactory(
     existingBundleId,
     maxPayload,
     source,
+    analysisId
   );
   let remoteBundle: RemoteBundle | null = null;
 

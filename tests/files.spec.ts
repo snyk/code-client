@@ -31,6 +31,7 @@ describe('files', () => {
   });
 
   it('collect bundle files', async () => {
+    // TODO: We should introduce some performance test using a big enough repo to avoid flaky results
     const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
     const files = [];
     for await (const f of collector) {

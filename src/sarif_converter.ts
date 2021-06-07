@@ -209,7 +209,7 @@ function getResults(allIssues: ISarifSuggestion[]): Result[] {
 
     if (result.message.text) {
       const { message, argumentArray } = getArgumentsAndMessage(helpers, result.message.text);
-      result.message.markdown = message;
+      result.message.text = message;
       result.message.arguments = argumentArray;
     }
 

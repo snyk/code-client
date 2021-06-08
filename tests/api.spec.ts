@@ -16,13 +16,14 @@ import {
   reportEvent,
 } from '../src/http';
 
-const fakeBundleId = 'e87a6db9b99f0f91a4ce6d0894eff3f6be7d5c49d9849cbd0258b96d3fe58378';
+const fakeBundleId = 'c58d69bd4fd65c45b1112bd7b45f028e614d443fc123901fd1aba15856c13c27';
 let fakeBundleIdFull = '';
-const realBundleId = '1d16a90ae18e96edf2ab21e442a7c0665939613e4a2a9831f98c7cf32bcd5e00';
+const realBundleId = 'c3a31c6c503b76ce51e2f8f7db9aa8f26715e6367124ce6e2f419087cad011b0';
 let realBundleIdFull = '';
 const extendedBundleId = '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1';
 
 const fakeMissingFiles = [
+  `/AnnotatorTest.cpp`,
   `/GitHubAccessTokenScrambler12.java`,
   `/app.js`,
   `/db.js`,
@@ -55,7 +56,30 @@ describe('Requests to public API', () => {
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
-      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java']),
+      new Set([
+        '.CS',
+        '.Cs',
+        '.c',
+        '.cc',
+        '.cpp',
+        '.cs',
+        '.cxx',
+        '.es',
+        '.es6',
+        '.h',
+        '.hpp',
+        '.htm',
+        '.html',
+        '.hxx',
+        '.java',
+        '.js',
+        '.jsx',
+        '.php',
+        '.py',
+        '.ts',
+        '.tsx',
+        '.vue',
+      ]),
     );
   });
 
@@ -194,6 +218,7 @@ describe('Requests to public API', () => {
           [`/new.js`]: 'new123',
         },
         removedFiles: [
+          `/AnnotatorTest.cpp`,
           `/app.js`,
           `/GitHubAccessTokenScrambler12.java`,
           `/db.js`,
@@ -325,7 +350,7 @@ describe('Requests to public API', () => {
 
       if (response.value.status === AnalysisStatus.done) {
         expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
-        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(6);
+        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
         const suggestion = response.value.analysisResults.suggestions[0];
         expect(Object.keys(suggestion)).toEqual([
           'id',
@@ -361,7 +386,7 @@ describe('Requests to public API', () => {
         expect(suggestion.severity).toEqual(2);
 
         expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
+        expect(Object.keys(response.value.analysisResults.files).length).toEqual(5);
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,
         );
@@ -374,6 +399,11 @@ describe('Requests to public API', () => {
               files: 2,
               isSupported: true,
               lang: 'Java',
+            },
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'C++ (beta)',
             },
             {
               files: 5,
@@ -441,7 +471,7 @@ describe('Requests to public API', () => {
       const bundleResponse = await createGitBundle({
         baseURL,
         sessionToken,
-        gitUri: 'git@github.com:snyk/goof.git',
+        gitUri: 'git@github.com:snyk/goof.git@5a4f50e747dca50e3e54b47b3a3d5e52d481d31c',
         source: 'atom',
       });
       expect(bundleResponse.type).toEqual('success');
@@ -482,7 +512,7 @@ describe('Requests to public API', () => {
           expect(suggestion.rule).toEqual('HttpToHttps');
           expect(suggestion.severity).toEqual(2);
           expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
-          expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
+          expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
         }
       },
       TEST_TIMEOUT,

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import omit from 'lodash.omit';
+// import omit from 'lodash.omit';
 
 import {
   collectIgnoreRules,
@@ -10,82 +10,56 @@ import {
 } from './files';
 import {
   getFilters,
-  createGitBundle,
   GetAnalysisErrorCodes,
   getAnalysis,
   AnalysisStatus,
-  IResult,
+  Result,
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
-  AnalysisFinishedResponse,
   RemoteBundle,
 } from './http';
+
 import emitter from './emitter';
 import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
 import { remoteBundleFactory } from './bundles';
-import getSarif from './sarif_converter';
-import {
-  ISuggestion,
-  AnalysisSeverity,
-  IGitBundle,
-  IAnalysisFiles,
-  IFileBundle,
-  IBundleResult,
-} from './interfaces/analysis-result.interface';
-import {
-  FolderOptions,
-  AnalyzeFoldersOptions,
-  AnalyzeGitOptions,
-  GitOptions,
-} from './interfaces/analysis-options.interface';
-
-import { RequestOptions } from './interfaces/http-options.interface';
+import { AnalysisResult } from './interfaces/analysis-result.interface';
+import { AnalysisSeverity, FolderOptions, AnalyzeFoldersOptions } from './interfaces/analysis-options.interface';
 
 import { fromEntries } from './lib/utils';
-import { ISupportedFiles } from './interfaces/files.interface';
+import { SupportedFiles } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
 const ANALYSIS_OPTIONS_DEFAULTS = {
   baseURL: defaultBaseURL,
   sessionToken: '',
-  includeLint: false,
-  reachability: false,
   severity: AnalysisSeverity.info,
   symlinksEnabled: false,
   maxPayload: MAX_PAYLOAD,
   defaultFileIgnores: IGNORES_DEFAULT,
-  sarif: false,
   source: '',
+};
+
+export interface AnalysisOptions {
+  baseURL: string;
+  sessionToken: string;
+  bundleHash: string;
+  severity: AnalysisSeverity;
+  limitToFiles?: string[];
+  source: string;
 }
 
+// interface FileBundle {
+//   bundleHash: string;
+//   options: AnalysisOptions;
+//   fileOptions: AnalyzeFoldersOptions;
+//   results: AnalysisResult;
+// }
+
 async function pollAnalysis(
-  {
-    baseURL,
-    sessionToken,
-    includeLint,
-    severity,
-    bundleId,
-    oAuthToken,
-    username,
-    limitToFiles,
-    source,
-    reachability,
-  }: {
-    baseURL: string;
-    sessionToken: string;
-    includeLint: boolean;
-    severity: AnalysisSeverity;
-    bundleId: string;
-    oAuthToken?: string;
-    username?: string;
-    limitToFiles?: string[];
-    source: string;
-    reachability?: boolean;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
-  let analysisResponse: IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
+  options: AnalysisOptions,
+): Promise<Result<AnalysisFailedResponse | AnalysisResult, GetAnalysisErrorCodes>> {
+  let analysisResponse: Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
 
   emitter.analyseProgress({
@@ -96,21 +70,7 @@ async function pollAnalysis(
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    analysisResponse = await getAnalysis(
-      {
-        baseURL,
-        sessionToken,
-        oAuthToken,
-        username,
-        bundleId,
-        includeLint,
-        severity,
-        limitToFiles,
-        source,
-        reachability,
-      },
-      requestOptions,
-    );
+    analysisResponse = await getAnalysis(options);
 
     if (analysisResponse.type === 'error') {
       return analysisResponse;
@@ -122,65 +82,26 @@ async function pollAnalysis(
       analysisData.status === AnalysisStatus.waiting ||
       analysisData.status === AnalysisStatus.fetching ||
       analysisData.status === AnalysisStatus.analyzing ||
-      analysisData.status === AnalysisStatus.dcDone
+      analysisData.status === AnalysisStatus.done
     ) {
       // Report progress of fetching
       emitter.analyseProgress(analysisData);
-    } else if (analysisData.status === AnalysisStatus.done) {
+    } else if (analysisData.status === AnalysisStatus.complete) {
       // Return data of analysis
-      return analysisResponse as IResult<AnalysisFinishedResponse, GetAnalysisErrorCodes>;
+      return analysisResponse as Result<AnalysisResult, GetAnalysisErrorCodes>;
       // deepcode ignore DuplicateIfBody: false positive it seems that interface is not taken into account
     } else if (analysisData.status === AnalysisStatus.failed) {
       // Report failure of analysing
-      return analysisResponse as IResult<AnalysisFailedResponse, GetAnalysisErrorCodes>;
+      return analysisResponse as Result<AnalysisFailedResponse, GetAnalysisErrorCodes>;
     }
 
     await sleep(500);
   }
 }
 
-export async function analyzeBundle(
-  {
-    baseURL = defaultBaseURL,
-    sessionToken = '',
-    includeLint = false,
-    severity = AnalysisSeverity.info,
-    bundleId,
-    oAuthToken,
-    username,
-    limitToFiles,
-    source,
-    reachability = false,
-  }: {
-    baseURL: string;
-    sessionToken: string;
-    includeLint: boolean;
-    severity: AnalysisSeverity;
-    bundleId: string;
-    oAuthToken?: string;
-    username?: string;
-    limitToFiles?: string[];
-    source: string;
-    reachability?: boolean;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IBundleResult> {
+export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisResult> {
   // Call remote bundle for analysis results and emit intermediate progress
-  const analysisData = await pollAnalysis(
-    {
-      baseURL,
-      sessionToken,
-      oAuthToken,
-      username,
-      bundleId,
-      includeLint,
-      severity,
-      limitToFiles,
-      source,
-      reachability,
-    },
-    requestOptions,
-  );
+  const analysisData = await pollAnalysis(options);
 
   if (analysisData.type === 'error') {
     throw analysisData.error;
@@ -188,85 +109,73 @@ export async function analyzeBundle(
     throw new Error('Analysis has failed');
   }
 
-  const { analysisResults } = analysisData.value;
+  return analysisData.value;
 
-  // Create bundle instance to handle extensions
-  return {
-    bundleId,
-    analysisResults,
-    analysisURL: analysisData.value.analysisURL,
-  };
+  // // Create bundle instance to handle extensions
+  // return {
+  //   bundleHash,
+  //   analysisResults,
+  // };
 }
 
-function normalizeResultFiles(files: IAnalysisFiles, baseDir: string): IAnalysisFiles {
-  if (baseDir) {
-    return fromEntries(
-      Object.entries(files).map(([path, positions]) => {
-        const filePath = resolveBundleFilePath(baseDir, path);
-        return [filePath, positions];
-      }),
-    );
-  }
-  return files;
-}
+// function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
+//   if (baseDir) {
+//     return fromEntries(
+//       Object.entries(files).map(([path, positions]) => {
+//         const filePath = resolveBundleFilePath(baseDir, path);
+//         return [filePath, positions];
+//       }),
+//     );
+//   }
+//   return files;
+// }
 
-const moveSuggestionIndexes = <T>(
-  suggestionIndex: number,
-  suggestions: { [index: string]: T },
-): { [index: string]: T } => {
-  const entries = Object.entries(suggestions);
-  return fromEntries(
-    entries.map(([i, s]) => {
-      return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
-    }),
-  );
-};
+// const moveSuggestionIndexes = <T>(
+//   suggestionIndex: number,
+//   suggestions: { [index: string]: T },
+// ): { [index: string]: T } => {
+//   const entries = Object.entries(suggestions);
+//   return fromEntries(
+//     entries.map(([i, s]) => {
+//       return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
+//     }),
+//   );
+// };
 
-function mergeBundleResults(bundle: IFileBundle, analysisData: IBundleResult, limitToFiles: string[]): IFileBundle {
-  // Determine max suggestion index in our data
-  const suggestionIndex = Math.max(...Object.keys(bundle.analysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
+// function mergeBundleResults(bundle: FileBundle, analysisData: IBundleResult, limitToFiles: string[]): FileBundle {
+//   // Determine max suggestion index in our data
+//   const suggestionIndex = Math.max(...Object.keys(bundle.analysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
 
-  // Addup all new suggestions' indexes
-  const newSuggestions = moveSuggestionIndexes<ISuggestion>(suggestionIndex, analysisData.analysisResults.suggestions);
-  const suggestions = { ...bundle.analysisResults.suggestions, ...newSuggestions };
+//   // Addup all new suggestions' indexes
+//   const newSuggestions = moveSuggestionIndexes<Suggestion>(suggestionIndex, analysisData.analysisResults.suggestions);
+//   const suggestions = { ...bundle.analysisResults.suggestions, ...newSuggestions };
 
-  const newFiles = fromEntries(
-    Object.entries(analysisData.analysisResults.files).map(([fn, s]) => {
-      return [fn, moveSuggestionIndexes(suggestionIndex, s)];
-    }),
-  );
-  const files = {
-    ...omit(bundle.analysisResults.files, limitToFiles),
-    ...newFiles,
-  };
+//   const newFiles = fromEntries(
+//     Object.entries(analysisData.analysisResults.files).map(([fn, s]) => {
+//       return [fn, moveSuggestionIndexes(suggestionIndex, s)];
+//     }),
+//   );
+//   const files = {
+//     ...omit(bundle.analysisResults.files, limitToFiles),
+//     ...newFiles,
+//   };
 
-  const analysisResults = {
-    ...analysisData.analysisResults,
-    files,
-    suggestions,
-  };
+//   const analysisResults = {
+//     ...analysisData.analysisResults,
+//     files,
+//     suggestions,
+//   };
 
-  return {
-    ...bundle,
-    ...analysisData,
-    analysisResults,
-  };
-}
+//   return {
+//     ...bundle,
+//     ...analysisData,
+//     analysisResults,
+//   };
+// }
 
-export async function analyzeFolders(options: FolderOptions): Promise<IFileBundle> {
+export async function analyzeFolders(options: FolderOptions): Promise<FileBundle> {
   const analysisOptions: AnalyzeFoldersOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
-  const {
-    baseURL,
-    sessionToken,
-    includeLint,
-    reachability,
-    severity,
-    paths,
-    symlinksEnabled,
-    sarif,
-    defaultFileIgnores,
-    source,
-  } = analysisOptions;
+  const { baseURL, sessionToken, severity, paths, symlinksEnabled, defaultFileIgnores, source } = analysisOptions;
 
   const supportedFiles = await getSupportedFiles(baseURL, source);
 
@@ -292,17 +201,14 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
         },
         coverage: [],
       },
-      analysisURL: '',
-      bundleId: '',
+      bundleHash: '',
     };
   } else {
     analysisData = await analyzeBundle({
       baseURL,
       sessionToken,
-      includeLint,
-      reachability,
       severity,
-      bundleId: remoteBundle.bundleId,
+      bundleHash: remoteBundle.bundleHash,
       source,
     });
     analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
@@ -311,8 +217,6 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
   const result = {
     baseURL,
     sessionToken,
-    includeLint,
-    reachability,
     severity,
     supportedFiles,
     baseDir,
@@ -321,19 +225,16 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     symlinksEnabled,
     ...analysisData,
   };
-  if (sarif && analysisData.analysisResults) {
-    result.sarifResults = getSarif(analysisData.analysisResults);
-  }
 
   return result;
 }
 
 export async function extendAnalysis(
-  bundle: IFileBundle,
+  bundle: FileBundle,
   filePaths: string[],
   maxPayload = MAX_PAYLOAD,
   source: string,
-): Promise<IFileBundle | null> {
+): Promise<FileBundle | null> {
   const { files, removedFiles } = await prepareExtendingBundle(
     bundle.baseDir,
     filePaths,
@@ -354,7 +255,7 @@ export async function extendAnalysis(
     files,
     removedFiles,
     bundle.baseDir,
-    bundle.bundleId,
+    bundle.bundleHash,
     maxPayload,
     source,
   );
@@ -368,9 +269,8 @@ export async function extendAnalysis(
   const analysisData = await analyzeBundle({
     baseURL: bundle.baseURL,
     sessionToken: bundle.sessionToken,
-    includeLint: bundle.includeLint,
     severity: bundle.severity,
-    bundleId: remoteBundle.bundleId,
+    bundleHash: remoteBundle.bundleHash,
     limitToFiles: files.map(f => f.bundlePath),
     source,
   });
@@ -385,67 +285,11 @@ export async function extendAnalysis(
   );
 }
 
-export async function analyzeGit(options: GitOptions, requestOptions?: RequestOptions): Promise<IGitBundle> {
-  const analysisOptions: AnalyzeGitOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
-  const { baseURL, sessionToken, oAuthToken, username, includeLint, reachability, severity, gitUri, sarif, source } =
-    analysisOptions;
-  const bundleResponse = await createGitBundle(
-    {
-      baseURL,
-      sessionToken,
-      oAuthToken,
-      username,
-      gitUri,
-      source,
-    },
-    requestOptions,
-  );
-  if (bundleResponse.type === 'error') {
-    throw bundleResponse.error;
-  }
-  const { bundleId } = bundleResponse.value;
-  const analysisData = await analyzeBundle(
-    {
-      baseURL,
-      sessionToken,
-      oAuthToken,
-      username,
-      includeLint,
-      reachability,
-      severity,
-      bundleId,
-      source,
-    },
-    requestOptions,
-  );
-
-  const result = {
-    baseURL,
-    sessionToken,
-    oAuthToken,
-    includeLint,
-    reachability,
-    severity,
-    gitUri,
-    ...analysisData,
-  };
-
-  // Create bundle instance to handle extensions
-  if (sarif && analysisData.analysisResults) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    result.sarifResults = getSarif(analysisData.analysisResults);
-  }
-
-  return result;
-}
-
 interface CreateBundleFromFoldersOptions extends FolderOptions {
-  supportedFiles?: ISupportedFiles;
+  supportedFiles?: SupportedFiles;
   baseDir?: string;
   fileIgnores?: string[];
 }
-
-
 
 /**
  * Creates a remote bundle and returns response from the bundle API
@@ -488,7 +332,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
 
   // Create remote bundle
   return bundleFiles.length
-    ? await remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
+    ? remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
     : null;
 }
 
@@ -499,7 +343,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
  * @param source
  * @returns
  */
-async function getSupportedFiles(baseURL: string, source: string): Promise<ISupportedFiles> {
+async function getSupportedFiles(baseURL: string, source: string): Promise<SupportedFiles> {
   emitter.supportedFilesLoaded(null);
   const resp = await getFilters(baseURL, source);
   if (resp.type === 'error') {

@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { IFileInfo } from '../../src/interfaces/files.interface';
+import { FileInfo } from '../../src/interfaces/files.interface';
 import { getFileInfo, notEmpty } from '../../src/files';
 
 export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
@@ -45,5 +45,5 @@ async function getBundleFiles(withContent: boolean) {
   ).filter(notEmpty);
 }
 
-export const bundleFiles: Promise<IFileInfo[]> = getBundleFiles(false);
-export const bundleFilesFull: Promise<IFileInfo[]> = getBundleFiles(true);
+export const bundleFiles: Promise<FileInfo[]> = getBundleFiles(false);
+export const bundleFilesFull: Promise<FileInfo[]> = getBundleFiles(true);

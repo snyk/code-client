@@ -8,7 +8,7 @@ import util from 'util';
 import { Cache } from './cache';
 import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
 
-import { ISupportedFiles, IFileInfo } from './interfaces/files.interface';
+import { SupportedFiles, FileInfo } from './interfaces/files.interface';
 
 const isWindows = nodePath.sep === '\\';
 
@@ -49,7 +49,7 @@ const fgOptions = {
 
 type CachedData = [number, number, string];
 
-function filterSupportedFiles(files: string[], supportedFiles: ISupportedFiles): string[] {
+function filterSupportedFiles(files: string[], supportedFiles: SupportedFiles): string[] {
   const patters = getGlobPatterns(supportedFiles);
   return multimatch(files, patters, multiMatchOptions);
 }
@@ -113,7 +113,7 @@ export function parseFileIgnores(path: string): string[] {
   return parseIgnoreRulesToGlobs(rules, dirname);
 }
 
-export function getGlobPatterns(supportedFiles: ISupportedFiles): string[] {
+export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
   return [
     ...supportedFiles.extensions.map(e => `*${e}`),
     ...supportedFiles.configFiles.filter(e => !IGNORE_FILES_NAMES.includes(e)),
@@ -213,11 +213,11 @@ async function* searchFiles(
 export async function* collectBundleFiles(
   baseDir: string,
   paths: string[],
-  supportedFiles: ISupportedFiles,
+  supportedFiles: SupportedFiles,
   fileIgnores: string[] = IGNORES_DEFAULT,
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
-): AsyncGenerator<IFileInfo> {
+): AsyncGenerator<FileInfo> {
   const cache = new Cache(CACHE_KEY, baseDir);
 
   const files = [];
@@ -267,13 +267,13 @@ export async function* collectBundleFiles(
 export async function prepareExtendingBundle(
   baseDir: string,
   files: string[],
-  supportedFiles: ISupportedFiles,
+  supportedFiles: SupportedFiles,
   fileIgnores: string[] = IGNORES_DEFAULT,
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
-): Promise<{ files: IFileInfo[]; removedFiles: string[] }> {
+): Promise<{ files: FileInfo[]; removedFiles: string[] }> {
   let removedFiles: string[] = [];
-  let bundleFiles: IFileInfo[] = [];
+  let bundleFiles: FileInfo[] = [];
   const cache = new Cache(CACHE_KEY, baseDir);
 
   // Filter for supported extensions/files only
@@ -323,7 +323,7 @@ export async function prepareExtendingBundle(
 function getBundleFilePath(filePath: string, baseDir: string) {
   const relPath = nodePath.relative(baseDir, filePath);
   const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
-  return encodeURI(`/${posixPath}`);
+  return encodeURI(posixPath);
 }
 
 export async function getFileInfo(
@@ -331,7 +331,7 @@ export async function getFileInfo(
   baseDir: string,
   withContent = false,
   cache: Cache | null = null,
-): Promise<IFileInfo | null> {
+): Promise<FileInfo | null> {
   const fileStats = await lStat(filePath);
   if (fileStats === null) {
     return fileStats;
@@ -347,7 +347,7 @@ export async function getFileInfo(
   let fileHash = '';
   if (!withContent && !!cache) {
     // Try to get hash from cache
-    const cachedData: CachedData | null = cache.getKey(filePath);
+    const cachedData = cache.getKey(filePath) as CachedData | null;
     if (cachedData) {
       if (cachedData[0] === fileStats.size && cachedData[1] === fileStats.mtimeMs) {
         fileHash = cachedData[2];
@@ -381,7 +381,7 @@ export async function getFileInfo(
   };
 }
 
-export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: string[]): Promise<IFileInfo[]> {
+export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: string[]): Promise<FileInfo[]> {
   const cache = new Cache('.dccache', baseDir);
   const tasks = bundleMissingFiles.map(mf => {
     const filePath = resolveBundleFilePath(baseDir, mf);
@@ -394,7 +394,7 @@ export async function resolveBundleFiles(baseDir: string, bundleMissingFiles: st
 }
 
 export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): string {
-  let relPath = bundleFilePath.slice(1);
+  let relPath = bundleFilePath;
 
   if (isWindows) {
     relPath = relPath.replace(/\//g, '\\');
@@ -403,15 +403,15 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
   return nodePath.resolve(baseDir, decodeURI(relPath));
 }
 
-export function* composeFilePayloads(files: IFileInfo[], bucketSize = MAX_PAYLOAD): Generator<IFileInfo[]> {
+export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD): Generator<FileInfo[]> {
   type Bucket = {
     size: number;
-    files: IFileInfo[];
+    files: FileInfo[];
   };
   const buckets: Bucket[] = [{ size: bucketSize, files: [] }];
 
   let bucketIndex = -1;
-  const isLowerSize = (bucket: Bucket, fileData: IFileInfo) => bucket.size >= fileData.size;
+  const isLowerSize = (bucket: Bucket, fileData: FileInfo) => bucket.size >= fileData.size;
   for (let fileData of files) {
     if (fileData.size > bucketSize) {
       // This file is too large. but it should not be here as previosly checked

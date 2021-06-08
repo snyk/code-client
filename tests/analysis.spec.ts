@@ -7,7 +7,7 @@ import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
-import { ISupportedFiles } from '../src/interfaces/files.interface';
+import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity } from '../src/interfaces/analysis-result.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 
@@ -16,7 +16,7 @@ describe('Functional test of analysis', () => {
     it(
       'analyze folder',
       async () => {
-        const onSupportedFilesLoaded = jest.fn((data: ISupportedFiles | null) => {
+        const onSupportedFilesLoaded = jest.fn((data: SupportedFiles | null) => {
           if (data === null) {
             // all good
           }
@@ -55,7 +55,6 @@ describe('Functional test of analysis', () => {
         const bundle = await analyzeFolders({
           baseURL,
           sessionToken,
-          includeLint: false,
           severity: 1,
           paths: [sampleProjectPath],
           symlinksEnabled: false,
@@ -64,7 +63,6 @@ describe('Functional test of analysis', () => {
         expect(bundle).toHaveProperty('baseURL');
         expect(bundle).toHaveProperty('sessionToken');
         expect(bundle).toHaveProperty('supportedFiles');
-        expect(bundle).toHaveProperty('analysisURL');
         expect(Object.keys(bundle.analysisResults.files).length).toEqual(4);
         expect(
           bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/GitHubAccessTokenScrambler12.java`),
@@ -103,7 +101,7 @@ describe('Functional test of analysis', () => {
         expect(onAPIRequestLog).toHaveBeenCalled();
 
         // Test uploadRemoteBundle with empty list of files
-        let uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, []);
+        let uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleHash, []);
         // We do nothing in such cases
         expect(uploaded).toEqual(true);
 
@@ -116,7 +114,7 @@ describe('Functional test of analysis', () => {
         emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
         // Forse uploading files one more time
-        uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, bFiles);
+        uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleHash, bFiles);
 
         expect(uploaded).toEqual(true);
 
@@ -127,7 +125,6 @@ describe('Functional test of analysis', () => {
     );
 
     it('analyze folder - with sarif returned', async () => {
-      const includeLint = false;
       const severity = AnalysisSeverity.info;
       const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
       const symlinksEnabled = false;
@@ -138,13 +135,11 @@ describe('Functional test of analysis', () => {
       const bundle = await analyzeFolders({
         baseURL,
         sessionToken,
-        includeLint,
         severity,
         paths,
         symlinksEnabled,
         maxPayload,
         defaultFileIgnores,
-        sarif,
       });
       const validationResult = jsonschema.validate(bundle.sarifResults, sarifSchema);
 
@@ -152,7 +147,6 @@ describe('Functional test of analysis', () => {
     });
 
     it('analyze empty folder', async () => {
-      const includeLint = false;
       const severity = AnalysisSeverity.info;
       const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
       const symlinksEnabled = false;
@@ -161,7 +155,6 @@ describe('Functional test of analysis', () => {
       const bundle = await analyzeFolders({
         baseURL,
         sessionToken,
-        includeLint,
         severity,
         paths,
         symlinksEnabled,
@@ -176,7 +169,6 @@ describe('Functional test of analysis', () => {
 
   describe('createBundleFromFolders', () => {
     it('should return a bundle with correct parameters', async () => {
-      const includeLint = false;
       const severity = AnalysisSeverity.info;
       const paths: string[] = [path.join(sampleProjectPath)];
       const symlinksEnabled = false;
@@ -186,7 +178,6 @@ describe('Functional test of analysis', () => {
       const result = await createBundleFromFolders({
         baseURL,
         sessionToken,
-        includeLint,
         severity,
         paths,
         symlinksEnabled,
@@ -195,9 +186,8 @@ describe('Functional test of analysis', () => {
       });
 
       expect(result).not.toBeNull();
-      expect(result).toHaveProperty('bundleId');
+      expect(result).toHaveProperty('bundleHash');
       expect(result).toHaveProperty('missingFiles');
-      expect(result).toHaveProperty('uploadURL');
     });
   });
 });

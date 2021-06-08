@@ -1,7 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import chunk from 'lodash.chunk';
+import pick from 'lodash.pick';
 
-import { IFileInfo } from './interfaces/files.interface';
+import { BundleFiles, FileInfo } from './interfaces/files.interface';
 
 import { composeFilePayloads, resolveBundleFiles } from './files';
 import {
@@ -11,34 +12,32 @@ import {
   createBundle,
   extendBundle,
   checkBundle,
-  uploadFiles,
-  IResult,
+  Result,
   RemoteBundle,
 } from './http';
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
-import { fromEntries } from './lib/utils';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
 async function* prepareRemoteBundle(
   baseURL: string,
   sessionToken: string,
-  files: IFileInfo[],
+  files: FileInfo[],
   removedFiles: string[] = [],
-  existingBundleId: string | null = null,
+  existingBundleHash: string | null = null,
   maxPayload = MAX_PAYLOAD,
   source: string,
-): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
-  let response: IResult<RemoteBundle, BundleErrorCodes>;
-  let bundleId = existingBundleId;
+): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
+  let response: Result<RemoteBundle, BundleErrorCodes>;
+  let bundleHash = existingBundleHash;
 
   const fileChunks = chunk(files, maxPayload / 300);
   emitter.createBundleProgress(0, fileChunks.length);
   for (const [i, chunkedFiles] of fileChunks.entries()) {
-    const paramFiles = fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
+    const paramFiles = chunkedFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: f.hash }), {} as BundleFiles);
 
-    if (bundleId === null) {
+    if (bundleHash === null) {
       // eslint-disable-next-line no-await-in-loop
       response = await createBundle({
         baseURL,
@@ -51,7 +50,7 @@ async function* prepareRemoteBundle(
       response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId,
+        bundleHash,
         files: paramFiles,
         removedFiles,
       });
@@ -64,7 +63,7 @@ async function* prepareRemoteBundle(
       yield response;
       break;
     }
-    bundleId = response.value.bundleId;
+    bundleHash = response.value.bundleHash;
 
     yield response;
   }
@@ -79,21 +78,19 @@ async function* prepareRemoteBundle(
 export async function uploadRemoteBundle(
   baseURL: string,
   sessionToken: string,
-  bundleId: string,
-  files: IFileInfo[],
+  bundleHash: string,
+  files: FileInfo[],
   maxPayload = MAX_PAYLOAD,
 ): Promise<boolean> {
   let uploadedFiles = 0;
   emitter.uploadBundleProgress(0, files.length);
 
-  const uploadFileChunks = async (bucketFiles: IFileInfo[]): Promise<boolean> => {
-    const resp = await uploadFiles({
+  const uploadFileChunks = async (bucketFiles: FileInfo[]): Promise<boolean> => {
+    const resp = await extendBundle({
       baseURL,
       sessionToken,
-      bundleId,
-      content: bucketFiles.map(f => {
-        return { fileHash: f.hash, fileContent: f.content || '' };
-      }),
+      bundleHash,
+      files: bucketFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: pick(f, ['hash', 'content']) }), {}),
     });
 
     if (resp.type !== 'error') {
@@ -129,14 +126,20 @@ async function fullfillRemoteBundle(
   let attempts = 0;
   while (remoteBundle.missingFiles.length && attempts < maxAttempts) {
     const missingFiles = await resolveBundleFiles(baseDir, remoteBundle.missingFiles);
-    const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
+    const isUploaded = await uploadRemoteBundle(
+      baseURL,
+      sessionToken,
+      remoteBundle.bundleHash,
+      missingFiles,
+      maxPayload,
+    );
     if (!isUploaded) {
       throw new Error('Failed to upload some files');
     }
     const bundleResponse = await checkBundle({
       baseURL,
       sessionToken,
-      bundleId: remoteBundle.bundleId,
+      bundleHash: remoteBundle.bundleHash,
     });
     if (bundleResponse.type === 'error') {
       throw new Error('Failed to get remote bundle');
@@ -151,10 +154,10 @@ async function fullfillRemoteBundle(
 export async function remoteBundleFactory(
   baseURL: string,
   sessionToken: string,
-  files: IFileInfo[],
+  files: FileInfo[],
   removedFiles: string[] = [],
   baseDir: string,
-  existingBundleId: string | null = null,
+  existingBundleHash: string | null = null,
   maxPayload = MAX_PAYLOAD,
   source: string,
 ): Promise<RemoteBundle | null> {
@@ -163,7 +166,7 @@ export async function remoteBundleFactory(
     sessionToken,
     files,
     removedFiles,
-    existingBundleId,
+    existingBundleHash,
     maxPayload,
     source,
   );

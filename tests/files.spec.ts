@@ -14,7 +14,6 @@ import {
   sampleProjectPath,
   supportedFiles,
   bundleFiles,
-  bundleFilePaths,
   bundleFilesFull,
   bundleFileIgnores,
 } from './constants/sample';

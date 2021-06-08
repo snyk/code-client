@@ -1,35 +1,31 @@
-import { AnalysisSeverity } from './analysis-result.interface';
 
-export interface AnalysisOptions {
-  baseURL: string;
-  sessionToken: string;
-  includeLint: boolean;
-  reachability: boolean;
-  severity: AnalysisSeverity;
-  sarif: boolean;
-  source: string;
+// eslint-disable-next-line no-shadow
+export enum AnalysisSeverity {
+  info = 1,
+  warning = 2,
+  critical = 3,
 }
 
-export interface AnalyzeFoldersOptions extends AnalysisOptions {
+export interface AnalysisOptionsBase {
+  baseURL: string;
+  sessionToken: string;
+  severity: AnalysisSeverity;
+  limitToFiles?: string[];
+  source: string;
+  // bundleHash: string;
+}
+
+export interface AnalyzeFoldersOptions extends AnalysisOptionsBase {
   paths: string[];
   symlinksEnabled: boolean;
   maxPayload: number;
   defaultFileIgnores: string[];
 }
 
-export interface AnalyzeGitOptions extends AnalysisOptions {
-  gitUri: string;
-  oAuthToken?: string;
-  username?: string;
-}
-
 export interface Options {
   baseURL?: string;
   sessionToken: string;
-  includeLint?: boolean;
-  reachability?: boolean;
   severity?: AnalysisSeverity;
-  sarif?: boolean;
   source?: string;
 }
 export interface FolderOptions extends Options {
@@ -37,10 +33,4 @@ export interface FolderOptions extends Options {
   symlinksEnabled?: boolean;
   maxPayload?: number;
   defaultFileIgnores?: string[];
-}
-
-export interface GitOptions extends Options {
-  gitUri: string;
-  oAuthToken?: string;
-  username?: string;
 }

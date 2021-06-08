@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import omit from 'lodash.omit';
 
-import { apiPath, ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
+import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
 import axios from './axios';
 
-import { IFiles, IFileContent, ISupportedFiles } from './interfaces/files.interface';
-import { IAnalysisResult } from './interfaces/analysis-result.interface';
-import { RequestOptions } from './interfaces/http-options.interface';
+import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
+import { AnalysisResult } from './interfaces/analysis-result.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -18,7 +19,7 @@ type ResultError<E> = {
   };
 };
 
-export type IResult<T, E> = ResultSuccess<T> | ResultError<E>;
+export type Result<T, E> = ResultSuccess<T> | ResultError<E>;
 
 export function determineErrorCode(error: AxiosError | any): ErrorCodes {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -90,7 +91,7 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
 
 export function startSession(options: { readonly authHost: string; readonly source: string }): StartSessionResponseDto {
   const { source, authHost } = options;
-  const draftToken = uuidv4() as string;
+  const draftToken = uuidv4();
 
   return {
     draftToken,
@@ -113,7 +114,7 @@ interface IApiTokenResponse {
 export async function checkSession(options: {
   readonly authHost: string;
   readonly draftToken: string;
-}): Promise<IResult<string, CheckSessionErrorCodes>> {
+}): Promise<Result<string, CheckSessionErrorCodes>> {
   const { draftToken, authHost } = options;
   const config: AxiosRequestConfig = {
     url: `${authHost}/api/v1/verify/callback`,
@@ -132,7 +133,7 @@ export async function checkSession(options: {
     };
   } catch (err) {
     if (
-      [ErrorCodes.loginInProgress, ErrorCodes.unauthorizedContent, ErrorCodes.unauthorizedUser].includes(
+      [ErrorCodes.loginInProgress, ErrorCodes.badRequest, ErrorCodes.unauthorizedUser].includes(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         err.response?.status,
       )
@@ -144,29 +145,32 @@ export async function checkSession(options: {
   }
 }
 
-export async function getFilters(
-  baseURL: string,
-  source: string,
-): Promise<IResult<ISupportedFiles, GenericErrorTypes>> {
+export async function getFilters(baseURL: string, source: string): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
   const config: AxiosRequestConfig = {
     headers: { source },
-    url: `${baseURL}${apiPath}/${apiName}`,
+    url: `${baseURL}/${apiName}`,
     method: 'GET',
   };
 
   try {
-    const response = await axios.request<ISupportedFiles>(config);
+    const response = await axios.request<SupportedFiles>(config);
     return { type: 'success', value: response.data };
   } catch (error) {
     return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, apiName);
   }
 }
 
+function prepareTokenHeaders(sessionToken: string) {
+  return {
+    'Session-Token': sessionToken,
+    Authorization: `Bearer ${sessionToken}`,
+  };
+}
+
 export type RemoteBundle = {
-  readonly bundleId: string;
+  readonly bundleHash: string;
   readonly missingFiles: string[];
-  readonly uploadURL?: string;
 };
 
 export type CreateBundleErrorCodes =
@@ -174,7 +178,7 @@ export type CreateBundleErrorCodes =
   | ErrorCodes.unauthorizedUser
   | ErrorCodes.unauthorizedBundleAccess
   | ErrorCodes.bigPayload
-  | ErrorCodes.unauthorizedContent
+  | ErrorCodes.badRequest
   | ErrorCodes.notFound;
 
 const CREATE_BUNDLE_ERROR_MESSAGES: { [P in CreateBundleErrorCodes]: string } = {
@@ -182,24 +186,26 @@ const CREATE_BUNDLE_ERROR_MESSAGES: { [P in CreateBundleErrorCodes]: string } = 
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
   [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Request content doesn't match the specifications`,
+  [ErrorCodes.badRequest]: `Request payload doesn't match the specifications`,
   [ErrorCodes.notFound]: 'Unable to resolve requested oid',
 };
 
 export async function createBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
-  readonly files: IFiles;
+  readonly files: BundleFiles;
   readonly source: string;
-}): Promise<IResult<RemoteBundle, CreateBundleErrorCodes>> {
+}): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   const { baseURL, sessionToken, files, source } = options;
+
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken, source },
-    url: `${baseURL}${apiPath}/bundle`,
-    method: 'POST',
-    data: {
-      files,
+    headers: {
+      ...prepareTokenHeaders(sessionToken),
+      source,
     },
+    url: `${baseURL}/bundle`,
+    method: 'POST',
+    data: files,
   };
 
   try {
@@ -226,12 +232,12 @@ const CHECK_BUNDLE_ERROR_MESSAGES: { [P in CheckBundleErrorCodes]: string } = {
 export async function checkBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
-  readonly bundleId: string;
-}): Promise<IResult<RemoteBundle, CheckBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId } = options;
+  readonly bundleHash: string;
+}): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
+  const { baseURL, sessionToken, bundleHash } = options;
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
-    url: `${baseURL}${apiPath}/bundle/${bundleId}`,
+    headers: prepareTokenHeaders(sessionToken),
+    url: `${baseURL}/bundle/${bundleHash}`,
     method: 'GET',
   };
 
@@ -246,7 +252,7 @@ export async function checkBundle(options: {
 export type ExtendBundleErrorCodes =
   | GenericErrorTypes
   | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedContent
+  | ErrorCodes.badRequest
   | ErrorCodes.unauthorizedBundleAccess
   | ErrorCodes.bigPayload
   | ErrorCodes.notFound;
@@ -255,7 +261,7 @@ const EXTEND_BUNDLE_ERROR_MESSAGES: { [P in ExtendBundleErrorCodes]: string } = 
   ...GENERIC_ERROR_MESSAGES,
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Attempted to extend a git bundle, or ended up with an empty bundle after the extension`,
+  [ErrorCodes.badRequest]: `Bad request`,
   [ErrorCodes.unauthorizedBundleAccess]: 'Unauthorized access to parent bundle',
   [ErrorCodes.notFound]: 'Parent bundle has expired',
 };
@@ -263,14 +269,14 @@ const EXTEND_BUNDLE_ERROR_MESSAGES: { [P in ExtendBundleErrorCodes]: string } = 
 export async function extendBundle(options: {
   readonly baseURL: string;
   readonly sessionToken: string;
-  readonly bundleId: string;
-  readonly files: IFiles;
+  readonly bundleHash: string;
+  readonly files: BundleFiles;
   readonly removedFiles?: string[];
-}): Promise<IResult<RemoteBundle, ExtendBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, files, removedFiles = [] } = options;
+}): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
+  const { baseURL, sessionToken, bundleHash, files, removedFiles = [] } = options;
   const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
-    url: `${baseURL}${apiPath}/bundle/${bundleId}`,
+    headers: prepareTokenHeaders(sessionToken),
+    url: `${baseURL}/bundle/${bundleHash}`,
     method: 'PUT',
     data: {
       files,
@@ -286,104 +292,18 @@ export async function extendBundle(options: {
   }
 }
 
-type CreateGitBundleErrorCodes =
-  | GenericErrorTypes
-  | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedBundleAccess
-  | ErrorCodes.notFound;
-
-const CREATE_GIT_BUNDLE_ERROR_MESSAGES: { [P in CreateGitBundleErrorCodes]: string } = {
-  ...GENERIC_ERROR_MESSAGES,
-  [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
-  [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
-  [ErrorCodes.notFound]: 'Unable to found requested repository or commit hash',
-};
-
-export async function createGitBundle(
-  options: {
-    readonly baseURL: string;
-    readonly sessionToken: string;
-    readonly oAuthToken?: string;
-    readonly username?: string;
-    readonly gitUri: string;
-    readonly source: string;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, username, gitUri, source } = options;
-  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
-  if (oAuthToken) {
-    headers['X-OAuthToken'] = oAuthToken;
-  }
-  if (username) {
-    headers['X-UserName'] = username;
-  }
-  const config: AxiosRequestConfig = {
-    headers,
-    url: `${baseURL}${apiPath}/bundle`,
-    method: 'POST',
-    data: { gitURI: gitUri },
-  };
-
-  try {
-    const response = await axios.request<RemoteBundle>(config);
-    return { type: 'success', value: response.data };
-  } catch (error) {
-    return generateError<CreateGitBundleErrorCodes>(error, CREATE_GIT_BUNDLE_ERROR_MESSAGES, 'createBundle');
-  }
-}
-
-type UploadBundleErrorCodes =
-  | GenericErrorTypes
-  | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedContent
-  | ErrorCodes.unauthorizedBundleAccess
-  | ErrorCodes.notFound
-  | ErrorCodes.bigPayload;
-
-const UPLOAD_BUNDLE_ERROR_MESSAGES: { [P in UploadBundleErrorCodes]: string } = {
-  ...GENERIC_ERROR_MESSAGES,
-  [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
-  [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
-  [ErrorCodes.notFound]: DEFAULT_ERROR_MESSAGES[ErrorCodes.notFound],
-  [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension`,
-};
-
-export async function uploadFiles(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleId: string;
-  readonly content: IFileContent[];
-}): Promise<IResult<boolean, UploadBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, content } = options;
-  const config: AxiosRequestConfig = {
-    headers: { 'Session-Token': sessionToken },
-    url: `${baseURL}${apiPath}/file/${bundleId}`,
-    method: 'POST',
-    data: content,
-  };
-
-  try {
-    await axios.request(config);
-    return { type: 'success', value: true };
-  } catch (error) {
-    return generateError<UploadBundleErrorCodes>(error, UPLOAD_BUNDLE_ERROR_MESSAGES, 'uploadFiles');
-  }
-}
-
 // eslint-disable-next-line no-shadow
 export enum AnalysisStatus {
   waiting = 'WAITING',
   fetching = 'FETCHING',
   analyzing = 'ANALYZING',
-  dcDone = 'DC_DONE',
   done = 'DONE',
   failed = 'FAILED',
+  complete = 'COMPLETE',
 }
 
 export type AnalysisResponseProgress = {
-  readonly status: AnalysisStatus.waiting | AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.dcDone;
+  readonly status: AnalysisStatus.waiting | AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.done;
   readonly progress: number;
 };
 
@@ -391,18 +311,13 @@ export type AnalysisFailedResponse = {
   readonly status: AnalysisStatus.failed;
 };
 
-export type AnalysisFinishedResponse = {
-  readonly status: AnalysisStatus.done;
-  readonly analysisURL: string;
-  readonly analysisResults: IAnalysisResult;
-};
-
-export type GetAnalysisResponseDto = AnalysisFinishedResponse | AnalysisFailedResponse | AnalysisResponseProgress;
+export type GetAnalysisResponseDto = AnalysisResult | AnalysisFailedResponse | AnalysisResponseProgress;
 
 export type GetAnalysisErrorCodes =
   | GenericErrorTypes
   | ErrorCodes.unauthorizedUser
   | ErrorCodes.unauthorizedBundleAccess
+  | ErrorCodes.badRequest
   | ErrorCodes.notFound;
 
 const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
@@ -410,59 +325,38 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
   [ErrorCodes.notFound]: DEFAULT_ERROR_MESSAGES[ErrorCodes.notFound],
+  [ErrorCodes.badRequest]: DEFAULT_ERROR_MESSAGES[ErrorCodes.badRequest],
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
-export async function getAnalysis(
-  options: {
-    readonly baseURL: string;
-    readonly sessionToken: string;
-    readonly bundleId: string;
-    readonly includeLint?: boolean;
-    readonly severity: number;
-    readonly limitToFiles?: string[];
-    readonly oAuthToken?: string;
-    readonly username?: string;
-    readonly source: string;
-    readonly reachability?: boolean;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const {
-    baseURL,
-    sessionToken,
-    oAuthToken,
-    username,
-    bundleId,
-    includeLint,
-    severity,
-    limitToFiles,
-    source,
-    reachability,
-  } = options;
-  // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
-  // the same applies for reachability
-  const params = { severity, linters: includeLint || undefined, reachability: reachability || undefined };
+export async function getAnalysis(options: {
+  readonly baseURL: string;
+  readonly sessionToken: string;
+  readonly bundleHash: string;
+  readonly severity: number;
+  readonly limitToFiles?: string[];
+  readonly source: string;
+}): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
+  const { baseURL, sessionToken, bundleHash, severity, limitToFiles, source } = options;
 
-  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
-  if (oAuthToken) {
-    headers['X-OAuthToken'] = oAuthToken;
-  }
-  if (username) {
-    headers['X-UserName'] = username;
-  }
+  const headers = {
+    ...prepareTokenHeaders(sessionToken),
+    source,
+  };
 
   const config: AxiosRequestConfig = {
     headers,
-    params,
-    url: `${baseURL}${apiPath}/analysis/${bundleId}`,
-    method: 'GET',
+    url: `${baseURL}/analysis`,
+    method: 'POST',
+    data: {
+      key: {
+        type: 'file',
+        hash: bundleHash,
+        limitToFiles: limitToFiles || [],
+      },
+      severity,
+    },
   };
-
-  if (limitToFiles && limitToFiles.length) {
-    config.data = { files: limitToFiles };
-    config.method = 'POST';
-  }
 
   try {
     const response = await axios.request<GetAnalysisResponseDto>(config);
@@ -472,67 +366,3 @@ export async function getAnalysis(
   }
 }
 
-type ReportTelemetryRequestDto = {
-  readonly baseURL: string;
-  readonly sessionToken?: string;
-  readonly source?: string;
-  readonly type?: string;
-  readonly message?: string;
-  readonly path?: string;
-  readonly bundleId?: string;
-  readonly version?: string;
-  readonly environmentVersion?: string;
-  readonly data?: any;
-};
-
-export async function reportError(options: ReportTelemetryRequestDto): Promise<IResult<void, GenericErrorTypes>> {
-  const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
-  const config: AxiosRequestConfig = {
-    url: `${baseURL}${apiPath}/error`,
-    method: 'POST',
-    data: {
-      sessionToken,
-      source,
-      type,
-      message,
-      path,
-      bundleId,
-      version,
-      environmentVersion,
-      data,
-    },
-  };
-
-  try {
-    await axios.request(config);
-    return { type: 'success', value: undefined };
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'reportError');
-  }
-}
-
-export async function reportEvent(options: ReportTelemetryRequestDto): Promise<IResult<void, GenericErrorTypes>> {
-  const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
-  const config: AxiosRequestConfig = {
-    url: `${baseURL}${apiPath}/track`,
-    method: 'POST',
-    data: {
-      sessionToken,
-      source,
-      type,
-      message,
-      path,
-      bundleId,
-      version,
-      environmentVersion,
-      data,
-    },
-  };
-
-  try {
-    await axios.request(config);
-    return { type: 'success', value: undefined };
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'reportEvent');
-  }
-}

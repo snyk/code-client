@@ -1,28 +1,26 @@
 import { baseURL, authHost, sessionToken, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, bundleFilePaths } from './constants/sample';
 import { fromEntries } from '../src/lib/utils';
+import pick from 'lodash.pick';
 import {
   getFilters,
   startSession,
   checkSession,
   createBundle,
-  createGitBundle,
   checkBundle,
-  uploadFiles,
   extendBundle,
   getAnalysis,
   AnalysisStatus,
-  reportError,
-  reportEvent,
 } from '../src/http';
+import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleId = 'e87a6db9b99f0f91a4ce6d0894eff3f6be7d5c49d9849cbd0258b96d3fe58378';
-let fakeBundleIdFull = '';
-const realBundleId = '1d16a90ae18e96edf2ab21e442a7c0665939613e4a2a9831f98c7cf32bcd5e00';
-let realBundleIdFull = '';
-const extendedBundleId = '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1';
+const fakeBundleHash = 'fe72b6d08bbbc36214992aa769a9e3ee2a52579f88e1212cbb0719d63da6e14c';
+let fakeBundleHashFull = '';
+const realBundleHash = '26635e09233a4c221b2d0f3f118f92e0b48bbdcbbbcde8e3d0d34d1eacb44b37';
+let realBundleHashFull = '';
 
 const fakeMissingFiles = [
+  '/AnnotatorTest.cpp',
   `/GitHubAccessTokenScrambler12.java`,
   `/app.js`,
   `/db.js`,
@@ -34,39 +32,14 @@ const fakeMissingFiles = [
   `/routes/sharks.js`,
 ];
 
-const reportTelemetryRequest = {
-  baseURL,
-  sessionToken,
-  bundleId: fakeBundleId,
-  source: 'testSource',
-  type: 'testType',
-  message: 'testMessage',
-  path: '/test/path',
-  data: {
-    foo: 'bar',
-    bar: ['fo', 'foo', 'fooo'],
-  },
-};
-
 describe('Requests to public API', () => {
   it('gets filters successfully', async () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
-    expect(new Set(response.value.extensions)).toEqual(
-      new Set(['.es', '.es6', '.htm', '.html', '.js', '.jsx', '.py', '.ts', '.tsx', '.vue', '.java']),
-    );
-  });
 
-  it('reports error successfully', async () => {
-    const response = await reportError(reportTelemetryRequest);
-    expect(response.type).toEqual('success');
-  });
-
-  it('reports event successfully', async () => {
-    const response = await reportEvent(reportTelemetryRequest);
-    expect(response.type).toEqual('success');
+    expect(response.value.configFiles.length).toBeGreaterThan(0);
+    expect(response.value.extensions.length).toBeGreaterThan(0);
   });
 
   it('starts session successfully', async () => {
@@ -108,7 +81,8 @@ describe('Requests to public API', () => {
   it(
     'creates bundle successfully',
     async () => {
-      const files = fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
+
+      const files: BundleFiles = fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
 
       const response = await createBundle({
         baseURL,
@@ -117,9 +91,12 @@ describe('Requests to public API', () => {
         source: 'atom',
       });
       expect(response.type).toEqual('success');
-      if (response.type === 'error') return;
-      expect(response.value.bundleId).toContain(fakeBundleId);
-      fakeBundleIdFull = response.value.bundleId;
+      if (response.type === 'error') {
+        console.error(response);
+        return;
+      }
+      expect(response.value.bundleHash).toContain(fakeBundleHash);
+      fakeBundleHashFull = response.value.bundleHash;
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
@@ -131,11 +108,11 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
+        bundleHash: fakeBundleHashFull,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleId).toEqual(fakeBundleIdFull);
+      expect(response.value.bundleHash).toEqual(fakeBundleHashFull);
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
@@ -147,7 +124,7 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: 'mock-expired-bundle-id',
+        bundleHash: 'mock-expired-bundle-id',
       });
       expect(response.type).toEqual('error');
       // dummy to cheat typescript compiler
@@ -166,8 +143,7 @@ describe('Requests to public API', () => {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: fakeBundleIdFull,
-          includeLint: false,
+          bundleHash: fakeBundleHashFull,
           severity: 1,
           source: 'atom',
         });
@@ -189,24 +165,25 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
+        bundleHash: fakeBundleHashFull,
         files: {
-          [`/new.js`]: 'new123',
+          '/new.js': 'new123',
         },
         removedFiles: [
-          `/app.js`,
-          `/GitHubAccessTokenScrambler12.java`,
-          `/db.js`,
-          `/main.js`,
-          `/not/ignored/this_should_be_ignored.jsx`,
-          `/not/ignored/this_should_not_be_ignored.java`,
-          `/routes/index.js`,
-          `/routes/sharks.js`,
+          '/app.js',
+          '/AnnotatorTest.cpp',
+          '/GitHubAccessTokenScrambler12.java',
+          '/db.js',
+          '/main.js',
+          '/not/ignored/this_should_be_ignored.jsx',
+          '/not/ignored/this_should_not_be_ignored.java',
+          '/routes/index.js',
+          '/routes/sharks.js',
         ],
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleId).toContain(extendedBundleId);
+      expect(response.value.bundleHash).toContain('f497974a35b2b146bf35c259186027d71fdecdeb319567e46255090edca06675');
       expect(response.value.missingFiles).toEqual([`/new.js`]);
     },
     TEST_TIMEOUT,
@@ -218,18 +195,16 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: 'wrong-bundle-id',
+        bundleHash: 'wrong-bundle-id-2',
         files: {
-          [`/new2.js`]: 'new1234',
+          '/new2.js': 'new1234',
         },
       });
 
-      expect(response.type).toEqual('error');
-      // dummy to cheat typescript compiler
-      if (response.type == 'success') return;
-
-      expect(response.error.statusCode).toEqual(404);
-      expect(response.error.statusText).toEqual('Parent bundle has expired');
+      expect(response.type).toEqual('success');
+      if (response.type === 'error') return;
+      expect(response.value.bundleHash).toContain('5979992527b34d10f9d772abcc0d6a07c70db08b4850b1c99ee6879f14d13f22');
+      expect(response.value.missingFiles).toEqual([`/new2.js`]);
     },
     TEST_TIMEOUT,
   );
@@ -237,38 +212,29 @@ describe('Requests to public API', () => {
   it(
     'uploads fake files to fake bundle',
     async () => {
-      const response = await uploadFiles({
+      const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
-        content: [
-          {
-            fileHash: 'df',
-            fileContent: 'const module = new Module();',
-          },
-          {
-            fileHash: 'sdfs',
-            fileContent: 'const App = new App();',
-          },
-        ],
+        bundleHash: fakeBundleHashFull,
+        files: {
+          'df.js': { hash: 'df', content: 'const module = new Module();'},
+          'sdfs.js': { hash: 'sdfs', content: 'const App = new App();'},
+        },
       });
-      expect(response.type).toEqual('error');
-      if (response.type === 'success') return;
-      expect(response.error).toEqual({
-        apiName: 'uploadFiles',
-        statusCode: 400,
-        statusText:
-          'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',
-      });
+      expect(response.type).toEqual('success');
+      if (response.type !== 'success') return; // TS trick
+      expect(response.value.bundleHash).toContain('9ef5c6239fc95b9dc4e9defb9550dee534580cc990cee773f0c504688e86cac8');
+      expect(response.value.missingFiles).toHaveLength(11);
     },
     TEST_TIMEOUT,
   );
 
-  it(
-    'test successful workflow with and without linters',
-    async () => {
+  it('test successful workflow', async () => {
       // Create a bundle first
-      const files = fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
+      const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
+        r[d.bundlePath] = pick(d, ['hash', 'content']);
+        return r;
+      }, {});
 
       const bundleResponse = await createBundle({
         baseURL,
@@ -278,44 +244,25 @@ describe('Requests to public API', () => {
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
-      expect(bundleResponse.value.bundleId).toContain(realBundleId);
-      realBundleIdFull = bundleResponse.value.bundleId;
-
-      const content = (await bundleFilesFull).map(d => {
-        return {
-          fileHash: d.hash,
-          fileContent: d.content || '',
-        };
-      });
-
-      // Upload files
-      const uploadResponse = await uploadFiles({
-        baseURL,
-        sessionToken,
-        bundleId: realBundleIdFull,
-        content: content,
-      });
-      expect(uploadResponse.type).toEqual('success');
-      if (uploadResponse.type === 'error') return;
-      expect(uploadResponse.value).toEqual(true);
+      expect(bundleResponse.value.bundleHash).toContain(realBundleHash);
+      realBundleHashFull = bundleResponse.value.bundleHash;
 
       // Check missing files
       const checkResponse = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: realBundleIdFull,
+        bundleHash: realBundleHashFull,
       });
       expect(checkResponse.type).toEqual('success');
       if (checkResponse.type === 'error') return;
-      expect(checkResponse.value.bundleId).toEqual(realBundleIdFull);
+      expect(checkResponse.value.bundleHash).toEqual(realBundleHashFull);
       expect(checkResponse.value.missingFiles).toEqual([]);
 
-      // Get analysis results without linters
+      // Get analysis results
       let response = await getAnalysis({
         baseURL,
         sessionToken,
-        bundleId: realBundleIdFull,
-        includeLint: false,
+        bundleHash: realBundleHashFull,
         severity: 1,
         source: 'atom',
       });
@@ -323,53 +270,39 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
-      if (response.value.status === AnalysisStatus.done) {
-        expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
-        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(6);
-        const suggestion = response.value.analysisResults.suggestions[0];
-        expect(Object.keys(suggestion)).toEqual([
-          'id',
-          'rule',
-          'message',
-          'severity',
-          'lead_url',
-          'leadURL',
-          'categories',
-          'tags',
-          'title',
-          'cwe',
-          'text',
-          'repoDatasetSize',
-          'exampleCommitDescriptions',
-          'exampleCommitFixes',
-        ]);
-        expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FDisablePoweredBy');
-        expect(suggestion.leadURL).toEqual(
-          'http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header',
-        );
-        expect(suggestion.repoDatasetSize).toEqual(874);
-        expect(suggestion.exampleCommitDescriptions).toEqual([
-          'Test without express',
-          '/server tests ()',
-          'secure the api with helmet',
-        ]);
-        expect(suggestion.exampleCommitFixes.length).toEqual(3);
-        expect(suggestion.message).toEqual(
-          'Disable X-Powered-By header for your Express app (consider using Helmet middleware), because it exposes information about the used framework to potential attackers.',
-        );
-        expect(suggestion.rule).toEqual('DisablePoweredBy');
-        expect(suggestion.severity).toEqual(2);
+      if (response.value.status === AnalysisStatus.complete) {
 
-        expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-        expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          response.value.analysisResults.timing.fetchingCode,
-        );
-        const filePath = `/GitHubAccessTokenScrambler12.java`;
-        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
-        expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(response.value.analysisResults.coverage)).toEqual(
+        const suggestions = response.value.sarif.runs[0].results!;
+        expect(suggestions).toHaveLength(12);
+        if (suggestions.length < 1) return; // TS trick
+
+        const suggestion = suggestions[0];
+        expect(suggestion).toMatchObject({
+          ruleId: 'cpp/MissingOpenCheckOnFile/test',
+          level: 'note',
+          fingerprints: {
+            '0': '3e40a81739245db8fff4903a7e28e08bffa03486a677e7c91594cfdf15fb5a1d',
+            '1': '57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf.4a7ae834.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf'
+          },
+          message: {
+            "text": "Missing check is_open on {0} before {1}.",
+            "markdown": "Missing check is_open on std::fstream before writing to it.",
+            "arguments": [
+              "[std::fstream](0)",
+              "[writing to it](1)",
+            ]
+          }
+        });
+
+        expect(suggestion.codeFlows![0].threadFlows[0].locations).toHaveLength(2);
+
+        expect(new Set(response.value.coverage)).toEqual(
           new Set([
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'C++ (beta)',
+            },
             {
               files: 2,
               isSupported: true,
@@ -394,8 +327,7 @@ describe('Requests to public API', () => {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: realBundleIdFull,
-          includeLint: false,
+          bundleHash: realBundleHashFull,
           severity: 1,
           limitToFiles: [`/GitHubAccessTokenScrambler12.java`],
           source: 'atom',
@@ -404,169 +336,25 @@ describe('Requests to public API', () => {
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
+      } while (response.value.status !== AnalysisStatus.complete);
 
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
-      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
-        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
-      );
+      expect(response.value.sarif.runs[0].results).toHaveLength(8);
 
-      // Get analysis results without linters but with severity 3
+      // Get analysis results with severity 3
       do {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: realBundleIdFull,
-          includeLint: false,
+          bundleHash: realBundleHashFull,
           severity: 3,
           source: 'atom',
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
+      } while (response.value.status !== AnalysisStatus.complete);
 
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
-        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
-      );
-    },
-    TEST_TIMEOUT,
-  );
-
-  describe('git analysis', () => {
-    let goofBundleId: string;
-
-    it('create git bundle', async () => {
-      const bundleResponse = await createGitBundle({
-        baseURL,
-        sessionToken,
-        gitUri: 'git@github.com:snyk/goof.git',
-        source: 'atom',
-      });
-      expect(bundleResponse.type).toEqual('success');
-      if (bundleResponse.type === 'error') return;
-      expect(bundleResponse.value.bundleId).toBeTruthy();
-      goofBundleId = bundleResponse.value.bundleId;
-    });
-
-    it(
-      'git analysis',
-      async () => {
-        // Get analysis results
-        const response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId: goofBundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-        });
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-
-        if (response.value.status === AnalysisStatus.done) {
-          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
-          expect(response.value.analysisResults.suggestions).toBeTruthy();
-
-          const suggestion = response.value.analysisResults.suggestions[0];
-          expect(suggestion.categories).toEqual(['Security']);
-          expect(suggestion).toHaveProperty('exampleCommitDescriptions');
-          expect(suggestion).toHaveProperty('exampleCommitFixes');
-          expect(suggestion.leadURL).toEqual('');
-          expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
-          expect(suggestion.message).toContain(
-            'http (used in require) is an insecure protocol and should not be used in new code.',
-          );
-          expect(suggestion.rule).toEqual('HttpToHttps');
-          expect(suggestion.severity).toEqual(2);
-          expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
-          expect(Object.keys(response.value.analysisResults.files).length).toEqual(3);
-        }
-      },
-      TEST_TIMEOUT,
-    );
-
-    it(
-      'git analysis with reachability flag',
-      async () => {
-        const response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId: goofBundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-          reachability: true,
-        });
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-
-        if (response.value.status === AnalysisStatus.done) {
-          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
-          expect(response.value.analysisResults.suggestions).toBeTruthy();
-
-          expect(response.value.analysisResults.coverage).toEqual(
-            expect.arrayContaining([
-              {
-                files: 8,
-                isSupported: true,
-                lang: 'JavaScript',
-              },
-              {
-                files: 1,
-                isSupported: true,
-                lang: 'HTML',
-              },
-            ]),
-          );
-        }
-      },
-      TEST_TIMEOUT,
-    );
-  });
-
-  it(
-    'git analysis with empty results',
-    async () => {
-      const bundleId = 'gh/DeepcodeAI/test-bigfiles/e7633ef98fba3ddc24e5bea27ae58d5b08b2f949';
-
-      let response;
-
-      do {
-        // Get analysis results
-        response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-        });
-
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
-
-      expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
-      expect(response.value.analysisResults.suggestions).toEqual({});
-      expect(response.value.analysisResults.files).toEqual({});
-
-      expect(response.value.analysisResults.coverage).toEqual([
-        {
-          files: 3,
-          isSupported: false,
-          lang: 'Text',
-        },
-        {
-          files: 1,
-          isSupported: false,
-          lang: 'Markdown',
-        },
-      ]);
+      expect(response.value.sarif.runs[0].results).toHaveLength(4);
     },
     TEST_TIMEOUT,
   );

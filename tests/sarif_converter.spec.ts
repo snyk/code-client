@@ -10,6 +10,7 @@ import path from 'path';
 import { analyzeFolders, analyzeGit } from '../src/analysis';
 import { baseURL, sessionToken } from './constants/base';
 import { AnalysisSeverity } from '../src/interfaces/analysis-result.interface';
+import { Log, Result } from 'sarif';
 
 describe('Sarif Convertor', () => {
   it('should keep us sane that we do not loose issues', async () => {
@@ -49,7 +50,7 @@ describe('Sarif Convertor', () => {
   }, 100000);
 
   it('should test no changes have occured in the sarif', () => {
-    const sarifResults = getSarif((analysisResultsWithoutFingerprinting as unknown) as IAnalysisResult);
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
     expect(sarifResults).toMatchSnapshot();
   });
 
@@ -86,7 +87,7 @@ describe('Sarif Convertor', () => {
   });
 
   it('should contain fingerprinting', () => {
-    const sarifResults = getSarif((analysisResultsWithoutFingerprinting as unknown) as IAnalysisResult);
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
     const validationResult = jsonschema.validate(sarifResults, sarifSchema);
     // this is to debug any errors found
     // const json = JSON.stringify(validationResult)
@@ -133,7 +134,7 @@ describe('Sarif Convertor', () => {
   });
 
   it('should contain example commit fixes', () => {
-    const sarifResults = getSarif((analysisResultsWithoutFingerprinting as unknown) as IAnalysisResult);
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
     const validationResult = jsonschema.validate(sarifResults, sarifSchema);
     expect(validationResult.errors.length).toEqual(0);
 
@@ -153,7 +154,7 @@ describe('Sarif Convertor', () => {
   });
 
   it('should contain example commit descriptions', () => {
-    const sarifResults = getSarif((analysisResultsWithoutFingerprinting as unknown) as IAnalysisResult);
+    const sarifResults = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
     const validationResult = jsonschema.validate(sarifResults, sarifSchema);
     expect(validationResult.errors.length).toEqual(0);
 
@@ -162,6 +163,19 @@ describe('Sarif Convertor', () => {
     if (rules !== undefined) exampleCommitDescriptions = rules[0].properties?.exampleCommitDescriptions;
 
     expect(exampleCommitDescriptions.length).toBeGreaterThan(0);
+  });
+
+  it('Should contain arguments placeholders on message.markdown but not on message.text', () => {
+    // Since the input for `getSarif` is constant and it includes arguments. we know that we expect
+    // certain placeholders to be included in function's response
+    const sarifResults: Log = getSarif(analysisResultsWithoutFingerprinting as unknown as IAnalysisResult);
+    const validationResult = jsonschema.validate(sarifResults, sarifSchema);
+    expect(validationResult.errors.length).toEqual(0);
+
+    const results: Result[] = sarifResults.runs[0].results!;
+    const { text = '', markdown = '' }: { text?: string; markdown?: string } = results[0].message;
+    expect(text.includes('{0}')).toBeFalsy();
+    expect(markdown.includes('{0}')).toBeTruthy();
   });
 });
 

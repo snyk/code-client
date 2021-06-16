@@ -42,7 +42,8 @@ jobs:
           command: npm install
       - run:
           name: Publish to GitHub
-          command: npx semantic-release
+          ## this is a work around, as it seems that the latest version has issues with < node14
+          command: npx semantic-release@16
 
 workflows:
   default_workflow:

@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import http from 'http';
 import https from 'https';
 import emitter from './emitter';
@@ -11,16 +11,17 @@ export declare interface Global extends NodeJS.Global {
 }
 declare const global: Global;
 
-const agentOptions = {
+export const agentOptions = {
   keepAlive: true,
   maxSockets: 100, // Maximum number of sockets to allow per host. Defaults to Infinity.
   maxFreeSockets: 10,
   freeSocketTimeout: 60000, // // Maximum number of sockets to leave open for 60 seconds in a free state. Only relevant if keepAlive is set to true. Defaults to 256.
   socketActiveTTL: 1000 * 60 * 10,
   rejectUnauthorized: !global.ignoreUnknownCA,
+  family: 6,
 };
 
-const axios_ = axios.create({
+const defaultRequestConfig: AxiosRequestConfig = {
   responseType: 'json',
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
@@ -29,7 +30,9 @@ const axios_ = axios.create({
   httpAgent: new http.Agent(agentOptions),
   httpsAgent: new https.Agent(agentOptions),
   proxy: false,
-});
+};
+
+const axios_ = axios.create(defaultRequestConfig);
 
 axios_.interceptors.request.use(
   (config: AxiosRequestConfig) => {
@@ -54,5 +57,15 @@ axios_.interceptors.response.use(
     throw error;
   },
 );
+
+export function createCustomAgentAxios(options: https.AgentOptions & https.AgentOptions) {
+  const config = {
+    ...defaultRequestConfig,
+    httpAgent: new http.Agent(options),
+    httpsAgent: new https.Agent(options),
+  };
+
+  return axios.create(config);
+}
 
 export default axios_;

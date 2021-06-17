@@ -1,11 +1,9 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-
-import { apiPath, ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
-import axios from './axios';
-
-import { IFiles, IFileContent, ISupportedFiles } from './interfaces/files.interface';
+import axios, { agentOptions, createCustomAgentAxios } from './axios';
+import { apiPath, DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes } from './constants';
 import { IAnalysisResult } from './interfaces/analysis-result.interface';
+import { IFileContent, IFiles, ISupportedFiles } from './interfaces/files.interface';
 import { RequestOptions } from './interfaces/http-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
@@ -98,6 +96,26 @@ export function startSession(options: { readonly authHost: string; readonly sour
   };
 }
 
+export type IpFamily = 6 | undefined;
+/**
+ * Dispatches a FORCED IPv6 request to test client's ISP and network capability.
+ *
+ * @return {number} IP family number used by the client.
+ */
+export async function getIpFamily(authHost: string): Promise<IpFamily> {
+  const family = 6;
+  try {
+    const customAxios = createCustomAgentAxios({ ...agentOptions, family } as any); // axios options are not properly typed
+    await customAxios.request({
+      url: `${authHost}/api/v1/verify/callback`,
+      method: 'POST',
+    });
+    return family;
+  } catch (e) {
+    return undefined;
+  }
+}
+
 type CheckSessionErrorCodes = GenericErrorTypes | ErrorCodes.unauthorizedUser | ErrorCodes.loginInProgress;
 const CHECK_SESSION_ERROR_MESSAGES: { [P in CheckSessionErrorCodes]: string } = {
   ...GENERIC_ERROR_MESSAGES,
@@ -113,8 +131,9 @@ interface IApiTokenResponse {
 export async function checkSession(options: {
   readonly authHost: string;
   readonly draftToken: string;
+  readonly ipFamily?: IpFamily;
 }): Promise<IResult<string, CheckSessionErrorCodes>> {
-  const { draftToken, authHost } = options;
+  const { draftToken, authHost, ipFamily } = options;
   const config: AxiosRequestConfig = {
     url: `${authHost}/api/v1/verify/callback`,
     method: 'POST',
@@ -124,7 +143,15 @@ export async function checkSession(options: {
   };
 
   try {
-    const response = await axios.request<IApiTokenResponse>(config);
+    let response;
+    if (ipFamily) {
+      const customAxios = createCustomAgentAxios({ ...agentOptions, family: ipFamily } as any); // axios options are not properly typed
+
+      response = await customAxios.request<IApiTokenResponse>(config);
+    } else {
+      response = await axios.request<IApiTokenResponse>(config);
+    }
+
     return {
       type: 'success',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access

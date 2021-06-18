@@ -110,8 +110,11 @@ export async function getIpFamily(authHost: string): Promise<IpFamily> {
       url: `${authHost}/api/v1/verify/callback`,
       method: 'POST',
     });
-    return family;
   } catch (e) {
+    if (e?.response?.status == 401) {
+      return family;
+    }
+
     return undefined;
   }
 }

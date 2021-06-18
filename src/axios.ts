@@ -18,7 +18,6 @@ export const agentOptions = {
   freeSocketTimeout: 60000, // // Maximum number of sockets to leave open for 60 seconds in a free state. Only relevant if keepAlive is set to true. Defaults to 256.
   socketActiveTTL: 1000 * 60 * 10,
   rejectUnauthorized: !global.ignoreUnknownCA,
-  family: 6,
 };
 
 const defaultRequestConfig: AxiosRequestConfig = {

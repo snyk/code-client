@@ -21,15 +21,15 @@ let realBundleHashFull = '';
 
 const fakeMissingFiles = [
   '/AnnotatorTest.cpp',
-  `/GitHubAccessTokenScrambler12.java`,
-  `/app.js`,
-  `/db.js`,
-  `/main.js`,
+  '/GitHubAccessTokenScrambler12.java',
+  '/app.js',
+  '/db.js',
+  '/main.js',
   // TODO: This should be ignored
-  `/not/ignored/this_should_be_ignored.jsx`,
-  `/not/ignored/this_should_not_be_ignored.java`,
-  `/routes/index.js`,
-  `/routes/sharks.js`,
+  '/not/ignored/this_should_be_ignored.jsx',
+  '/not/ignored/this_should_not_be_ignored.java',
+  '/routes/index.js',
+  '/routes/sharks.js',
 ];
 
 describe('Requests to public API', () => {
@@ -37,6 +37,33 @@ describe('Requests to public API', () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
+    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
+    expect(new Set(response.value.extensions)).toEqual(
+      new Set([
+        '.CS',
+        '.Cs',
+        '.c',
+        '.cc',
+        '.cpp',
+        '.cs',
+        '.cxx',
+        '.es',
+        '.es6',
+        '.h',
+        '.hpp',
+        '.htm',
+        '.html',
+        '.hxx',
+        '.java',
+        '.js',
+        '.jsx',
+        '.php',
+        '.py',
+        '.ts',
+        '.tsx',
+        '.vue',
+      ]),
+    );
 
     expect(response.value.configFiles.length).toBeGreaterThan(0);
     expect(response.value.extensions.length).toBeGreaterThan(0);
@@ -170,15 +197,15 @@ describe('Requests to public API', () => {
           '/new.js': 'new123',
         },
         removedFiles: [
-          '/app.js',
-          '/AnnotatorTest.cpp',
-          '/GitHubAccessTokenScrambler12.java',
-          '/db.js',
-          '/main.js',
-          '/not/ignored/this_should_be_ignored.jsx',
-          '/not/ignored/this_should_not_be_ignored.java',
-          '/routes/index.js',
-          '/routes/sharks.js',
+          `/AnnotatorTest.cpp`,
+          `/app.js`,
+          `/GitHubAccessTokenScrambler12.java`,
+          `/db.js`,
+          `/main.js`,
+          `/not/ignored/this_should_be_ignored.jsx`,
+          `/not/ignored/this_should_not_be_ignored.java`,
+          `/routes/index.js`,
+          `/routes/sharks.js`,
         ],
       });
       expect(response.type).toEqual('success');
@@ -307,6 +334,11 @@ describe('Requests to public API', () => {
               files: 2,
               isSupported: true,
               lang: 'Java',
+            },
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'C++ (beta)',
             },
             {
               files: 5,

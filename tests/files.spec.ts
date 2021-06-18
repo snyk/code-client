@@ -39,7 +39,7 @@ describe('files', () => {
     expect(files).toEqual(await bundleFiles);
 
     const testFile = files[1];
-    expect(testFile.bundlePath).toEqual('/AnnotatorTest.cpp');
+    expect(testFile.bundlePath).toEqual('AnnotatorTest.cpp');
     expect(testFile.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
     expect(testFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
     expect(testFile.size).toEqual(239);
@@ -62,7 +62,7 @@ describe('files', () => {
       bundleFileIgnores,
     );
     expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.filePath)));
-    expect(removedFiles).toEqual(['/removed_from_the_parent_bundle.java']);
+    expect(removedFiles).toEqual(['removed_from_the_parent_bundle.java']);
   });
 
   it('collect bundle files with small max payload', async () => {
@@ -91,8 +91,8 @@ describe('files', () => {
     }
     expect(smallFiles.length).toEqual(2);
     expect(smallFiles.map(f => [f.filePath, f.bundlePath])).toEqual([
-      [`${sampleProjectPath}/models/sharks.js`, '/models/sharks.js'],
-      [`${sampleProjectPath}/controllers/sharks.js`, '/controllers/sharks.js'],
+      [`${sampleProjectPath}/models/sharks.js`, 'models/sharks.js'],
+      [`${sampleProjectPath}/controllers/sharks.js`, 'controllers/sharks.js'],
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('files', () => {
 
     const testPayload = payloads[0][1];
     expect(testPayload.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
-    expect(testPayload.bundlePath).toEqual(`/AnnotatorTest.cpp`);
+    expect(testPayload.bundlePath).toEqual(`AnnotatorTest.cpp`);
     expect(testPayload.size).toEqual(239);
     expect(testPayload.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
     expect(testPayload.content).toEqual(fs.readFileSync(testPayload.filePath).toString('utf8'));

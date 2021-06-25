@@ -31,7 +31,7 @@ describe('files', () => {
 
   it('collect bundle files', async () => {
     // TODO: We should introduce some performance test using a big enough repo to avoid flaky results
-    const collector = collectBundleFiles(sampleProjectPath, [sampleProjectPath], supportedFiles, bundleFileIgnores);
+    const collector = collectBundleFiles({ baseDir: sampleProjectPath, paths: [sampleProjectPath], supportedFiles, fileIgnores: bundleFileIgnores });
     const files = [];
     for await (const f of collector) {
       files.push(f);
@@ -57,9 +57,9 @@ describe('files', () => {
     const parentBundle = [...testNewFiles, ...testRemovedFiles];
     const { files, removedFiles } = await prepareExtendingBundle(
       sampleProjectPath,
-      parentBundle,
       supportedFiles,
       bundleFileIgnores,
+      parentBundle,
     );
     expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.filePath)));
     expect(removedFiles).toEqual(['removed_from_the_parent_bundle.java']);
@@ -67,13 +67,13 @@ describe('files', () => {
 
   it('collect bundle files with small max payload', async () => {
     // Limit size and we get fewer files
-    const collector = collectBundleFiles(
-      sampleProjectPath,
-      [sampleProjectPath],
+    const collector = collectBundleFiles({
+      baseDir: sampleProjectPath,
+      paths: [sampleProjectPath],
       supportedFiles,
-      bundleFileIgnores,
-      500,
-    );
+      fileIgnores: bundleFileIgnores,
+      maxPayload: 500,
+    });
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);
@@ -84,7 +84,7 @@ describe('files', () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles(sampleProjectPath, folders, supportedFiles);
+    const collector = collectBundleFiles({ baseDir: sampleProjectPath, paths: folders, supportedFiles, fileIgnores: [] });
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);

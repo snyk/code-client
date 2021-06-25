@@ -207,30 +207,40 @@ async function* searchFiles(
   }
 }
 
+export interface AnalyzeFoldersOptions {
+  paths: string[];
+  symlinksEnabled?: boolean;
+  maxPayload?: number;
+  defaultFileIgnores?: string[];
+}
+
+export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
+  supportedFiles: SupportedFiles;
+  baseDir: string;
+  fileIgnores: string[];
+}
+
 /**
  * Returns bundle files from requested paths
  * */
-export async function* collectBundleFiles(
-  baseDir: string,
-  paths: string[],
-  supportedFiles: SupportedFiles,
-  fileIgnores: string[] = IGNORES_DEFAULT,
-  maxFileSize = MAX_PAYLOAD,
+export async function* collectBundleFiles({
+  maxPayload = MAX_PAYLOAD,
   symlinksEnabled = false,
-): AsyncGenerator<FileInfo> {
-  const cache = new Cache(CACHE_KEY, baseDir);
+  ...options
+}: CollectBundleFilesOptions): AsyncGenerator<FileInfo> {
+  const cache = new Cache(CACHE_KEY, options.baseDir);
 
   const files = [];
   const dirs = [];
 
   // Split into directories and files and exclude symlinks if needed
-  for (const path of paths) {
+  for (const path of options.paths) {
     // eslint-disable-next-line no-await-in-loop
     const fileStats = await lStat(path);
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled)) continue;
 
-    if (fileStats.isFile() && fileStats.size <= maxFileSize) {
+    if (fileStats.isFile() && fileStats.size <= maxPayload) {
       files.push(path);
     } else if (fileStats.isDirectory()) {
       dirs.push(path);
@@ -238,13 +248,13 @@ export async function* collectBundleFiles(
   }
 
   // Scan folders
-  const globPatterns = getGlobPatterns(supportedFiles);
+  const globPatterns = getGlobPatterns(options.supportedFiles);
   for (const folder of dirs) {
-    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores);
+    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, options.fileIgnores);
     // eslint-disable-next-line no-await-in-loop
     for await (const filePath of searcher) {
-      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
-      if (fileInfo && fileInfo.size <= maxFileSize) {
+      const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
       }
     }
@@ -252,10 +262,15 @@ export async function* collectBundleFiles(
 
   // Sanitize files
   if (files.length) {
-    const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, fileIgnores);
+    const searcher = searchFiles(
+      filterSupportedFiles(files, options.supportedFiles),
+      options.baseDir,
+      symlinksEnabled,
+      options.fileIgnores,
+    );
     for await (const filePath of searcher) {
-      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
-      if (fileInfo && fileInfo.size <= maxFileSize) {
+      const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
       }
     }
@@ -266,9 +281,9 @@ export async function* collectBundleFiles(
 
 export async function prepareExtendingBundle(
   baseDir: string,
-  files: string[],
   supportedFiles: SupportedFiles,
   fileIgnores: string[] = IGNORES_DEFAULT,
+  files: string[],
   maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
 ): Promise<{ files: FileInfo[]; removedFiles: string[] }> {

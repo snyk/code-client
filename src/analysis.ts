@@ -7,6 +7,7 @@ import {
   prepareExtendingBundle,
   determineBaseDir,
   resolveBundleFilePath,
+  AnalyzeFoldersOptions,
 } from './files';
 import {
   getFilters,
@@ -17,47 +18,33 @@ import {
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   RemoteBundle,
+  GetAnalysisOptions,
 } from './http';
 
 import emitter from './emitter';
-import { defaultBaseURL, MAX_PAYLOAD, IGNORES_DEFAULT } from './constants';
+import { MAX_PAYLOAD } from './constants';
 import { remoteBundleFactory } from './bundles';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
-import { AnalysisSeverity, FolderOptions, AnalyzeFoldersOptions } from './interfaces/analysis-options.interface';
 
 import { fromEntries } from './lib/utils';
 import { SupportedFiles } from './interfaces/files.interface';
+import pick from 'lodash.pick';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
-const ANALYSIS_OPTIONS_DEFAULTS = {
-  baseURL: defaultBaseURL,
-  sessionToken: '',
-  severity: AnalysisSeverity.info,
-  symlinksEnabled: false,
-  maxPayload: MAX_PAYLOAD,
-  defaultFileIgnores: IGNORES_DEFAULT,
-  source: '',
-};
+// const ANALYSIS_OPTIONS_DEFAULTS = {
+//   baseURL: defaultBaseURL,
+//   sessionToken: '',
+//   severity: AnalysisSeverity.info,
+//   symlinksEnabled: false,
+//   maxPayload: MAX_PAYLOAD,
+//   defaultFileIgnores: IGNORES_DEFAULT,
+//   source: '',
+// };
 
-export interface AnalysisOptions {
-  baseURL: string;
-  sessionToken: string;
-  bundleHash: string;
-  severity: AnalysisSeverity;
-  limitToFiles?: string[];
-  source: string;
-}
-
-// interface FileBundle {
-//   bundleHash: string;
-//   options: AnalysisOptions;
-//   fileOptions: AnalyzeFoldersOptions;
-//   results: AnalysisResult;
-// }
 
 async function pollAnalysis(
-  options: AnalysisOptions,
+  options: GetAnalysisOptions,
 ): Promise<Result<AnalysisFailedResponse | AnalysisResult, GetAnalysisErrorCodes>> {
   let analysisResponse: Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>;
   let analysisData: GetAnalysisResponseDto;
@@ -99,7 +86,7 @@ async function pollAnalysis(
   }
 }
 
-export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisResult> {
+export async function analyzeBundle(options: GetAnalysisOptions): Promise<AnalysisResult> {
   // Call remote bundle for analysis results and emit intermediate progress
   const analysisData = await pollAnalysis(options);
 
@@ -110,12 +97,6 @@ export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisR
   }
 
   return analysisData.value;
-
-  // // Create bundle instance to handle extensions
-  // return {
-  //   bundleHash,
-  //   analysisResults,
-  // };
 }
 
 // function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
@@ -130,6 +111,47 @@ export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisR
 //   return files;
 // }
 
+interface FileBundle {
+  options: GetAnalysisOptions;
+  fileOptions: AnalyzeFoldersOptions;
+  results: AnalysisResult;
+}
+
+export async function analyzeFolders(
+  options: GetAnalysisOptions,
+  fileOptions: AnalyzeFoldersOptions,
+): Promise<AnalysisResult | null> {
+  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
+
+  // Scan directories and find all suitable files
+  const baseDir = determineBaseDir(fileOptions.paths);
+
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(
+    fileOptions.paths,
+    fileOptions.symlinksEnabled,
+    fileOptions.defaultFileIgnores,
+  );
+
+  const remoteBundle = await createBundleFromFolders({
+    ...options,
+    fileOptions,
+    supportedFiles,
+    baseDir,
+    fileIgnores,
+  });
+
+  // Analyze bundle
+  if (remoteBundle === null) {
+    return null;
+  }
+
+  const analysisResults = await analyzeBundle({ ...options, bundleHash: remoteBundle.bundleHash });
+  // TODO: expand relative file names to absolute ones
+  // analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
+  return analysisResults;
+}
+
 // const moveSuggestionIndexes = <T>(
 //   suggestionIndex: number,
 //   suggestions: { [index: string]: T },
@@ -141,7 +163,6 @@ export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisR
 //     }),
 //   );
 // };
-
 // function mergeBundleResults(bundle: FileBundle, analysisData: IBundleResult, limitToFiles: string[]): FileBundle {
 //   // Determine max suggestion index in our data
 //   const suggestionIndex = Math.max(...Object.keys(bundle.analysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
@@ -173,75 +194,22 @@ export async function analyzeBundle(options: AnalysisOptions): Promise<AnalysisR
 //   };
 // }
 
-export async function analyzeFolders(options: FolderOptions): Promise<FileBundle> {
-  const analysisOptions: AnalyzeFoldersOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
-  const { baseURL, sessionToken, severity, paths, symlinksEnabled, defaultFileIgnores, source } = analysisOptions;
-
-  const supportedFiles = await getSupportedFiles(baseURL, source);
-
-  // Scan directories and find all suitable files
-  const baseDir = determineBaseDir(paths);
-
-  // Scan for custom ignore rules
-  const fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores);
-
-  const remoteBundle = await createBundleFromFolders({ ...analysisOptions, supportedFiles, baseDir, fileIgnores });
-
-  // Analyze bundle
-  let analysisData;
-  if (remoteBundle === null) {
-    analysisData = {
-      analysisResults: {
-        files: {},
-        suggestions: {},
-        timing: {
-          analysis: 0,
-          fetchingCode: 0,
-          queue: 0,
-        },
-        coverage: [],
-      },
-      bundleHash: '',
-    };
-  } else {
-    analysisData = await analyzeBundle({
-      baseURL,
-      sessionToken,
-      severity,
-      bundleHash: remoteBundle.bundleHash,
-      source,
-    });
-    analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
-  }
-
-  const result = {
-    baseURL,
-    sessionToken,
-    severity,
-    supportedFiles,
-    baseDir,
-    paths,
-    fileIgnores,
-    symlinksEnabled,
-    ...analysisData,
-  };
-
-  return result;
+interface ExtendAnalysisOptions extends GetAnalysisOptions {
+  fileOptions: AnalyzeFoldersOptions;
+  bundle: FileBundle;
+  supportedFiles: SupportedFiles;
+  baseDir: string;
+  fileIgnores: string[];
 }
 
-export async function extendAnalysis(
-  bundle: FileBundle,
-  filePaths: string[],
-  maxPayload = MAX_PAYLOAD,
-  source: string,
-): Promise<FileBundle | null> {
+export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileBundle | null> {
   const { files, removedFiles } = await prepareExtendingBundle(
-    bundle.baseDir,
-    filePaths,
-    bundle.supportedFiles,
-    bundle.fileIgnores,
-    maxPayload,
-    bundle.symlinksEnabled,
+    options.baseDir,
+    options.supportedFiles,
+    options.fileIgnores,
+    options.fileOptions.paths,
+    options.fileOptions.maxPayload,
+    options.fileOptions.symlinksEnabled,
   );
 
   if (!files.length && !removedFiles.length) {
@@ -249,16 +217,14 @@ export async function extendAnalysis(
   }
 
   // Extend remote bundle
-  const remoteBundle = await remoteBundleFactory(
-    bundle.baseURL,
-    bundle.sessionToken,
+  const remoteBundle = await remoteBundleFactory({
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    bundleHash: options.bundleHash,
+    baseDir: options.baseDir,
+    maxPayload: options.fileOptions.maxPayload,
     files,
     removedFiles,
-    bundle.baseDir,
-    bundle.bundleHash,
-    maxPayload,
-    source,
-  );
+  });
 
   if (remoteBundle === null) {
     // File list is empty
@@ -266,16 +232,15 @@ export async function extendAnalysis(
     return null;
   }
 
-  const analysisData = await analyzeBundle({
-    baseURL: bundle.baseURL,
-    sessionToken: bundle.sessionToken,
-    severity: bundle.severity,
+  const analysisResults = await analyzeBundle({
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    severity: options.severity,
     bundleHash: remoteBundle.bundleHash,
     limitToFiles: files.map(f => f.bundlePath),
-    source,
   });
-  // Transform relative paths into absolute
-  analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
+
+  // TODO: Transform relative paths into absolute
+  // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
   // Merge into base bundle results
   return mergeBundleResults(
@@ -285,10 +250,11 @@ export async function extendAnalysis(
   );
 }
 
-interface CreateBundleFromFoldersOptions extends FolderOptions {
-  supportedFiles?: SupportedFiles;
-  baseDir?: string;
-  fileIgnores?: string[];
+interface CreateBundleFromFoldersOptions extends GetAnalysisOptions {
+  fileOptions: AnalyzeFoldersOptions;
+  supportedFiles: SupportedFiles;
+  baseDir: string;
+  fileIgnores: string[];
 }
 
 /**
@@ -298,32 +264,16 @@ interface CreateBundleFromFoldersOptions extends FolderOptions {
  * @returns {Promise<RemoteBundle | null>}
  */
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<RemoteBundle | null> {
-  const analysisOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
-
-  const {
-    baseURL,
-    source,
-    paths,
-    symlinksEnabled,
-    defaultFileIgnores,
-    maxPayload,
-    sessionToken,
-    supportedFiles = await getSupportedFiles(baseURL, source),
-    baseDir = determineBaseDir(paths),
-    fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores),
-  } = analysisOptions;
+  // const {
+  //   supportedFiles = await getSupportedFiles(baseURL, source),
+  //   baseDir = determineBaseDir(paths),
+  //   fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores),
+  // } = analysisOptions;
 
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
   let totalFiles = 0;
-  const bundleFileCollector = collectBundleFiles(
-    baseDir,
-    paths,
-    supportedFiles,
-    fileIgnores,
-    maxPayload,
-    symlinksEnabled,
-  );
+  const bundleFileCollector = collectBundleFiles(options);
   for await (const f of bundleFileCollector) {
     bundleFiles.push(f);
     totalFiles += 1;
@@ -331,9 +281,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
   }
 
   // Create remote bundle
-  return bundleFiles.length
-    ? remoteBundleFactory(baseURL, sessionToken, bundleFiles, [], baseDir, null, maxPayload, source)
-    : null;
+  return bundleFiles.length ? remoteBundleFactory({ ...options, files: bundleFiles }) : null;
 }
 
 /**

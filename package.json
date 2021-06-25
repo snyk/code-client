@@ -31,7 +31,16 @@
   "homepage": "https://github.com/snyk/code-client#readme",
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testTimeout": 50000,
+
+    "verbose": true,
+    "clearMocks": true,
+    "collectCoverage": true,
+    "coverageProvider": "v8",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "devDependencies": {
     "@types/jest": "^26.0.12",

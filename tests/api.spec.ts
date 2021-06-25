@@ -1,4 +1,4 @@
-import { baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
+import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, bundleFilePaths } from './constants/sample';
 import { fromEntries } from '../src/lib/utils';
 import pick from 'lodash.pick';
@@ -91,6 +91,7 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: fakeBundleHashFull,
       });
       expect(response.type).toEqual('success');
@@ -107,6 +108,7 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: 'mock-expired-bundle-id',
       });
       expect(response.type).toEqual('error');
@@ -148,6 +150,7 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: fakeBundleHashFull,
         files: {
           'new.js': 'new123',
@@ -178,6 +181,7 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: 'wrong-bundle-id-2',
         files: {
           'new2.js': 'new1234',
@@ -201,6 +205,7 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: fakeBundleHashFull,
         files: {
           'df.js': { hash: 'df', content: 'const module = new Module();' },
@@ -239,6 +244,7 @@ describe('Requests to public API', () => {
       const checkResponse = await checkBundle({
         baseURL,
         sessionToken,
+        source,
         bundleHash: realBundleHashFull,
       });
       expect(checkResponse.type).toEqual('success');

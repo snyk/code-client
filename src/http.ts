@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import omit from 'lodash.omit';
+import pick from 'lodash.pick';
 
 import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
 import axios from './axios';
@@ -20,6 +20,12 @@ type ResultError<E> = {
 };
 
 export type Result<T, E> = ResultSuccess<T> | ResultError<E>;
+
+export interface ConnectionOptions {
+  baseURL: string;
+  sessionToken: string;
+  source: string;
+}
 
 export function determineErrorCode(error: AxiosError | any): ErrorCodes {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -89,7 +95,12 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
   [ErrorCodes.connectionRefused]: DEFAULT_ERROR_MESSAGES[ErrorCodes.connectionRefused],
 };
 
-export function startSession(options: { readonly authHost: string; readonly source: string }): StartSessionResponseDto {
+interface StartSessionOptions {
+  readonly authHost: string;
+  readonly source: string;
+}
+
+export function startSession(options: StartSessionOptions): StartSessionResponseDto {
   const { source, authHost } = options;
   const draftToken = uuidv4();
 
@@ -111,16 +122,18 @@ interface IApiTokenResponse {
   api: string;
 }
 
-export async function checkSession(options: {
+interface CheckSessionOptions {
   readonly authHost: string;
   readonly draftToken: string;
-}): Promise<Result<string, CheckSessionErrorCodes>> {
-  const { draftToken, authHost } = options;
+}
+
+export async function checkSession(options: CheckSessionOptions): Promise<Result<string, CheckSessionErrorCodes>> {
   const config: AxiosRequestConfig = {
-    url: `${authHost}/api/v1/verify/callback`,
+    baseURL: options.authHost,
+    url: `/api/v1/verify/callback`,
     method: 'POST',
     data: {
-      token: draftToken,
+      token: options.draftToken,
     },
   };
 
@@ -146,10 +159,10 @@ export async function checkSession(options: {
 }
 
 export async function getFilters(baseURL: string, source: string): Promise<Result<SupportedFiles, GenericErrorTypes>> {
-  const apiName = 'filters';
   const config: AxiosRequestConfig = {
     headers: { source },
-    url: `${baseURL}/${apiName}`,
+    baseURL,
+    url: `/filters`,
     method: 'GET',
   };
 
@@ -157,13 +170,14 @@ export async function getFilters(baseURL: string, source: string): Promise<Resul
     const response = await axios.request<SupportedFiles>(config);
     return { type: 'success', value: response.data };
   } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, apiName);
+    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'filters');
   }
 }
 
 function prepareTokenHeaders(sessionToken: string) {
   return {
     'Session-Token': sessionToken,
+    // We need to be able to test code-client without deepcode locally
     Authorization: `Bearer ${sessionToken}`,
   };
 }
@@ -190,22 +204,22 @@ const CREATE_BUNDLE_ERROR_MESSAGES: { [P in CreateBundleErrorCodes]: string } = 
   [ErrorCodes.notFound]: 'Unable to resolve requested oid',
 };
 
-export async function createBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly files: BundleFiles;
-  readonly source: string;
-}): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
-  const { baseURL, sessionToken, files, source } = options;
+interface CreateBundleOptions extends ConnectionOptions {
+  files: BundleFiles;
+}
 
+export async function createBundle(
+  options: CreateBundleOptions,
+): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   const config: AxiosRequestConfig = {
     headers: {
-      ...prepareTokenHeaders(sessionToken),
-      source,
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
     },
-    url: `${baseURL}/bundle`,
+    baseURL: options.baseURL,
+    url: `/bundle`,
     method: 'POST',
-    data: files,
+    data: options.files,
   };
 
   try {
@@ -229,15 +243,18 @@ const CHECK_BUNDLE_ERROR_MESSAGES: { [P in CheckBundleErrorCodes]: string } = {
   [ErrorCodes.notFound]: 'Uploaded bundle has expired',
 };
 
-export async function checkBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleHash: string;
-}): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleHash } = options;
+interface CheckBundleOptions extends ConnectionOptions {
+  bundleHash: string;
+}
+
+export async function checkBundle(options: CheckBundleOptions): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
   const config: AxiosRequestConfig = {
-    headers: prepareTokenHeaders(sessionToken),
-    url: `${baseURL}/bundle/${bundleHash}`,
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    baseURL: options.baseURL,
+    url: `/bundle/${options.bundleHash}`,
     method: 'GET',
   };
 
@@ -266,22 +283,24 @@ const EXTEND_BUNDLE_ERROR_MESSAGES: { [P in ExtendBundleErrorCodes]: string } = 
   [ErrorCodes.notFound]: 'Parent bundle has expired',
 };
 
-export async function extendBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
+interface ExtendBundleOptions extends ConnectionOptions {
   readonly bundleHash: string;
   readonly files: BundleFiles;
   readonly removedFiles?: string[];
-}): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleHash, files, removedFiles = [] } = options;
+}
+
+export async function extendBundle(
+  options: ExtendBundleOptions,
+): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
   const config: AxiosRequestConfig = {
-    headers: prepareTokenHeaders(sessionToken),
-    url: `${baseURL}/bundle/${bundleHash}`,
-    method: 'PUT',
-    data: {
-      files,
-      removedFiles,
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
     },
+    baseURL: options.baseURL,
+    url: `/bundle/${options.bundleHash}`,
+    method: 'PUT',
+    data: pick(options, ['files', 'removedFiles']),
   };
 
   try {
@@ -329,32 +348,30 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
-export async function getAnalysis(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
+export interface GetAnalysisOptions extends ConnectionOptions {
   readonly bundleHash: string;
   readonly severity: number;
   readonly limitToFiles?: string[];
-  readonly source: string;
-}): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, bundleHash, severity, limitToFiles, source } = options;
+}
 
-  const headers = {
-    ...prepareTokenHeaders(sessionToken),
-    source,
-  };
-
+export async function getAnalysis(
+  options: GetAnalysisOptions,
+): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const config: AxiosRequestConfig = {
-    headers,
-    url: `${baseURL}/analysis`,
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    baseURL: options.baseURL,
+    url: `/analysis`,
     method: 'POST',
     data: {
       key: {
         type: 'file',
-        hash: bundleHash,
-        limitToFiles: limitToFiles || [],
+        hash: options.bundleHash,
+        limitToFiles: options.limitToFiles || [],
       },
-      severity,
+      severity: options.severity,
     },
   };
 
@@ -365,4 +382,3 @@ export async function getAnalysis(options: {
     return generateError<GetAnalysisErrorCodes>(error, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
   }
 }
-

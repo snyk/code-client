@@ -38,6 +38,7 @@ describe('Requests to public API', () => {
         '.cpp',
         '.cs',
         '.cxx',
+        '.ejs',
         '.es',
         '.es6',
         '.h',

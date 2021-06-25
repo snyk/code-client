@@ -348,10 +348,13 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
-export interface GetAnalysisOptions extends ConnectionOptions {
-  readonly bundleHash: string;
+export interface AnalysisOptions {
   readonly severity: number;
   readonly limitToFiles?: string[];
+}
+
+export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions {
+  readonly bundleHash: string;
 }
 
 export async function getAnalysis(

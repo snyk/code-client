@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-// import omit from 'lodash.omit';
+import pick from 'lodash.pick';
 
 import {
   collectIgnoreRules,
@@ -18,17 +18,18 @@ import {
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   RemoteBundle,
+  AnalysisOptions,
+  ConnectionOptions,
   GetAnalysisOptions,
 } from './http';
 
 import emitter from './emitter';
-import { MAX_PAYLOAD } from './constants';
+// import { MAX_PAYLOAD } from './constants';
 import { remoteBundleFactory } from './bundles';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 
-import { fromEntries } from './lib/utils';
+// import { fromEntries } from './lib/utils';
 import { SupportedFiles } from './interfaces/files.interface';
-import pick from 'lodash.pick';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -41,7 +42,6 @@ const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, d
 //   defaultFileIgnores: IGNORES_DEFAULT,
 //   source: '',
 // };
-
 
 async function pollAnalysis(
   options: GetAnalysisOptions,
@@ -111,34 +111,20 @@ export async function analyzeBundle(options: GetAnalysisOptions): Promise<Analys
 //   return files;
 // }
 
-interface FileBundle {
-  options: GetAnalysisOptions;
-  fileOptions: AnalyzeFoldersOptions;
-  results: AnalysisResult;
+// interface FileBundle {
+//   options: GetAnalysisOptions;
+//   fileOptions: AnalyzeFoldersOptions;
+//   results: AnalysisResult;
+// }
+
+interface FileAnalysisOptions extends ConnectionOptions, AnalysisOptions, AnalyzeFoldersOptions {
+  // pass
 }
 
-export async function analyzeFolders(
-  options: GetAnalysisOptions,
-  fileOptions: AnalyzeFoldersOptions,
-): Promise<AnalysisResult | null> {
-  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
-
-  // Scan directories and find all suitable files
-  const baseDir = determineBaseDir(fileOptions.paths);
-
-  // Scan for custom ignore rules
-  const fileIgnores = await collectIgnoreRules(
-    fileOptions.paths,
-    fileOptions.symlinksEnabled,
-    fileOptions.defaultFileIgnores,
-  );
-
+export async function analyzeFolders(options: FileAnalysisOptions): Promise<AnalysisResult | null> {
   const remoteBundle = await createBundleFromFolders({
-    ...options,
-    fileOptions,
-    supportedFiles,
-    baseDir,
-    fileIgnores,
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    ...pick(options, ['paths', 'symlinksEnabled', 'maxPayload', 'defaultFileIgnores']),
   });
 
   // Analyze bundle
@@ -146,7 +132,10 @@ export async function analyzeFolders(
     return null;
   }
 
-  const analysisResults = await analyzeBundle({ ...options, bundleHash: remoteBundle.bundleHash });
+  const analysisResults = await analyzeBundle({
+    ...pick(options, ['baseURL', 'sessionToken', 'source', 'severity', 'limitToFiles']),
+    bundleHash: remoteBundle.bundleHash,
+  });
   // TODO: expand relative file names to absolute ones
   // analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
   return analysisResults;
@@ -194,67 +183,64 @@ export async function analyzeFolders(
 //   };
 // }
 
-interface ExtendAnalysisOptions extends GetAnalysisOptions {
-  fileOptions: AnalyzeFoldersOptions;
-  bundle: FileBundle;
-  supportedFiles: SupportedFiles;
-  baseDir: string;
-  fileIgnores: string[];
-}
+// interface ExtendAnalysisOptions extends GetAnalysisOptions {
+//   fileOptions: AnalyzeFoldersOptions;
+//   bundle: FileBundle;
+//   supportedFiles: SupportedFiles;
+//   baseDir: string;
+//   fileIgnores: string[];
+// }
 
-export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileBundle | null> {
-  const { files, removedFiles } = await prepareExtendingBundle(
-    options.baseDir,
-    options.supportedFiles,
-    options.fileIgnores,
-    options.fileOptions.paths,
-    options.fileOptions.maxPayload,
-    options.fileOptions.symlinksEnabled,
-  );
+// export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileBundle | null> {
+//   const { files, removedFiles } = await prepareExtendingBundle(
+//     options.baseDir,
+//     options.supportedFiles,
+//     options.fileIgnores,
+//     options.fileOptions.paths,
+//     options.fileOptions.maxPayload,
+//     options.fileOptions.symlinksEnabled,
+//   );
 
-  if (!files.length && !removedFiles.length) {
-    return null; // nothing to extend, just return null
-  }
+//   if (!files.length && !removedFiles.length) {
+//     return null; // nothing to extend, just return null
+//   }
 
-  // Extend remote bundle
-  const remoteBundle = await remoteBundleFactory({
-    ...pick(options, ['baseURL', 'sessionToken', 'source']),
-    bundleHash: options.bundleHash,
-    baseDir: options.baseDir,
-    maxPayload: options.fileOptions.maxPayload,
-    files,
-    removedFiles,
-  });
+//   // Extend remote bundle
+//   const remoteBundle = await remoteBundleFactory({
+//     ...pick(options, ['baseURL', 'sessionToken', 'source']),
+//     bundleHash: options.bundleHash,
+//     baseDir: options.baseDir,
+//     maxPayload: options.fileOptions.maxPayload,
+//     files,
+//     removedFiles,
+//   });
 
-  if (remoteBundle === null) {
-    // File list is empty
-    // nothing to extend, just return null
-    return null;
-  }
+//   if (remoteBundle === null) {
+//     // File list is empty
+//     // nothing to extend, just return null
+//     return null;
+//   }
 
-  const analysisResults = await analyzeBundle({
-    ...pick(options, ['baseURL', 'sessionToken', 'source']),
-    severity: options.severity,
-    bundleHash: remoteBundle.bundleHash,
-    limitToFiles: files.map(f => f.bundlePath),
-  });
+//   const analysisResults = await analyzeBundle({
+//     ...pick(options, ['baseURL', 'sessionToken', 'source']),
+//     severity: options.severity,
+//     bundleHash: remoteBundle.bundleHash,
+//     limitToFiles: files.map(f => f.bundlePath),
+//   });
 
-  // TODO: Transform relative paths into absolute
-  // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
+//   // TODO: Transform relative paths into absolute
+//   // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
-  // Merge into base bundle results
-  return mergeBundleResults(
-    bundle,
-    analysisData,
-    files.map(f => f.filePath),
-  );
-}
+//   // Merge into base bundle results
+//   return mergeBundleResults(
+//     bundle,
+//     analysisData,
+//     files.map(f => f.filePath),
+//   );
+// }
 
-interface CreateBundleFromFoldersOptions extends GetAnalysisOptions {
-  fileOptions: AnalyzeFoldersOptions;
-  supportedFiles: SupportedFiles;
-  baseDir: string;
-  fileIgnores: string[];
+interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+  // pass
 }
 
 /**
@@ -264,24 +250,37 @@ interface CreateBundleFromFoldersOptions extends GetAnalysisOptions {
  * @returns {Promise<RemoteBundle | null>}
  */
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<RemoteBundle | null> {
-  // const {
-  //   supportedFiles = await getSupportedFiles(baseURL, source),
-  //   baseDir = determineBaseDir(paths),
-  //   fileIgnores = await collectIgnoreRules(paths, symlinksEnabled, defaultFileIgnores),
-  // } = analysisOptions;
+  const baseDir = determineBaseDir(options.paths);
+
+  // Fetch supporte files to save network traffic
+  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
+
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
 
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
   let totalFiles = 0;
-  const bundleFileCollector = collectBundleFiles(options);
+  const bundleFileCollector = collectBundleFiles({
+    ...pick(options, ['paths', 'symlinksEnabled', 'maxPayload']),
+    baseDir,
+    fileIgnores,
+    supportedFiles,
+  });
   for await (const f of bundleFileCollector) {
     bundleFiles.push(f);
     totalFiles += 1;
     emitter.scanFilesProgress(totalFiles);
   }
 
+  const bundleOptions = {
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    baseDir,
+    files: bundleFiles,
+  };
+
   // Create remote bundle
-  return bundleFiles.length ? remoteBundleFactory({ ...options, files: bundleFiles }) : null;
+  return bundleFiles.length ? remoteBundleFactory(bundleOptions) : null;
 }
 
 /**

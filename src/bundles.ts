@@ -3,9 +3,16 @@ import chunk from 'lodash.chunk';
 import pick from 'lodash.pick';
 import omit from 'lodash.omit';
 
-import { BundleFiles, FileInfo } from './interfaces/files.interface';
+import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interface';
 
-import { composeFilePayloads, resolveBundleFiles } from './files';
+import {
+  composeFilePayloads,
+  resolveBundleFiles,
+  AnalyzeFoldersOptions,
+  collectIgnoreRules,
+  determineBaseDir,
+  collectBundleFiles,
+} from './files';
 
 import {
   CreateBundleErrorCodes,
@@ -17,7 +24,9 @@ import {
   Result,
   RemoteBundle,
   ConnectionOptions,
+  getFilters,
 } from './http';
+
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
 
@@ -170,4 +179,82 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
   }
 
   return remoteBundle;
+}
+
+interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+  // pass
+}
+
+/**
+ * Get supported filters and test baseURL for correctness and availability
+ *
+ * @param baseURL
+ * @param source
+ * @returns
+ */
+async function getSupportedFiles(baseURL: string, source: string): Promise<SupportedFiles> {
+  emitter.supportedFilesLoaded(null);
+  const resp = await getFilters(baseURL, source);
+  if (resp.type === 'error') {
+    throw resp.error;
+  }
+  const supportedFiles = resp.value;
+  emitter.supportedFilesLoaded(supportedFiles);
+  return supportedFiles;
+}
+
+export interface FileBundle extends RemoteBundle {
+  baseDir: string;
+  supportedFiles: SupportedFiles;
+  fileIgnores: string[];
+}
+
+/**
+ * Creates a remote bundle and returns response from the bundle API
+ *
+ * @param {CreateBundleFromFoldersOptions} options
+ * @returns {Promise<FileBundle | null>}
+ */
+export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
+  const baseDir = determineBaseDir(options.paths);
+
+  // Fetch supporte files to save network traffic
+  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
+
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
+
+  emitter.scanFilesProgress(0);
+  const bundleFiles = [];
+  let totalFiles = 0;
+  const bundleFileCollector = collectBundleFiles({
+    ...pick(options, ['paths', 'symlinksEnabled', 'maxPayload']),
+    baseDir,
+    fileIgnores,
+    supportedFiles,
+  });
+  for await (const f of bundleFileCollector) {
+    bundleFiles.push(f);
+    totalFiles += 1;
+    emitter.scanFilesProgress(totalFiles);
+  }
+
+  const bundleOptions = {
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    baseDir,
+    files: bundleFiles,
+  };
+
+  // Create remote bundle
+  if (!bundleFiles.length) return null;
+
+  const remoteBundle = await remoteBundleFactory(bundleOptions);
+  if (remoteBundle === null) return null;
+
+  return {
+    ...remoteBundle,
+    baseDir,
+    supportedFiles,
+    fileIgnores,
+  };
 }

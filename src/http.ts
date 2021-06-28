@@ -7,6 +7,7 @@ import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constan
 import axios from './axios';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
+import { AnalysisSeverity } from './interfaces/analysis-options.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
@@ -349,12 +350,12 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
 };
 
 export interface AnalysisOptions {
-  readonly severity: number;
+  readonly severity?: number;
   readonly limitToFiles?: string[];
 }
 
 export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions {
-  readonly bundleHash: string;
+  bundleHash: string;
 }
 
 export async function getAnalysis(
@@ -374,7 +375,7 @@ export async function getAnalysis(
         hash: options.bundleHash,
         limitToFiles: options.limitToFiles || [],
       },
-      severity: options.severity,
+      severity: options.severity || AnalysisSeverity.info,
     },
   };
 

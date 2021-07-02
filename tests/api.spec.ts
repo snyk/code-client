@@ -266,26 +266,8 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.complete) {
-        const suggestions = response.value.sarif.runs[0].results!;
-        expect(suggestions).toHaveLength(12);
-        if (suggestions.length < 1) return; // TS trick
-
-        const suggestion = suggestions.find(s => s.ruleId === 'cpp/MissingOpenCheckOnFile/test');
-        expect(suggestion).toMatchObject({
-          ruleId: 'cpp/MissingOpenCheckOnFile/test',
-          level: 'note',
-          fingerprints: {
-            '0': '6e90d2fd2bfca34d437a16cbbd195be525dc2f129d047cae4b03c8fd7265346e',
-            '1': '57664a44.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf.4a7ae834.2c254dac.98501263.9e345555.da547a36.9509b717.a713c1c8.45d76bdf',
-          },
-          message: {
-            text: 'Missing check is_open on std::fstream before writing to it.',
-            markdown: 'Missing check is_open on {0} before {1}.',
-            arguments: ['[std::fstream](0)', '[writing to it](1)'],
-          },
-        });
-
-        expect(suggestion!.codeFlows![0].threadFlows[0].locations).toHaveLength(2);
+        expect(response.value.sarif).toMatchSnapshot();
+        expect(response.value.sarif.runs[0].results).toHaveLength(12);
 
         expect(new Set(response.value.coverage)).toEqual(
           new Set([
@@ -328,7 +310,7 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
-
+      expect(response.value.sarif).toMatchSnapshot();
       expect(response.value.sarif.runs[0].results).toHaveLength(8);
 
       // Get analysis results with severity 3
@@ -344,7 +326,7 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
-
+      expect(response.value.sarif).toMatchSnapshot();
       expect(response.value.sarif.runs[0].results).toHaveLength(4);
     },
     TEST_TIMEOUT,

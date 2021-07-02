@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs/promises';
+import fs from 'fs';
 
 import { FileInfo } from '../../src/interfaces/files.interface';
 import { getFileInfo, notEmpty } from '../../src/files';
@@ -50,7 +50,7 @@ export const bundleFiles: Promise<FileInfo[]> = getBundleFiles(false);
 export const bundleFilesFull: Promise<FileInfo[]> = getBundleFiles(true);
 
 export const bundleExtender: () => Promise<{
-  files: { removed: string, changed: string, added: string, all: string[] }, exec: () => Promise<void>, restore: () => Promise<void>
+  files: { removed: string, changed: string, added: string, all: string[] }, exec: () => void, restore: () => void
 }> = async () => {
   const fBundle = await bundleFilesFull;
   const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.cpp`];
@@ -65,15 +65,15 @@ export const bundleExtender: () => Promise<{
       added: addedFilesNames[0],
       all: [ ...addedFilesNames, ...changedFilesNames ],
     },
-    exec: async () => {
-      await fs.writeFile(addedFiles[0], original![0]!);
-      await fs.unlink(changedFiles[0]);
-      await fs.writeFile(changedFiles[1], `#include <fstream>`);
+    exec: () => {
+      fs.writeFileSync(addedFiles[0], original![0]!);
+      fs.unlinkSync(changedFiles[0]);
+      fs.writeFileSync(changedFiles[1], `#include <fstream>`);
     },
-    restore: async () => {
-      await fs.writeFile(changedFiles[0], original![0]!);
-      await fs.writeFile(changedFiles[1], original![1]!);
-      await fs.unlink(addedFiles[0]);
+    restore: () => {
+      fs.writeFileSync(changedFiles[0], original![0]!);
+      fs.writeFileSync(changedFiles[1], original![1]!);
+      fs.unlinkSync(addedFiles[0]);
     }
   };
 }

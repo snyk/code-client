@@ -181,216 +181,6 @@ Object {
                             "uriBaseId": "%SRCROOT%",
                           },
                           "region": Object {
-                            "endColumn": 27,
-                            "endLine": 23,
-                            "startColumn": 19,
-                            "startLine": 23,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 31,
-                            "endLine": 24,
-                            "startColumn": 17,
-                            "startLine": 24,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "0a22c29440f80a500c11208f935cbe289296f29c1a75b433793e877b50ea74d7",
-            "1": "c2e08f55.e9fd9d38.d1699128.f482feb1.a485742e.730a5695.62adb608.e9000d02.c2e08f55.ef94efde.cd271e66.e22980a8.d31a8364.730a5695.bae646e8.54d46e25",
-          },
-          "level": "note",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "not/ignored/this_should_not_be_ignored.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 15,
-                  "endLine": 24,
-                  "startColumn": 14,
-                  "startLine": 24,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[java.lang.Exception](0)",
-              "[printStackTrace](1)",
-            ],
-            "markdown": "Printing the stack trace of {0}. Production code should not use {1}.",
-            "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
-          },
-          "ruleId": "java/DontUsePrintStackTrace",
-          "ruleIndex": 2,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 27,
-                            "endLine": 23,
-                            "startColumn": 19,
-                            "startLine": 23,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 31,
-                            "endLine": 24,
-                            "startColumn": 17,
-                            "startLine": 24,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "e17ec7b854d63ee0ccbd9d61af883cbf8c98d88ace44eba827de877e04af2474",
-            "1": "c2e08f55.e9fd9d38.d1699128.f482feb1.a485742e.730a5695.62adb608.e9000d02.c2e08f55.ef94efde.cd271e66.e22980a8.d31a8364.730a5695.bae646e8.54d46e25",
-          },
-          "level": "note",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "GitHubAccessTokenScrambler12.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 15,
-                  "endLine": 24,
-                  "startColumn": 14,
-                  "startLine": 24,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[java.lang.Exception](0)",
-              "[printStackTrace](1)",
-            ],
-            "markdown": "Printing the stack trace of {0}. Production code should not use {1}.",
-            "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
-          },
-          "ruleId": "java/DontUsePrintStackTrace",
-          "ruleIndex": 2,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "AnnotatorTest.cpp",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 27,
-                            "endLine": 5,
-                            "startColumn": 8,
-                            "startLine": 5,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "49bc4d99f6c74fa3bcfe1df96f17f9379b7921289a52dc9f0c4bbede0bffd9b4",
-          },
-          "level": "warning",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "AnnotatorTest.cpp",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 27,
-                  "endLine": 5,
-                  "startColumn": 8,
-                  "startLine": 5,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [],
-            "markdown": "The expression will always evaluate to false because both sides always hold the same value.",
-            "text": "The expression will always evaluate to false because both sides always hold the same value.",
-          },
-          "ruleId": "cpp/CppSameEvalBinaryExpressionfalse",
-          "ruleIndex": 3,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
                             "endColumn": 57,
                             "endLine": 10,
                             "startColumn": 40,
@@ -451,7 +241,7 @@ Object {
             "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
           },
           "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 4,
+          "ruleIndex": 2,
         },
         Object {
           "codeFlows": Array [
@@ -528,7 +318,7 @@ Object {
             "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
           },
           "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 4,
+          "ruleIndex": 2,
         },
         Object {
           "codeFlows": Array [
@@ -605,7 +395,7 @@ Object {
             "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
           },
           "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 4,
+          "ruleIndex": 2,
         },
         Object {
           "codeFlows": Array [
@@ -682,7 +472,7 @@ Object {
             "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
           },
           "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 4,
+          "ruleIndex": 2,
         },
         Object {
           "codeFlows": Array [
@@ -759,7 +549,7 @@ Object {
             "text": "The CBC mode used in javax.crypto.Cipher.getInstance does not provide integrity. Consided using Galois/Counter Mode.",
           },
           "ruleId": "java/CipherModeWithNoIntegrity",
-          "ruleIndex": 5,
+          "ruleIndex": 3,
         },
         Object {
           "codeFlows": Array [
@@ -836,7 +626,63 @@ Object {
             "text": "The CBC mode used in javax.crypto.Cipher.getInstance does not provide integrity. Consided using Galois/Counter Mode.",
           },
           "ruleId": "java/CipherModeWithNoIntegrity",
-          "ruleIndex": 5,
+          "ruleIndex": 3,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "AnnotatorTest.cpp",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 27,
+                            "endLine": 5,
+                            "startColumn": 8,
+                            "startLine": 5,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "49bc4d99f6c74fa3bcfe1df96f17f9379b7921289a52dc9f0c4bbede0bffd9b4",
+          },
+          "level": "warning",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "AnnotatorTest.cpp",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 27,
+                  "endLine": 5,
+                  "startColumn": 8,
+                  "startLine": 5,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [],
+            "markdown": "The expression will always evaluate to false because both sides always hold the same value.",
+            "text": "The expression will always evaluate to false because both sides always hold the same value.",
+          },
+          "ruleId": "cpp/CppSameEvalBinaryExpressionfalse",
+          "ruleIndex": 4,
         },
         Object {
           "codeFlows": Array [
@@ -913,6 +759,160 @@ Object {
             "text": "Missing check is_open on std::fstream before writing to it.",
           },
           "ruleId": "cpp/MissingOpenCheckOnFile/test",
+          "ruleIndex": 5,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 27,
+                            "endLine": 23,
+                            "startColumn": 19,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 31,
+                            "endLine": 24,
+                            "startColumn": 17,
+                            "startLine": 24,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "0a22c29440f80a500c11208f935cbe289296f29c1a75b433793e877b50ea74d7",
+            "1": "c2e08f55.e9fd9d38.d1699128.f482feb1.a485742e.730a5695.62adb608.e9000d02.c2e08f55.ef94efde.cd271e66.e22980a8.d31a8364.730a5695.bae646e8.54d46e25",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "not/ignored/this_should_not_be_ignored.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 15,
+                  "endLine": 24,
+                  "startColumn": 14,
+                  "startLine": 24,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[java.lang.Exception](0)",
+              "[printStackTrace](1)",
+            ],
+            "markdown": "Printing the stack trace of {0}. Production code should not use {1}.",
+            "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
+          },
+          "ruleId": "java/DontUsePrintStackTrace",
+          "ruleIndex": 6,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 27,
+                            "endLine": 23,
+                            "startColumn": 19,
+                            "startLine": 23,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 31,
+                            "endLine": 24,
+                            "startColumn": 17,
+                            "startLine": 24,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "e17ec7b854d63ee0ccbd9d61af883cbf8c98d88ace44eba827de877e04af2474",
+            "1": "c2e08f55.e9fd9d38.d1699128.f482feb1.a485742e.730a5695.62adb608.e9000d02.c2e08f55.ef94efde.cd271e66.e22980a8.d31a8364.730a5695.bae646e8.54d46e25",
+          },
+          "level": "note",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "GitHubAccessTokenScrambler12.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 15,
+                  "endLine": 24,
+                  "startColumn": 14,
+                  "startLine": 24,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[java.lang.Exception](0)",
+              "[printStackTrace](1)",
+            ],
+            "markdown": "Printing the stack trace of {0}. Production code should not use {1}.",
+            "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
+          },
+          "ruleId": "java/DontUsePrintStackTrace",
           "ruleIndex": 6,
         },
       ],
@@ -1228,193 +1228,6 @@ Consequences of exposure can include holding it for ransom payment, identity the
             },
             Object {
               "defaultConfiguration": Object {
-                "level": "note",
-              },
-              "help": Object {
-                "markdown": "",
-                "text": "",
-              },
-              "id": "java/DontUsePrintStackTrace",
-              "name": "DontUsePrintStackTrace",
-              "properties": Object {
-                "categories": Array [
-                  "Defect",
-                ],
-                "exampleCommitDescriptions": Array [
-                  "improve logging and testing",
-                  "more tests, exceptions",
-                  "log errors to the log file",
-                ],
-                "exampleCommitFixes": Array [
-                  Object {
-                    "commitURL": "https://github.com/gpiercey/HbnContainer/commit/a3518b77e5c6d566e12e55b3ec62749da2a86559?diff=split#diff-8a957fb3416fcd2d2ca7105e49bad1bfL497",
-                    "lines": Array [
-                      Object {
-                        "line": "			fireValueChange();
-",
-                        "lineChange": "none",
-                        "lineNumber": 493,
-                      },
-                      Object {
-                        "line": "}",
-                        "lineChange": "none",
-                        "lineNumber": 495,
-                      },
-                      Object {
-                        "line": "catch (final java.lang.Exception e)",
-                        "lineChange": "removed",
-                        "lineNumber": 496,
-                      },
-                      Object {
-                        "line": "catch (Exception e)",
-                        "lineChange": "added",
-                        "lineNumber": 402,
-                      },
-                      Object {
-                        "line": "{",
-                        "lineChange": "none",
-                        "lineNumber": 497,
-                      },
-                      Object {
-                        "line": "  e.printStackTrace();",
-                        "lineChange": "removed",
-                        "lineNumber": 498,
-                      },
-                      Object {
-                        "line": "  logger.error(unwindStack(e));",
-                        "lineChange": "added",
-                        "lineNumber": 404,
-                      },
-                      Object {
-                        "line": "  throw new ConversionException(e);",
-                        "lineChange": "none",
-                        "lineNumber": 499,
-                      },
-                      Object {
-                        "line": "}",
-                        "lineChange": "none",
-                        "lineNumber": 500,
-                      },
-                    ],
-                  },
-                  Object {
-                    "commitURL": "https://github.com/US-CBP/GTAS/commit/c9bc21821935759544861b1746cac64ae0257bd5?diff=split#diff-a6876a2ab8047e80af75226e568e4ec0L37",
-                    "lines": Array [
-                      Object {
-                        "line": "try{",
-                        "lineChange": "none",
-                        "lineNumber": 38,
-                      },
-                      Object {
-                        "line": "        chain.doFilter(req, res);",
-                        "lineChange": "none",
-                        "lineNumber": 39,
-                      },
-                      Object {
-                        "line": "    }catch(Exception ex){",
-                        "lineChange": "none",
-                        "lineNumber": 40,
-                      },
-                      Object {
-                        "line": "        ex.printStackTrace();",
-                        "lineChange": "removed",
-                        "lineNumber": 37,
-                      },
-                      Object {
-                        "line": "        logger.error(\\"error in cors filter.\\", ex);",
-                        "lineChange": "added",
-                        "lineNumber": 41,
-                      },
-                      Object {
-                        "line": "    }",
-                        "lineChange": "none",
-                        "lineNumber": 42,
-                      },
-                    ],
-                  },
-                  Object {
-                    "commitURL": "https://github.com/apache/axis1-java/commit/ba5b2ce10d1ae31880e69c44ec22bc96d5488e05?diff=split#diff-90f0a4e734056f5b8ddaa0844b199fb6L335",
-                    "lines": Array [
-                      Object {
-                        "line": "    try {",
-                        "lineChange": "none",
-                        "lineNumber": 332,
-                      },
-                      Object {
-                        "line": "        mAttachments.writeContentToStream(os);",
-                        "lineChange": "none",
-                        "lineNumber": 333,
-                      },
-                      Object {
-                        "line": "    } catch (java.lang.Exception e) {",
-                        "lineChange": "none",
-                        "lineNumber": 334,
-                      },
-                      Object {
-                        "line": "        log.error(\\"Exception: \\", e);",
-                        "lineChange": "none",
-                        "lineNumber": 335,
-                      },
-                      Object {
-                        "line": "        e.printStackTrace();",
-                        "lineChange": "removed",
-                        "lineNumber": 336,
-                      },
-                      Object {
-                        "line": "    }",
-                        "lineChange": "none",
-                        "lineNumber": 337,
-                      },
-                      Object {
-                        "line": "}",
-                        "lineChange": "none",
-                        "lineNumber": 338,
-                      },
-                    ],
-                  },
-                ],
-                "precision": "very-high",
-                "tags": Array [
-                  "java",
-                  "maintenance",
-                  "bug",
-                  "logging",
-                  "exception",
-                  "error",
-                ],
-              },
-              "shortDescription": Object {
-                "text": "DontUsePrintStackTrace",
-              },
-            },
-            Object {
-              "defaultConfiguration": Object {
-                "level": "warning",
-              },
-              "help": Object {
-                "markdown": "",
-                "text": "",
-              },
-              "id": "cpp/CppSameEvalBinaryExpressionfalse",
-              "name": "CppSameEvalBinaryExpressionfalse",
-              "properties": Object {
-                "categories": Array [
-                  "Check",
-                  "InTest",
-                ],
-                "exampleCommitDescriptions": Array [],
-                "exampleCommitFixes": Array [],
-                "precision": "very-high",
-                "tags": Array [
-                  "cpp",
-                ],
-              },
-              "shortDescription": Object {
-                "text": "CppSameEvalBinaryExpressionfalse",
-              },
-            },
-            Object {
-              "defaultConfiguration": Object {
                 "level": "error",
               },
               "help": Object {
@@ -1910,6 +1723,32 @@ review comment",
               },
               "shortDescription": Object {
                 "text": "CipherModeWithNoIntegrity",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "warning",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "cpp/CppSameEvalBinaryExpressionfalse",
+              "name": "CppSameEvalBinaryExpressionfalse",
+              "properties": Object {
+                "categories": Array [
+                  "Check",
+                  "InTest",
+                ],
+                "exampleCommitDescriptions": Array [],
+                "exampleCommitFixes": Array [],
+                "precision": "very-high",
+                "tags": Array [
+                  "cpp",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "CppSameEvalBinaryExpressionfalse",
               },
             },
             Object {
@@ -2158,6 +1997,167 @@ review comment",
                 "text": "MissingOpenCheckOnFile/test",
               },
             },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "note",
+              },
+              "help": Object {
+                "markdown": "",
+                "text": "",
+              },
+              "id": "java/DontUsePrintStackTrace",
+              "name": "DontUsePrintStackTrace",
+              "properties": Object {
+                "categories": Array [
+                  "Defect",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "improve logging and testing",
+                  "more tests, exceptions",
+                  "log errors to the log file",
+                ],
+                "exampleCommitFixes": Array [
+                  Object {
+                    "commitURL": "https://github.com/gpiercey/HbnContainer/commit/a3518b77e5c6d566e12e55b3ec62749da2a86559?diff=split#diff-8a957fb3416fcd2d2ca7105e49bad1bfL497",
+                    "lines": Array [
+                      Object {
+                        "line": "			fireValueChange();
+",
+                        "lineChange": "none",
+                        "lineNumber": 493,
+                      },
+                      Object {
+                        "line": "}",
+                        "lineChange": "none",
+                        "lineNumber": 495,
+                      },
+                      Object {
+                        "line": "catch (final java.lang.Exception e)",
+                        "lineChange": "removed",
+                        "lineNumber": 496,
+                      },
+                      Object {
+                        "line": "catch (Exception e)",
+                        "lineChange": "added",
+                        "lineNumber": 402,
+                      },
+                      Object {
+                        "line": "{",
+                        "lineChange": "none",
+                        "lineNumber": 497,
+                      },
+                      Object {
+                        "line": "  e.printStackTrace();",
+                        "lineChange": "removed",
+                        "lineNumber": 498,
+                      },
+                      Object {
+                        "line": "  logger.error(unwindStack(e));",
+                        "lineChange": "added",
+                        "lineNumber": 404,
+                      },
+                      Object {
+                        "line": "  throw new ConversionException(e);",
+                        "lineChange": "none",
+                        "lineNumber": 499,
+                      },
+                      Object {
+                        "line": "}",
+                        "lineChange": "none",
+                        "lineNumber": 500,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/US-CBP/GTAS/commit/c9bc21821935759544861b1746cac64ae0257bd5?diff=split#diff-a6876a2ab8047e80af75226e568e4ec0L37",
+                    "lines": Array [
+                      Object {
+                        "line": "try{",
+                        "lineChange": "none",
+                        "lineNumber": 38,
+                      },
+                      Object {
+                        "line": "        chain.doFilter(req, res);",
+                        "lineChange": "none",
+                        "lineNumber": 39,
+                      },
+                      Object {
+                        "line": "    }catch(Exception ex){",
+                        "lineChange": "none",
+                        "lineNumber": 40,
+                      },
+                      Object {
+                        "line": "        ex.printStackTrace();",
+                        "lineChange": "removed",
+                        "lineNumber": 37,
+                      },
+                      Object {
+                        "line": "        logger.error(\\"error in cors filter.\\", ex);",
+                        "lineChange": "added",
+                        "lineNumber": 41,
+                      },
+                      Object {
+                        "line": "    }",
+                        "lineChange": "none",
+                        "lineNumber": 42,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/apache/axis1-java/commit/ba5b2ce10d1ae31880e69c44ec22bc96d5488e05?diff=split#diff-90f0a4e734056f5b8ddaa0844b199fb6L335",
+                    "lines": Array [
+                      Object {
+                        "line": "    try {",
+                        "lineChange": "none",
+                        "lineNumber": 332,
+                      },
+                      Object {
+                        "line": "        mAttachments.writeContentToStream(os);",
+                        "lineChange": "none",
+                        "lineNumber": 333,
+                      },
+                      Object {
+                        "line": "    } catch (java.lang.Exception e) {",
+                        "lineChange": "none",
+                        "lineNumber": 334,
+                      },
+                      Object {
+                        "line": "        log.error(\\"Exception: \\", e);",
+                        "lineChange": "none",
+                        "lineNumber": 335,
+                      },
+                      Object {
+                        "line": "        e.printStackTrace();",
+                        "lineChange": "removed",
+                        "lineNumber": 336,
+                      },
+                      Object {
+                        "line": "    }",
+                        "lineChange": "none",
+                        "lineNumber": 337,
+                      },
+                      Object {
+                        "line": "}",
+                        "lineChange": "none",
+                        "lineNumber": 338,
+                      },
+                    ],
+                  },
+                ],
+                "precision": "very-high",
+                "tags": Array [
+                  "java",
+                  "maintenance",
+                  "bug",
+                  "logging",
+                  "exception",
+                  "error",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "DontUsePrintStackTrace",
+              },
+            },
           ],
           "semanticVersion": "1.0.0",
           "version": "1.0.0",
@@ -2199,314 +2199,6 @@ Object {
         ],
       },
       "results": Array [
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 57,
-                            "endLine": 10,
-                            "startColumn": 40,
-                            "startLine": 10,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 53,
-                            "endLine": 15,
-                            "startColumn": 39,
-                            "startLine": 15,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "87bdbfe154fdb6f588b84899a99c093230eaf47373ada97c0ff1e3b8ead5e617",
-            "1": "19689298.883ce888.fa1beb9c.44ab356c.f81b5a8d.f7edcf51.0d475b83.41ec51de.19689298.601f8825.fa1beb9c.de031890.f81b5a8d.ce109560.0d475b83.41ec51de",
-          },
-          "level": "error",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "GitHubAccessTokenScrambler12.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 53,
-                  "endLine": 15,
-                  "startColumn": 39,
-                  "startLine": 15,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[string](0)",
-              "[cipher initialization value](1)",
-            ],
-            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-            "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-          },
-          "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 0,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 57,
-                            "endLine": 10,
-                            "startColumn": 40,
-                            "startLine": 10,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 53,
-                            "endLine": 15,
-                            "startColumn": 39,
-                            "startLine": 15,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "98ae9142e6207e4ff6fa1cf0328bfb9a202d307fcd29f9efbcb42c267f120bc8",
-            "1": "19689298.883ce888.fa1beb9c.44ab356c.f81b5a8d.f7edcf51.0d475b83.41ec51de.19689298.601f8825.fa1beb9c.de031890.f81b5a8d.ce109560.0d475b83.41ec51de",
-          },
-          "level": "error",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "not/ignored/this_should_not_be_ignored.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 53,
-                  "endLine": 15,
-                  "startColumn": 39,
-                  "startLine": 15,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[string](0)",
-              "[cipher initialization value](1)",
-            ],
-            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-            "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-          },
-          "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 0,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 51,
-                            "endLine": 11,
-                            "startColumn": 34,
-                            "startLine": 11,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "GitHubAccessTokenScrambler12.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 54,
-                            "endLine": 16,
-                            "startColumn": 42,
-                            "startLine": 16,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "bed2dbd87029b5e48215cd087071cc601a2f0f8b86103e28942d9037f1f6298b",
-            "1": "a75b04d3.0b7f48d1.7a59bef1.44ab356c.a698423b.f7edcf51.c23c997b.41ec51de.a75b04d3.0b7f48d1.3c7d90aa.de031890.8b2d3351.ce109560.c23c997b.41ec51de",
-          },
-          "level": "error",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "GitHubAccessTokenScrambler12.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 54,
-                  "endLine": 16,
-                  "startColumn": 42,
-                  "startLine": 16,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[string](0)",
-              "[cipher key](1)",
-            ],
-            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-            "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-          },
-          "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 0,
-        },
-        Object {
-          "codeFlows": Array [
-            Object {
-              "threadFlows": Array [
-                Object {
-                  "locations": Array [
-                    Object {
-                      "location": Object {
-                        "id": 0,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 51,
-                            "endLine": 11,
-                            "startColumn": 34,
-                            "startLine": 11,
-                          },
-                        },
-                      },
-                    },
-                    Object {
-                      "location": Object {
-                        "id": 1,
-                        "physicalLocation": Object {
-                          "artifactLocation": Object {
-                            "uri": "not/ignored/this_should_not_be_ignored.java",
-                            "uriBaseId": "%SRCROOT%",
-                          },
-                          "region": Object {
-                            "endColumn": 54,
-                            "endLine": 16,
-                            "startColumn": 42,
-                            "startLine": 16,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          "fingerprints": Object {
-            "0": "f546ee8b1353735896f316602602805b180fa29ff51785a632a631b7be3b622b",
-            "1": "a75b04d3.0b7f48d1.7a59bef1.44ab356c.a698423b.f7edcf51.c23c997b.41ec51de.a75b04d3.0b7f48d1.3c7d90aa.de031890.8b2d3351.ce109560.c23c997b.41ec51de",
-          },
-          "level": "error",
-          "locations": Array [
-            Object {
-              "physicalLocation": Object {
-                "artifactLocation": Object {
-                  "uri": "not/ignored/this_should_not_be_ignored.java",
-                  "uriBaseId": "%SRCROOT%",
-                },
-                "region": Object {
-                  "endColumn": 54,
-                  "endLine": 16,
-                  "startColumn": 42,
-                  "startLine": 16,
-                },
-              },
-            },
-          ],
-          "message": Object {
-            "arguments": Array [
-              "[string](0)",
-              "[cipher key](1)",
-            ],
-            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-            "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
-          },
-          "ruleId": "java/HardcodedSecret",
-          "ruleIndex": 0,
-        },
         Object {
           "codeFlows": Array [
             Object {
@@ -2582,7 +2274,7 @@ Object {
             "text": "The CBC mode used in javax.crypto.Cipher.getInstance does not provide integrity. Consided using Galois/Counter Mode.",
           },
           "ruleId": "java/CipherModeWithNoIntegrity",
-          "ruleIndex": 1,
+          "ruleIndex": 0,
         },
         Object {
           "codeFlows": Array [
@@ -2659,7 +2351,7 @@ Object {
             "text": "The CBC mode used in javax.crypto.Cipher.getInstance does not provide integrity. Consided using Galois/Counter Mode.",
           },
           "ruleId": "java/CipherModeWithNoIntegrity",
-          "ruleIndex": 1,
+          "ruleIndex": 0,
         },
         Object {
           "codeFlows": Array [
@@ -2736,7 +2428,7 @@ Object {
             "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
           },
           "ruleId": "java/DontUsePrintStackTrace",
-          "ruleIndex": 2,
+          "ruleIndex": 1,
         },
         Object {
           "codeFlows": Array [
@@ -2813,6 +2505,314 @@ Object {
             "text": "Printing the stack trace of java.lang.Exception. Production code should not use printStackTrace.",
           },
           "ruleId": "java/DontUsePrintStackTrace",
+          "ruleIndex": 1,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 57,
+                            "endLine": 10,
+                            "startColumn": 40,
+                            "startLine": 10,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 53,
+                            "endLine": 15,
+                            "startColumn": 39,
+                            "startLine": 15,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "87bdbfe154fdb6f588b84899a99c093230eaf47373ada97c0ff1e3b8ead5e617",
+            "1": "19689298.883ce888.fa1beb9c.44ab356c.f81b5a8d.f7edcf51.0d475b83.41ec51de.19689298.601f8825.fa1beb9c.de031890.f81b5a8d.ce109560.0d475b83.41ec51de",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "GitHubAccessTokenScrambler12.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 53,
+                  "endLine": 15,
+                  "startColumn": 39,
+                  "startLine": 15,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[string](0)",
+              "[cipher initialization value](1)",
+            ],
+            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+            "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+          },
+          "ruleId": "java/HardcodedSecret",
+          "ruleIndex": 2,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 57,
+                            "endLine": 10,
+                            "startColumn": 40,
+                            "startLine": 10,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 53,
+                            "endLine": 15,
+                            "startColumn": 39,
+                            "startLine": 15,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "98ae9142e6207e4ff6fa1cf0328bfb9a202d307fcd29f9efbcb42c267f120bc8",
+            "1": "19689298.883ce888.fa1beb9c.44ab356c.f81b5a8d.f7edcf51.0d475b83.41ec51de.19689298.601f8825.fa1beb9c.de031890.f81b5a8d.ce109560.0d475b83.41ec51de",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "not/ignored/this_should_not_be_ignored.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 53,
+                  "endLine": 15,
+                  "startColumn": 39,
+                  "startLine": 15,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[string](0)",
+              "[cipher initialization value](1)",
+            ],
+            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+            "text": "Hardcoded value string is used as a cipher initialization value. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+          },
+          "ruleId": "java/HardcodedSecret",
+          "ruleIndex": 2,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 51,
+                            "endLine": 11,
+                            "startColumn": 34,
+                            "startLine": 11,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "GitHubAccessTokenScrambler12.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 54,
+                            "endLine": 16,
+                            "startColumn": 42,
+                            "startLine": 16,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "bed2dbd87029b5e48215cd087071cc601a2f0f8b86103e28942d9037f1f6298b",
+            "1": "a75b04d3.0b7f48d1.7a59bef1.44ab356c.a698423b.f7edcf51.c23c997b.41ec51de.a75b04d3.0b7f48d1.3c7d90aa.de031890.8b2d3351.ce109560.c23c997b.41ec51de",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "GitHubAccessTokenScrambler12.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 54,
+                  "endLine": 16,
+                  "startColumn": 42,
+                  "startLine": 16,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[string](0)",
+              "[cipher key](1)",
+            ],
+            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+            "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+          },
+          "ruleId": "java/HardcodedSecret",
+          "ruleIndex": 2,
+        },
+        Object {
+          "codeFlows": Array [
+            Object {
+              "threadFlows": Array [
+                Object {
+                  "locations": Array [
+                    Object {
+                      "location": Object {
+                        "id": 0,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 51,
+                            "endLine": 11,
+                            "startColumn": 34,
+                            "startLine": 11,
+                          },
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "id": 1,
+                        "physicalLocation": Object {
+                          "artifactLocation": Object {
+                            "uri": "not/ignored/this_should_not_be_ignored.java",
+                            "uriBaseId": "%SRCROOT%",
+                          },
+                          "region": Object {
+                            "endColumn": 54,
+                            "endLine": 16,
+                            "startColumn": 42,
+                            "startLine": 16,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          "fingerprints": Object {
+            "0": "f546ee8b1353735896f316602602805b180fa29ff51785a632a631b7be3b622b",
+            "1": "a75b04d3.0b7f48d1.7a59bef1.44ab356c.a698423b.f7edcf51.c23c997b.41ec51de.a75b04d3.0b7f48d1.3c7d90aa.de031890.8b2d3351.ce109560.c23c997b.41ec51de",
+          },
+          "level": "error",
+          "locations": Array [
+            Object {
+              "physicalLocation": Object {
+                "artifactLocation": Object {
+                  "uri": "not/ignored/this_should_not_be_ignored.java",
+                  "uriBaseId": "%SRCROOT%",
+                },
+                "region": Object {
+                  "endColumn": 54,
+                  "endLine": 16,
+                  "startColumn": 42,
+                  "startLine": 16,
+                },
+              },
+            },
+          ],
+          "message": Object {
+            "arguments": Array [
+              "[string](0)",
+              "[cipher key](1)",
+            ],
+            "markdown": "Hardcoded value {0} is used as a {1}. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+            "text": "Hardcoded value string is used as a cipher key. Generate the value with a cryptographically strong random number generator such as java.security.SecureRandom instead.",
+          },
+          "ruleId": "java/HardcodedSecret",
           "ruleIndex": 2,
         },
       ],
@@ -2820,289 +2820,6 @@ Object {
         "driver": Object {
           "name": "SnykCode",
           "rules": Array [
-            Object {
-              "defaultConfiguration": Object {
-                "level": "error",
-              },
-              "help": Object {
-                "markdown": "## Details
-
-When constants are hard-coded into applications, this information could easily be reverse-engineered and become known to attackers. For example, if a breached authentication token is hard-coded in multiple places in the application, it may lead to components of the application remaining vulnerable if not all instances are changed.
-Another negative effect of hard-coding constants is potential unpredictability in the application's performance if the development team fails to update every single instance of the hard-coded constant throughout the code. For these reasons, hard-coding security-relevant constants is considered bad coding practice and should be remedied if present and avoided in future.
-
-### Best practices for prevention
-- Never hard code security-related constants; use symbolic names or configuration lookup files.
-- As hard coding is often done by coders working alone on a small scale, examine all legacy code components and test carefully when scaling.
-- Adopt a \\"future-proof code\\" mindset: While use of constants may save a little time now and make development simpler in the short term, it could cost time and money adapting to scale or other unforeseen circumstances (such as new hardware) in the future.",
-                "text": "",
-              },
-              "id": "java/HardcodedSecret",
-              "name": "HardcodedSecret",
-              "properties": Object {
-                "categories": Array [
-                  "Security",
-                ],
-                "cwe": Array [
-                  "CWE-547",
-                ],
-                "exampleCommitDescriptions": Array [
-                  "Api keys from json file",
-                  "* feat() add test case",
-                ],
-                "exampleCommitFixes": Array [
-                  Object {
-                    "commitURL": "https://github.com/Hurence/logisland/commit/e00443e73ba5493cec16c58a47aadf807496de22?diff=split#diff-b44812dc78b45d39c691371af796ac09R30",
-                    "lines": Array [
-                      Object {
-                        "line": "if (null == iv || iv.length != 16) {",
-                        "lineChange": "added",
-                        "lineNumber": 27,
-                      },
-                      Object {
-                        "line": "    System.out.println(\\"Invalid IV! default IV will be used \\");",
-                        "lineChange": "added",
-                        "lineNumber": 28,
-                      },
-                      Object {
-                        "line": "    iv = \\"azerty1234567890\\".getBytes();",
-                        "lineChange": "added",
-                        "lineNumber": 29,
-                      },
-                      Object {
-                        "line": "}",
-                        "lineChange": "added",
-                        "lineNumber": 30,
-                      },
-                      Object {
-                        "line": " if (padding == null) throw new NoSuchAlgorithmException(\\"Invalid transformation format:\\"+ALGO_AES+\\"/\\"+mode);",
-                        "lineChange": "none",
-                        "lineNumber": 34,
-                      },
-                      Object {
-                        "line": "this.key = key;",
-                        "lineChange": "none",
-                        "lineNumber": 50,
-                      },
-                      Object {
-                        "line": "if (iv.length != 16) {",
-                        "lineChange": "removed",
-                        "lineNumber": 51,
-                      },
-                      Object {
-                        "line": "    this.iv = \\"azerty1234567890\\".getBytes();",
-                        "lineChange": "removed",
-                        "lineNumber": 52,
-                      },
-                      Object {
-                        "line": "} else {",
-                        "lineChange": "removed",
-                        "lineNumber": 53,
-                      },
-                      Object {
-                        "line": "    this.iv = iv;",
-                        "lineChange": "removed",
-                        "lineNumber": 54,
-                      },
-                      Object {
-                        "line": "Key key = generateKey();",
-                        "lineChange": "none",
-                        "lineNumber": 62,
-                      },
-                      Object {
-                        "line": "if (mode.equalsIgnoreCase(\\"CBC\\")) {",
-                        "lineChange": "removed",
-                        "lineNumber": 63,
-                      },
-                      Object {
-                        "line": "if (null != mode && mode.equalsIgnoreCase(\\"CBC\\")) {",
-                        "lineChange": "added",
-                        "lineNumber": 53,
-                      },
-                      Object {
-                        "line": "    IvParameterSpec spec = new IvParameterSpec(iv);",
-                        "lineChange": "none",
-                        "lineNumber": 64,
-                      },
-                      Object {
-                        "line": "    cipher.init(Cipher.ENCRYPT_MODE, key, spec);",
-                        "lineChange": "none",
-                        "lineNumber": 65,
-                      },
-                      Object {
-                        "line": "} else {",
-                        "lineChange": "none",
-                        "lineNumber": 66,
-                      },
-                    ],
-                  },
-                  Object {
-                    "commitURL": "https://github.com/PeterHdd/cordova-plugin-crypto-file/commit/870d58cdeed54a25047a2d2a5971f82af097c180?diff=split#diff-04b53151da15f3abb582bd5f2cea5419L30",
-                    "lines": Array [
-                      Object {
-                        "line": "  private static final String URL_PREFIX = \\"http://localhost:8080/\\";",
-                        "lineChange": "removed",
-                        "lineNumber": 26,
-                      },
-                      Object {
-                        "line": "private static final String URL_PREFIX = \\"http://localhost:8080/\\";",
-                        "lineChange": "added",
-                        "lineNumber": 27,
-                      },
-                      Object {
-                        "line": "  private static final String CRYPT_KEY = \\"zkOgwW2MJ8yuqwnxLlCKJLQwEUijyQJg\\";",
-                        "lineChange": "removed",
-                        "lineNumber": 28,
-                      },
-                      Object {
-                        "line": "  private static final String CRYPT_IV = \\"0NTzzxaqRnAskulk\\";",
-                        "lineChange": "removed",
-                        "lineNumber": 29,
-                      },
-                      Object {
-                        "line": "private static final String CRYPT_KEY = \\"\\";",
-                        "lineChange": "added",
-                        "lineNumber": 29,
-                      },
-                      Object {
-                        "line": "private static final String CRYPT_IV = \\"\\";",
-                        "lineChange": "added",
-                        "lineNumber": 30,
-                      },
-                      Object {
-                        "line": "  private static final String[] CRYPT_FILES = {",
-                        "lineChange": "removed",
-                        "lineNumber": 31,
-                      },
-                      Object {
-                        "line": "private static final String[] CRYPT_FILES = {",
-                        "lineChange": "added",
-                        "lineNumber": 32,
-                      },
-                      Object {
-                        "line": "SecretKey skey = new SecretKeySpec(CRYPT_KEY.getBytes(\\"UTF-8\\"), \\"AES\\");",
-                        "lineChange": "removed",
-                        "lineNumber": 71,
-                      },
-                      Object {
-                        "line": "Cipher cipher = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
-                        "lineChange": "removed",
-                        "lineNumber": 72,
-                      },
-                      Object {
-                        "line": "cipher.init(Cipher.DECRYPT_MODE, skey, new IvParameterSpec(CRYPT_IV.getBytes(\\"UTF-8\\")));",
-                        "lineChange": "removed",
-                        "lineNumber": 73,
-                      },
-                      Object {
-                        "line": "ByteArrayOutputStream bos = new ByteArrayOutputStream();",
-                        "lineChange": "removed",
-                        "lineNumber": 75,
-                      },
-                      Object {
-                        "line": "SecretKey skey = new SecretKeySpec(CRYPT_KEY.getBytes(\\"UTF-8\\"), \\"AES\\");",
-                        "lineChange": "added",
-                        "lineNumber": 73,
-                      },
-                      Object {
-                        "line": "Cipher cipher  = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
-                        "lineChange": "added",
-                        "lineNumber": 74,
-                      },
-                      Object {
-                        "line": "cipher.init(Cipher.DECRYPT_MODE, skey, new IvParameterSpec(CRYPT_IV.getBytes(\\"UTF-8\\")));",
-                        "lineChange": "added",
-                        "lineNumber": 75,
-                      },
-                      Object {
-                        "line": "ByteArrayOutputStream bos = new ByteArrayOutputStream();",
-                        "lineChange": "added",
-                        "lineNumber": 77,
-                      },
-                    ],
-                  },
-                  Object {
-                    "commitURL": "https://github.com/yz-java/common-project/commit/c79ab4c1758326ab28303350a0adacba83fb64f1?diff=split#diff-0f9c8fd9b2f1f330899bdb71f975e966L22",
-                    "lines": Array [
-                      Object {
-                        "line": " */",
-                        "lineChange": "none",
-                        "lineNumber": 21,
-                      },
-                      Object {
-                        "line": "private static String sKey = \\"B31F2A75FBF94099\\";",
-                        "lineChange": "removed",
-                        "lineNumber": 20,
-                      },
-                      Object {
-                        "line": "private static String ivParameter = \\"1234567890123456\\";",
-                        "lineChange": "removed",
-                        "lineNumber": 21,
-                      },
-                      Object {
-                        "line": "private String ivParameter = \\"1234567890123456\\";",
-                        "lineChange": "added",
-                        "lineNumber": 23,
-                      },
-                      Object {
-                        "line": "public AES_CBC(String sKey,String ivParameter){",
-                        "lineChange": "added",
-                        "lineNumber": 25,
-                      },
-                      Object {
-                        "line": "    this.sKey=sKey;",
-                        "lineChange": "added",
-                        "lineNumber": 26,
-                      },
-                      Object {
-                        "line": "    this.ivParameter=ivParameter;",
-                        "lineChange": "added",
-                        "lineNumber": 27,
-                      },
-                      Object {
-                        "line": "// 加密",
-                        "lineChange": "none",
-                        "lineNumber": 30,
-                      },
-                      Object {
-                        "line": "SecretKeySpec skeySpec = new SecretKeySpec(raw, \\"AES\\");",
-                        "lineChange": "none",
-                        "lineNumber": 47,
-                      },
-                      Object {
-                        "line": "Cipher cipher = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
-                        "lineChange": "none",
-                        "lineNumber": 48,
-                      },
-                      Object {
-                        "line": "IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());",
-                        "lineChange": "none",
-                        "lineNumber": 49,
-                      },
-                      Object {
-                        "line": "cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);",
-                        "lineChange": "none",
-                        "lineNumber": 50,
-                      },
-                      Object {
-                        "line": "byte[] encrypted1 = new BASE64Decoder().decodeBuffer(sSrc);//先用base64解密",
-                        "lineChange": "none",
-                        "lineNumber": 51,
-                      },
-                    ],
-                  },
-                ],
-                "precision": "very-high",
-                "tags": Array [
-                  "java",
-                  "maintenance",
-                  "key",
-                  "feat",
-                ],
-              },
-              "shortDescription": Object {
-                "text": "Hardcoded Secret",
-              },
-            },
             Object {
               "defaultConfiguration": Object {
                 "level": "warning",
@@ -3478,6 +3195,289 @@ review comment",
               },
               "shortDescription": Object {
                 "text": "DontUsePrintStackTrace",
+              },
+            },
+            Object {
+              "defaultConfiguration": Object {
+                "level": "error",
+              },
+              "help": Object {
+                "markdown": "## Details
+
+When constants are hard-coded into applications, this information could easily be reverse-engineered and become known to attackers. For example, if a breached authentication token is hard-coded in multiple places in the application, it may lead to components of the application remaining vulnerable if not all instances are changed.
+Another negative effect of hard-coding constants is potential unpredictability in the application's performance if the development team fails to update every single instance of the hard-coded constant throughout the code. For these reasons, hard-coding security-relevant constants is considered bad coding practice and should be remedied if present and avoided in future.
+
+### Best practices for prevention
+- Never hard code security-related constants; use symbolic names or configuration lookup files.
+- As hard coding is often done by coders working alone on a small scale, examine all legacy code components and test carefully when scaling.
+- Adopt a \\"future-proof code\\" mindset: While use of constants may save a little time now and make development simpler in the short term, it could cost time and money adapting to scale or other unforeseen circumstances (such as new hardware) in the future.",
+                "text": "",
+              },
+              "id": "java/HardcodedSecret",
+              "name": "HardcodedSecret",
+              "properties": Object {
+                "categories": Array [
+                  "Security",
+                ],
+                "cwe": Array [
+                  "CWE-547",
+                ],
+                "exampleCommitDescriptions": Array [
+                  "Api keys from json file",
+                  "* feat() add test case",
+                ],
+                "exampleCommitFixes": Array [
+                  Object {
+                    "commitURL": "https://github.com/Hurence/logisland/commit/e00443e73ba5493cec16c58a47aadf807496de22?diff=split#diff-b44812dc78b45d39c691371af796ac09R30",
+                    "lines": Array [
+                      Object {
+                        "line": "if (null == iv || iv.length != 16) {",
+                        "lineChange": "added",
+                        "lineNumber": 27,
+                      },
+                      Object {
+                        "line": "    System.out.println(\\"Invalid IV! default IV will be used \\");",
+                        "lineChange": "added",
+                        "lineNumber": 28,
+                      },
+                      Object {
+                        "line": "    iv = \\"azerty1234567890\\".getBytes();",
+                        "lineChange": "added",
+                        "lineNumber": 29,
+                      },
+                      Object {
+                        "line": "}",
+                        "lineChange": "added",
+                        "lineNumber": 30,
+                      },
+                      Object {
+                        "line": " if (padding == null) throw new NoSuchAlgorithmException(\\"Invalid transformation format:\\"+ALGO_AES+\\"/\\"+mode);",
+                        "lineChange": "none",
+                        "lineNumber": 34,
+                      },
+                      Object {
+                        "line": "this.key = key;",
+                        "lineChange": "none",
+                        "lineNumber": 50,
+                      },
+                      Object {
+                        "line": "if (iv.length != 16) {",
+                        "lineChange": "removed",
+                        "lineNumber": 51,
+                      },
+                      Object {
+                        "line": "    this.iv = \\"azerty1234567890\\".getBytes();",
+                        "lineChange": "removed",
+                        "lineNumber": 52,
+                      },
+                      Object {
+                        "line": "} else {",
+                        "lineChange": "removed",
+                        "lineNumber": 53,
+                      },
+                      Object {
+                        "line": "    this.iv = iv;",
+                        "lineChange": "removed",
+                        "lineNumber": 54,
+                      },
+                      Object {
+                        "line": "Key key = generateKey();",
+                        "lineChange": "none",
+                        "lineNumber": 62,
+                      },
+                      Object {
+                        "line": "if (mode.equalsIgnoreCase(\\"CBC\\")) {",
+                        "lineChange": "removed",
+                        "lineNumber": 63,
+                      },
+                      Object {
+                        "line": "if (null != mode && mode.equalsIgnoreCase(\\"CBC\\")) {",
+                        "lineChange": "added",
+                        "lineNumber": 53,
+                      },
+                      Object {
+                        "line": "    IvParameterSpec spec = new IvParameterSpec(iv);",
+                        "lineChange": "none",
+                        "lineNumber": 64,
+                      },
+                      Object {
+                        "line": "    cipher.init(Cipher.ENCRYPT_MODE, key, spec);",
+                        "lineChange": "none",
+                        "lineNumber": 65,
+                      },
+                      Object {
+                        "line": "} else {",
+                        "lineChange": "none",
+                        "lineNumber": 66,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/PeterHdd/cordova-plugin-crypto-file/commit/870d58cdeed54a25047a2d2a5971f82af097c180?diff=split#diff-04b53151da15f3abb582bd5f2cea5419L30",
+                    "lines": Array [
+                      Object {
+                        "line": "  private static final String URL_PREFIX = \\"http://localhost:8080/\\";",
+                        "lineChange": "removed",
+                        "lineNumber": 26,
+                      },
+                      Object {
+                        "line": "private static final String URL_PREFIX = \\"http://localhost:8080/\\";",
+                        "lineChange": "added",
+                        "lineNumber": 27,
+                      },
+                      Object {
+                        "line": "  private static final String CRYPT_KEY = \\"zkOgwW2MJ8yuqwnxLlCKJLQwEUijyQJg\\";",
+                        "lineChange": "removed",
+                        "lineNumber": 28,
+                      },
+                      Object {
+                        "line": "  private static final String CRYPT_IV = \\"0NTzzxaqRnAskulk\\";",
+                        "lineChange": "removed",
+                        "lineNumber": 29,
+                      },
+                      Object {
+                        "line": "private static final String CRYPT_KEY = \\"\\";",
+                        "lineChange": "added",
+                        "lineNumber": 29,
+                      },
+                      Object {
+                        "line": "private static final String CRYPT_IV = \\"\\";",
+                        "lineChange": "added",
+                        "lineNumber": 30,
+                      },
+                      Object {
+                        "line": "  private static final String[] CRYPT_FILES = {",
+                        "lineChange": "removed",
+                        "lineNumber": 31,
+                      },
+                      Object {
+                        "line": "private static final String[] CRYPT_FILES = {",
+                        "lineChange": "added",
+                        "lineNumber": 32,
+                      },
+                      Object {
+                        "line": "SecretKey skey = new SecretKeySpec(CRYPT_KEY.getBytes(\\"UTF-8\\"), \\"AES\\");",
+                        "lineChange": "removed",
+                        "lineNumber": 71,
+                      },
+                      Object {
+                        "line": "Cipher cipher = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
+                        "lineChange": "removed",
+                        "lineNumber": 72,
+                      },
+                      Object {
+                        "line": "cipher.init(Cipher.DECRYPT_MODE, skey, new IvParameterSpec(CRYPT_IV.getBytes(\\"UTF-8\\")));",
+                        "lineChange": "removed",
+                        "lineNumber": 73,
+                      },
+                      Object {
+                        "line": "ByteArrayOutputStream bos = new ByteArrayOutputStream();",
+                        "lineChange": "removed",
+                        "lineNumber": 75,
+                      },
+                      Object {
+                        "line": "SecretKey skey = new SecretKeySpec(CRYPT_KEY.getBytes(\\"UTF-8\\"), \\"AES\\");",
+                        "lineChange": "added",
+                        "lineNumber": 73,
+                      },
+                      Object {
+                        "line": "Cipher cipher  = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
+                        "lineChange": "added",
+                        "lineNumber": 74,
+                      },
+                      Object {
+                        "line": "cipher.init(Cipher.DECRYPT_MODE, skey, new IvParameterSpec(CRYPT_IV.getBytes(\\"UTF-8\\")));",
+                        "lineChange": "added",
+                        "lineNumber": 75,
+                      },
+                      Object {
+                        "line": "ByteArrayOutputStream bos = new ByteArrayOutputStream();",
+                        "lineChange": "added",
+                        "lineNumber": 77,
+                      },
+                    ],
+                  },
+                  Object {
+                    "commitURL": "https://github.com/yz-java/common-project/commit/c79ab4c1758326ab28303350a0adacba83fb64f1?diff=split#diff-0f9c8fd9b2f1f330899bdb71f975e966L22",
+                    "lines": Array [
+                      Object {
+                        "line": " */",
+                        "lineChange": "none",
+                        "lineNumber": 21,
+                      },
+                      Object {
+                        "line": "private static String sKey = \\"B31F2A75FBF94099\\";",
+                        "lineChange": "removed",
+                        "lineNumber": 20,
+                      },
+                      Object {
+                        "line": "private static String ivParameter = \\"1234567890123456\\";",
+                        "lineChange": "removed",
+                        "lineNumber": 21,
+                      },
+                      Object {
+                        "line": "private String ivParameter = \\"1234567890123456\\";",
+                        "lineChange": "added",
+                        "lineNumber": 23,
+                      },
+                      Object {
+                        "line": "public AES_CBC(String sKey,String ivParameter){",
+                        "lineChange": "added",
+                        "lineNumber": 25,
+                      },
+                      Object {
+                        "line": "    this.sKey=sKey;",
+                        "lineChange": "added",
+                        "lineNumber": 26,
+                      },
+                      Object {
+                        "line": "    this.ivParameter=ivParameter;",
+                        "lineChange": "added",
+                        "lineNumber": 27,
+                      },
+                      Object {
+                        "line": "// 加密",
+                        "lineChange": "none",
+                        "lineNumber": 30,
+                      },
+                      Object {
+                        "line": "SecretKeySpec skeySpec = new SecretKeySpec(raw, \\"AES\\");",
+                        "lineChange": "none",
+                        "lineNumber": 47,
+                      },
+                      Object {
+                        "line": "Cipher cipher = Cipher.getInstance(\\"AES/CBC/PKCS5Padding\\");",
+                        "lineChange": "none",
+                        "lineNumber": 48,
+                      },
+                      Object {
+                        "line": "IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());",
+                        "lineChange": "none",
+                        "lineNumber": 49,
+                      },
+                      Object {
+                        "line": "cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);",
+                        "lineChange": "none",
+                        "lineNumber": 50,
+                      },
+                      Object {
+                        "line": "byte[] encrypted1 = new BASE64Decoder().decodeBuffer(sSrc);//先用base64解密",
+                        "lineChange": "none",
+                        "lineNumber": 51,
+                      },
+                    ],
+                  },
+                ],
+                "precision": "very-high",
+                "tags": Array [
+                  "java",
+                  "maintenance",
+                  "key",
+                  "feat",
+                ],
+              },
+              "shortDescription": Object {
+                "text": "Hardcoded Secret",
               },
             },
           ],

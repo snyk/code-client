@@ -1,4 +1,5 @@
-import { analyzeFolders, createBundleFromFolders } from './analysis';
+import { analyzeFolders } from './analysis';
+import { createBundleFromFolders } from './bundles';
 import emitter from './emitter';
 import { startSession, checkSession } from './http';
 import * as constants from './constants';

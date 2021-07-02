@@ -316,9 +316,8 @@ export async function prepareExtendingBundle(
     }, foundFiles);
 
     removedFiles = processingFiles.reduce((s, p) => {
-      if (!foundFiles.has(p)) {
-        s.push(getBundleFilePath(p, baseDir));
-      }
+      const filePath = resolveBundleFilePath(baseDir, p);
+      if (!foundFiles.has(filePath)) s.push(p);
       return s;
     }, [] as string[]);
 

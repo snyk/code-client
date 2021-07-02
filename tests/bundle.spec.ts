@@ -5,7 +5,7 @@ import { createBundleFromFolders } from '../src/bundles';
 import { baseURL, sessionToken, source } from './constants/base';
 import { sampleProjectPath } from './constants/sample';
 
-describe('Functional test of analysis', () => {
+describe('Functional test for bundle creation', () => {
 
   it('should return a bundle with correct parameters', async () => {
     const paths: string[] = [path.join(sampleProjectPath)];

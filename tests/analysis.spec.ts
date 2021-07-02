@@ -2,10 +2,10 @@
 import path from 'path';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders } from '../src/analysis';
+import { analyzeFolders, extendAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { sampleProjectPath, bundleFiles, bundleFilesFull } from './constants/sample';
+import { sampleProjectPath, bundleFiles, bundleFilesFull, bundleExtender } from './constants/sample';
 import emitter from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
@@ -68,12 +68,16 @@ describe('Functional test of analysis', () => {
         expect(bundle).toBeTruthy();
         if (!bundle) return; // TS trick
 
-        // TODO: follow sarif format
-        // expect(Object.keys(bundle.analysisResults.files).length).toEqual(5);
-        // expect(
-        //   bundle.analysisResults.files.hasOwnProperty(`${sampleProjectPath}/GitHubAccessTokenScrambler12.java`),
-        // ).toBeTruthy();
-        // expect(Object.keys(bundle.analysisResults.suggestions).length).toEqual(8);
+        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(7);
+        expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(12);
+        const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
+          (res) => res.locations && res.locations[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`
+        );
+        expect(sampleRes).toBeTruthy();
+        if (!sampleRes) return; // TS trick
+        expect(sampleRes.ruleIndex).toBeDefined();
+        if (!sampleRes.ruleIndex) return; // TS trick
+        expect(sampleRes!.ruleId).toEqual(bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
 
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           bundle.analysisResults.timing.fetchingCode,
@@ -159,8 +163,6 @@ describe('Functional test of analysis', () => {
       if (!bundle) return; // TS trick
 
       const validationResult = jsonschema.validate(bundle.analysisResults.sarif, sarifSchema);
-
-      console.log('validationResult.errors --> ', validationResult.errors);
       expect(validationResult.errors.length).toEqual(0);
     });
 
@@ -178,6 +180,90 @@ describe('Functional test of analysis', () => {
 
       expect(bundle).toBeNull();
     });
+
+    it(
+      'extend folder analysis',
+      async () => {
+        const bundle = await analyzeFolders({
+          connection: { baseURL, sessionToken, source },
+          analysisOptions: {
+            severity: 1,
+          },
+          fileOptions: {
+            paths: [sampleProjectPath],
+            symlinksEnabled: false,
+            maxPayload: 1000,
+          },
+        });
+
+        expect(bundle).toBeTruthy();
+        if (!bundle) return; // TS trick
+
+        const extender = await bundleExtender();
+        type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
+        let extendedBundle!: Awaited<ReturnType<typeof extendAnalysis>>;
+        try {
+          await extender.exec();
+          extendedBundle = await extendAnalysis({
+            ...bundle,
+            files: extender.files.all,
+          });
+        } catch (err) {
+          console.error(err);
+          expect(err).toBeFalsy();
+        } finally {
+          await extender.restore();
+        }
+        expect(extendedBundle).toBeTruthy();
+        if (!extendedBundle) return; // TS trick
+
+        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
+        expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
+        const getRes = (path: string) => extendedBundle!.analysisResults.sarif.runs[0].results!.find(
+          (res) => res.locations && res.locations[0].physicalLocation?.artifactLocation?.uri === path
+        );
+        const sampleRes = getRes(extender.files.added);
+        const changedRes = getRes(extender.files.changed);
+        const removedRes = getRes(extender.files.removed);
+        expect(changedRes).toBeUndefined();
+        expect(removedRes).toBeUndefined();
+        expect(sampleRes).toBeTruthy();
+        if (!sampleRes) return; // TS trick
+        expect(sampleRes.ruleIndex).toBeDefined();
+        if (!sampleRes.ruleIndex) return; // TS trick
+        expect(sampleRes!.ruleId).toEqual(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
+
+        expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
+          bundle.analysisResults.timing.fetchingCode,
+        );
+        expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
+        expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(
+          new Set([
+            {
+              files: 2,
+              isSupported: true,
+              lang: 'Java',
+            },
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'C++ (beta)',
+            },
+            {
+              files: 4,
+              isSupported: true,
+              lang: 'JavaScript',
+            },
+            {
+              files: 1,
+              isSupported: true,
+              lang: 'JSX',
+            },
+          ]),
+        );
+      },
+      TEST_TIMEOUT,
+    );
   });
 
 });

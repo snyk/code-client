@@ -127,42 +127,80 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
   return { fileBundle, analysisResults, ...options };
 }
 
-// function mergeBundleResults(bundle: FileBundle, analysisData: IBundleResult, limitToFiles: string[]): FileBundle {
-//   // Determine max suggestion index in our data
-//   const suggestionIndex = Math.max(...Object.keys(bundle.analysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
-
-//   // Addup all new suggestions' indexes
-//   const newSuggestions = moveSuggestionIndexes<Suggestion>(suggestionIndex, analysisData.analysisResults.suggestions);
-//   const suggestions = { ...bundle.analysisResults.suggestions, ...newSuggestions };
-
-//   const newFiles = fromEntries(
-//     Object.entries(analysisData.analysisResults.files).map(([fn, s]) => {
-//       return [fn, moveSuggestionIndexes(suggestionIndex, s)];
-//     }),
-//   );
-//   const files = {
-//     ...omit(bundle.analysisResults.files, limitToFiles),
-//     ...newFiles,
-//   };
-
-//   const analysisResults = {
-//     ...analysisData.analysisResults,
-//     files,
-//     suggestions,
-//   };
-
-//   return {
-//     ...bundle,
-//     ...analysisData,
-//     analysisResults,
-//   };
-// }
+function mergeBundleResults(
+  oldAnalysisResults: AnalysisResult,
+  newAnalysisResults: AnalysisResult,
+  limitToFiles: string[],
+  removedFiles: string[] = [],
+): AnalysisResult {
+  // Start from the new analysis results
+  // For each finding of the old analysis,
+  //  if it's location is not part of the limitToFiles or removedFiles (removedFiles should also be checked against condeFlow),
+  //   append the finding to the new analysis and check if the rule must be added as well
+  const changedFiles = [...limitToFiles, ...removedFiles];
+  const sarifResults = (newAnalysisResults.sarif.runs[0].results || []).filter(res => {
+      // TODO: This should not be necessary in theory but, in case of two identical files,
+      // Bundle Server returns the finding in both files even if limitToFiles only reports one
+      const loc = res.locations && res.locations[0].physicalLocation?.artifactLocation?.uri;
+      return loc && changedFiles.includes(loc);
+  });
+  const sarifRules = newAnalysisResults.sarif.runs[0].tool.driver.rules || [];
+  const oldResults = oldAnalysisResults.sarif.runs[0].results || [];
+  for (let res of oldResults) {
+    const locations: string[] = (res.locations || []).reduce<string[]>(
+      (acc, loc) => {
+        if (loc.physicalLocation?.artifactLocation?.uri) {
+          acc.push(loc.physicalLocation!.artifactLocation!.uri!);
+        };
+        return acc;
+      }, []
+    );
+    const codeFlowLocations: string[] = (res.codeFlows || []).reduce<string[]>(
+      (acc1, cf) => {
+        acc1.push(...(cf.threadFlows || []).reduce<string[]>(
+          (acc2, tf) => {
+              acc2.push(...(tf.locations || []).reduce<string[]>(
+                (acc3, loc) => {
+                  if (loc.location?.physicalLocation?.artifactLocation?.uri) {
+                    acc3.push(loc.location!.physicalLocation!.artifactLocation!.uri!);
+                  };
+                  return acc3;
+                }, []
+              ));
+              return acc2;
+            }, []
+        ));
+        return acc1; 
+      }, []
+    );
+    if (
+      locations.some(loc => changedFiles.includes(loc)) ||
+      codeFlowLocations.some(loc => removedFiles.includes(loc))
+    ) continue;
+    
+    let ruleIndex = sarifRules.findIndex((rule) => rule.id === res.ruleId);
+    if (
+      ruleIndex === -1 && res.ruleIndex &&
+      oldAnalysisResults.sarif.runs[0].tool.driver.rules &&
+      oldAnalysisResults.sarif.runs[0].tool.driver.rules[res.ruleIndex]
+    ) {
+      const newLength = sarifRules.push(oldAnalysisResults.sarif.runs[0].tool.driver.rules[res.ruleIndex]);
+      ruleIndex = newLength - 1;
+    }
+    res.ruleIndex = ruleIndex;
+    sarifResults.push(res);
+  }
+  newAnalysisResults.sarif.runs[0].results = sarifResults;
+  newAnalysisResults.sarif.runs[0].tool.driver.rules = sarifRules;
+  return newAnalysisResults;
+}
 
 interface ExtendAnalysisOptions extends FileAnalysis {
   files: string[];
 }
 
 export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileAnalysis | null> {
+  const oldAnalysisResults = options.analysisResults;
   const { files, removedFiles } = await prepareExtendingBundle(
     options.fileBundle.baseDir,
     options.fileBundle.supportedFiles,
@@ -195,23 +233,18 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
     ...options.fileBundle,
     ...remoteBundle,
   };
-
-  const analysisResults = await analyzeBundle({
+  const limitToFiles = files.map(f => f.bundlePath);
+  let analysisResults = await analyzeBundle({
     bundleHash: remoteBundle.bundleHash,
     ...options.connection,
     ...options.analysisOptions,
-    limitToFiles: files.map(f => f.bundlePath),
+    limitToFiles,
   });
 
   // TODO: Transform relative paths into absolute
   // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
-  return { ...options, fileBundle, analysisResults };
+  analysisResults = mergeBundleResults(oldAnalysisResults, analysisResults, limitToFiles, removedFiles);
 
-  // Merge into base bundle results
-  // return mergeBundleResults(
-  //   bundle,
-  //   analysisData,
-  //   files.map(f => f.filePath),
-  // );
+  return { ...options, fileBundle, analysisResults };
 }

@@ -42,26 +42,27 @@ describe('files', () => {
     expect(testFile.bundlePath).toEqual('AnnotatorTest.cpp');
     expect(testFile.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
     expect(testFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
+    expect(testFile.bundlePath).toEqual(`AnnotatorTest.cpp`);
     expect(testFile.size).toEqual(239);
   });
 
   it('extend bundle files', async () => {
     const testNewFiles = [
-      `${sampleProjectPath}/app.js`,
-      `${sampleProjectPath}/not/ignored/this_should_not_be_ignored.java`,
+      `app.js`,
+      `not/ignored/this_should_not_be_ignored.java`,
     ];
     const testRemovedFiles = [
-      `${sampleProjectPath}/removed_from_the_parent_bundle.java`,
-      `${sampleProjectPath}/ignored/this_should_be_ignored.java`,
+      `removed_from_the_parent_bundle.java`,
+      `ignored/this_should_be_ignored.java`,
     ];
-    const parentBundle = [...testNewFiles, ...testRemovedFiles];
+    const newBundle = [...testNewFiles, ...testRemovedFiles];
     const { files, removedFiles } = await prepareExtendingBundle(
       sampleProjectPath,
       supportedFiles,
       bundleFileIgnores,
-      parentBundle,
+      newBundle,
     );
-    expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.filePath)));
+    expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.bundlePath)));
     expect(removedFiles).toEqual(['removed_from_the_parent_bundle.java']);
   });
 

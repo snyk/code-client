@@ -200,7 +200,6 @@ interface ExtendAnalysisOptions extends FileAnalysis {
 }
 
 export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileAnalysis | null> {
-  const oldAnalysisResults = options.analysisResults;
   const { files, removedFiles } = await prepareExtendingBundle(
     options.fileBundle.baseDir,
     options.fileBundle.supportedFiles,
@@ -244,7 +243,7 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
   // TODO: Transform relative paths into absolute
   // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
 
-  analysisResults = mergeBundleResults(oldAnalysisResults, analysisResults, limitToFiles, removedFiles);
+  analysisResults = mergeBundleResults(options.analysisResults, analysisResults, limitToFiles, removedFiles);
 
   return { ...options, fileBundle, analysisResults };
 }

@@ -295,8 +295,10 @@ export async function prepareExtendingBundle(
   let processingFiles: string[] = filterSupportedFiles(files, supportedFiles);
 
   // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed.
-  processingFiles = processingFiles.filter(f => !isMatch(f, fileIgnores));
-
+  processingFiles = processingFiles
+    .map(f => resolveBundleFilePath(baseDir, f))
+    .filter(f => !isMatch(resolveBundleFilePath(baseDir, f), fileIgnores));
+  
   if (processingFiles.length) {
     // Determine existing files (minus removed)
     const entries = await fg(processingFiles, {
@@ -306,7 +308,7 @@ export async function prepareExtendingBundle(
       objectMode: true,
       stats: true,
     });
-
+    
     let foundFiles: Set<string> = new Set(); // This initialization is needed to help Typescript checker
     foundFiles = entries.reduce((s, e) => {
       if (e.stats && e.stats.size <= maxFileSize) {
@@ -316,8 +318,9 @@ export async function prepareExtendingBundle(
     }, foundFiles);
 
     removedFiles = processingFiles.reduce((s, p) => {
-      const filePath = resolveBundleFilePath(baseDir, p);
-      if (!foundFiles.has(filePath)) s.push(p);
+      if (!foundFiles.has(p)) {
+        s.push(getBundleFilePath(p, baseDir));
+      }
       return s;
     }, [] as string[]);
 

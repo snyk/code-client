@@ -147,15 +147,42 @@ function mergeBundleResults(
   const sarifRules = newAnalysisResults.sarif.runs[0].tool.driver.rules || [];
   const oldResults = oldAnalysisResults.sarif.runs[0].results || [];
   for (let res of oldResults) {
-    const locations: string[] = (res.locations || []).flatMap(
-      loc => !!loc.physicalLocation?.artifactLocation?.uri ? [loc.physicalLocation.artifactLocation.uri] : []
+    // NOTE: Node 10 doesn't support the more readable .flatMap, so we need to use .reduce, but the behaviour would be the following:
+    // const locations: string[] = (res.locations || []).flatMap(
+    //   loc => !!loc.physicalLocation?.artifactLocation?.uri ? [loc.physicalLocation.artifactLocation.uri] : []
+    // );
+    // const codeFlowLocations: string[] = (res.codeFlows || []).flatMap(
+    //   cf => (cf.threadFlows || []).flatMap(
+    //     tf => (tf.locations || []).flatMap(
+    //       loc => !!loc.location?.physicalLocation?.artifactLocation?.uri ? [loc.location.physicalLocation.artifactLocation.uri] : []
+    //     )
+    //   )
+    // );
+    const locations: string[] = (res.locations || []).reduce<string[]>(
+      (acc, loc) => {
+        if (loc.physicalLocation?.artifactLocation?.uri) {
+          acc.push(loc.physicalLocation!.artifactLocation!.uri!);
+        };
+        return acc;
+      }, []
     );
-    const codeFlowLocations: string[] = (res.codeFlows || []).flatMap(
-      cf => (cf.threadFlows || []).flatMap(
-        tf => (tf.locations || []).flatMap(
-          loc => !!loc.location?.physicalLocation?.artifactLocation?.uri ? [loc.location.physicalLocation.artifactLocation.uri] : []
-        )
-      )
+    const codeFlowLocations: string[] = (res.codeFlows || []).reduce<string[]>(
+      (acc1, cf) => {
+        acc1.push(...(cf.threadFlows || []).reduce<string[]>(
+          (acc2, tf) => {
+              acc2.push(...(tf.locations || []).reduce<string[]>(
+                (acc3, loc) => {
+                  if (loc.location?.physicalLocation?.artifactLocation?.uri) {
+                    acc3.push(loc.location!.physicalLocation!.artifactLocation!.uri!);
+                  };
+                  return acc3;
+                }, []
+              ));
+              return acc2;
+            }, []
+        ));
+        return acc1; 
+      }, []
     );
     if (
       locations.some(loc => changedFiles.includes(loc)) ||

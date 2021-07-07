@@ -297,7 +297,7 @@ export async function prepareExtendingBundle(
   // Exclude files to be ignored based on ignore rules. We assume here, that ignore rules have not been changed.
   processingFiles = processingFiles
     .map(f => resolveBundleFilePath(baseDir, f))
-    .filter(f => !isMatch(resolveBundleFilePath(baseDir, f), fileIgnores));
+    .filter(f => !isMatch(f, fileIgnores));
   
   if (processingFiles.length) {
     // Determine existing files (minus removed)

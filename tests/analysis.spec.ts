@@ -71,7 +71,7 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(7);
         expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(12);
         const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
-          (res) => res.locations && res.locations[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`
+          (res) => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`
         );
         expect(sampleRes).toBeTruthy();
         if (!sampleRes) return; // TS trick
@@ -220,7 +220,7 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
         expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
         const getRes = (path: string) => extendedBundle!.analysisResults.sarif.runs[0].results!.find(
-          (res) => res.locations && res.locations[0].physicalLocation?.artifactLocation?.uri === path
+          (res) => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path
         );
         const sampleRes = getRes(extender.files.added);
         const changedRes = getRes(extender.files.changed);

@@ -57,14 +57,4 @@ axios_.interceptors.response.use(
   },
 );
 
-export function createCustomAgentAxios(options: https.AgentOptions & https.AgentOptions) {
-  const config = {
-    ...defaultRequestConfig,
-    httpAgent: new http.Agent(options),
-    httpsAgent: new https.Agent(options),
-  };
-
-  return axios.create(config);
-}
-
 export default axios_;

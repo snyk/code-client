@@ -1,10 +1,14 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
-import axios, { agentOptions, createCustomAgentAxios } from './axios';
+import axios, { agentOptions } from './axios';
 import { apiPath, DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes } from './constants';
 import { IAnalysisResult } from './interfaces/analysis-result.interface';
 import { IFileContent, IFiles, ISupportedFiles } from './interfaces/files.interface';
 import { RequestOptions } from './interfaces/http-options.interface';
+import { promises as dns } from 'dns';
+import { IPv6, parse } from 'ipaddr.js';
+import { URL } from 'url';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -103,18 +107,17 @@ export type IpFamily = 6 | undefined;
  * @return {number} IP family number used by the client.
  */
 export async function getIpFamily(authHost: string): Promise<IpFamily> {
+  const authHostUrl = new URL(authHost);
   const family = 6;
   try {
-    const customAxios = createCustomAgentAxios({ ...agentOptions, family } as any); // axios options are not properly typed
-    await customAxios.request({
-      url: `${authHost}/api/v1/verify/callback`,
-      method: 'POST',
+    const { address } = await dns.lookup(authHostUrl.hostname, {
+      family,
     });
-  } catch (e) {
-    if (e?.response?.status == 401) {
-      return family;
-    }
 
+    const res = parse(address) as IPv6;
+    return !res.isIPv4MappedAddress() ? family : undefined;
+  } catch (e) {
+    /* IPv6 is not enabled */
     return undefined;
   }
 }
@@ -137,8 +140,20 @@ export async function checkSession(options: {
   readonly ipFamily?: IpFamily;
 }): Promise<IResult<string, CheckSessionErrorCodes>> {
   const { draftToken, authHost, ipFamily } = options;
+
+  let host = authHost;
+  if (ipFamily === 6) {
+    const authHostUrl = new URL(authHost);
+    const ipv6Addr = (
+      await dns.lookup(authHostUrl.hostname, {
+        family: ipFamily,
+      })
+    ).address;
+    host = `${authHostUrl.protocol}//[${ipv6Addr}]:443`;
+  }
+
   const config: AxiosRequestConfig = {
-    url: `${authHost}/api/v1/verify/callback`,
+    url: `${host}/api/v1/verify/callback`,
     method: 'POST',
     data: {
       token: draftToken,
@@ -146,14 +161,7 @@ export async function checkSession(options: {
   };
 
   try {
-    let response;
-    if (ipFamily) {
-      const customAxios = createCustomAgentAxios({ ...agentOptions, family: ipFamily } as any); // axios options are not properly typed
-
-      response = await customAxios.request<IApiTokenResponse>(config);
-    } else {
-      response = await axios.request<IApiTokenResponse>(config);
-    }
+    const response = await axios.request<IApiTokenResponse>(config);
 
     return {
       type: 'success',

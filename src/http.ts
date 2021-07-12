@@ -223,14 +223,16 @@ export async function createBundle(options: {
   const { baseURL, sessionToken, files, source } = options;
 
   try {
-    const response = await makeRequest({
+    const payload: Payload = {
       headers: { 'Session-Token': sessionToken, source },
       url: `${baseURL}${apiPath}/bundle`,
       method: 'post',
       body: {
         files,
       },
-    });
+    };
+
+    const response = await makeRequest(payload);
 
     return { type: 'success', value: response.body as RemoteBundle };
   } catch (error) {

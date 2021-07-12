@@ -29,7 +29,6 @@ export interface Payload {
   headers?: OutgoingHttpHeaders;
   method: NeedleHttpVerbs;
   qs?: {};
-  json?: boolean;
   timeout?: number;
   family?: number;
 }
@@ -59,7 +58,7 @@ export function makeRequest(payload: Payload): Promise<{ res: needle.NeedleRespo
 
     const agent = parsedUrl.protocol === 'http:' ? new http.Agent(agentOptions) : new https.Agent(agentOptions);
     const options: needle.NeedleOptions = {
-      json: payload.json,
+      json: true,
       headers: payload.headers,
       timeout: payload.timeout,
       // eslint-disable-next-line @typescript-eslint/camelcase

@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
+import { URL } from 'url';
+import { promises as dns } from 'dns';
+import { IPv6, parse } from 'ipaddr.js';
+
 import { apiPath, DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes } from './constants';
 import { IAnalysisResult } from './interfaces/analysis-result.interface';
 import { IFileContent, IFiles, ISupportedFiles } from './interfaces/files.interface';
 import { RequestOptions } from './interfaces/http-options.interface';
-import { promises as dns } from 'dns';
-import { IPv6, parse } from 'ipaddr.js';
-import { URL } from 'url';
 import { makeRequest, Payload } from './needle';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
@@ -24,7 +25,7 @@ export function determineErrorCode(error: any): ErrorCodes {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { response }: { response: any | undefined } = error;
   if (response) {
-    return response.status;
+    return response.statusCode;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -90,7 +91,7 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
 
 export function startSession(options: { readonly authHost: string; readonly source: string }): StartSessionResponseDto {
   const { source, authHost } = options;
-  const draftToken = uuidv4() as string;
+  const draftToken = uuidv4();
 
   return {
     draftToken,
@@ -98,7 +99,7 @@ export function startSession(options: { readonly authHost: string; readonly sour
   };
 }
 
-export type IpFamily = 6 | undefined;
+export type IpFamily = 6 | 4;
 /**
  * Dispatches a FORCED IPv6 request to test client's ISP and network capability.
  *
@@ -113,10 +114,10 @@ export async function getIpFamily(authHost: string): Promise<IpFamily> {
     });
 
     const res = parse(address) as IPv6;
-    return !res.isIPv4MappedAddress() ? family : undefined;
+    return !res.isIPv4MappedAddress() ? family : 4;
   } catch (e) {
     /* IPv6 is not enabled */
-    return undefined;
+    return 4;
   }
 }
 
@@ -137,33 +138,34 @@ export async function checkSession(options: {
   readonly draftToken: string;
   readonly ipFamily?: IpFamily;
 }): Promise<IResult<string, CheckSessionErrorCodes>> {
-  const { draftToken, authHost, ipFamily } = options;
+  const defaultValue: ResultSuccess<string> = {
+    type: 'success',
+    value: '',
+  };
 
   try {
-    const response = await makeRequest({
-      url: `${authHost}/api/v1/verify/callback`,
+    const { success, response } = await makeRequest({
+      url: `${options.authHost}/api/v1/verify/callback`,
       body: {
-        token: draftToken,
+        token: options.draftToken,
       },
-      family: ipFamily,
+      family: options.ipFamily,
       method: 'post',
     });
 
-    const responseBody = response.body as IApiTokenResponse;
-    return {
-      type: 'success',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      value: (response.res.statusCode === 200 && responseBody.ok && responseBody.api) || '',
-    };
+    if (success) {
+      const responseBody = response.body as IApiTokenResponse;
+      defaultValue.value = (responseBody.ok && responseBody.api) || '';
+    }
+    return defaultValue;
   } catch (err) {
-    //todo
     if (
       [ErrorCodes.loginInProgress, ErrorCodes.unauthorizedContent, ErrorCodes.unauthorizedUser].includes(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         err.response?.status,
       )
     ) {
-      return { type: 'success', value: '' };
+      return defaultValue;
     }
 
     return generateError<CheckSessionErrorCodes>(err, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
@@ -177,16 +179,19 @@ export async function getFilters(
   const apiName = 'filters';
 
   try {
-    const response = await makeRequest({
+    const { success, response } = await makeRequest({
       headers: { source },
       url: `${baseURL}${apiPath}/${apiName}`,
       method: 'get',
     });
 
-    const responseBody = response.body as ISupportedFiles;
-    return { type: 'success', value: responseBody };
+    if (success) {
+      const responseBody = response.body as ISupportedFiles;
+      return { type: 'success', value: responseBody };
+    }
+
+    return generateError<GenericErrorTypes>({ response }, GENERIC_ERROR_MESSAGES, apiName);
   } catch (error) {
-    // todo
     return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, apiName);
   }
 }
@@ -194,7 +199,6 @@ export async function getFilters(
 export type RemoteBundle = {
   readonly bundleId: string;
   readonly missingFiles: string[];
-  readonly uploadURL?: string;
 };
 
 export type CreateBundleErrorCodes =
@@ -232,11 +236,14 @@ export async function createBundle(options: {
       },
     };
 
-    const response = await makeRequest(payload);
+    const { response, success } = await makeRequest(payload);
 
-    return { type: 'success', value: response.body as RemoteBundle };
+    if (success) {
+      return { type: 'success', value: response.body as RemoteBundle };
+    }
+
+    return generateError<CreateBundleErrorCodes>({ response }, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
   } catch (error) {
-    // todo
     return generateError<CreateBundleErrorCodes>(error, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
   }
 }
@@ -262,15 +269,16 @@ export async function checkBundle(options: {
   const { baseURL, sessionToken, bundleId } = options;
 
   try {
-    const response = await makeRequest({
+    const { response, success } = await makeRequest({
       headers: { 'Session-Token': sessionToken },
       url: `${baseURL}${apiPath}/bundle/${bundleId}`,
       method: 'get',
     });
 
-    return { type: 'success', value: response.body as RemoteBundle };
+    if (success) return { type: 'success', value: response.body as RemoteBundle };
+
+    return generateError<CheckBundleErrorCodes>({ response }, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
   } catch (error) {
-    // todo
     return generateError<CheckBundleErrorCodes>(error, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
   }
 }
@@ -302,7 +310,7 @@ export async function extendBundle(options: {
   const { baseURL, sessionToken, bundleId, files, removedFiles = [] } = options;
 
   try {
-    const response = await makeRequest({
+    const { response, success } = await makeRequest({
       headers: { 'Session-Token': sessionToken },
       url: `${baseURL}${apiPath}/bundle/${bundleId}`,
       method: 'put',
@@ -312,9 +320,10 @@ export async function extendBundle(options: {
       },
     });
 
-    return { type: 'success', value: response.body as RemoteBundle };
+    if (success) return { type: 'success', value: response.body as RemoteBundle };
+
+    return generateError<ExtendBundleErrorCodes>({ response }, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
   } catch (error) {
-    // todo
     return generateError<ExtendBundleErrorCodes>(error, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
   }
 }
@@ -353,16 +362,17 @@ export async function createGitBundle(
   }
 
   try {
-    const response = await makeRequest({
+    const { response, success } = await makeRequest({
       headers,
       url: `${baseURL}${apiPath}/bundle`,
       method: 'post',
       body: { gitURI: gitUri },
     });
 
-    return { type: 'success', value: response.body as RemoteBundle };
+    if (success) return { type: 'success', value: response.body as RemoteBundle };
+
+    return generateError<CreateGitBundleErrorCodes>({ response }, CREATE_GIT_BUNDLE_ERROR_MESSAGES, 'createBundle');
   } catch (error) {
-    // todo
     return generateError<CreateGitBundleErrorCodes>(error, CREATE_GIT_BUNDLE_ERROR_MESSAGES, 'createBundle');
   }
 }
@@ -393,16 +403,17 @@ export async function uploadFiles(options: {
   const { baseURL, sessionToken, bundleId, content } = options;
 
   try {
-    await makeRequest({
+    const { response, success } = await makeRequest({
       headers: { 'Session-Token': sessionToken },
       url: `${baseURL}${apiPath}/file/${bundleId}`,
       method: 'post',
       body: content,
     });
 
-    return { type: 'success', value: true };
+    if (success) return { type: 'success', value: true };
+
+    return generateError<UploadBundleErrorCodes>({ response }, UPLOAD_BUNDLE_ERROR_MESSAGES, 'uploadFiles');
   } catch (error) {
-    // todo
     return generateError<UploadBundleErrorCodes>(error, UPLOAD_BUNDLE_ERROR_MESSAGES, 'uploadFiles');
   }
 }
@@ -428,7 +439,6 @@ export type AnalysisFailedResponse = {
 
 export type AnalysisFinishedResponse = {
   readonly status: AnalysisStatus.done;
-  readonly analysisURL: string;
   readonly analysisResults: IAnalysisResult;
 };
 
@@ -453,7 +463,6 @@ export async function getAnalysis(
     readonly baseURL: string;
     readonly sessionToken: string;
     readonly bundleId: string;
-    readonly includeLint?: boolean;
     readonly severity: number;
     readonly limitToFiles?: string[];
     readonly oAuthToken?: string;
@@ -463,21 +472,14 @@ export async function getAnalysis(
   },
   requestOptions?: RequestOptions,
 ): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const {
-    baseURL,
-    sessionToken,
-    oAuthToken,
-    username,
-    bundleId,
-    includeLint,
-    severity,
-    limitToFiles,
-    source,
-    reachability,
-  } = options;
-  // ?linters=false is still a truthy query value, if(includeLint === false) we have to avoid sending the value altogether
+  const { baseURL, sessionToken, oAuthToken, username, bundleId, severity, limitToFiles, source, reachability } =
+    options;
+
   // the same applies for reachability
-  const params = { severity, linters: includeLint || undefined, reachability: reachability || undefined };
+  const params: { severity: number; reachability?: boolean } = { severity };
+  if (reachability) {
+    params.reachability = true;
+  }
 
   const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
   if (oAuthToken) {
@@ -496,12 +498,14 @@ export async function getAnalysis(
 
   if (limitToFiles && limitToFiles.length) {
     config.body = { files: limitToFiles };
-    config.method = 'get';
+    config.method = 'post';
   }
 
   try {
-    const response = await makeRequest(config);
-    return { type: 'success', value: response.body as GetAnalysisResponseDto };
+    const { response, success } = await makeRequest(config);
+    if (success) return { type: 'success', value: response.body as GetAnalysisResponseDto };
+
+    return generateError<GetAnalysisErrorCodes>({ response }, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
   } catch (error) {
     return generateError<GetAnalysisErrorCodes>(error, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
   }

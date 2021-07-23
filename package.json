@@ -13,7 +13,7 @@
     "lint": "npx eslint src/**/*.ts",
     "lint:fix": "npx eslint --fix src/**/*.ts",
     "watch": "tsc -watch -p ./",
-    "test": "jest --coverage --runInBand --detectOpenHandles"
+    "test": "jest --verbose --coverage --runInBand --detectOpenHandles"
   },
   "repository": {
     "type": "git",

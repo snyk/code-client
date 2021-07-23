@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Requests to public API test successful workflow with and without linters 1`] = `
+exports[`Requests to public API test successful workflow 1`] = `
 Object {
-  "2": Array [
+  "0": Array [
     Object {
       "cols": Array [
         39,
@@ -64,7 +64,7 @@ Object {
       ],
     },
   ],
-  "3": Array [
+  "1": Array [
     Object {
       "cols": Array [
         42,
@@ -126,7 +126,7 @@ Object {
       ],
     },
   ],
-  "4": Array [
+  "2": Array [
     Object {
       "cols": Array [
         37,
@@ -188,7 +188,7 @@ Object {
       ],
     },
   ],
-  "5": Array [
+  "3": Array [
     Object {
       "cols": Array [
         14,

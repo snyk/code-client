@@ -3,7 +3,6 @@ import { AnalysisSeverity } from './analysis-result.interface';
 export interface AnalysisOptions {
   baseURL: string;
   sessionToken: string;
-  includeLint: boolean;
   reachability: boolean;
   severity: AnalysisSeverity;
   sarif: boolean;
@@ -26,7 +25,6 @@ export interface AnalyzeGitOptions extends AnalysisOptions {
 export interface Options {
   baseURL?: string;
   sessionToken: string;
-  includeLint?: boolean;
   reachability?: boolean;
   severity?: AnalysisSeverity;
   sarif?: boolean;

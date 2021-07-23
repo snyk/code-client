@@ -99,7 +99,6 @@ export interface IBundleArgs {
   readonly baseURL: string;
   readonly sessionToken: string;
   readonly oAuthToken?: string;
-  readonly includeLint: boolean;
   readonly severity: AnalysisSeverity;
 }
 
@@ -107,7 +106,6 @@ export interface IBundleResult {
   readonly bundleId: string;
   readonly analysisResults: IAnalysisResult;
   readonly sarifResults?: Log;
-  readonly analysisURL: string;
 }
 
 interface IBundleBase extends IBundleArgs, IBundleResult {}

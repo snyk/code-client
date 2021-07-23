@@ -80,6 +80,10 @@ describe('Requests to public API', () => {
         '.ts',
         '.tsx',
         '.vue',
+        '.ASPX',
+        '.Aspx',
+        '.aspx',
+        '.ejs',
       ]),
     );
   });
@@ -95,7 +99,7 @@ describe('Requests to public API', () => {
   });
 
   it('starts session successfully', async () => {
-    const ipFamily = await getIpFamily(authHost);
+    // const ipFamily = await getIpFamily(authHost);
 
     const startSessionResponse = startSession({
       source: 'atom',
@@ -103,9 +107,10 @@ describe('Requests to public API', () => {
     });
     expect(startSessionResponse.loginURL).toMatch(/.*\/login\?token=.*&utm_source=atom/);
     const draftToken = startSessionResponse.draftToken;
-
     // This token is just a draft and not ready to be used permanently
-    const checkSessionResponse = await checkSession({ authHost, draftToken, ipFamily });
+
+    const checkSessionResponse = await checkSession({ authHost, draftToken, ipFamily: 4 });
+
     expect(checkSessionResponse.type).toEqual('success');
     if (checkSessionResponse.type == 'error') return;
     expect(checkSessionResponse.value).toEqual('');
@@ -194,7 +199,6 @@ describe('Requests to public API', () => {
           baseURL,
           sessionToken,
           bundleId: fakeBundleIdFull,
-          includeLint: false,
           severity: 1,
           source: 'atom',
         });
@@ -292,9 +296,7 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
-  it(
-    'test successful workflow with and without linters',
-    async () => {
+  it('test successful workflow', async () => {
       // Create a bundle first
       const files = fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
 
@@ -323,6 +325,7 @@ describe('Requests to public API', () => {
         bundleId: realBundleIdFull,
         content: content,
       });
+
       expect(uploadResponse.type).toEqual('success');
       if (uploadResponse.type === 'error') return;
       expect(uploadResponse.value).toEqual(true);
@@ -338,12 +341,11 @@ describe('Requests to public API', () => {
       expect(checkResponse.value.bundleId).toEqual(realBundleIdFull);
       expect(checkResponse.value.missingFiles).toEqual([]);
 
-      // Get analysis results without linters
+      // Get analysis results
       let response = await getAnalysis({
         baseURL,
         sessionToken,
         bundleId: realBundleIdFull,
-        includeLint: false,
         severity: 1,
         source: 'atom',
       });
@@ -352,9 +354,8 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.done) {
-        expect(response.value.analysisURL.includes(realBundleIdFull)).toBeTruthy();
         expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
-        const suggestion = response.value.analysisResults.suggestions[0];
+        const suggestion = Object.values(response.value.analysisResults.suggestions).find(s => s.id === 'javascript%2Fdc_interfile_project%2FDisablePoweredBy')!;
         expect(Object.keys(suggestion)).toEqual([
           'id',
           'rule',
@@ -371,15 +372,14 @@ describe('Requests to public API', () => {
           'exampleCommitDescriptions',
           'exampleCommitFixes',
         ]);
-        expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FDisablePoweredBy');
         expect(suggestion.leadURL).toEqual(
           'http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header',
         );
-        expect(suggestion.repoDatasetSize).toEqual(874);
+        expect(suggestion.repoDatasetSize).toEqual(835);
         expect(suggestion.exampleCommitDescriptions).toEqual([
           'Test without express',
-          '/server tests ()',
           'secure the api with helmet',
+          'Fix some security vulnerabilities, refactor the error constants a little',
         ]);
         expect(suggestion.exampleCommitFixes.length).toEqual(3);
         expect(suggestion.message).toEqual(
@@ -388,7 +388,7 @@ describe('Requests to public API', () => {
         expect(suggestion.rule).toEqual('DisablePoweredBy');
         expect(suggestion.severity).toEqual(2);
 
-        expect(suggestion.tags).toEqual(['maintenance', 'express', 'server', 'helmet']);
+        expect(suggestion.tags).toEqual(['maintenance', 'express', 'helmet', 'security']);
         expect(Object.keys(response.value.analysisResults.files).length).toEqual(5);
         expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           response.value.analysisResults.timing.fetchingCode,
@@ -428,7 +428,6 @@ describe('Requests to public API', () => {
           baseURL,
           sessionToken,
           bundleId: realBundleIdFull,
-          includeLint: false,
           severity: 1,
           limitToFiles: [`/GitHubAccessTokenScrambler12.java`],
           source: 'atom',
@@ -444,13 +443,12 @@ describe('Requests to public API', () => {
         new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
       );
 
-      // Get analysis results without linters but with severity 3
+      // Get analysis results with severity 3
       do {
         response = await getAnalysis({
           baseURL,
           sessionToken,
           bundleId: realBundleIdFull,
-          includeLint: false,
           severity: 3,
           source: 'atom',
         });
@@ -467,140 +465,4 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
-  describe('git analysis', () => {
-    let goofBundleId: string;
-
-    it('create git bundle', async () => {
-      const bundleResponse = await createGitBundle({
-        baseURL,
-        sessionToken,
-        gitUri: 'git@github.com:snyk/goof.git@5a4f50e747dca50e3e54b47b3a3d5e52d481d31c',
-        source: 'atom',
-      });
-      expect(bundleResponse.type).toEqual('success');
-      if (bundleResponse.type === 'error') return;
-      expect(bundleResponse.value.bundleId).toBeTruthy();
-      goofBundleId = bundleResponse.value.bundleId;
-    });
-
-    it(
-      'git analysis',
-      async () => {
-        // Get analysis results
-        const response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId: goofBundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-        });
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-
-        if (response.value.status === AnalysisStatus.done) {
-          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
-          expect(response.value.analysisResults.suggestions).toBeTruthy();
-
-          const suggestion = response.value.analysisResults.suggestions[0];
-          expect(suggestion.categories).toEqual(['Security']);
-          expect(suggestion).toHaveProperty('exampleCommitDescriptions');
-          expect(suggestion).toHaveProperty('exampleCommitFixes');
-          expect(suggestion.leadURL).toEqual('');
-          expect(suggestion.id).toEqual('javascript%2Fdc_interfile_project%2FHttpToHttps');
-          expect(suggestion.message).toContain(
-            'http (used in require) is an insecure protocol and should not be used in new code.',
-          );
-          expect(suggestion.rule).toEqual('HttpToHttps');
-          expect(suggestion.severity).toEqual(2);
-          expect(suggestion.tags).toEqual(['maintenance', 'http', 'server']);
-          expect(Object.keys(response.value.analysisResults.files).length).toEqual(4);
-        }
-      },
-      TEST_TIMEOUT,
-    );
-
-    it(
-      'git analysis with reachability flag',
-      async () => {
-        const response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId: goofBundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-          reachability: true,
-        });
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-
-        if (response.value.status === AnalysisStatus.done) {
-          expect(response.value.analysisURL.includes(goofBundleId)).toBeTruthy();
-          expect(response.value.analysisResults.suggestions).toBeTruthy();
-
-          expect(response.value.analysisResults.coverage).toEqual(
-            expect.arrayContaining([
-              {
-                files: 8,
-                isSupported: true,
-                lang: 'JavaScript',
-              },
-              {
-                files: 1,
-                isSupported: true,
-                lang: 'HTML',
-              },
-            ]),
-          );
-        }
-      },
-      TEST_TIMEOUT,
-    );
-  });
-
-  it(
-    'git analysis with empty results',
-    async () => {
-      const bundleId = 'gh/DeepcodeAI/test-bigfiles/e7633ef98fba3ddc24e5bea27ae58d5b08b2f949';
-
-      let response;
-
-      do {
-        // Get analysis results
-        response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleId,
-          includeLint: false,
-          severity: 1,
-          source: 'atom',
-        });
-
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
-
-      expect(response.value.analysisURL.includes(bundleId)).toBeTruthy();
-      expect(response.value.analysisResults.suggestions).toEqual({});
-      expect(response.value.analysisResults.files).toEqual({});
-
-      expect(response.value.analysisResults.coverage).toEqual([
-        {
-          files: 3,
-          isSupported: false,
-          lang: 'Text',
-        },
-        {
-          files: 1,
-          isSupported: false,
-          lang: 'Markdown',
-        },
-      ]);
-    },
-    TEST_TIMEOUT,
-  );
 });

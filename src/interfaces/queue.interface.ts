@@ -14,11 +14,9 @@
 //   baseURL: string;
 //   sessionToken: string;
 //   bundleId: string;
-//   useLinter?: boolean;
 // }
 
 // export interface IQueueAnalysisCheckResult {
 //   analysisResults: IAnalysisResult;
 //   progress: number;
-//   analysisURL: string;
 // }

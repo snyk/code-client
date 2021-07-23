@@ -14,7 +14,6 @@ import { Log, Result } from 'sarif';
 
 describe('Sarif Convertor', () => {
   it('should keep us sane that we do not loose issues', async () => {
-    const includeLint = false;
     const severity = AnalysisSeverity.info;
     const paths: string[] = [path.resolve(__dirname, 'fixtures/sarif_convertor/shallow_sast_webgoat')];
     const symlinksEnabled = false;
@@ -22,11 +21,10 @@ describe('Sarif Convertor', () => {
     const defaultFileIgnores = undefined;
     const sarif = true;
     let folderBundleResultsCount = 0;
-    let gitBundleResultsCount = 0;
+
     const folderBundle = await analyzeFolders({
       baseURL,
       sessionToken,
-      includeLint,
       severity,
       paths,
       symlinksEnabled,
@@ -34,19 +32,8 @@ describe('Sarif Convertor', () => {
       defaultFileIgnores,
       sarif,
     });
-    const gitBundle = await analyzeGit({
-      baseURL,
-      sessionToken,
-      includeLint: false,
-      severity: 1,
-      gitUri: 'git@github.com:DeepcodeAI/shallow_sast_webgoat.git',
-      sarif: true,
-    });
     folderBundleResultsCount = getNumOfIssues(folderBundle);
-    gitBundleResultsCount = getNumOfIssues(gitBundle);
-    expect(folderBundleResultsCount).toEqual(gitBundleResultsCount);
     expect(folderBundle.sarifResults?.runs[0]?.results?.length).toEqual(folderBundleResultsCount);
-    expect(gitBundle.sarifResults?.runs[0]?.results?.length).toEqual(gitBundleResultsCount);
   }, 100000);
 
   it('should test no changes have occured in the sarif', () => {

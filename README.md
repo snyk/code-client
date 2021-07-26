@@ -89,7 +89,6 @@ Complete list of events:
 const bundle = await codeClient.analyzeFolders({
   baseURL,
   sessionToken,
-  includeLint: false,
   severity: 1,
   paths: ['/home/user/repo'],
   sarif,
@@ -99,11 +98,9 @@ const bundle = await codeClient.analyzeFolders({
 // bundle implements interface IFileBundle:
 //   readonly baseURL: string;
 //   readonly sessionToken: string;
-//   readonly includeLint: boolean;
 //   readonly severity: AnalysisSeverity;
 //   readonly bundleId: string;
 //   readonly analysisResults: IAnalysisResult;
-//   readonly analysisURL: string;
 //   readonly baseDir: string;
 //   readonly paths: string[];
 //   readonly supportedFiles: ISupportedFiles;
@@ -121,7 +118,7 @@ const result = await codeClient.extendBundle({
   },
   removedFiles: [],
 });
-const { bundleId, missingFiles, uploadURL } = result;
+const { bundleId, missingFiles } = result;
 ```
 
 ### Run analysis of remote git repository
@@ -130,7 +127,6 @@ const { bundleId, missingFiles, uploadURL } = result;
 const bundle = await analyzeGit({
   baseURL,
   sessionToken,
-  includeLint: false,
   severity: 1,
   gitUri: 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
   sarif: true,
@@ -141,11 +137,9 @@ const bundle = await analyzeGit({
 //   readonly baseURL: string;
 //   readonly sessionToken: string;
 //   readonly oAuthToken?: string;
-//   readonly includeLint: boolean;
 //   readonly severity: AnalysisSeverity;
 //   readonly bundleId: string;
 //   readonly analysisResults: IAnalysisResult;
-//   readonly analysisURL: string;
 //   readonly sarifResults?: Log;
 //   readonly gitUri: string;
 ```

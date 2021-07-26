@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Requests to public API test successful workflow with and without linters 1`] = `
+exports[`Requests to public API test successful workflow 1`] = `
 Object {
   "2": Array [
     Object {

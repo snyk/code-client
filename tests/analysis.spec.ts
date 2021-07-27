@@ -1,4 +1,3 @@
-
 import path from 'path';
 import jsonschema from 'jsonschema';
 
@@ -71,13 +70,15 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(7);
         expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(12);
         const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
-          (res) => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`
+          res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`,
         );
         expect(sampleRes).toBeTruthy();
         if (!sampleRes) return; // TS trick
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes!.ruleId).toEqual(bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
+        expect(sampleRes!.ruleId).toEqual(
+          bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
+        );
 
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           bundle.analysisResults.timing.fetchingCode,
@@ -117,26 +118,28 @@ describe('Functional test of analysis', () => {
 
         // Test uploadRemoteBundle with empty list of files
         let uploaded = await uploadRemoteBundle({
-          baseURL, sessionToken, source,
+          baseURL,
+          sessionToken,
+          source,
           bundleHash: bundle.fileBundle.bundleHash,
-          files: []
+          files: [],
         });
         // We do nothing in such cases
         expect(uploaded).toEqual(true);
 
         const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
           expect(typeof processed).toBe('number');
-          expect(total).toEqual(bFiles.length);
-
           expect(processed).toBeLessThanOrEqual(total);
         });
         emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
         // Forse uploading files one more time
         uploaded = await uploadRemoteBundle({
-          baseURL, sessionToken, source,
+          baseURL,
+          sessionToken,
+          source,
           bundleHash: bundle.fileBundle.bundleHash,
-          files: bFiles
+          files: bFiles,
         });
 
         expect(uploaded).toEqual(true);
@@ -177,41 +180,6 @@ describe('Functional test of analysis', () => {
           defaultFileIgnores: undefined,
         },
       });
-      emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
-
-      // Forse uploading files one more time
-      uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, bFiles);
-
-      expect(uploaded).toEqual(true);
-
-      expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
-      expect(onAPIRequestLog).toHaveBeenCalled();
-    },
-    TEST_TIMEOUT,
-  );
-
-  it('analyze folder - with sarif returned', async () => {
-    const severity = AnalysisSeverity.info;
-    const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
-    const symlinksEnabled = false;
-    const maxPayload = 1000;
-    const defaultFileIgnores = undefined;
-    const sarif = true;
-
-    const bundle = await analyzeFolders({
-      baseURL,
-      sessionToken,
-      severity,
-      paths,
-      symlinksEnabled,
-      maxPayload,
-      defaultFileIgnores,
-      sarif,
-    });
-    const validationResult = jsonschema.validate(bundle.sarifResults, sarifSchema);
-
-    expect(validationResult.errors.length).toEqual(0);
-  });
 
       expect(bundle).toBeNull();
     });
@@ -252,11 +220,12 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
 
-        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
+        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(4);
         expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
-        const getRes = (path: string) => extendedBundle!.analysisResults.sarif.runs[0].results!.find(
-          (res) => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path
-        );
+        const getRes = (path: string) =>
+          extendedBundle!.analysisResults.sarif.runs[0].results!.find(
+            res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path,
+          );
         const sampleRes = getRes(extender.files.added);
         const changedRes = getRes(extender.files.changed);
         const removedRes = getRes(extender.files.removed);
@@ -266,7 +235,9 @@ describe('Functional test of analysis', () => {
         if (!sampleRes) return; // TS trick
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes!.ruleId).toEqual(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
+        expect(sampleRes!.ruleId).toEqual(
+          extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
+        );
 
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           bundle.analysisResults.timing.fetchingCode,
@@ -300,5 +271,4 @@ describe('Functional test of analysis', () => {
       TEST_TIMEOUT,
     );
   });
-
 });

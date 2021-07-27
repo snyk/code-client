@@ -177,6 +177,41 @@ describe('Functional test of analysis', () => {
           defaultFileIgnores: undefined,
         },
       });
+      emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
+
+      // Forse uploading files one more time
+      uploaded = await uploadRemoteBundle(baseURL, sessionToken, bundle.bundleId, bFiles);
+
+      expect(uploaded).toEqual(true);
+
+      expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
+      expect(onAPIRequestLog).toHaveBeenCalled();
+    },
+    TEST_TIMEOUT,
+  );
+
+  it('analyze folder - with sarif returned', async () => {
+    const severity = AnalysisSeverity.info;
+    const paths: string[] = [path.join(sampleProjectPath, 'only_text')];
+    const symlinksEnabled = false;
+    const maxPayload = 1000;
+    const defaultFileIgnores = undefined;
+    const sarif = true;
+
+    const bundle = await analyzeFolders({
+      baseURL,
+      sessionToken,
+      severity,
+      paths,
+      symlinksEnabled,
+      maxPayload,
+      defaultFileIgnores,
+      sarif,
+    });
+    const validationResult = jsonschema.validate(bundle.sarifResults, sarifSchema);
+
+    expect(validationResult.errors.length).toEqual(0);
+  });
 
       expect(bundle).toBeNull();
     });

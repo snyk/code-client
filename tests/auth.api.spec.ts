@@ -1,10 +1,12 @@
 
 import { authHost } from './constants/base';
-import { startSession, checkSession } from '../src/http';
+import { startSession, checkSession, getIpFamily } from '../src/http';
 
 describe('Requests to public API', () => {
 
   it('starts session successfully', async () => {
+    const ipFamily = await getIpFamily(authHost);
+
     const startSessionResponse = startSession({
       source: 'atom',
       authHost,
@@ -13,7 +15,7 @@ describe('Requests to public API', () => {
     const draftToken = startSessionResponse.draftToken;
 
     // This token is just a draft and not ready to be used permanently
-    const checkSessionResponse = await checkSession({ authHost, draftToken });
+    const checkSessionResponse = await checkSession({ authHost, draftToken, ipFamily });
     expect(checkSessionResponse.type).toEqual('success');
     if (checkSessionResponse.type == 'error') return;
     expect(checkSessionResponse.value).toEqual('');

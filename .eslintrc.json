@@ -57,7 +57,8 @@
     "no-use-before-define": "off",
     "no-continue": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
-    "@typescript-eslint/no-unsafe-assignment": "warn"
+    "@typescript-eslint/no-unsafe-assignment": "warn",
+    "no-param-reassign": "off"
   },
   "settings": {
     "import/resolver": {

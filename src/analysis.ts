@@ -49,7 +49,6 @@ const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, d
 const ANALYSIS_OPTIONS_DEFAULTS = {
   baseURL: defaultBaseURL,
   sessionToken: '',
-  includeLint: false,
   reachability: false,
   severity: AnalysisSeverity.info,
   symlinksEnabled: false,
@@ -63,7 +62,6 @@ async function pollAnalysis(
   {
     baseURL,
     sessionToken,
-    includeLint,
     severity,
     bundleId,
     oAuthToken,
@@ -74,7 +72,6 @@ async function pollAnalysis(
   }: {
     baseURL: string;
     sessionToken: string;
-    includeLint: boolean;
     severity: AnalysisSeverity;
     bundleId: string;
     oAuthToken?: string;
@@ -103,7 +100,6 @@ async function pollAnalysis(
         oAuthToken,
         username,
         bundleId,
-        includeLint,
         severity,
         limitToFiles,
         source,
@@ -143,7 +139,6 @@ export async function analyzeBundle(
   {
     baseURL = defaultBaseURL,
     sessionToken = '',
-    includeLint = false,
     severity = AnalysisSeverity.info,
     bundleId,
     oAuthToken,
@@ -154,7 +149,6 @@ export async function analyzeBundle(
   }: {
     baseURL: string;
     sessionToken: string;
-    includeLint: boolean;
     severity: AnalysisSeverity;
     bundleId: string;
     oAuthToken?: string;
@@ -173,7 +167,6 @@ export async function analyzeBundle(
       oAuthToken,
       username,
       bundleId,
-      includeLint,
       severity,
       limitToFiles,
       source,
@@ -194,7 +187,6 @@ export async function analyzeBundle(
   return {
     bundleId,
     analysisResults,
-    analysisURL: analysisData.value.analysisURL,
   };
 }
 
@@ -258,7 +250,6 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
   const {
     baseURL,
     sessionToken,
-    includeLint,
     reachability,
     severity,
     paths,
@@ -292,14 +283,12 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
         },
         coverage: [],
       },
-      analysisURL: '',
       bundleId: '',
     };
   } else {
     analysisData = await analyzeBundle({
       baseURL,
       sessionToken,
-      includeLint,
       reachability,
       severity,
       bundleId: remoteBundle.bundleId,
@@ -311,7 +300,6 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
   const result = {
     baseURL,
     sessionToken,
-    includeLint,
     reachability,
     severity,
     supportedFiles,
@@ -368,7 +356,6 @@ export async function extendAnalysis(
   const analysisData = await analyzeBundle({
     baseURL: bundle.baseURL,
     sessionToken: bundle.sessionToken,
-    includeLint: bundle.includeLint,
     severity: bundle.severity,
     bundleId: remoteBundle.bundleId,
     limitToFiles: files.map(f => f.bundlePath),
@@ -387,7 +374,7 @@ export async function extendAnalysis(
 
 export async function analyzeGit(options: GitOptions, requestOptions?: RequestOptions): Promise<IGitBundle> {
   const analysisOptions: AnalyzeGitOptions = { ...ANALYSIS_OPTIONS_DEFAULTS, ...options };
-  const { baseURL, sessionToken, oAuthToken, username, includeLint, reachability, severity, gitUri, sarif, source } =
+  const { baseURL, sessionToken, oAuthToken, username, reachability, severity, gitUri, sarif, source } =
     analysisOptions;
   const bundleResponse = await createGitBundle(
     {
@@ -410,7 +397,6 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
       sessionToken,
       oAuthToken,
       username,
-      includeLint,
       reachability,
       severity,
       bundleId,
@@ -423,7 +409,6 @@ export async function analyzeGit(options: GitOptions, requestOptions?: RequestOp
     baseURL,
     sessionToken,
     oAuthToken,
-    includeLint,
     reachability,
     severity,
     gitUri,

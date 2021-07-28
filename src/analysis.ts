@@ -181,14 +181,14 @@ function mergeBundleResults(
               return acc2;
             }, []
         ));
-        return acc1; 
+        return acc1;
       }, []
     );
     if (
       locations.some(loc => changedFiles.includes(loc)) ||
       codeFlowLocations.some(loc => removedFiles.includes(loc))
     ) continue;
-    
+
     let ruleIndex = sarifRules.findIndex((rule) => rule.id === res.ruleId);
     if (
       ruleIndex === -1 && res.ruleIndex &&

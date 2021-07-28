@@ -1,7 +1,8 @@
-import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { bundleFiles, bundleFilesFull, bundleFilePaths } from './constants/sample';
-import { fromEntries } from '../src/lib/utils';
 import pick from 'lodash.pick';
+
+import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
+import { bundleFiles, bundleFilesFull } from './constants/sample';
+import { fromEntries } from '../src/lib/utils';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
@@ -54,6 +55,10 @@ describe('Requests to public API', () => {
         '.ts',
         '.tsx',
         '.vue',
+        '.ASPX',
+        '.Aspx',
+        '.aspx',
+        '.ejs',
       ]),
     );
 
@@ -221,9 +226,7 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
-  it(
-    'test successful workflow',
-    async () => {
+  it('test successful workflow', async () => {
       // Create a bundle first
       const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
         r[d.bundlePath] = pick(d, ['hash', 'content']);
@@ -266,7 +269,6 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.complete) {
-        expect(response.value.sarif).toMatchSnapshot();
         expect(response.value.sarif.runs[0].results).toHaveLength(12);
 
         expect(new Set(response.value.coverage)).toEqual(
@@ -310,7 +312,6 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
-      expect(response.value.sarif).toMatchSnapshot();
       expect(response.value.sarif.runs[0].results).toHaveLength(8);
 
       // Get analysis results with severity 3
@@ -326,7 +327,6 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
-      expect(response.value.sarif).toMatchSnapshot();
       expect(response.value.sarif.runs[0].results).toHaveLength(4);
     },
     TEST_TIMEOUT,

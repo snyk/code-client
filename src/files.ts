@@ -254,6 +254,7 @@ export async function* collectBundleFiles({
     // eslint-disable-next-line no-await-in-loop
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
       if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
       }
@@ -270,6 +271,7 @@ export async function* collectBundleFiles({
     );
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
       if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
       }
@@ -298,7 +300,7 @@ export async function prepareExtendingBundle(
   processingFiles = processingFiles
     .map(f => resolveBundleFilePath(baseDir, f))
     .filter(f => !isMatch(f, fileIgnores));
-  
+
   if (processingFiles.length) {
     // Determine existing files (minus removed)
     const entries = await fg(processingFiles, {
@@ -308,7 +310,7 @@ export async function prepareExtendingBundle(
       objectMode: true,
       stats: true,
     });
-    
+
     let foundFiles: Set<string> = new Set(); // This initialization is needed to help Typescript checker
     foundFiles = entries.reduce((s, e) => {
       if (e.stats && e.stats.size <= maxFileSize) {

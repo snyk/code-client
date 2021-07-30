@@ -15,5 +15,4 @@ export interface AnalysisResult {
   };
   coverage: Coverage[];
   status: 'COMPLETE';
-  // progress: 1;
 }

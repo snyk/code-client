@@ -33,7 +33,6 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "testTimeout": 50000,
-
     "verbose": true,
     "clearMocks": true,
     "collectCoverage": true,

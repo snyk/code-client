@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import pick from 'lodash.pick';
 
 import { AnalyzeFoldersOptions, prepareExtendingBundle } from './files';
 import {
@@ -17,17 +16,7 @@ import { createBundleFromFolders, FileBundle, remoteBundleFactory } from './bund
 import emitter from './emitter';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 
-// import { fromEntries } from './lib/utils';
-
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
-
-// const ANALYSIS_OPTIONS_DEFAULTS = {
-//   baseURL: defaultBaseURL,
-//   sessionToken: '',
-//   severity: AnalysisSeverity.info,
-//   symlinksEnabled: false,
-//   defaultFileIgnores: IGNORES_DEFAULT,
-// };
 
 async function pollAnalysis(
   options: GetAnalysisOptions,
@@ -42,7 +31,6 @@ async function pollAnalysis(
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    // eslint-disable-next-line no-await-in-loop
     analysisResponse = await getAnalysis(options);
 
     if (analysisResponse.type === 'error') {
@@ -139,14 +127,14 @@ function mergeBundleResults(
   //   append the finding to the new analysis and check if the rule must be added as well
   const changedFiles = [...limitToFiles, ...removedFiles];
   const sarifResults = (newAnalysisResults.sarif.runs[0].results || []).filter(res => {
-      // TODO: This should not be necessary in theory but, in case of two identical files,
-      // Bundle Server returns the finding in both files even if limitToFiles only reports one
-      const loc = res.locations?.[0].physicalLocation?.artifactLocation?.uri;
-      return loc && changedFiles.includes(loc);
+    // TODO: This should not be necessary in theory but, in case of two identical files,
+    // Bundle Server returns the finding in both files even if limitToFiles only reports one
+    const loc = res.locations?.[0].physicalLocation?.artifactLocation?.uri;
+    return loc && changedFiles.includes(loc);
   });
   const sarifRules = newAnalysisResults.sarif.runs[0].tool.driver.rules || [];
   const oldResults = oldAnalysisResults.sarif.runs[0].results || [];
-  for (let res of oldResults) {
+  for (const res of oldResults) {
     // NOTE: Node 10 doesn't support the more readable .flatMap, so we need to use .reduce, but the behaviour would be the following:
     // const locations: string[] = (res.locations || []).flatMap(
     //   loc => !!loc.physicalLocation?.artifactLocation?.uri ? [loc.physicalLocation.artifactLocation.uri] : []
@@ -158,40 +146,35 @@ function mergeBundleResults(
     //     )
     //   )
     // );
-    const locations: string[] = (res.locations || []).reduce<string[]>(
-      (acc, loc) => {
-        if (loc.physicalLocation?.artifactLocation?.uri) {
-          acc.push(loc.physicalLocation!.artifactLocation!.uri!);
-        };
-        return acc;
-      }, []
-    );
-    const codeFlowLocations: string[] = (res.codeFlows || []).reduce<string[]>(
-      (acc1, cf) => {
-        acc1.push(...(cf.threadFlows || []).reduce<string[]>(
-          (acc2, tf) => {
-              acc2.push(...(tf.locations || []).reduce<string[]>(
-                (acc3, loc) => {
-                  if (loc.location?.physicalLocation?.artifactLocation?.uri) {
-                    acc3.push(loc.location!.physicalLocation!.artifactLocation!.uri!);
-                  };
-                  return acc3;
-                }, []
-              ));
-              return acc2;
-            }, []
-        ));
-        return acc1;
-      }, []
-    );
-    if (
-      locations.some(loc => changedFiles.includes(loc)) ||
-      codeFlowLocations.some(loc => removedFiles.includes(loc))
-    ) continue;
+    const locations: string[] = (res.locations || []).reduce<string[]>((acc, loc) => {
+      if (loc.physicalLocation?.artifactLocation?.uri) {
+        acc.push(loc.physicalLocation.artifactLocation.uri);
+      }
+      return acc;
+    }, []);
+    const codeFlowLocations: string[] = (res.codeFlows || []).reduce<string[]>((acc1, cf) => {
+      acc1.push(
+        ...(cf.threadFlows || []).reduce<string[]>((acc2, tf) => {
+          acc2.push(
+            ...(tf.locations || []).reduce<string[]>((acc3, loc) => {
+              if (loc.location?.physicalLocation?.artifactLocation?.uri) {
+                acc3.push(loc.location.physicalLocation.artifactLocation.uri);
+              }
+              return acc3;
+            }, []),
+          );
+          return acc2;
+        }, []),
+      );
+      return acc1;
+    }, []);
+    if (locations.some(loc => changedFiles.includes(loc)) || codeFlowLocations.some(loc => removedFiles.includes(loc)))
+      continue;
 
-    let ruleIndex = sarifRules.findIndex((rule) => rule.id === res.ruleId);
+    let ruleIndex = sarifRules.findIndex(rule => rule.id === res.ruleId);
     if (
-      ruleIndex === -1 && res.ruleIndex &&
+      ruleIndex === -1 &&
+      res.ruleIndex &&
       oldAnalysisResults.sarif.runs[0].tool.driver.rules &&
       oldAnalysisResults.sarif.runs[0].tool.driver.rules[res.ruleIndex]
     ) {

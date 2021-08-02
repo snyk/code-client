@@ -4,7 +4,7 @@ import pick from 'lodash.pick';
 import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
-import { AnalysisSeverity } from './interfaces/analysis-options.interface';
+// import { AnalysisSeverity } from './interfaces/analysis-options.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 import { makeRequest, Payload } from './needle';
 
@@ -385,6 +385,7 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
 export interface AnalysisOptions {
   readonly severity?: number;
   readonly limitToFiles?: string[];
+  readonly prioritized?: boolean;
 }
 
 export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions {
@@ -407,7 +408,8 @@ export async function getAnalysis(
         hash: options.bundleHash,
         limitToFiles: options.limitToFiles || [],
       },
-      severity: options.severity || AnalysisSeverity.info,
+      ...pick(options, ['severity', 'prioritized']),
+      // severity: options.severity || AnalysisSeverity.info,
     },
   };
 

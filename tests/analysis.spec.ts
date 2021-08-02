@@ -56,6 +56,7 @@ describe('Functional test of analysis', () => {
           connection: { baseURL, sessionToken, source },
           analysisOptions: {
             severity: 1,
+            prioritized: true,
           },
           fileOptions: {
             paths: [sampleProjectPath],
@@ -153,7 +154,7 @@ describe('Functional test of analysis', () => {
     it('analyze folder - with sarif returned', async () => {
       const bundle = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
-        analysisOptions: { severity: AnalysisSeverity.info },
+        analysisOptions: { severity: AnalysisSeverity.info, prioritized: true },
         fileOptions: {
           paths: [sampleProjectPath],
           symlinksEnabled: false,

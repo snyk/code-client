@@ -57,6 +57,7 @@ describe('Functional test of analysis', () => {
         paths: [sampleProjectPath],
         symlinksEnabled: false,
         maxPayload: 1000,
+        prioritized: true,
       });
       expect(bundle).toHaveProperty('baseURL');
       expect(bundle).toHaveProperty('sessionToken');
@@ -144,6 +145,7 @@ describe('Functional test of analysis', () => {
       maxPayload,
       defaultFileIgnores,
       sarif,
+      prioritized: true,
     });
     const validationResult = jsonschema.validate(bundle.sarifResults, sarifSchema);
 

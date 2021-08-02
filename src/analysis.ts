@@ -56,6 +56,7 @@ const ANALYSIS_OPTIONS_DEFAULTS = {
   defaultFileIgnores: IGNORES_DEFAULT,
   sarif: false,
   source: '',
+  prioritized: false,
 }
 
 async function pollAnalysis(
@@ -69,6 +70,7 @@ async function pollAnalysis(
     limitToFiles,
     source,
     reachability,
+    prioritized,
   }: {
     baseURL: string;
     sessionToken: string;
@@ -79,6 +81,7 @@ async function pollAnalysis(
     limitToFiles?: string[];
     source: string;
     reachability?: boolean;
+    prioritized?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IResult<AnalysisFailedResponse | AnalysisFinishedResponse, GetAnalysisErrorCodes>> {
@@ -104,6 +107,7 @@ async function pollAnalysis(
         limitToFiles,
         source,
         reachability,
+        prioritized,
       },
       requestOptions,
     );
@@ -146,6 +150,7 @@ export async function analyzeBundle(
     limitToFiles,
     source,
     reachability = false,
+    prioritized = false,
   }: {
     baseURL: string;
     sessionToken: string;
@@ -156,6 +161,7 @@ export async function analyzeBundle(
     limitToFiles?: string[];
     source: string;
     reachability?: boolean;
+    prioritized?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IBundleResult> {
@@ -171,6 +177,7 @@ export async function analyzeBundle(
       limitToFiles,
       source,
       reachability,
+      prioritized,
     },
     requestOptions,
   );
@@ -257,6 +264,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
     sarif,
     defaultFileIgnores,
     source,
+    prioritized,
   } = analysisOptions;
 
   const supportedFiles = await getSupportedFiles(baseURL, source);
@@ -293,6 +301,7 @@ export async function analyzeFolders(options: FolderOptions): Promise<IFileBundl
       severity,
       bundleId: remoteBundle.bundleId,
       source,
+      prioritized,
     });
     analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
   }

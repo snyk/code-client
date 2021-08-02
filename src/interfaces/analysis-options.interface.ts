@@ -14,6 +14,7 @@ export interface AnalyzeFoldersOptions extends AnalysisOptions {
   symlinksEnabled: boolean;
   maxPayload: number;
   defaultFileIgnores: string[];
+  prioritized?: boolean;
 }
 
 export interface AnalyzeGitOptions extends AnalysisOptions {
@@ -35,6 +36,7 @@ export interface FolderOptions extends Options {
   symlinksEnabled?: boolean;
   maxPayload?: number;
   defaultFileIgnores?: string[];
+  prioritized?: boolean;
 }
 
 export interface GitOptions extends Options {

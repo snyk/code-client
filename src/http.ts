@@ -467,16 +467,31 @@ export async function getAnalysis(
     readonly username?: string;
     readonly source: string;
     readonly reachability?: boolean;
+    readonly prioritized?: boolean;
   },
   requestOptions?: RequestOptions,
 ): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, username, bundleId, severity, limitToFiles, source, reachability } =
-    options;
+  const {
+    baseURL,
+    sessionToken,
+    oAuthToken,
+    username,
+    bundleId,
+    severity,
+    limitToFiles,
+    source,
+    reachability,
+    prioritized,
+  } = options;
 
   // the same applies for reachability
-  const params: { severity: number; reachability?: boolean } = { severity };
+  const params: { severity: number; reachability?: boolean; prioritized?: boolean } = { severity };
   if (reachability) {
     params.reachability = true;
+  }
+
+  if (prioritized) {
+    params.prioritized = true;
   }
 
   const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };

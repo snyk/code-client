@@ -5,6 +5,9 @@ Typescript consumer of public API
 [![npm version](https://img.shields.io/npm/v/@snyk/code-client.svg?style=flat-square)](https://www.npmjs.org/package/@snyk/code-client)
 [![npm downloads](https://img.shields.io/npm/dm/@snyk/code-client.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@snyk/code-client)
 
+This package is published using:
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+
 # Installation
 
 ```shell script
@@ -86,62 +89,30 @@ Complete list of events:
 ### Run analysis
 
 ```javascript
-const bundle = await codeClient.analyzeFolders({
-  baseURL,
-  sessionToken,
-  severity: 1,
-  paths: ['/home/user/repo'],
-  sarif,
-  source,
+const results = await codeClient.analyzeFolders({
+  connection: { baseURL, sessionToken, source },
+  analysisOptions: {
+    severity: 1,
+  },
+  fileOptions: {
+    paths: ['/home/user/repo'],
+    symlinksEnabled: false,
+  },
 });
 
-// bundle implements interface IFileBundle:
-//   readonly baseURL: string;
-//   readonly sessionToken: string;
-//   readonly severity: AnalysisSeverity;
-//   readonly bundleId: string;
-//   readonly analysisResults: IAnalysisResult;
-//   readonly baseDir: string;
-//   readonly paths: string[];
-//   readonly supportedFiles: ISupportedFiles;
 ```
 
 ### Creates a new bundle based on a previously uploaded one
 
 ```javascript
-const result = await codeClient.extendBundle({
-  sessionToken,
-  bundleId,
+const results = await codeClient.extendAnalysis({
+  ...previousAnalysisResults,
   files: {
-    '/home/user/repo/main.js': '3e297985...',
-    '/home/user/repo/app.js': 'c8bc6452...',
+    '/home/user/repo/main.js',
+    '/home/user/repo/app.js',
   },
-  removedFiles: [],
-});
-const { bundleId, missingFiles } = result;
-```
-
-### Run analysis of remote git repository
-
-```javascript
-const bundle = await analyzeGit({
-  baseURL,
-  sessionToken,
-  severity: 1,
-  gitUri: 'git@github.com:DeepCodeAI/cli.git@320d98a6896f5376efe6cefefb6e70b46b97d566',
-  sarif: true,
-  source,
 });
 
-// bundle implements interface IGitBundle
-//   readonly baseURL: string;
-//   readonly sessionToken: string;
-//   readonly oAuthToken?: string;
-//   readonly severity: AnalysisSeverity;
-//   readonly bundleId: string;
-//   readonly analysisResults: IAnalysisResult;
-//   readonly sarifResults?: Log;
-//   readonly gitUri: string;
 ```
 
 ### Errors

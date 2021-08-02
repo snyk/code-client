@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { URL } from 'url';
-import { promises as dns } from 'dns';
+import pick from 'lodash.pick';
 
-import { apiPath, DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes } from './constants';
-import { IAnalysisResult } from './interfaces/analysis-result.interface';
-import { IFileContent, IFiles, ISupportedFiles } from './interfaces/files.interface';
-import { RequestOptions } from './interfaces/http-options.interface';
+import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
+
+import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
+// import { AnalysisSeverity } from './interfaces/analysis-options.interface';
+import { AnalysisResult } from './interfaces/analysis-result.interface';
 import { makeRequest, Payload } from './needle';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
@@ -18,7 +18,13 @@ type ResultError<E> = {
   };
 };
 
-export type IResult<T, E> = ResultSuccess<T> | ResultError<E>;
+export type Result<T, E> = ResultSuccess<T> | ResultError<E>;
+
+export interface ConnectionOptions {
+  baseURL: string;
+  sessionToken: string;
+  source: string;
+}
 
 export function determineErrorCode(error: any): ErrorCodes {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -88,7 +94,12 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
   [ErrorCodes.connectionRefused]: DEFAULT_ERROR_MESSAGES[ErrorCodes.connectionRefused],
 };
 
-export function startSession(options: { readonly authHost: string; readonly source: string }): StartSessionResponseDto {
+interface StartSessionOptions {
+  readonly authHost: string;
+  readonly source: string;
+}
+
+export function startSession(options: StartSessionOptions): StartSessionResponseDto {
   const { source, authHost } = options;
   const draftToken = uuidv4();
 
@@ -131,11 +142,13 @@ interface IApiTokenResponse {
   api: string;
 }
 
-export async function checkSession(options: {
+interface CheckSessionOptions {
   readonly authHost: string;
   readonly draftToken: string;
   readonly ipFamily?: IpFamily;
-}): Promise<IResult<string, CheckSessionErrorCodes>> {
+}
+
+export async function checkSession(options: CheckSessionOptions): Promise<Result<string, CheckSessionErrorCodes>> {
   const defaultValue: ResultSuccess<string> = {
     type: 'success',
     value: '',
@@ -158,7 +171,7 @@ export async function checkSession(options: {
     return defaultValue;
   } catch (err) {
     if (
-      [ErrorCodes.loginInProgress, ErrorCodes.unauthorizedContent, ErrorCodes.unauthorizedUser].includes(
+      [ErrorCodes.loginInProgress, ErrorCodes.badRequest, ErrorCodes.unauthorizedUser].includes(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         err.response?.status,
       )
@@ -170,32 +183,37 @@ export async function checkSession(options: {
   }
 }
 
-export async function getFilters(
-  baseURL: string,
-  source: string,
-): Promise<IResult<ISupportedFiles, GenericErrorTypes>> {
+export async function getFilters(baseURL: string, source: string): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
 
   try {
     const { success, response } = await makeRequest({
       headers: { source },
-      url: `${baseURL}${apiPath}/${apiName}`,
+      url: `${baseURL}/${apiName}`,
       method: 'get',
     });
 
     if (success) {
-      const responseBody = response.body as ISupportedFiles;
+      const responseBody = response.body as SupportedFiles;
       return { type: 'success', value: responseBody };
     }
 
     return generateError<GenericErrorTypes>({ response }, GENERIC_ERROR_MESSAGES, apiName);
   } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, apiName);
+    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'filters');
   }
 }
 
+function prepareTokenHeaders(sessionToken: string) {
+  return {
+    'Session-Token': sessionToken,
+    // We need to be able to test code-client without deepcode locally
+    Authorization: `Bearer ${sessionToken}`,
+  };
+}
+
 export type RemoteBundle = {
-  readonly bundleId: string;
+  readonly bundleHash: string;
   readonly missingFiles: string[];
 };
 
@@ -204,7 +222,7 @@ export type CreateBundleErrorCodes =
   | ErrorCodes.unauthorizedUser
   | ErrorCodes.unauthorizedBundleAccess
   | ErrorCodes.bigPayload
-  | ErrorCodes.unauthorizedContent
+  | ErrorCodes.badRequest
   | ErrorCodes.notFound;
 
 const CREATE_BUNDLE_ERROR_MESSAGES: { [P in CreateBundleErrorCodes]: string } = {
@@ -212,26 +230,26 @@ const CREATE_BUNDLE_ERROR_MESSAGES: { [P in CreateBundleErrorCodes]: string } = 
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
   [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Request content doesn't match the specifications`,
+  [ErrorCodes.badRequest]: `Request payload doesn't match the specifications`,
   [ErrorCodes.notFound]: 'Unable to resolve requested oid',
 };
 
-export async function createBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly files: IFiles;
-  readonly source: string;
-}): Promise<IResult<RemoteBundle, CreateBundleErrorCodes>> {
-  const { baseURL, sessionToken, files, source } = options;
+interface CreateBundleOptions extends ConnectionOptions {
+  files: BundleFiles;
+}
 
+export async function createBundle(
+  options: CreateBundleOptions,
+): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   try {
     const payload: Payload = {
-      headers: { 'Session-Token': sessionToken, source },
-      url: `${baseURL}${apiPath}/bundle`,
-      method: 'post',
-      body: {
-        files,
+      headers: {
+        ...prepareTokenHeaders(options.sessionToken),
+        source: options.source,
       },
+      url: `${options.baseURL}/bundle`,
+      method: 'post',
+      body: options.files,
     };
 
     const { response, success } = await makeRequest(payload);
@@ -259,17 +277,18 @@ const CHECK_BUNDLE_ERROR_MESSAGES: { [P in CheckBundleErrorCodes]: string } = {
   [ErrorCodes.notFound]: 'Uploaded bundle has expired',
 };
 
-export async function checkBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleId: string;
-}): Promise<IResult<RemoteBundle, CheckBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId } = options;
+interface CheckBundleOptions extends ConnectionOptions {
+  bundleHash: string;
+}
 
+export async function checkBundle(options: CheckBundleOptions): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
   try {
     const { response, success } = await makeRequest({
-      headers: { 'Session-Token': sessionToken },
-      url: `${baseURL}${apiPath}/bundle/${bundleId}`,
+      headers: {
+        ...prepareTokenHeaders(options.sessionToken),
+        source: options.source,
+      },
+      url: `${options.baseURL}/bundle/${options.bundleHash}`,
       method: 'get',
     });
 
@@ -284,7 +303,7 @@ export async function checkBundle(options: {
 export type ExtendBundleErrorCodes =
   | GenericErrorTypes
   | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedContent
+  | ErrorCodes.badRequest
   | ErrorCodes.unauthorizedBundleAccess
   | ErrorCodes.bigPayload
   | ErrorCodes.notFound;
@@ -293,29 +312,29 @@ const EXTEND_BUNDLE_ERROR_MESSAGES: { [P in ExtendBundleErrorCodes]: string } = 
   ...GENERIC_ERROR_MESSAGES,
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Attempted to extend a git bundle, or ended up with an empty bundle after the extension`,
+  [ErrorCodes.badRequest]: `Bad request`,
   [ErrorCodes.unauthorizedBundleAccess]: 'Unauthorized access to parent bundle',
   [ErrorCodes.notFound]: 'Parent bundle has expired',
 };
 
-export async function extendBundle(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleId: string;
-  readonly files: IFiles;
+interface ExtendBundleOptions extends ConnectionOptions {
+  readonly bundleHash: string;
+  readonly files: BundleFiles;
   readonly removedFiles?: string[];
-}): Promise<IResult<RemoteBundle, ExtendBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, files, removedFiles = [] } = options;
+}
 
+export async function extendBundle(
+  options: ExtendBundleOptions,
+): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
   try {
     const { response, success } = await makeRequest({
-      headers: { 'Session-Token': sessionToken },
-      url: `${baseURL}${apiPath}/bundle/${bundleId}`,
-      method: 'put',
-      body: {
-        files,
-        removedFiles,
+      headers: {
+        ...prepareTokenHeaders(options.sessionToken),
+        source: options.source,
       },
+      url: `${options.baseURL}/bundle/${options.bundleHash}`,
+      method: 'put',
+      body: pick(options, ['files', 'removedFiles']),
     });
 
     if (success) return { type: 'success', value: response.body as RemoteBundle };
@@ -326,108 +345,18 @@ export async function extendBundle(options: {
   }
 }
 
-type CreateGitBundleErrorCodes =
-  | GenericErrorTypes
-  | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedBundleAccess
-  | ErrorCodes.notFound;
-
-const CREATE_GIT_BUNDLE_ERROR_MESSAGES: { [P in CreateGitBundleErrorCodes]: string } = {
-  ...GENERIC_ERROR_MESSAGES,
-  [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
-  [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
-  [ErrorCodes.notFound]: 'Unable to found requested repository or commit hash',
-};
-
-export async function createGitBundle(
-  options: {
-    readonly baseURL: string;
-    readonly sessionToken: string;
-    readonly oAuthToken?: string;
-    readonly username?: string;
-    readonly gitUri: string;
-    readonly source: string;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IResult<RemoteBundle, CreateGitBundleErrorCodes>> {
-  const { baseURL, sessionToken, oAuthToken, username, gitUri, source } = options;
-  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
-  if (oAuthToken) {
-    headers['X-OAuthToken'] = oAuthToken;
-  }
-  if (username) {
-    headers['X-UserName'] = username;
-  }
-
-  try {
-    const { response, success } = await makeRequest({
-      headers,
-      url: `${baseURL}${apiPath}/bundle`,
-      method: 'post',
-      body: { gitURI: gitUri },
-    });
-
-    if (success) return { type: 'success', value: response.body as RemoteBundle };
-
-    return generateError<CreateGitBundleErrorCodes>({ response }, CREATE_GIT_BUNDLE_ERROR_MESSAGES, 'createBundle');
-  } catch (error) {
-    return generateError<CreateGitBundleErrorCodes>(error, CREATE_GIT_BUNDLE_ERROR_MESSAGES, 'createBundle');
-  }
-}
-
-type UploadBundleErrorCodes =
-  | GenericErrorTypes
-  | ErrorCodes.unauthorizedUser
-  | ErrorCodes.unauthorizedContent
-  | ErrorCodes.unauthorizedBundleAccess
-  | ErrorCodes.notFound
-  | ErrorCodes.bigPayload;
-
-const UPLOAD_BUNDLE_ERROR_MESSAGES: { [P in UploadBundleErrorCodes]: string } = {
-  ...GENERIC_ERROR_MESSAGES,
-  [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
-  [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
-  [ErrorCodes.notFound]: DEFAULT_ERROR_MESSAGES[ErrorCodes.notFound],
-  [ErrorCodes.bigPayload]: DEFAULT_ERROR_MESSAGES[ErrorCodes.bigPayload],
-  [ErrorCodes.unauthorizedContent]: `Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension`,
-};
-
-export async function uploadFiles(options: {
-  readonly baseURL: string;
-  readonly sessionToken: string;
-  readonly bundleId: string;
-  readonly content: IFileContent[];
-}): Promise<IResult<boolean, UploadBundleErrorCodes>> {
-  const { baseURL, sessionToken, bundleId, content } = options;
-
-  try {
-    const { response, success } = await makeRequest({
-      headers: { 'Session-Token': sessionToken },
-      url: `${baseURL}${apiPath}/file/${bundleId}`,
-      method: 'post',
-      body: content,
-    });
-
-    if (success) return { type: 'success', value: true };
-
-    return generateError<UploadBundleErrorCodes>({ response }, UPLOAD_BUNDLE_ERROR_MESSAGES, 'uploadFiles');
-  } catch (error) {
-    return generateError<UploadBundleErrorCodes>(error, UPLOAD_BUNDLE_ERROR_MESSAGES, 'uploadFiles');
-  }
-}
-
 // eslint-disable-next-line no-shadow
 export enum AnalysisStatus {
   waiting = 'WAITING',
   fetching = 'FETCHING',
   analyzing = 'ANALYZING',
-  dcDone = 'DC_DONE',
   done = 'DONE',
   failed = 'FAILED',
+  complete = 'COMPLETE',
 }
 
 export type AnalysisResponseProgress = {
-  readonly status: AnalysisStatus.waiting | AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.dcDone;
+  readonly status: AnalysisStatus.waiting | AnalysisStatus.fetching | AnalysisStatus.analyzing | AnalysisStatus.done;
   readonly progress: number;
 };
 
@@ -435,17 +364,13 @@ export type AnalysisFailedResponse = {
   readonly status: AnalysisStatus.failed;
 };
 
-export type AnalysisFinishedResponse = {
-  readonly status: AnalysisStatus.done;
-  readonly analysisResults: IAnalysisResult;
-};
-
-export type GetAnalysisResponseDto = AnalysisFinishedResponse | AnalysisFailedResponse | AnalysisResponseProgress;
+export type GetAnalysisResponseDto = AnalysisResult | AnalysisFailedResponse | AnalysisResponseProgress;
 
 export type GetAnalysisErrorCodes =
   | GenericErrorTypes
   | ErrorCodes.unauthorizedUser
   | ErrorCodes.unauthorizedBundleAccess
+  | ErrorCodes.badRequest
   | ErrorCodes.notFound;
 
 const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
@@ -453,66 +378,40 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
   [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
   [ErrorCodes.notFound]: DEFAULT_ERROR_MESSAGES[ErrorCodes.notFound],
+  [ErrorCodes.badRequest]: DEFAULT_ERROR_MESSAGES[ErrorCodes.badRequest],
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
+export interface AnalysisOptions {
+  readonly severity?: number;
+  readonly limitToFiles?: string[];
+  readonly prioritized?: boolean;
+}
+
+export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions {
+  bundleHash: string;
+}
+
 export async function getAnalysis(
-  options: {
-    readonly baseURL: string;
-    readonly sessionToken: string;
-    readonly bundleId: string;
-    readonly severity: number;
-    readonly limitToFiles?: string[];
-    readonly oAuthToken?: string;
-    readonly username?: string;
-    readonly source: string;
-    readonly reachability?: boolean;
-    readonly prioritized?: boolean;
-  },
-  requestOptions?: RequestOptions,
-): Promise<IResult<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
-  const {
-    baseURL,
-    sessionToken,
-    oAuthToken,
-    username,
-    bundleId,
-    severity,
-    limitToFiles,
-    source,
-    reachability,
-    prioritized,
-  } = options;
-
-  // the same applies for reachability
-  const params: { severity: number; reachability?: boolean; prioritized?: boolean } = { severity };
-  if (reachability) {
-    params.reachability = true;
-  }
-
-  if (prioritized) {
-    params.prioritized = true;
-  }
-
-  const headers = { ...requestOptions?.headers, 'Session-Token': sessionToken, source };
-  if (oAuthToken) {
-    headers['X-OAuthToken'] = oAuthToken;
-  }
-  if (username) {
-    headers['X-UserName'] = username;
-  }
-
+  options: GetAnalysisOptions,
+): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
-    headers,
-    qs: params,
-    url: `${baseURL}${apiPath}/analysis/${bundleId}`,
-    method: 'get',
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    url: `${options.baseURL}/analysis`,
+    method: 'post',
+    body: {
+      key: {
+        type: 'file',
+        hash: options.bundleHash,
+        limitToFiles: options.limitToFiles || [],
+      },
+      ...pick(options, ['severity', 'prioritized']),
+      // severity: options.severity || AnalysisSeverity.info,
+    },
   };
-
-  if (limitToFiles && limitToFiles.length) {
-    config.body = { files: limitToFiles };
-    config.method = 'post';
-  }
 
   try {
     const { response, success } = await makeRequest(config);
@@ -521,70 +420,5 @@ export async function getAnalysis(
     return generateError<GetAnalysisErrorCodes>({ response }, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
   } catch (error) {
     return generateError<GetAnalysisErrorCodes>(error, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
-  }
-}
-
-type ReportTelemetryRequestDto = {
-  readonly baseURL: string;
-  readonly sessionToken?: string;
-  readonly source?: string;
-  readonly type?: string;
-  readonly message?: string;
-  readonly path?: string;
-  readonly bundleId?: string;
-  readonly version?: string;
-  readonly environmentVersion?: string;
-  readonly data?: any;
-};
-
-export async function reportError(options: ReportTelemetryRequestDto): Promise<IResult<void, GenericErrorTypes>> {
-  const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
-  const config: Payload = {
-    url: `${baseURL}${apiPath}/error`,
-    method: 'post',
-    body: {
-      sessionToken,
-      source,
-      type,
-      message,
-      path,
-      bundleId,
-      version,
-      environmentVersion,
-      data,
-    },
-  };
-
-  try {
-    await makeRequest(config);
-    return { type: 'success', value: undefined };
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'reportError');
-  }
-}
-
-export async function reportEvent(options: ReportTelemetryRequestDto): Promise<IResult<void, GenericErrorTypes>> {
-  const { baseURL, sessionToken, source, type, message, path, bundleId, version, environmentVersion, data } = options;
-  const config: Payload = {
-    url: `${baseURL}${apiPath}/track`,
-    method: 'post',
-    body: {
-      sessionToken,
-      source,
-      type,
-      message,
-      path,
-      bundleId,
-      version,
-      environmentVersion,
-      data,
-    },
-  };
-
-  try {
-    await makeRequest(config);
-    return { type: 'success', value: undefined };
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'reportEvent');
   }
 }

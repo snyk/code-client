@@ -6,6 +6,8 @@
     "lib": ["esnext"],
     "module": "commonjs",
     "sourceMap": true,
+    "incremental": true,
+    "pretty": true,
     "allowJs": false,
     "declaration": true,
     "declarationDir": "./dist",

@@ -1,8 +1,7 @@
 import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 
 export const MAX_PAYLOAD = 4 * 1024 * 1024;
-export const defaultBaseURL = 'https://www.deepcode.ai';
-export const apiPath = '/publicapi';
+export const defaultBaseURL = 'https://api.snyk.deepcode.ai';
 export const HASH_ALGORITHM = 'sha256';
 export const ENCODE_TYPE = 'hex';
 export const GIT_FILENAME = '.git';
@@ -24,7 +23,7 @@ export const DCIGNORE_DRAFTS = {
 // eslint-disable-next-line no-shadow
 export enum ErrorCodes {
   loginInProgress = 304,
-  unauthorizedContent = 400,
+  badRequest = 400,
   unauthorizedUser = 401,
   unauthorizedBundleAccess = 403,
   notFound = 404,
@@ -45,7 +44,7 @@ export const DEFAULT_ERROR_MESSAGES: { [P in ErrorCodes]: string } = {
   [ErrorCodes.dnsNotFound]: '[Connection issue] Could not resolve domain', // 452
   [ErrorCodes.connectionRefused]: '[Connection issue] Connection refused', // 421
   [ErrorCodes.loginInProgress]: 'Login has not been confirmed yet',
-  [ErrorCodes.unauthorizedContent]: 'Unauthorized request to specific content',
+  [ErrorCodes.badRequest]: 'Bad request',
   [ErrorCodes.unauthorizedUser]: 'Missing, revoked or inactive token',
   [ErrorCodes.unauthorizedBundleAccess]: 'Unauthorized access to requested bundle analysis',
   [ErrorCodes.notFound]: 'Not found',

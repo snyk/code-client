@@ -1,13 +1,13 @@
-export interface IFiles {
-  [filePath: string]: string;
+export interface File {
+  hash: string;
+  content: string;
 }
 
-export interface IFileContent {
-  fileHash: string;
-  fileContent: string;
-}
+export type BundleFiles = {
+  [filePath: string]: string | File;
+};
 
-export interface IFileInfo {
+export interface FileInfo {
   filePath: string;
   bundlePath: string;
   size: number;
@@ -15,16 +15,7 @@ export interface IFileInfo {
   content?: string;
 }
 
-export interface IFileQueue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  results: any[] | null;
-  concurrency: number;
-  autostart: boolean;
-  on: Function;
-  start: Function;
-}
-
-export type ISupportedFiles = {
+export type SupportedFiles = {
   configFiles: string[];
   extensions: string[];
 };

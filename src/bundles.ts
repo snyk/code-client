@@ -1,9 +1,19 @@
 /* eslint-disable no-await-in-loop */
 import chunk from 'lodash.chunk';
+import pick from 'lodash.pick';
+import omit from 'lodash.omit';
 
-import { IFileInfo } from './interfaces/files.interface';
+import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interface';
 
-import { composeFilePayloads, resolveBundleFiles } from './files';
+import {
+  composeFilePayloads,
+  resolveBundleFiles,
+  AnalyzeFoldersOptions,
+  collectIgnoreRules,
+  determineBaseDir,
+  collectBundleFiles,
+} from './files';
+
 import {
   CreateBundleErrorCodes,
   CheckBundleErrorCodes,
@@ -11,50 +21,45 @@ import {
   createBundle,
   extendBundle,
   checkBundle,
-  uploadFiles,
-  IResult,
+  Result,
   RemoteBundle,
+  ConnectionOptions,
+  getFilters,
 } from './http';
+
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
-import { fromEntries } from './lib/utils';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
-async function* prepareRemoteBundle(
-  baseURL: string,
-  sessionToken: string,
-  files: IFileInfo[],
-  removedFiles: string[] = [],
-  existingBundleId: string | null = null,
-  maxPayload = MAX_PAYLOAD,
-  source: string,
-): AsyncGenerator<IResult<RemoteBundle, BundleErrorCodes>> {
-  let response: IResult<RemoteBundle, BundleErrorCodes>;
-  let bundleId = existingBundleId;
+interface PrepareRemoteBundleOptions extends ConnectionOptions {
+  files: FileInfo[];
+  bundleHash?: string;
+  removedFiles?: string[];
+  maxPayload?: number;
+}
 
-  const fileChunks = chunk(files, maxPayload / 300);
+async function* prepareRemoteBundle({
+  maxPayload = MAX_PAYLOAD,
+  ...options
+}: PrepareRemoteBundleOptions): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
+  let response: Result<RemoteBundle, BundleErrorCodes>;
+  let { bundleHash } = options;
+
+  const fileChunks = chunk(options.files, maxPayload / 300);
   emitter.createBundleProgress(0, fileChunks.length);
   for (const [i, chunkedFiles] of fileChunks.entries()) {
-    const paramFiles = fromEntries(chunkedFiles.map(d => [d.bundlePath, d.hash]));
+    const apiParams = {
+      ...pick(options, ['baseURL', 'sessionToken', 'source', 'removedFiles']),
+      files: chunkedFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: f.hash }), {} as BundleFiles),
+    };
 
-    if (bundleId === null) {
+    if (!bundleHash) {
       // eslint-disable-next-line no-await-in-loop
-      response = await createBundle({
-        baseURL,
-        sessionToken,
-        files: paramFiles,
-        source,
-      });
+      response = await createBundle(apiParams);
     } else {
       // eslint-disable-next-line no-await-in-loop
-      response = await extendBundle({
-        baseURL,
-        sessionToken,
-        bundleId,
-        files: paramFiles,
-        removedFiles,
-      });
+      response = await extendBundle({ bundleHash, ...apiParams });
     }
 
     emitter.createBundleProgress(i + 1, fileChunks.length);
@@ -64,10 +69,16 @@ async function* prepareRemoteBundle(
       yield response;
       break;
     }
-    bundleId = response.value.bundleId;
+    bundleHash = response.value.bundleHash;
 
     yield response;
   }
+}
+
+interface UpdateRemoteBundleOptions extends ConnectionOptions {
+  bundleHash: string;
+  files: FileInfo[];
+  maxPayload?: number;
 }
 
 /**
@@ -76,29 +87,24 @@ async function* prepareRemoteBundle(
  * @param sessionToken
  * @param remoteBundle
  */
-export async function uploadRemoteBundle(
-  baseURL: string,
-  sessionToken: string,
-  bundleId: string,
-  files: IFileInfo[],
+export async function uploadRemoteBundle({
   maxPayload = MAX_PAYLOAD,
-): Promise<boolean> {
+  ...options
+}: UpdateRemoteBundleOptions): Promise<boolean> {
   let uploadedFiles = 0;
-  emitter.uploadBundleProgress(0, files.length);
+  emitter.uploadBundleProgress(0, options.files.length);
 
-  const uploadFileChunks = async (bucketFiles: IFileInfo[]): Promise<boolean> => {
-    const resp = await uploadFiles({
-      baseURL,
-      sessionToken,
-      bundleId,
-      content: bucketFiles.map(f => {
-        return { fileHash: f.hash, fileContent: f.content || '' };
-      }),
+  const apiParams = pick(options, ['baseURL', 'sessionToken', 'source', 'bundleHash']);
+
+  const uploadFileChunks = async (bucketFiles: FileInfo[]): Promise<boolean> => {
+    const resp = await extendBundle({
+      ...apiParams,
+      files: bucketFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: pick(f, ['hash', 'content']) }), {}),
     });
 
     if (resp.type !== 'error') {
       uploadedFiles += bucketFiles.length;
-      emitter.uploadBundleProgress(uploadedFiles, files.length);
+      emitter.uploadBundleProgress(uploadedFiles, options.files.length);
       return true;
     }
 
@@ -106,7 +112,7 @@ export async function uploadRemoteBundle(
   };
 
   const tasks = [];
-  for (const bucketFiles of composeFilePayloads(files, maxPayload)) {
+  for (const bucketFiles of composeFilePayloads(options.files, maxPayload)) {
     tasks.push(uploadFileChunks(bucketFiles));
   }
 
@@ -116,28 +122,32 @@ export async function uploadRemoteBundle(
   return true;
 }
 
-async function fullfillRemoteBundle(
-  baseURL: string,
-  sessionToken: string,
-  baseDir: string,
-  remoteBundle: RemoteBundle,
-  maxPayload = MAX_PAYLOAD,
-  maxAttempts = MAX_UPLOAD_ATTEMPTS,
-): Promise<RemoteBundle> {
+interface FullfillRemoteBundleOptions extends ConnectionOptions {
+  baseDir: string;
+  remoteBundle: RemoteBundle;
+  maxPayload?: number;
+  maxAttempts?: number;
+}
+
+async function fullfillRemoteBundle(options: FullfillRemoteBundleOptions): Promise<RemoteBundle> {
   // Fulfill remote bundle by uploading only missing files (splitted in chunks)
   // Check remove bundle to make sure no missing files left
   let attempts = 0;
-  while (remoteBundle.missingFiles.length && attempts < maxAttempts) {
-    const missingFiles = await resolveBundleFiles(baseDir, remoteBundle.missingFiles);
-    const isUploaded = await uploadRemoteBundle(baseURL, sessionToken, remoteBundle.bundleId, missingFiles, maxPayload);
+  let { remoteBundle } = options;
+  const connectionOptions = pick(options, ['baseURL', 'sessionToken', 'source']);
+
+  while (remoteBundle.missingFiles.length && attempts < (options.maxAttempts || MAX_UPLOAD_ATTEMPTS)) {
+    const missingFiles = await resolveBundleFiles(options.baseDir, remoteBundle.missingFiles);
+    const isUploaded = await uploadRemoteBundle({
+      ...connectionOptions,
+      bundleHash: remoteBundle.bundleHash,
+      files: missingFiles,
+    });
     if (!isUploaded) {
       throw new Error('Failed to upload some files');
     }
-    const bundleResponse = await checkBundle({
-      baseURL,
-      sessionToken,
-      bundleId: remoteBundle.bundleId,
-    });
+
+    const bundleResponse = await checkBundle({ ...connectionOptions, bundleHash: remoteBundle.bundleHash });
     if (bundleResponse.type === 'error') {
       throw new Error('Failed to get remote bundle');
     }
@@ -148,37 +158,103 @@ async function fullfillRemoteBundle(
   return remoteBundle;
 }
 
-export async function remoteBundleFactory(
-  baseURL: string,
-  sessionToken: string,
-  files: IFileInfo[],
-  removedFiles: string[] = [],
-  baseDir: string,
-  existingBundleId: string | null = null,
-  maxPayload = MAX_PAYLOAD,
-  source: string,
-): Promise<RemoteBundle | null> {
-  const bundleFactory = prepareRemoteBundle(
-    baseURL,
-    sessionToken,
-    files,
-    removedFiles,
-    existingBundleId,
-    maxPayload,
-    source,
-  );
-  let remoteBundle: RemoteBundle | null = null;
+interface RemoteBundleFactoryOptions extends PrepareRemoteBundleOptions {
+  baseDir: string;
+}
 
+export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): Promise<RemoteBundle | null> {
+  let remoteBundle: RemoteBundle | null = null;
+  const baseOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'baseDir']);
+
+  const bundleFactory = prepareRemoteBundle(omit(options, ['baseDir']));
   for await (const response of bundleFactory) {
     if (response.type === 'error') {
       throw response.error;
     }
 
-    remoteBundle = await fullfillRemoteBundle(baseURL, sessionToken, baseDir, response.value, maxPayload);
+    remoteBundle = await fullfillRemoteBundle({ ...baseOptions, remoteBundle: response.value });
     if (remoteBundle.missingFiles.length) {
       throw new Error(`Failed to upload # files: ${remoteBundle.missingFiles.length}`);
     }
   }
 
   return remoteBundle;
+}
+
+interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+  // pass
+}
+
+/**
+ * Get supported filters and test baseURL for correctness and availability
+ *
+ * @param baseURL
+ * @param source
+ * @returns
+ */
+async function getSupportedFiles(baseURL: string, source: string): Promise<SupportedFiles> {
+  emitter.supportedFilesLoaded(null);
+  const resp = await getFilters(baseURL, source);
+  if (resp.type === 'error') {
+    throw resp.error;
+  }
+  const supportedFiles = resp.value;
+  emitter.supportedFilesLoaded(supportedFiles);
+  return supportedFiles;
+}
+
+export interface FileBundle extends RemoteBundle {
+  baseDir: string;
+  supportedFiles: SupportedFiles;
+  fileIgnores: string[];
+}
+
+/**
+ * Creates a remote bundle and returns response from the bundle API
+ *
+ * @param {CreateBundleFromFoldersOptions} options
+ * @returns {Promise<FileBundle | null>}
+ */
+export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
+  const baseDir = determineBaseDir(options.paths);
+
+  // Fetch supporte files to save network traffic
+  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
+
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
+
+  emitter.scanFilesProgress(0);
+  const bundleFiles = [];
+  let totalFiles = 0;
+  const bundleFileCollector = collectBundleFiles({
+    ...pick(options, ['paths', 'symlinksEnabled', 'maxPayload']),
+    baseDir,
+    fileIgnores,
+    supportedFiles,
+  });
+  for await (const f of bundleFileCollector) {
+    bundleFiles.push(f);
+    totalFiles += 1;
+    emitter.scanFilesProgress(totalFiles);
+  }
+
+  const bundleOptions = {
+    ...pick(options, ['baseURL', 'sessionToken', 'source']),
+    baseDir,
+    files: bundleFiles,
+  };
+
+  // Create remote bundle
+  if (!bundleFiles.length) return null;
+
+  const remoteBundle = await remoteBundleFactory(bundleOptions);
+  if (remoteBundle === null) return null;
+
+  return {
+    ...remoteBundle,
+    baseDir,
+    supportedFiles,
+    fileIgnores,
+  };
 }

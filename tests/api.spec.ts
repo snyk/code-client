@@ -1,54 +1,28 @@
-import {
-  AnalysisStatus,
-  checkBundle,
-  checkSession,
-  createBundle,
-  createGitBundle,
-  extendBundle,
-  getAnalysis,
-  getFilters,
-  getIpFamily,
-  reportError,
-  reportEvent,
-  startSession,
-  uploadFiles,
-} from '../src/http';
-import { fromEntries } from '../src/lib/utils';
-import { authHost, baseURL, sessionToken, TEST_TIMEOUT } from './constants/base';
-import { bundleFiles, bundleFilesFull } from './constants/sample';
+import pick from 'lodash.pick';
 
-const fakeBundleId = 'c58d69bd4fd65c45b1112bd7b45f028e614d443fc123901fd1aba15856c13c27';
-let fakeBundleIdFull = '';
-const realBundleId = 'c3a31c6c503b76ce51e2f8f7db9aa8f26715e6367124ce6e2f419087cad011b0';
-let realBundleIdFull = '';
-const extendedBundleId = '587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1';
+import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
+import { bundleFiles, bundleFilesFull } from './constants/sample';
+import { fromEntries } from '../src/lib/utils';
+import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
+import { BundleFiles } from '../src/interfaces/files.interface';
+
+const fakeBundleHash = 'c58d69bd4fd65c45b1112bd7b45f028e614d443fc123901fd1aba15856c13c27';
+let fakeBundleHashFull = '';
+const realBundleHash = 'c3a31c6c503b76ce51e2f8f7db9aa8f26715e6367124ce6e2f419087cad011b0';
+let realBundleHashFull = '';
 
 const fakeMissingFiles = [
-  `/AnnotatorTest.cpp`,
-  `/GitHubAccessTokenScrambler12.java`,
-  `/app.js`,
-  `/db.js`,
-  `/main.js`,
+  'AnnotatorTest.cpp',
+  'GitHubAccessTokenScrambler12.java',
+  'app.js',
+  'db.js',
+  'main.js',
   // TODO: This should be ignored
-  `/not/ignored/this_should_be_ignored.jsx`,
-  `/not/ignored/this_should_not_be_ignored.java`,
-  `/routes/index.js`,
-  `/routes/sharks.js`,
+  'not/ignored/this_should_be_ignored.jsx',
+  'not/ignored/this_should_not_be_ignored.java',
+  'routes/index.js',
+  'routes/sharks.js',
 ];
-
-const reportTelemetryRequest = {
-  baseURL,
-  sessionToken,
-  bundleId: fakeBundleId,
-  source: 'testSource',
-  type: 'testType',
-  message: 'testMessage',
-  path: '/test/path',
-  data: {
-    foo: 'bar',
-    bar: ['fo', 'foo', 'fooo'],
-  },
-};
 
 describe('Requests to public API', () => {
   it('gets filters successfully', async () => {
@@ -65,6 +39,7 @@ describe('Requests to public API', () => {
         '.cpp',
         '.cs',
         '.cxx',
+        '.ejs',
         '.es',
         '.es6',
         '.h',
@@ -86,61 +61,17 @@ describe('Requests to public API', () => {
         '.ejs',
       ]),
     );
+
+    expect(response.value.configFiles.length).toBeGreaterThan(0);
+    expect(response.value.extensions.length).toBeGreaterThan(0);
   });
-
-  it('reports error successfully', async () => {
-    const response = await reportError(reportTelemetryRequest);
-    expect(response.type).toEqual('success');
-  });
-
-  it('reports event successfully', async () => {
-    const response = await reportEvent(reportTelemetryRequest);
-    expect(response.type).toEqual('success');
-  });
-
-  it('starts session successfully', async () => {
-    const ipFamily = await getIpFamily(authHost);
-
-    const startSessionResponse = startSession({
-      source: 'atom',
-      authHost,
-    });
-    expect(startSessionResponse.loginURL).toMatch(/.*\/login\?token=.*&utm_source=atom/);
-    const draftToken = startSessionResponse.draftToken;
-    // This token is just a draft and not ready to be used permanently
-
-    const checkSessionResponse = await checkSession({ authHost, draftToken, ipFamily });
-
-    expect(checkSessionResponse.type).toEqual('success');
-    if (checkSessionResponse.type == 'error') return;
-    expect(checkSessionResponse.value).toEqual('');
-  });
-
-  it('checks session unsuccessfully', async () => {
-    const response = await checkSession({
-      authHost,
-      draftToken: 'dummy-token',
-    });
-    expect(response.type).toEqual('success');
-    if (response.type === 'error') return;
-    expect(response.value).toEqual('');
-  });
-
-  // TODO: find a way to test successfull workflow automatically
-  // it('checks session successfully', async () => {
-  //   const response = await checkSession({
-  //     authHost,
-  //     sessionToken,
-  //   });
-  //   expect(response.type).toEqual('success');
-  //   if (response.type === 'error') return;
-  //   expect(response.value).toEqual(true);
-  // });
 
   it(
     'creates bundle successfully',
     async () => {
-      const files = fromEntries([...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]));
+      const files: BundleFiles = fromEntries(
+        [...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]),
+      );
 
       const response = await createBundle({
         baseURL,
@@ -149,9 +80,12 @@ describe('Requests to public API', () => {
         source: 'atom',
       });
       expect(response.type).toEqual('success');
-      if (response.type === 'error') return;
-      expect(response.value.bundleId).toContain(fakeBundleId);
-      fakeBundleIdFull = response.value.bundleId;
+      if (response.type === 'error') {
+        console.error(response);
+        return;
+      }
+      expect(response.value.bundleHash).toContain(fakeBundleHash);
+      fakeBundleHashFull = response.value.bundleHash;
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
@@ -163,11 +97,12 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
+        source,
+        bundleHash: fakeBundleHashFull,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleId).toEqual(fakeBundleIdFull);
+      expect(response.value.bundleHash).toEqual(fakeBundleHashFull);
       expect(response.value.missingFiles).toEqual(fakeMissingFiles);
     },
     TEST_TIMEOUT,
@@ -179,7 +114,8 @@ describe('Requests to public API', () => {
       const response = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: 'mock-expired-bundle-id',
+        source,
+        bundleHash: 'mock-expired-bundle-id',
       });
       expect(response.type).toEqual('error');
       // dummy to cheat typescript compiler
@@ -198,7 +134,7 @@ describe('Requests to public API', () => {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: fakeBundleIdFull,
+          bundleHash: fakeBundleHashFull,
           severity: 1,
           source: 'atom',
         });
@@ -220,48 +156,51 @@ describe('Requests to public API', () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
+        source,
+        bundleHash: fakeBundleHashFull,
         files: {
-          [`/new.js`]: 'new123',
+          'new.js': 'new123',
         },
         removedFiles: [
-          `/AnnotatorTest.cpp`,
-          `/app.js`,
-          `/GitHubAccessTokenScrambler12.java`,
-          `/db.js`,
-          `/main.js`,
-          `/not/ignored/this_should_be_ignored.jsx`,
-          `/not/ignored/this_should_not_be_ignored.java`,
-          `/routes/index.js`,
-          `/routes/sharks.js`,
+          `AnnotatorTest.cpp`,
+          `app.js`,
+          `GitHubAccessTokenScrambler12.java`,
+          `db.js`,
+          `main.js`,
+          `not/ignored/this_should_be_ignored.jsx`,
+          `not/ignored/this_should_not_be_ignored.java`,
+          `routes/index.js`,
+          `routes/sharks.js`,
         ],
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleId).toContain(extendedBundleId);
-      expect(response.value.missingFiles).toEqual([`/new.js`]);
+      expect(response.value.bundleHash).toContain('587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1');
+      expect(response.value.missingFiles).toEqual([`new.js`]);
     },
     TEST_TIMEOUT,
   );
 
   it(
-    'extends expired bundle successfully',
+    'extends expired bundle and fails',
     async () => {
       const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: 'wrong-bundle-id',
+        source,
+        bundleHash: 'wrong-bundle-id-2',
         files: {
-          [`/new2.js`]: 'new1234',
+          'new2.js': 'new1234',
         },
       });
 
       expect(response.type).toEqual('error');
-      // dummy to cheat typescript compiler
-      if (response.type == 'success') return;
-
-      expect(response.error.statusCode).toEqual(404);
-      expect(response.error.statusText).toEqual('Parent bundle has expired');
+      if (response.type !== 'error') return;
+      expect(response.error).toEqual({
+        apiName: "extendBundle",
+        statusCode: 404,
+        statusText: "Parent bundle has expired"
+      });
     },
     TEST_TIMEOUT,
   );
@@ -269,36 +208,30 @@ describe('Requests to public API', () => {
   it(
     'uploads fake files to fake bundle',
     async () => {
-      const response = await uploadFiles({
+      const response = await extendBundle({
         baseURL,
         sessionToken,
-        bundleId: fakeBundleIdFull,
-        content: [
-          {
-            fileHash: 'df',
-            fileContent: 'const module = new Module();',
-          },
-          {
-            fileHash: 'sdfs',
-            fileContent: 'const App = new App();',
-          },
-        ],
+        source,
+        bundleHash: fakeBundleHashFull,
+        files: {
+          'df.js': { hash: 'df', content: 'const module = new Module();' },
+          'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
+        },
       });
-      expect(response.type).toEqual('error');
-      if (response.type === 'success') return;
-      expect(response.error).toEqual({
-        apiName: 'uploadFiles',
-        statusCode: 400,
-        statusText:
-          'Invalid request, attempted to extend a git bundle, or ended up with an empty bundle after the extension',
-      });
+      expect(response.type).toEqual('success');
+      if (response.type !== 'success') return; // TS trick
+      expect(response.value.bundleHash).toContain('5bdbdda45cf74752fee89c78558bc8b7b3f09582edf66bbaf206d0b530c15ed8');
+      expect(response.value.missingFiles).toHaveLength(11);
     },
     TEST_TIMEOUT,
   );
 
   it('test successful workflow', async () => {
       // Create a bundle first
-      const files = fromEntries((await bundleFilesFull).map(d => [d.bundlePath, d.hash]));
+      const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
+        r[d.bundlePath] = pick(d, ['hash', 'content']);
+        return r;
+      }, {});
 
       const bundleResponse = await createBundle({
         baseURL,
@@ -308,44 +241,26 @@ describe('Requests to public API', () => {
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
-      expect(bundleResponse.value.bundleId).toContain(realBundleId);
-      realBundleIdFull = bundleResponse.value.bundleId;
-
-      const content = (await bundleFilesFull).map(d => {
-        return {
-          fileHash: d.hash,
-          fileContent: d.content || '',
-        };
-      });
-
-      // Upload files
-      const uploadResponse = await uploadFiles({
-        baseURL,
-        sessionToken,
-        bundleId: realBundleIdFull,
-        content: content,
-      });
-
-      expect(uploadResponse.type).toEqual('success');
-      if (uploadResponse.type === 'error') return;
-      expect(uploadResponse.value).toEqual(true);
+      expect(bundleResponse.value.bundleHash).toContain(realBundleHash);
+      realBundleHashFull = bundleResponse.value.bundleHash;
 
       // Check missing files
       const checkResponse = await checkBundle({
         baseURL,
         sessionToken,
-        bundleId: realBundleIdFull,
+        source,
+        bundleHash: realBundleHashFull,
       });
       expect(checkResponse.type).toEqual('success');
       if (checkResponse.type === 'error') return;
-      expect(checkResponse.value.bundleId).toEqual(realBundleIdFull);
+      expect(checkResponse.value.bundleHash).toEqual(realBundleHashFull);
       expect(checkResponse.value.missingFiles).toEqual([]);
 
       // Get analysis results
       let response = await getAnalysis({
         baseURL,
         sessionToken,
-        bundleId: realBundleIdFull,
+        bundleHash: realBundleHashFull,
         severity: 1,
         source: 'atom',
       });
@@ -353,50 +268,10 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
-      if (response.value.status === AnalysisStatus.done) {
-        expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(8);
-        const suggestion = Object.values(response.value.analysisResults.suggestions).find(s => s.id === 'javascript%2Fdc_interfile_project%2FDisablePoweredBy')!;
-        expect(Object.keys(suggestion)).toEqual([
-          'id',
-          'rule',
-          'message',
-          'severity',
-          'lead_url',
-          'leadURL',
-          'categories',
-          'tags',
-          'title',
-          'cwe',
-          'text',
-          'repoDatasetSize',
-          'exampleCommitDescriptions',
-          'exampleCommitFixes',
-        ]);
-        expect(suggestion.leadURL).toEqual(
-          'http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header',
-        );
-        expect(suggestion.repoDatasetSize).toEqual(835);
-        expect(suggestion.exampleCommitDescriptions).toEqual([
-          'Test without express',
-          'secure the api with helmet',
-          'Fix some security vulnerabilities, refactor the error constants a little',
-        ]);
-        expect(suggestion.exampleCommitFixes.length).toEqual(3);
-        expect(suggestion.message).toEqual(
-          'Disable X-Powered-By header for your Express app (consider using Helmet middleware), because it exposes information about the used framework to potential attackers.',
-        );
-        expect(suggestion.rule).toEqual('DisablePoweredBy');
-        expect(suggestion.severity).toEqual(2);
+      if (response.value.status === AnalysisStatus.complete) {
+        expect(response.value.sarif.runs[0].results).toHaveLength(12);
 
-        expect(suggestion.tags).toEqual(['maintenance', 'express', 'helmet', 'security']);
-        expect(Object.keys(response.value.analysisResults.files).length).toEqual(5);
-        expect(response.value.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          response.value.analysisResults.timing.fetchingCode,
-        );
-        const filePath = `/GitHubAccessTokenScrambler12.java`;
-        expect(response.value.analysisResults.files[filePath]).toMatchSnapshot();
-        expect(response.value.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(response.value.analysisResults.coverage)).toEqual(
+        expect(new Set(response.value.coverage)).toEqual(
           new Set([
             {
               files: 2,
@@ -427,42 +302,33 @@ describe('Requests to public API', () => {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: realBundleIdFull,
+          bundleHash: realBundleHashFull,
           severity: 1,
-          limitToFiles: [`/GitHubAccessTokenScrambler12.java`],
+          limitToFiles: [`GitHubAccessTokenScrambler12.java`],
           source: 'atom',
         });
 
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
-
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(4);
-      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
-        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
-      );
+      } while (response.value.status !== AnalysisStatus.complete);
+      expect(response.value.sarif.runs[0].results).toHaveLength(8);
 
       // Get analysis results with severity 3
       do {
         response = await getAnalysis({
           baseURL,
           sessionToken,
-          bundleId: realBundleIdFull,
+          bundleHash: realBundleHashFull,
           severity: 3,
           source: 'atom',
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.done);
-
-      expect(Object.keys(response.value.analysisResults.suggestions).length).toEqual(2);
-      expect(new Set(Object.keys(response.value.analysisResults.files))).toEqual(
-        new Set(['/GitHubAccessTokenScrambler12.java', '/not/ignored/this_should_not_be_ignored.java']),
-      );
+      } while (response.value.status !== AnalysisStatus.complete);
+      expect(response.value.sarif.runs[0].results).toHaveLength(4);
     },
     TEST_TIMEOUT,
   );
-
 });

@@ -39,6 +39,7 @@
     "indent": "warn",
     "quote-props": ["warn", "as-needed"],
     "lines-between-class-members": "off",
+    "prefer-destructuring": ["warn", {"object": true, "array": false}],
     "import/extensions": [
       "error",
       "ignorePackages",
@@ -58,6 +59,7 @@
     "no-continue": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "no-param-reassign": "off"
   },
   "settings": {

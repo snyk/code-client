@@ -7,6 +7,7 @@ export const ENCODE_TYPE = 'hex';
 export const GIT_FILENAME = '.git';
 export const GITIGNORE_FILENAME = '.gitignore';
 export const DCIGNORE_FILENAME = '.dcignore';
+export const DOTSNYK_FILENAME = '.snyk';
 export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENAME];
 export const CACHE_KEY = '.dccache';
 export const MAX_UPLOAD_ATTEMPTS = 5;

@@ -1,4 +1,3 @@
-
 import path from 'path';
 
 import { createBundleFromFolders } from '../src/bundles';
@@ -6,7 +5,6 @@ import { baseURL, sessionToken, source } from './constants/base';
 import { sampleProjectPath } from './constants/sample';
 
 describe('Functional test for bundle creation', () => {
-
   it('should return a bundle with correct parameters', async () => {
     const paths: string[] = [path.join(sampleProjectPath)];
     const symlinksEnabled = false;
@@ -27,5 +25,4 @@ describe('Functional test for bundle creation', () => {
     expect(result).toHaveProperty('bundleHash');
     expect(result).toHaveProperty('missingFiles');
   });
-
 });

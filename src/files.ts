@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import fg from '@snyk/fast-glob';
 import multimatch from 'multimatch';
 import crypto from 'crypto';
+import { parse as parseYaml } from 'yaml';
 import union from 'lodash.union';
 import util from 'util';
 import { Cache } from './cache';
@@ -226,15 +227,18 @@ export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
 export async function* collectBundleFiles({
   maxPayload = MAX_PAYLOAD,
   symlinksEnabled = false,
-  ...options
+  baseDir,
+  fileIgnores,
+  paths,
+  supportedFiles,
 }: CollectBundleFilesOptions): AsyncGenerator<FileInfo> {
-  const cache = new Cache(CACHE_KEY, options.baseDir);
+  const cache = new Cache(CACHE_KEY, baseDir);
 
   const files = [];
   const dirs = [];
 
   // Split into directories and files and exclude symlinks if needed
-  for (const path of options.paths) {
+  for (const path of paths) {
     // eslint-disable-next-line no-await-in-loop
     const fileStats = await lStat(path);
     // Check if symlink and exclude if requested
@@ -248,12 +252,12 @@ export async function* collectBundleFiles({
   }
 
   // Scan folders
-  const globPatterns = getGlobPatterns(options.supportedFiles);
+  const globPatterns = getGlobPatterns(supportedFiles);
   for (const folder of dirs) {
-    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, options.fileIgnores);
+    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores);
     // eslint-disable-next-line no-await-in-loop
     for await (const filePath of searcher) {
-      const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
       if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
@@ -263,14 +267,9 @@ export async function* collectBundleFiles({
 
   // Sanitize files
   if (files.length) {
-    const searcher = searchFiles(
-      filterSupportedFiles(files, options.supportedFiles),
-      options.baseDir,
-      symlinksEnabled,
-      options.fileIgnores,
-    );
+    const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, fileIgnores);
     for await (const filePath of searcher) {
-      const fileInfo = await getFileInfo(filePath.toString(), options.baseDir, false, cache);
+      const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
       if (fileInfo && fileInfo.size <= maxPayload) {
         yield fileInfo;
@@ -461,4 +460,23 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 
 export function isMatch(filePath: string, rules: string[]): boolean {
   return !!multimatch([filePath], rules, { ...multiMatchOptions, matchBase: false }).length;
+}
+
+export function parseDotSnykExcludes(pathToDotSnykFile: string): string[] {
+  try {
+    const dotSnykFile = fs.readFileSync(pathToDotSnykFile, 'utf-8');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const parsed: { exclude: string[] } = parseYaml(dotSnykFile);
+    return parsed.exclude.map(path => `${nodePath.dirname(pathToDotSnykFile)}/${path}`);
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
+      console.error(`${pathToDotSnykFile} is not accessible.`);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (err.code === 'ENOENT') {
+      console.error(`no such file or directory: ${pathToDotSnykFile}`);
+    }
+    return [];
+  }
 }

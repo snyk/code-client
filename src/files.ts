@@ -471,11 +471,11 @@ export function parseDotSnykExcludes(pathToDotSnykFile: string): string[] {
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (err.code === 'EACCES' || err.code === 'EPERM') {
-      console.error(`${pathToDotSnykFile} is not accessible.`);
+      console.info(`${pathToDotSnykFile} is not accessible.`);
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (err.code === 'ENOENT') {
-      console.error(`no such file or directory: ${pathToDotSnykFile}`);
+      console.info(`no such file or directory: ${pathToDotSnykFile}`);
     }
     return [];
   }

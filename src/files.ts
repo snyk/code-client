@@ -466,8 +466,8 @@ export function parseDotSnykExcludes(pathToDotSnykFile: string): string[] {
   try {
     const dotSnykFile = fs.readFileSync(pathToDotSnykFile, 'utf-8');
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const parsed: { exclude: string[] } = parseYaml(dotSnykFile);
-    return parsed.exclude.map(path => `${nodePath.dirname(pathToDotSnykFile)}/${path}`);
+    const parsed: { exclude: { code: string[] } } = parseYaml(dotSnykFile);
+    return parsed.exclude.code.map(path => `${nodePath.dirname(pathToDotSnykFile)}/${path}`);
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (err.code === 'EACCES' || err.code === 'EPERM') {

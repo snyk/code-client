@@ -10,6 +10,8 @@ export const supportedFiles = {
   configFiles: ['.eslintrc.json', '.dcignore'],
 };
 
+export const bundlefileExcludes = [`${sampleProjectPath}/exclude/**`];
+
 export const bundleFileIgnores = [
   '**/.git/**',
   `${sampleProjectPath}/**/mode_nodules/**`,
@@ -50,20 +52,24 @@ export const bundleFiles: Promise<FileInfo[]> = getBundleFiles(false);
 export const bundleFilesFull: Promise<FileInfo[]> = getBundleFiles(true);
 
 export const bundleExtender: () => Promise<{
-  files: { removed: string, changed: string, added: string, all: string[] }, exec: () => void, restore: () => void
+  files: { removed: string; changed: string; added: string; all: string[] };
+  exec: () => void;
+  restore: () => void;
 }> = async () => {
   const fBundle = await bundleFilesFull;
   const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.cpp`];
   const addedFilesNames = [`GHATS12.java`];
-  const [ changedFiles, addedFiles ] = [ changedFilesNames, addedFilesNames ].map(arr => arr.map(name => `${sampleProjectPath}/${name}`));
-  const original = changedFiles.map((path) => fBundle.find(f => f.filePath === path)?.content);
+  const [changedFiles, addedFiles] = [changedFilesNames, addedFilesNames].map(arr =>
+    arr.map(name => `${sampleProjectPath}/${name}`),
+  );
+  const original = changedFiles.map(path => fBundle.find(f => f.filePath === path)?.content);
   if (original.some(c => !c)) throw new Error('Content not found. Impossible to restore');
   return {
     files: {
       removed: changedFilesNames[0],
       changed: changedFilesNames[1],
       added: addedFilesNames[0],
-      all: [ ...addedFilesNames, ...changedFilesNames ],
+      all: [...addedFilesNames, ...changedFilesNames],
     },
     exec: () => {
       fs.writeFileSync(addedFiles[0], original![0]!);
@@ -74,6 +80,6 @@ export const bundleExtender: () => Promise<{
       fs.writeFileSync(changedFiles[0], original![0]!);
       fs.writeFileSync(changedFiles[1], original![1]!);
       fs.unlinkSync(addedFiles[0]);
-    }
+    },
   };
-}
+};

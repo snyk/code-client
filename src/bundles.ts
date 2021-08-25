@@ -12,6 +12,7 @@ import {
   collectIgnoreRules,
   determineBaseDir,
   collectBundleFiles,
+  parseDotSnykExcludes,
 } from './files';
 
 import {
@@ -27,7 +28,7 @@ import {
   getFilters,
 } from './http';
 
-import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
+import { DOTSNYK_FILENAME, MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
 import emitter from './emitter';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
@@ -218,11 +219,16 @@ export interface FileBundle extends RemoteBundle {
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
   const baseDir = determineBaseDir(options.paths);
 
-  // Fetch supporte files to save network traffic
-  const supportedFiles = await getSupportedFiles(options.baseURL, options.source);
+  const [supportedFiles, excludesFromIgnoreFiles, excludesFromDotSnyk] = await Promise.all([
+    // Fetch supporte files to save network traffic
+    getSupportedFiles(options.baseURL, options.source),
+    // Scan for custom ignore rules
+    collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores),
+    // Get exclusions from .snyk file
+    parseDotSnykExcludes(`${baseDir}/${DOTSNYK_FILENAME}`),
+  ]);
 
-  // Scan for custom ignore rules
-  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
+  const fileIgnores = [...excludesFromIgnoreFiles, ...excludesFromDotSnyk];
 
   emitter.scanFilesProgress(0);
   const bundleFiles = [];

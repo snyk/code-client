@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
+import { DOTSNYK_FILENAME } from '../src/constants';
 
 import {
   collectIgnoreRules,
@@ -8,6 +9,7 @@ import {
   composeFilePayloads,
   parseFileIgnores,
   getFileInfo,
+  parseDotSnykExcludes,
 } from '../src/files';
 
 import {
@@ -16,12 +18,18 @@ import {
   bundleFiles,
   bundleFilesFull,
   bundleFileIgnores,
+  bundlefileExcludes,
 } from './constants/sample';
 
 describe('files', () => {
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
     expect(patterns).toEqual(bundleFileIgnores.slice(1));
+  });
+
+  it('should parse .snyk file', async () => {
+    const patterns = await parseDotSnykExcludes(`${sampleProjectPath}/${DOTSNYK_FILENAME}`);
+    expect(patterns).toEqual(bundlefileExcludes);
   });
 
   it('collect ignore rules', async () => {
@@ -31,7 +39,12 @@ describe('files', () => {
 
   it('collect bundle files', async () => {
     // TODO: We should introduce some performance test using a big enough repo to avoid flaky results
-    const collector = collectBundleFiles({ baseDir: sampleProjectPath, paths: [sampleProjectPath], supportedFiles, fileIgnores: bundleFileIgnores });
+    const collector = collectBundleFiles({
+      baseDir: sampleProjectPath,
+      paths: [sampleProjectPath],
+      supportedFiles,
+      fileIgnores: [...bundleFileIgnores, ...bundlefileExcludes],
+    });
     const files = [];
     for await (const f of collector) {
       files.push(f);
@@ -47,14 +60,8 @@ describe('files', () => {
   });
 
   it('extend bundle files', async () => {
-    const testNewFiles = [
-      `app.js`,
-      `not/ignored/this_should_not_be_ignored.java`,
-    ];
-    const testRemovedFiles = [
-      `removed_from_the_parent_bundle.java`,
-      `ignored/this_should_be_ignored.java`,
-    ];
+    const testNewFiles = [`app.js`, `not/ignored/this_should_not_be_ignored.java`];
+    const testRemovedFiles = [`removed_from_the_parent_bundle.java`, `ignored/this_should_be_ignored.java`];
     const newBundle = [...testNewFiles, ...testRemovedFiles];
     const { files, removedFiles } = await prepareExtendingBundle(
       sampleProjectPath,
@@ -72,7 +79,7 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: [sampleProjectPath],
       supportedFiles,
-      fileIgnores: bundleFileIgnores,
+      fileIgnores: [...bundleFileIgnores, ...bundlefileExcludes],
       maxPayload: 500,
     });
     const smallFiles = [];
@@ -85,7 +92,12 @@ describe('files', () => {
   it('collect bundle files with multiple folders', async () => {
     // Limit size and we get fewer files
     const folders = [nodePath.join(sampleProjectPath, 'models'), nodePath.join(sampleProjectPath, 'controllers')];
-    const collector = collectBundleFiles({ baseDir: sampleProjectPath, paths: folders, supportedFiles, fileIgnores: [] });
+    const collector = collectBundleFiles({
+      baseDir: sampleProjectPath,
+      paths: folders,
+      supportedFiles,
+      fileIgnores: [],
+    });
     const smallFiles = [];
     for await (const f of collector) {
       smallFiles.push(f);

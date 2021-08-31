@@ -5,6 +5,11 @@ import https from 'https';
 import { URL } from 'url';
 import emitter from './emitter';
 
+import {
+  MAX_RETRY_ATTEMPTS,
+  REQUEST_RETRY_DELAY,
+} from './constants';
+
 // Snyk CLI allow passing --insecure flag which allows self-signed certificates
 // It updates global namespace property ignoreUnknownCA and we can use it in order
 // to pass rejectUnauthorized option to https agent
@@ -31,9 +36,11 @@ export interface Payload {
   qs?: querystring.ParsedUrlQueryInput;
   timeout?: number;
   family?: number;
+  attempts?: number;
+  retryDelay?: number;
 }
 
-export function makeRequest(payload: Payload): Promise<{ success: boolean; response: needle.NeedleResponse }> {
+export async function makeRequest(payload: Payload): Promise<{ success: boolean; response: needle.NeedleResponse }> {
   const data = JSON.stringify(payload.body);
 
   const parsedUrl = new URL(payload.url);
@@ -63,15 +70,30 @@ export function makeRequest(payload: Payload): Promise<{ success: boolean; respo
   };
 
   emitter.apiRequestLog(`=> HTTP ${method?.toUpperCase()} ${url} ${data ?? ''}`.slice(0, 399));
-
-  return needle(method, url, data, options)
-    .then(response => {
+  let shouldRetry = true;
+  let attempts = payload.attempts || MAX_RETRY_ATTEMPTS;
+  let retryDelay = payload.retryDelay || REQUEST_RETRY_DELAY;
+  let response, success;
+  do {
+    try {
+      response = await needle(method, url, data, options);
       emitter.apiRequestLog(`<= Response: ${response.statusCode} ${JSON.stringify(response.body)}`.slice(0, 399));
-      const success = !!(response.statusCode && response.statusCode >= 200 && response.statusCode < 300);
-      return { success, response };
-    })
-    .catch(err => {
+      success = !!(response.statusCode && response.statusCode >= 200 && response.statusCode < 300);
+      if (success) return { success, response };
+      
+      // Try to avoid breaking requests due to temporary network errors
+      if (attempts > 1 && response.statusCode === 502) {
+        attempts--;
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        attempts = 0;
+      }
+    } catch (err) {
       emitter.apiRequestLog(`Request error --> ${err}`.slice(0, 399));
       throw err;
-    });
+    }
+  } while (attempts > 0);
+  if (response) return { success, response };
+  // Following line should be unreachable
+  throw new Error('Unknown network error');
 }

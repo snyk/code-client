@@ -33,8 +33,6 @@ describe('Functional test of analysis', () => {
 
         const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
           expect(typeof processed).toBe('number');
-          expect(total).toEqual(1);
-
           expect(processed).toBeLessThanOrEqual(total);
         });
         emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
@@ -43,7 +41,7 @@ describe('Functional test of analysis', () => {
           expect(['WAITING', 'FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
           expect(typeof data.progress).toBe('number');
           expect(data.progress).toBeGreaterThanOrEqual(0);
-          expect(data.progress).toBeLessThanOrEqual(100);
+          expect(data.progress).toBeLessThanOrEqual(1);
         });
         emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
@@ -144,7 +142,7 @@ describe('Functional test of analysis', () => {
         });
 
         expect(uploaded).toEqual(true);
-
+        
         expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAPIRequestLog).toHaveBeenCalled();
       },

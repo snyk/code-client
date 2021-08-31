@@ -112,14 +112,14 @@ describe('files', () => {
   it('compose file payloads', async () => {
     // Prepare all missing files first
     const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
-    expect(payloads.length).toEqual(5); // 5 chunks
-    expect(payloads[0].length).toEqual(4);
+    expect(payloads.length).toEqual(3); // 3 chunks
+    expect(payloads[0].length).toEqual(2);
 
     const testPayload = payloads[0][1];
-    expect(testPayload.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
-    expect(testPayload.bundlePath).toEqual(`AnnotatorTest.cpp`);
-    expect(testPayload.size).toEqual(239);
-    expect(testPayload.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
+    expect(testPayload.filePath).toEqual(`${sampleProjectPath}/routes/sharks.js`);
+    expect(testPayload.bundlePath).toEqual(`routes/sharks.js`);
+    expect(testPayload.size).toEqual(363);
+    expect(testPayload.hash).toEqual('f870a225bfad387cd3c46ccfb0be52415aa2e07767b53edae54c41fa8e12e82e');
     expect(testPayload.content).toEqual(fs.readFileSync(testPayload.filePath).toString('utf8'));
   });
 

@@ -427,15 +427,15 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
   const buckets: Bucket[] = [{ size: bucketSize, files: [] }];
 
   let bucketIndex = -1;
-  const isLowerSize = (bucket: Bucket, fileData: FileInfo) => bucket.size >= fileData.size;
+  const getFileDataPayloadSize = (fileData: FileInfo) =>
+    (fileData.content?.length || 0) + fileData.bundlePath.length + fileData.hash.length;
+  const isLowerSize = (size: number, fileData: FileInfo) => size >= getFileDataPayloadSize(fileData);
   for (let fileData of files) {
-    if (fileData.size > bucketSize) {
-      // This file is too large. but it should not be here as previosly checked
-      fileData = { ...fileData, size: 1, content: '' };
-    }
-
+    // This file is empty or too large to send, it should be skipped.
+    if (!fileData.size || !isLowerSize(bucketSize, fileData)) continue;
+    
     // Find suitable bucket
-    bucketIndex = buckets.findIndex(b => isLowerSize(b, fileData));
+    bucketIndex = buckets.findIndex(b => isLowerSize(b.size, fileData));
 
     if (bucketIndex === -1) {
       // Create a new bucket
@@ -444,11 +444,11 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
     }
 
     buckets[bucketIndex].files.push(fileData);
-    buckets[bucketIndex].size -= fileData.size;
+    buckets[bucketIndex].size -= getFileDataPayloadSize(fileData);
 
     if (buckets[bucketIndex].size < bucketSize * 0.01) {
       yield buckets[bucketIndex].files; // Give bucket to requester
-      buckets.splice(bucketIndex); // Remove it as fullfilled
+      buckets.splice(bucketIndex); // Remove it as fullfilled 
     }
   }
 

@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-shadow
+// eslint-disable-next-line import/prefer-default-export, no-shadow
 export enum AnalysisSeverity {
   info = 1,
   warning = 2,

@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import chunk from 'lodash.chunk';
 import pick from 'lodash.pick';
 import omit from 'lodash.omit';
+import pMap from 'p-map';
 
 import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interface';
 
@@ -28,7 +28,12 @@ import {
   getFilters,
 } from './http';
 
-import { DOTSNYK_FILENAME, MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS } from './constants';
+import {
+  DOTSNYK_FILENAME,
+  MAX_PAYLOAD,
+  MAX_UPLOAD_ATTEMPTS,
+  UPLOAD_CONCURRENCY
+} from './constants';
 import emitter from './emitter';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
@@ -46,10 +51,9 @@ async function* prepareRemoteBundle({
 }: PrepareRemoteBundleOptions): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
   let response: Result<RemoteBundle, BundleErrorCodes>;
   let { bundleHash } = options;
-
-  const fileChunks = chunk(options.files, maxPayload / 300);
-  emitter.createBundleProgress(0, fileChunks.length);
-  for (const [i, chunkedFiles] of fileChunks.entries()) {
+  let cumulativeProgress = 0;
+  emitter.createBundleProgress(cumulativeProgress, options.files.length);
+  for (const chunkedFiles of composeFilePayloads(options.files, maxPayload)) {
     const apiParams = {
       ...pick(options, ['baseURL', 'sessionToken', 'source', 'removedFiles']),
       files: chunkedFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: f.hash }), {} as BundleFiles),
@@ -63,7 +67,8 @@ async function* prepareRemoteBundle({
       response = await extendBundle({ bundleHash, ...apiParams });
     }
 
-    emitter.createBundleProgress(i + 1, fileChunks.length);
+    cumulativeProgress += chunkedFiles.length;
+    emitter.createBundleProgress(cumulativeProgress, options.files.length);
 
     if (response.type === 'error') {
       // TODO: process Error
@@ -103,7 +108,8 @@ export async function uploadRemoteBundle({
       files: bucketFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: pick(f, ['hash', 'content']) }), {}),
     });
 
-    if (resp.type !== 'error') {
+    // During upload process, we expect the bundleHash not to change (same file map)
+    if (resp.type !== 'error' && resp.value.bundleHash === apiParams.bundleHash) {
       uploadedFiles += bucketFiles.length;
       emitter.uploadBundleProgress(uploadedFiles, options.files.length);
       return true;
@@ -112,15 +118,17 @@ export async function uploadRemoteBundle({
     return false;
   };
 
-  const tasks = [];
+  const tasks: FileInfo[][] = [];
   for (const bucketFiles of composeFilePayloads(options.files, maxPayload)) {
-    tasks.push(uploadFileChunks(bucketFiles));
+    tasks.push(bucketFiles);
   }
-
-  if (tasks.length) {
-    return (await Promise.all(tasks)).some(r => !!r);
-  }
-  return true;
+  const results = await pMap(
+    tasks,
+    async (task: FileInfo[]) => await uploadFileChunks(task),
+    { concurrency: UPLOAD_CONCURRENCY }
+  );
+  // Returning false if at least one result is false
+  return results.every(r => !!r);
 }
 
 interface FullfillRemoteBundleOptions extends ConnectionOptions {
@@ -166,13 +174,12 @@ interface RemoteBundleFactoryOptions extends PrepareRemoteBundleOptions {
 export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): Promise<RemoteBundle | null> {
   let remoteBundle: RemoteBundle | null = null;
   const baseOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'baseDir']);
-
   const bundleFactory = prepareRemoteBundle(omit(options, ['baseDir']));
   for await (const response of bundleFactory) {
     if (response.type === 'error') {
       throw response.error;
     }
-
+    
     remoteBundle = await fullfillRemoteBundle({ ...baseOptions, remoteBundle: response.value });
     if (remoteBundle.missingFiles.length) {
       throw new Error(`Failed to upload # files: ${remoteBundle.missingFiles.length}`);

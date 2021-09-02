@@ -33,8 +33,6 @@ describe('Functional test of analysis', () => {
 
         const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
           expect(typeof processed).toBe('number');
-          expect(total).toEqual(1);
-
           expect(processed).toBeLessThanOrEqual(total);
         });
         emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
@@ -43,7 +41,7 @@ describe('Functional test of analysis', () => {
           expect(['WAITING', 'FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
           expect(typeof data.progress).toBe('number');
           expect(data.progress).toBeGreaterThanOrEqual(0);
-          expect(data.progress).toBeLessThanOrEqual(100);
+          expect(data.progress).toBeLessThanOrEqual(1);
         });
         emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
@@ -134,17 +132,20 @@ describe('Functional test of analysis', () => {
         });
         emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
-        // Forse uploading files one more time
+        const shouldNotBeInBundle = [
+          '/.eslintrc.json', // <= no linters on backend
+          'main.js', // <= over maxPayload (23098 > 1000)
+        ]
+        // Force uploading files one more time
         uploaded = await uploadRemoteBundle({
           baseURL,
           sessionToken,
           source,
           bundleHash: bundle.fileBundle.bundleHash,
-          files: bFiles,
+          files: bFiles.filter(({ bundlePath }) => !shouldNotBeInBundle.includes(bundlePath)),
         });
-
         expect(uploaded).toEqual(true);
-
+        
         expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAPIRequestLog).toHaveBeenCalled();
       },
@@ -221,7 +222,7 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
 
-        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
+        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(4);
         expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
         const getRes = (path: string) =>
           extendedBundle!.analysisResults.sarif.runs[0].results!.find(

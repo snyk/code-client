@@ -6,8 +6,8 @@ import { getFileInfo, notEmpty } from '../../src/files';
 
 export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 export const supportedFiles = {
-  extensions: ['.js', '.jsx', '.cpp', '.java'],
-  configFiles: ['.eslintrc.json', '.dcignore'],
+  extensions: ['.js', '.jsx', '.cpp', '.java'], // <= not aligned with currently returned extensions from backend
+  configFiles: ['.eslintrc.json', '.dcignore'], // <= we are not running linters in the backend anymore
 };
 
 export const bundlefileExcludes = [`${sampleProjectPath}/exclude/**`];
@@ -26,12 +26,12 @@ export const bundleFileIgnores = [
 ];
 
 export const bundleFilePaths = [
-  '/.eslintrc.json',
+  '/.eslintrc.json', // <= we are not running linters in the backend anymore
   'AnnotatorTest.cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',
-  'main.js',
+  'main.js', // <= file size is over the custom maxPayload used in some tests (23098 > 1000)
   'routes/index.js',
   'routes/sharks.js',
   // TODO: This should be ignored for consistency with the .gitignore format (see last rule above),

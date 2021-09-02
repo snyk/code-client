@@ -103,7 +103,7 @@ export async function uploadRemoteBundle({
   const apiParams = pick(options, ['baseURL', 'sessionToken', 'source', 'bundleHash']);
 
   const uploadFileChunks = async (bucketFiles: FileInfo[]): Promise<boolean> => {
-    let resp = await extendBundle({
+    const resp = await extendBundle({
       ...apiParams,
       files: bucketFiles.reduce((d, f) => ({ ...d, [f.bundlePath]: pick(f, ['hash', 'content']) }), {}),
     });

@@ -132,13 +132,17 @@ describe('Functional test of analysis', () => {
         });
         emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
-        // Forse uploading files one more time
+        const shouldNotBeInBundle = [
+          '/.eslintrc.json', // <= no linters on backend
+          'main.js', // <= over maxPayload (23098 > 1000)
+        ]
+        // Force uploading files one more time
         uploaded = await uploadRemoteBundle({
           baseURL,
           sessionToken,
           source,
           bundleHash: bundle.fileBundle.bundleHash,
-          files: bFiles,
+          files: bFiles.filter(({ filePath }) => !shouldNotBeInBundle.includes(filePath)),
         });
 
         expect(uploaded).toEqual(true);

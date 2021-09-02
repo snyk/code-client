@@ -70,7 +70,6 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
   };
 
   emitter.apiRequestLog(`=> HTTP ${method?.toUpperCase()} ${url} ${data ?? ''}`.slice(0, 399));
-  let shouldRetry = true;
   let attempts = payload.attempts || MAX_RETRY_ATTEMPTS;
   let retryDelay = payload.retryDelay || REQUEST_RETRY_DELAY;
   let response, success;

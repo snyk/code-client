@@ -6,6 +6,7 @@ import { URL } from 'url';
 import emitter from './emitter';
 
 import {
+  ErrorCodes,
   MAX_RETRY_ATTEMPTS,
   REQUEST_RETRY_DELAY,
 } from './constants';
@@ -59,13 +60,14 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
 
   const options: needle.NeedleOptions = {
     headers: payload.headers,
-    timeout: payload.timeout,
+    open_timeout: 0, // No timeout
+    response_timeout: payload.timeout,
+    read_timeout: payload.timeout,
     family: payload.family,
     json: true,
     compressed: true, // sets 'Accept-Encoding' to 'gzip, deflate, br'
     follow_max: 5, // follow up to five redirects
     rejectUnauthorized: !global.ignoreUnknownCA, // verify SSL certificate
-    open_timeout: 0,
     agent,
   };
 
@@ -81,7 +83,13 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
       if (success) return { success, response };
       
       // Try to avoid breaking requests due to temporary network errors
-      if (attempts > 1 && response.statusCode === 502) {
+      if (attempts > 1 && response.statusCode && [
+        ErrorCodes.serviceUnavailable,
+        ErrorCodes.badGateway,
+        ErrorCodes.connectionRefused,
+        ErrorCodes.timeout,
+        ErrorCodes.dnsNotFound,
+      ].includes(response.statusCode)) {
         attempts--;
         await new Promise(resolve => setTimeout(resolve, retryDelay));
       } else {

@@ -128,7 +128,7 @@ export async function uploadRemoteBundle({
     { concurrency: UPLOAD_CONCURRENCY }
   );
   // Returning false if at least one result is false
-  return !results.some(r => !r);
+  return results.every(r => !!r);
 }
 
 interface FullfillRemoteBundleOptions extends ConnectionOptions {

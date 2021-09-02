@@ -12,7 +12,7 @@ export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENA
 export const CACHE_KEY = '.dccache';
 export const MAX_UPLOAD_ATTEMPTS = 5;
 export const UPLOAD_CONCURRENCY = 5;
-export const MAX_RETRY_ATTEMPTS = 5; // Request retries on 503 errors
+export const MAX_RETRY_ATTEMPTS = 5; // Request retries on network errors
 export const REQUEST_RETRY_DELAY = 30 * 1000; // 30 seconds delay between retries
 
 export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}/**`];

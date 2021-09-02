@@ -174,7 +174,6 @@ interface RemoteBundleFactoryOptions extends PrepareRemoteBundleOptions {
 export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): Promise<RemoteBundle | null> {
   let remoteBundle: RemoteBundle | null = null;
   const baseOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'baseDir']);
-
   const bundleFactory = prepareRemoteBundle(omit(options, ['baseDir']));
   for await (const response of bundleFactory) {
     if (response.type === 'error') {

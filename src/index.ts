@@ -1,7 +1,7 @@
 import { analyzeFolders } from './analysis';
 import { createBundleFromFolders } from './bundles';
 import emitter from './emitter';
-import { startSession, checkSession } from './http';
+import { startSession, checkSession, getAnalysis } from './http';
 import * as constants from './constants';
 import { getGlobPatterns } from './files';
 
@@ -14,6 +14,7 @@ export {
   analyzeFolders,
   createBundleFromFolders,
   // extendAnalysis,
+  getAnalysis,
   startSession,
   checkSession,
   emitter,

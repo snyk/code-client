@@ -1,3 +1,5 @@
 exclude:
+  global:
+    - exclude/excluded-folder/**
   code:
-    - exclude/**
+    - exclude/excluded-file.js

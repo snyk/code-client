@@ -433,7 +433,7 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
   for (let fileData of files) {
     // This file is empty or too large to send, it should be skipped.
     if (!fileData.size || !isLowerSize(bucketSize, fileData)) continue;
-    
+
     // Find suitable bucket
     bucketIndex = buckets.findIndex(b => isLowerSize(b.size, fileData));
 
@@ -448,7 +448,7 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 
     if (buckets[bucketIndex].size < bucketSize * 0.01) {
       yield buckets[bucketIndex].files; // Give bucket to requester
-      buckets.splice(bucketIndex); // Remove it as fullfilled 
+      buckets.splice(bucketIndex); // Remove it as fullfilled
     }
   }
 
@@ -466,8 +466,10 @@ export function parseDotSnykExcludes(pathToDotSnykFile: string): string[] {
   try {
     const dotSnykFile = fs.readFileSync(pathToDotSnykFile, 'utf-8');
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const parsed: { exclude: { code: string[] } } = parseYaml(dotSnykFile);
-    return parsed.exclude.code.map(path => `${nodePath.dirname(pathToDotSnykFile)}/${path}`);
+    const parsed: { exclude: { code: string[]; global: string[] } } = parseYaml(dotSnykFile);
+
+    const concatIgnorePath = (path: string) => `${nodePath.dirname(pathToDotSnykFile)}/${path}`;
+    return [...parsed.exclude.code.map(concatIgnorePath), ...parsed.exclude.global.map(concatIgnorePath)];
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (err.code === 'EACCES' || err.code === 'EPERM') {

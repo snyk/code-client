@@ -10,7 +10,10 @@ export const supportedFiles = {
   configFiles: ['.eslintrc.json', '.dcignore'], // <= we are not running linters in the backend anymore
 };
 
-export const bundlefileExcludes = [`${sampleProjectPath}/exclude/**`];
+export const bundlefileExcludes = [
+  `${sampleProjectPath}/exclude/excluded-file.js`,
+  `${sampleProjectPath}/exclude/excluded-folder/**`,
+];
 
 export const bundleFileIgnores = [
   '**/.git/**',

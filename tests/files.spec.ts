@@ -27,14 +27,14 @@ describe('files', () => {
     expect(patterns).toEqual(bundleFileIgnores.slice(1));
   });
 
-  it('should parse .snyk file', async () => {
-    const patterns = await parseDotSnykExcludes(`${sampleProjectPath}/${DOTSNYK_FILENAME}`);
-    expect(patterns).toEqual(bundlefileExcludes);
-  });
-
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
     expect(ignoreRules).toEqual(bundleFileIgnores);
+  });
+
+  it('should parse .snyk file', async () => {
+    const patterns = await parseDotSnykExcludes(`${sampleProjectPath}/${DOTSNYK_FILENAME}`);
+    expect(patterns).toEqual(bundlefileExcludes);
   });
 
   it('collect bundle files', async () => {

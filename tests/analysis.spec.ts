@@ -222,7 +222,7 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
 
-        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
+        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(4);
         expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
         const getRes = (path: string) =>
           extendedBundle!.analysisResults.sarif.runs[0].results!.find(

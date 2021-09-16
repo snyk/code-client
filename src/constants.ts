@@ -17,7 +17,7 @@ export const REQUEST_RETRY_DELAY = 30 * 1000; // 30 seconds delay between retrie
 
 export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}/**`];
 
-export const IGNORE_FILES_NAMES = [GITIGNORE_FILENAME, DCIGNORE_FILENAME];
+export const IGNORE_FILES_NAMES = [GITIGNORE_FILENAME, DCIGNORE_FILENAME, DOTSNYK_FILENAME];
 
 export const DCIGNORE_DRAFTS = {
   custom: CustomDCIgnore,

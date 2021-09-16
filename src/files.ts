@@ -7,7 +7,15 @@ import { parse as parseYaml } from 'yaml';
 import union from 'lodash.union';
 import util from 'util';
 import { Cache } from './cache';
-import { HASH_ALGORITHM, ENCODE_TYPE, MAX_PAYLOAD, IGNORES_DEFAULT, IGNORE_FILES_NAMES, CACHE_KEY } from './constants';
+import {
+  HASH_ALGORITHM,
+  ENCODE_TYPE,
+  MAX_PAYLOAD,
+  IGNORES_DEFAULT,
+  IGNORE_FILES_NAMES,
+  CACHE_KEY,
+  DOTSNYK_FILENAME,
+} from './constants';
 
 import { SupportedFiles, FileInfo } from './interfaces/files.interface';
 
@@ -98,7 +106,13 @@ export function parseFileIgnores(path: string): string[] {
   const dirname = nodePath.dirname(path);
   try {
     const f = fs.readFileSync(path, { encoding: 'utf8' });
+    if (path.includes(DOTSNYK_FILENAME)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const parsed: { exclude: { code: string[]; global: string[] } } = parseYaml(f);
 
+      const concatIgnorePath = (p: string) => `${nodePath.dirname(path)}/${p}`;
+      return [...parsed.exclude.code.map(concatIgnorePath), ...parsed.exclude.global.map(concatIgnorePath)];
+    }
     rules = f
       .split('\n')
       .map(l => l.trim())
@@ -460,21 +474,4 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 
 export function isMatch(filePath: string, rules: string[]): boolean {
   return !!multimatch([filePath], rules, { ...multiMatchOptions, matchBase: false }).length;
-}
-
-export function parseDotSnykExcludes(pathToDotSnykFile: string): string[] {
-  try {
-    const dotSnykFile = fs.readFileSync(pathToDotSnykFile, 'utf-8');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const parsed: { exclude: { code: string[]; global: string[] } } = parseYaml(dotSnykFile);
-
-    const concatIgnorePath = (path: string) => `${nodePath.dirname(pathToDotSnykFile)}/${path}`;
-    return [...parsed.exclude.code.map(concatIgnorePath), ...parsed.exclude.global.map(concatIgnorePath)];
-  } catch (err) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (err.code === 'EACCES' || err.code === 'EPERM') {
-      console.info(`${pathToDotSnykFile} is not accessible.`);
-    }
-    return [];
-  }
 }

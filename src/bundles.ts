@@ -12,7 +12,6 @@ import {
   collectIgnoreRules,
   determineBaseDir,
   collectBundleFiles,
-  parseDotSnykExcludes,
 } from './files';
 
 import {
@@ -28,12 +27,7 @@ import {
   getFilters,
 } from './http';
 
-import {
-  DOTSNYK_FILENAME,
-  MAX_PAYLOAD,
-  MAX_UPLOAD_ATTEMPTS,
-  UPLOAD_CONCURRENCY
-} from './constants';
+import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
 import emitter from './emitter';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
@@ -122,11 +116,9 @@ export async function uploadRemoteBundle({
   for (const bucketFiles of composeFilePayloads(options.files, maxPayload)) {
     tasks.push(bucketFiles);
   }
-  const results = await pMap(
-    tasks,
-    async (task: FileInfo[]) => await uploadFileChunks(task),
-    { concurrency: UPLOAD_CONCURRENCY }
-  );
+  const results = await pMap(tasks, async (task: FileInfo[]) => await uploadFileChunks(task), {
+    concurrency: UPLOAD_CONCURRENCY,
+  });
   // Returning false if at least one result is false
   return results.every(r => !!r);
 }
@@ -179,7 +171,7 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
     if (response.type === 'error') {
       throw response.error;
     }
-    
+
     remoteBundle = await fullfillRemoteBundle({ ...baseOptions, remoteBundle: response.value });
     if (remoteBundle.missingFiles.length) {
       throw new Error(`Failed to upload # files: ${remoteBundle.missingFiles.length}`);
@@ -226,16 +218,12 @@ export interface FileBundle extends RemoteBundle {
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
   const baseDir = determineBaseDir(options.paths);
 
-  const [supportedFiles, excludesFromIgnoreFiles, excludesFromDotSnyk] = await Promise.all([
+  const [supportedFiles, fileIgnores] = await Promise.all([
     // Fetch supporte files to save network traffic
     getSupportedFiles(options.baseURL, options.source),
     // Scan for custom ignore rules
     collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores),
-    // Get exclusions from .snyk file
-    parseDotSnykExcludes(`${baseDir}/${DOTSNYK_FILENAME}`),
   ]);
-
-  const fileIgnores = [...excludesFromIgnoreFiles, ...excludesFromDotSnyk];
 
   emitter.scanFilesProgress(0);
   const bundleFiles = [];

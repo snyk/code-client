@@ -135,7 +135,7 @@ describe('Functional test of analysis', () => {
         const shouldNotBeInBundle = [
           '/.eslintrc.json', // <= no linters on backend
           'main.js', // <= over maxPayload (23098 > 1000)
-        ]
+        ];
         // Force uploading files one more time
         uploaded = await uploadRemoteBundle({
           baseURL,
@@ -222,7 +222,7 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
 
-        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(4);
+        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
         expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
         const getRes = (path: string) =>
           extendedBundle!.analysisResults.sarif.runs[0].results!.find(

@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
-import { DOTSNYK_FILENAME } from '../src/constants';
 
 import {
   collectIgnoreRules,
@@ -9,32 +8,23 @@ import {
   composeFilePayloads,
   parseFileIgnores,
   getFileInfo,
-  parseDotSnykExcludes,
 } from '../src/files';
 
-import {
-  sampleProjectPath,
-  supportedFiles,
-  bundleFiles,
-  bundleFilesFull,
-  bundleFileIgnores,
-  bundlefileExcludes,
-} from './constants/sample';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
 describe('files', () => {
   it('parse dc ignore file', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns).toEqual(bundleFileIgnores.slice(1));
+    expect(patterns).toEqual(bundleFileIgnores.slice(1, 10));
+  });
+  it('parse dot snyk file', () => {
+    const patterns = parseFileIgnores(`${sampleProjectPath}/.snyk`);
+    expect(patterns).toEqual(bundleFileIgnores.slice(10));
   });
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
     expect(ignoreRules).toEqual(bundleFileIgnores);
-  });
-
-  it('should parse .snyk file', async () => {
-    const patterns = await parseDotSnykExcludes(`${sampleProjectPath}/${DOTSNYK_FILENAME}`);
-    expect(patterns).toEqual(bundlefileExcludes);
   });
 
   it('collect bundle files', async () => {
@@ -43,7 +33,7 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: [sampleProjectPath],
       supportedFiles,
-      fileIgnores: [...bundleFileIgnores, ...bundlefileExcludes],
+      fileIgnores: bundleFileIgnores,
     });
     const files = [];
     for await (const f of collector) {
@@ -79,7 +69,7 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: [sampleProjectPath],
       supportedFiles,
-      fileIgnores: [...bundleFileIgnores, ...bundlefileExcludes],
+      fileIgnores: bundleFileIgnores,
       maxPayload: 500,
     });
     const smallFiles = [];

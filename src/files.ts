@@ -108,10 +108,12 @@ export function parseFileIgnores(path: string): string[] {
     const f = fs.readFileSync(path, { encoding: 'utf8' });
     if (path.includes(DOTSNYK_FILENAME)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const parsed: { exclude: { code: string[]; global: string[] } } = parseYaml(f);
+      const parsed: { exclude: { code?: string[]; global?: string[] } } = parseYaml(f);
 
       const concatIgnorePath = (p: string) => `${nodePath.dirname(path)}/${p}`;
-      return [...parsed.exclude.code.map(concatIgnorePath), ...parsed.exclude.global.map(concatIgnorePath)];
+      const codeIgnoredPaths = parsed.exclude.code?.map(concatIgnorePath) || [];
+      const globalIgnoredPaths = parsed.exclude.global?.map(concatIgnorePath) || [];
+      return [...codeIgnoredPaths, ...globalIgnoredPaths];
     }
     rules = f
       .split('\n')

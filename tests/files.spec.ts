@@ -21,6 +21,11 @@ describe('files', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/.snyk`);
     expect(patterns).toEqual(bundleFileIgnores.slice(10));
   });
+  it('parse dot snyk file with only one field', () => {
+    const patterns = parseFileIgnores(`${sampleProjectPath}/exclude/.snyk`);
+    console.log(patterns);
+    expect(patterns).toEqual(bundleFileIgnores.slice(11));
+  });
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);

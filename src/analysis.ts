@@ -1,6 +1,8 @@
 /* eslint-disable no-await-in-loop */
+import omit from 'lodash.omit';
 
-import { AnalyzeFoldersOptions, prepareExtendingBundle } from './files';
+import { AnalyzeFoldersOptions, prepareExtendingBundle, resolveBundleFilePath } from './files';
+import { POLLING_INTERVAL } from './constants';
 import {
   GetAnalysisErrorCodes,
   getAnalysis,
@@ -12,9 +14,10 @@ import {
   ConnectionOptions,
   GetAnalysisOptions,
 } from './http';
+import { fromEntries } from './lib/utils';
 import { createBundleFromFolders, FileBundle, remoteBundleFactory } from './bundles';
-import emitter from './emitter';
-import { AnalysisResult } from './interfaces/analysis-result.interface';
+import { emitter } from './emitter';
+import { AnalysisResult, AnalysisResultLegacy, AnalysisResultSarif, AnalysisFiles, Suggestion } from './interfaces/analysis-result.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -56,7 +59,7 @@ async function pollAnalysis(
       return analysisResponse as Result<AnalysisFailedResponse, GetAnalysisErrorCodes>;
     }
 
-    await sleep(500);
+    await sleep(POLLING_INTERVAL);
   }
 }
 
@@ -73,17 +76,17 @@ export async function analyzeBundle(options: GetAnalysisOptions): Promise<Analys
   return analysisData.value;
 }
 
-// function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
-//   if (baseDir) {
-//     return fromEntries(
-//       Object.entries(files).map(([path, positions]) => {
-//         const filePath = resolveBundleFilePath(baseDir, path);
-//         return [filePath, positions];
-//       }),
-//     );
-//   }
-//   return files;
-// }
+function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
+  if (baseDir) {
+    return fromEntries(
+      Object.entries(files).map(([path, positions]) => {
+        const filePath = resolveBundleFilePath(baseDir, path);
+        return [filePath, positions];
+      }),
+    );
+  }
+  return files;
+}
 
 interface FileAnalysisOptions {
   connection: ConnectionOptions;
@@ -91,7 +94,7 @@ interface FileAnalysisOptions {
   fileOptions: AnalyzeFoldersOptions;
 }
 
-interface FileAnalysis extends FileAnalysisOptions {
+export interface FileAnalysis extends FileAnalysisOptions {
   fileBundle: FileBundle;
   analysisResults: AnalysisResult;
 }
@@ -109,18 +112,36 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
     ...options.connection,
     ...options.analysisOptions,
   });
-  // TODO: expand relative file names to absolute ones
-  // analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, baseDir);
+
+  if (analysisResults.type === 'legacy') {
+    // expand relative file names to absolute ones only for legacy results
+    analysisResults.files = normalizeResultFiles(analysisResults.files, fileBundle.baseDir);
+  }
 
   return { fileBundle, analysisResults, ...options };
 }
 
-function mergeBundleResults(
-  oldAnalysisResults: AnalysisResult,
+function mergeBundleResults(oldAnalysisResults: AnalysisResult,
   newAnalysisResults: AnalysisResult,
   limitToFiles: string[],
   removedFiles: string[] = [],
+  baseDir: string,
 ): AnalysisResult {
+
+  if (newAnalysisResults.type == 'sarif') {
+    return mergeSarifResults(oldAnalysisResults as AnalysisResultSarif, newAnalysisResults, limitToFiles, removedFiles);
+  }
+
+  return mergeLegacyResults(oldAnalysisResults as AnalysisResultLegacy, newAnalysisResults, limitToFiles, removedFiles, baseDir);
+
+}
+
+function mergeSarifResults(
+  oldAnalysisResults: AnalysisResultSarif,
+  newAnalysisResults: AnalysisResultSarif,
+  limitToFiles: string[],
+  removedFiles: string[] = [],
+): AnalysisResultSarif {
   // Start from the new analysis results
   // For each finding of the old analysis,
   //  if it's location is not part of the limitToFiles or removedFiles (removedFiles should also be checked against condeFlow),
@@ -189,6 +210,57 @@ function mergeBundleResults(
   return newAnalysisResults;
 }
 
+const moveSuggestionIndexes = <T>(
+  suggestionIndex: number,
+  suggestions: { [index: string]: T },
+): { [index: string]: T } => {
+  const entries = Object.entries(suggestions);
+  return fromEntries(
+    entries.map(([i, s]) => {
+      return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
+    }),
+  );
+};
+
+function mergeLegacyResults(
+  oldAnalysisResults: AnalysisResultLegacy,
+  newAnalysisResults: AnalysisResultLegacy,
+  limitToFiles: string[],
+  removedFiles: string[] = [],
+  baseDir: string,
+  ): AnalysisResultLegacy {
+
+  // expand relative file names to absolute ones only for legacy results
+  newAnalysisResults.files = normalizeResultFiles(newAnalysisResults.files, baseDir);
+
+  // Determine max suggestion index in our data
+  const suggestionIndex = Math.max(...Object.keys(oldAnalysisResults.suggestions).map(i => parseInt(i, 10))) || -1;
+
+  // Addup all new suggestions' indexes
+  const newSuggestions = moveSuggestionIndexes<Suggestion>(suggestionIndex, newAnalysisResults.suggestions);
+  const suggestions = { ...oldAnalysisResults.suggestions, ...newSuggestions };
+
+  const newFiles = fromEntries(
+    Object.entries(newAnalysisResults.files).map(([fn, s]) => {
+      return [fn, moveSuggestionIndexes(suggestionIndex, s)];
+    }),
+  );
+
+  // expand relative file names to absolute ones only for legacy results
+  const changedFiles = [...limitToFiles, ...removedFiles].map(path => resolveBundleFilePath(baseDir, path));
+
+  const files = {
+    ...omit(oldAnalysisResults.files, changedFiles),
+    ...newFiles,
+  };
+
+  return {
+    ...newAnalysisResults,
+    files,
+    suggestions,
+  };
+}
+
 interface ExtendAnalysisOptions extends FileAnalysis {
   files: string[];
 }
@@ -234,10 +306,7 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
     limitToFiles,
   });
 
-  // TODO: Transform relative paths into absolute
-  // analysisData.analysisResults.files = normalizeResultFiles(analysisData.analysisResults.files, bundle.baseDir);
-
-  analysisResults = mergeBundleResults(options.analysisResults, analysisResults, limitToFiles, removedFiles);
+  analysisResults = mergeBundleResults(options.analysisResults, analysisResults, limitToFiles, removedFiles, options.fileBundle.baseDir);
 
   return { ...options, fileBundle, analysisResults };
 }

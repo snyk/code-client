@@ -64,6 +64,7 @@ export const bundleExtender: () => Promise<{
   );
   const original = changedFiles.map(path => fBundle.find(f => f.filePath === path)?.content);
   if (original.some(c => !c)) throw new Error('Content not found. Impossible to restore');
+
   return {
     files: {
       removed: changedFilesNames[0],

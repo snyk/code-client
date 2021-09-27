@@ -274,7 +274,7 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
-      if (response.value.status === AnalysisStatus.complete) {
+      if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif' ) {
         expect(response.value.sarif.runs[0].results).toHaveLength(12);
 
         expect(new Set(response.value.coverage)).toEqual(
@@ -318,6 +318,10 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
+
+      expect(response.value.type === 'sarif').toBeTruthy();
+      if (response.value.type !== 'sarif') return;
+
       expect(response.value.sarif.runs[0].results).toHaveLength(8);
 
       // Get analysis results with severity 3
@@ -333,6 +337,10 @@ describe('Requests to public API', () => {
         if (response.type === 'error') return;
         expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
       } while (response.value.status !== AnalysisStatus.complete);
+
+      expect(response.value.type === 'sarif').toBeTruthy();
+      if (response.value.type !== 'sarif') return;
+
       expect(response.value.sarif.runs[0].results).toHaveLength(4);
     },
     TEST_TIMEOUT,

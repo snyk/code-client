@@ -46,5 +46,4 @@ export class EmitterDC extends EventEmitter {
   }
 }
 
-const emitter = new EmitterDC();
-export default emitter;
+export const emitter = new EmitterDC();

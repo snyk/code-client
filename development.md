@@ -4,14 +4,14 @@ To use and debug package locally you don't need publish it to NPM registry:
 
 ```shell script
 $ cd <package-location>
-$ npm install && npm run build && npx yalc publish
+$ npm install && npm run build && npm link
 ```
 
 After that you have to create symlink to your package in your project folder:
 
 ```shell script
 $ cd <project-location>
-$ npx yalc add @snyk/code-client
+$ npm link @snyk/code-client
 ```
 
 ## Publishing

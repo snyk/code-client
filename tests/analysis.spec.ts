@@ -1,11 +1,11 @@
 import path from 'path';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders, extendAnalysis } from '../src/analysis';
+import { analyzeFolders, extendAnalysis, FileAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFiles, bundleFilesFull, bundleExtender } from './constants/sample';
-import emitter from '../src/emitter';
+import { emitter } from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity } from '../src/interfaces/analysis-options.interface';
@@ -65,6 +65,9 @@ describe('Functional test of analysis', () => {
 
         expect(bundle).toBeTruthy();
         if (!bundle) return; // TS trick
+
+        expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
+        if (bundle.analysisResults.type !== 'sarif') return;
 
         expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(7);
         expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(12);
@@ -152,6 +155,28 @@ describe('Functional test of analysis', () => {
       TEST_TIMEOUT,
     );
 
+    it('analyze folder legacy json results', async () => {
+      const bundle = await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: { severity: AnalysisSeverity.info, prioritized: true, legacy: true },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+          maxPayload: 1000,
+          defaultFileIgnores: undefined,
+        },
+      });
+
+      expect(bundle).toBeTruthy();
+      if (!bundle) return; // TS trick
+
+      expect(bundle.analysisResults.type === 'legacy').toBeTruthy();
+      if (bundle.analysisResults.type !== 'legacy') return;
+
+      expect(Object.keys(bundle.analysisResults.files)).toHaveLength(5);
+      expect(Object.keys(bundle.analysisResults.suggestions)).toHaveLength(8);
+    });
+
     it('analyze folder - with sarif returned', async () => {
       const bundle = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
@@ -166,6 +191,9 @@ describe('Functional test of analysis', () => {
 
       expect(bundle).toBeTruthy();
       if (!bundle) return; // TS trick
+
+      expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
+      if (bundle.analysisResults.type !== 'sarif') return;
 
       const validationResult = jsonschema.validate(bundle.analysisResults.sarif, sarifSchema);
       expect(validationResult.errors.length).toEqual(0);
@@ -189,7 +217,7 @@ describe('Functional test of analysis', () => {
     it(
       'extend folder analysis',
       async () => {
-        const bundle = await analyzeFolders({
+        const fileAnalysis = await analyzeFolders({
           connection: { baseURL, sessionToken, source },
           analysisOptions: {
             severity: 1,
@@ -201,8 +229,14 @@ describe('Functional test of analysis', () => {
           },
         });
 
-        expect(bundle).toBeTruthy();
-        if (!bundle) return; // TS trick
+        expect(fileAnalysis).toBeTruthy();
+        if (!fileAnalysis) return; // TS trick
+
+        expect(fileAnalysis.analysisResults.type === 'sarif').toBeTruthy();
+        if (fileAnalysis.analysisResults.type !== 'sarif') return;
+
+        expect(fileAnalysis.analysisResults.sarif.runs[0].tool.driver.rules).toHaveLength(7);
+        expect(fileAnalysis.analysisResults.sarif.runs[0].results).toHaveLength(12);
 
         const extender = await bundleExtender();
         type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
@@ -210,7 +244,7 @@ describe('Functional test of analysis', () => {
         try {
           await extender.exec();
           extendedBundle = await extendAnalysis({
-            ...bundle,
+            ...fileAnalysis,
             files: extender.files.all,
           });
         } catch (err) {
@@ -222,10 +256,15 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
 
-        expect(extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(5);
-        expect(extendedBundle.analysisResults.sarif.runs[0].results?.length).toEqual(10);
+        expect(extendedBundle.analysisResults.type === 'sarif').toBeTruthy();
+        if (extendedBundle.analysisResults.type !== 'sarif') return;
+
+        const sarifResults = extendedBundle.analysisResults.sarif;
+
+        expect(sarifResults.runs[0].tool.driver.rules).toHaveLength(5);
+        expect(sarifResults.runs[0].results).toHaveLength(10);
         const getRes = (path: string) =>
-          extendedBundle!.analysisResults.sarif.runs[0].results!.find(
+          sarifResults.runs[0].results!.find(
             res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path,
           );
         const sampleRes = getRes(extender.files.added);
@@ -238,11 +277,11 @@ describe('Functional test of analysis', () => {
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
         expect(sampleRes!.ruleId).toEqual(
-          extendedBundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
+          sarifResults.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
         );
 
-        expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          bundle.analysisResults.timing.fetchingCode,
+        expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
+          extendedBundle.analysisResults.timing.fetchingCode,
         );
         expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
         expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(

@@ -28,7 +28,7 @@ import {
 } from './http';
 
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
-import emitter from './emitter';
+import { emitter } from './emitter';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 

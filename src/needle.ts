@@ -3,7 +3,7 @@ import needle from 'needle';
 import * as querystring from 'querystring';
 import https from 'https';
 import { URL } from 'url';
-import emitter from './emitter';
+import { emitter } from './emitter';
 
 import {
   ErrorCodes,
@@ -78,10 +78,10 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
   do {
     try {
       response = await needle(method, url, data, options);
-      emitter.apiRequestLog(`<= Response: ${response.statusCode} ${JSON.stringify(response.body)}`.slice(0, 399));
+      emitter.apiRequestLog(`<= Response: ${response.statusCode} ${JSON.stringify(response.body)}`);
       success = !!(response.statusCode && response.statusCode >= 200 && response.statusCode < 300);
       if (success) return { success, response };
-      
+
       // Try to avoid breaking requests due to temporary network errors
       if (attempts > 1 && response.statusCode && [
         ErrorCodes.serviceUnavailable,

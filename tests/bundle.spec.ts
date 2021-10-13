@@ -8,7 +8,6 @@ describe('Functional test for bundle creation', () => {
   it('should return a bundle with correct parameters', async () => {
     const paths: string[] = [path.join(sampleProjectPath)];
     const symlinksEnabled = false;
-    const maxPayload = 1000;
     const defaultFileIgnores = undefined;
 
     const result = await createBundleFromFolders({
@@ -17,7 +16,6 @@ describe('Functional test for bundle creation', () => {
       source,
       paths,
       symlinksEnabled,
-      maxPayload,
       defaultFileIgnores,
     });
 

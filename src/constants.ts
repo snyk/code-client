@@ -1,6 +1,7 @@
 import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 
 export const MAX_PAYLOAD = 4 * 1024 * 1024;
+export const MAX_FILE_SIZE = 128 * 1024;
 export const defaultBaseURL = 'https://api.snyk.deepcode.ai';
 export const HASH_ALGORITHM = 'sha256';
 export const ENCODE_TYPE = 'hex';
@@ -10,11 +11,11 @@ export const DCIGNORE_FILENAME = '.dcignore';
 export const DOTSNYK_FILENAME = '.snyk';
 export const EXCLUDED_NAMES = [GIT_FILENAME, GITIGNORE_FILENAME, DCIGNORE_FILENAME];
 export const CACHE_KEY = '.dccache';
-export const MAX_UPLOAD_ATTEMPTS = 5;
-export const UPLOAD_CONCURRENCY = 5;
+export const MAX_UPLOAD_ATTEMPTS = 10;
+export const UPLOAD_CONCURRENCY = 2;
 export const POLLING_INTERVAL = 500;
-export const MAX_RETRY_ATTEMPTS = 5; // Request retries on network errors
-export const REQUEST_RETRY_DELAY = 30 * 1000; // 30 seconds delay between retries
+export const MAX_RETRY_ATTEMPTS = 10; // Request retries on network errors
+export const REQUEST_RETRY_DELAY = 5 * 1000; // delay between retries in milliseconds
 
 export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}/**`];
 

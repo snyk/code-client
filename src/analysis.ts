@@ -273,7 +273,6 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
 
     options.files,
 
-    options.fileOptions.maxPayload,
     options.fileOptions.symlinksEnabled,
   );
 
@@ -287,7 +286,6 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
 
     bundleHash: options.fileBundle.bundleHash,
     baseDir: options.fileBundle.baseDir,
-    maxPayload: options.fileOptions.maxPayload,
 
     files,
     removedFiles,

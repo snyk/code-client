@@ -1,3 +1,3 @@
 exclude:
   global:
-    - excluded-folder/**
+    - /excluded-folder/**

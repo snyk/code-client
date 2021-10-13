@@ -23,8 +23,7 @@ describe('files', () => {
   });
   it('parse dot snyk file with only one field', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/exclude/.snyk`);
-    console.log(patterns);
-    expect(patterns).toEqual(bundleFileIgnores.slice(11));
+    expect(patterns).toEqual(bundleFileIgnores.slice(12));
   });
 
   it('collect ignore rules', async () => {
@@ -66,22 +65,6 @@ describe('files', () => {
     );
     expect(files).toEqual((await bundleFiles).filter(obj => testNewFiles.includes(obj.bundlePath)));
     expect(removedFiles).toEqual(['removed_from_the_parent_bundle.java']);
-  });
-
-  it('collect bundle files with small max payload', async () => {
-    // Limit size and we get fewer files
-    const collector = collectBundleFiles({
-      baseDir: sampleProjectPath,
-      paths: [sampleProjectPath],
-      supportedFiles,
-      fileIgnores: bundleFileIgnores,
-      maxPayload: 500,
-    });
-    const smallFiles = [];
-    for await (const f of collector) {
-      smallFiles.push(f);
-    }
-    expect(smallFiles.length).toEqual(5);
   });
 
   it('collect bundle files with multiple folders', async () => {

@@ -21,7 +21,8 @@ export const bundleFileIgnores = [
   `!${sampleProjectPath}/**/not/ignored`,
   `${sampleProjectPath}/**/*.jsx/**`,
   `${sampleProjectPath}/**/*.jsx`,
-  `${sampleProjectPath}/exclude/excluded-file.js`,
+  `${sampleProjectPath}/**/exclude/excluded-file.js/**`,
+  `${sampleProjectPath}/**/exclude/excluded-file.js`,
   `${sampleProjectPath}/exclude/excluded-folder/**`,
 ];
 
@@ -31,7 +32,7 @@ export const bundleFilePaths = [
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',
-  'main.js', // <= file size is over the custom maxPayload used in some tests (23098 > 1000)
+  'main.js', // <= file size is over the custom MAX_FILE_SIZE
   'routes/index.js',
   'routes/sharks.js',
   // TODO: This should be ignored for consistency with the .gitignore format (see last rule above),

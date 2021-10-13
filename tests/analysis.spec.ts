@@ -59,7 +59,6 @@ describe('Functional test of analysis', () => {
           fileOptions: {
             paths: [sampleProjectPath],
             symlinksEnabled: false,
-            maxPayload: 1000,
           },
         });
 
@@ -99,7 +98,7 @@ describe('Functional test of analysis', () => {
               lang: 'C++ (beta)',
             },
             {
-              files: 4,
+              files: 5,
               isSupported: true,
               lang: 'JavaScript',
             },
@@ -113,21 +112,19 @@ describe('Functional test of analysis', () => {
 
         // Check if emitter event happened
         expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-        expect(onScanFilesProgress).toHaveBeenCalledTimes(9);
+        expect(onScanFilesProgress).toHaveBeenCalledTimes(10);
         expect(onCreateBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAnalyseProgress).toHaveBeenCalled();
         expect(onAPIRequestLog).toHaveBeenCalled();
 
         // Test uploadRemoteBundle with empty list of files
-        let uploaded = await uploadRemoteBundle({
+        await uploadRemoteBundle({
           baseURL,
           sessionToken,
           source,
           bundleHash: bundle.fileBundle.bundleHash,
           files: [],
         });
-        // We do nothing in such cases
-        expect(uploaded).toEqual(true);
 
         const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
           expect(typeof processed).toBe('number');
@@ -137,18 +134,16 @@ describe('Functional test of analysis', () => {
 
         const shouldNotBeInBundle = [
           '/.eslintrc.json', // <= no linters on backend
-          'main.js', // <= over maxPayload (23098 > 1000)
+          'main.js', // <= over MAX_FILE_SIZE
         ];
         // Force uploading files one more time
-        uploaded = await uploadRemoteBundle({
+        await uploadRemoteBundle({
           baseURL,
           sessionToken,
           source,
           bundleHash: bundle.fileBundle.bundleHash,
           files: bFiles.filter(({ bundlePath }) => !shouldNotBeInBundle.includes(bundlePath)),
         });
-        expect(uploaded).toEqual(true);
-
         expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAPIRequestLog).toHaveBeenCalled();
       },
@@ -162,7 +157,6 @@ describe('Functional test of analysis', () => {
         fileOptions: {
           paths: [sampleProjectPath],
           symlinksEnabled: false,
-          maxPayload: 1000,
           defaultFileIgnores: undefined,
         },
       });
@@ -184,7 +178,6 @@ describe('Functional test of analysis', () => {
         fileOptions: {
           paths: [sampleProjectPath],
           symlinksEnabled: false,
-          maxPayload: 1000,
           defaultFileIgnores: undefined,
         },
       });
@@ -206,7 +199,6 @@ describe('Functional test of analysis', () => {
         fileOptions: {
           paths: [path.join(sampleProjectPath, 'only_text')],
           symlinksEnabled: false,
-          maxPayload: 1000,
           defaultFileIgnores: undefined,
         },
       });
@@ -225,7 +217,6 @@ describe('Functional test of analysis', () => {
           fileOptions: {
             paths: [sampleProjectPath],
             symlinksEnabled: false,
-            maxPayload: 1000,
           },
         });
 

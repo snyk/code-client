@@ -11,6 +11,7 @@ import {
   HASH_ALGORITHM,
   ENCODE_TYPE,
   MAX_PAYLOAD,
+  MAX_FILE_SIZE,
   IGNORES_DEFAULT,
   IGNORE_FILES_NAMES,
   CACHE_KEY,
@@ -110,15 +111,15 @@ export function parseFileIgnores(path: string): string[] {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const parsed: { exclude: { code?: string[]; global?: string[] } } = parseYaml(f);
 
-      const concatIgnorePath = (p: string) => `${nodePath.dirname(path)}/${p}`;
-      const codeIgnoredPaths = parsed.exclude.code?.map(concatIgnorePath) || [];
-      const globalIgnoredPaths = parsed.exclude.global?.map(concatIgnorePath) || [];
-      return [...codeIgnoredPaths, ...globalIgnoredPaths];
+      const codeIgnoredPaths = parsed.exclude.code || [];
+      const globalIgnoredPaths = parsed.exclude.global || [];
+      rules = [...codeIgnoredPaths, ...globalIgnoredPaths];
+    } else {
+      rules = f
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => !!l && !l.startsWith('#'));
     }
-    rules = f
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => !!l && !l.startsWith('#'));
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (err.code === 'EACCES' || err.code === 'EPERM') {
@@ -227,7 +228,6 @@ async function* searchFiles(
 export interface AnalyzeFoldersOptions {
   paths: string[];
   symlinksEnabled?: boolean;
-  maxPayload?: number;
   defaultFileIgnores?: string[];
 }
 
@@ -241,7 +241,6 @@ export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
  * Returns bundle files from requested paths
  * */
 export async function* collectBundleFiles({
-  maxPayload = MAX_PAYLOAD,
   symlinksEnabled = false,
   baseDir,
   fileIgnores,
@@ -260,7 +259,7 @@ export async function* collectBundleFiles({
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled)) continue;
 
-    if (fileStats.isFile() && fileStats.size <= maxPayload) {
+    if (fileStats.isFile() && fileStats.size <= MAX_FILE_SIZE) {
       files.push(path);
     } else if (fileStats.isDirectory()) {
       dirs.push(path);
@@ -275,7 +274,7 @@ export async function* collectBundleFiles({
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
-      if (fileInfo && fileInfo.size <= maxPayload) {
+      if (fileInfo && fileInfo.size <= MAX_FILE_SIZE) {
         yield fileInfo;
       }
     }
@@ -287,7 +286,7 @@ export async function* collectBundleFiles({
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
-      if (fileInfo && fileInfo.size <= maxPayload) {
+      if (fileInfo && fileInfo.size <= MAX_FILE_SIZE) {
         yield fileInfo;
       }
     }
@@ -301,7 +300,6 @@ export async function prepareExtendingBundle(
   supportedFiles: SupportedFiles,
   fileIgnores: string[] = IGNORES_DEFAULT,
   files: string[],
-  maxFileSize = MAX_PAYLOAD,
   symlinksEnabled = false,
 ): Promise<{ files: FileInfo[]; removedFiles: string[] }> {
   let removedFiles: string[] = [];
@@ -326,7 +324,7 @@ export async function prepareExtendingBundle(
 
     let foundFiles: Set<string> = new Set(); // This initialization is needed to help Typescript checker
     foundFiles = entries.reduce((s, e) => {
-      if (e.stats && e.stats.size <= maxFileSize) {
+      if (e.stats && e.stats.size <= MAX_FILE_SIZE) {
         s.add(e.path);
       }
       return s;

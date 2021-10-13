@@ -6,9 +6,9 @@ import { fromEntries } from '../src/lib/utils';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleHash = 'c58d69bd4fd65c45b1112bd7b45f028e614d443fc123901fd1aba15856c13c27';
+const fakeBundleHash = '3691c255a7fa00b47bb3ca96593f7108f3539cbe4bc6836e20e5c43410971979';
 let fakeBundleHashFull = '';
-const realBundleHash = 'c3a31c6c503b76ce51e2f8f7db9aa8f26715e6367124ce6e2f419087cad011b0';
+const realBundleHash = '7f1817d92710efc50f3b68a5f5dcca2bfb7d0ce82db78f2ecd30fd9e9a410059';
 let realBundleHashFull = '';
 
 const fakeMissingFiles = [
@@ -17,11 +17,11 @@ const fakeMissingFiles = [
   'app.js',
   'db.js',
   'main.js',
+  'routes/index.js',
+  'routes/sharks.js',
   // TODO: This should be ignored
   'not/ignored/this_should_be_ignored.jsx',
   'not/ignored/this_should_not_be_ignored.java',
-  'routes/index.js',
-  'routes/sharks.js',
 ];
 
 describe('Requests to public API', () => {
@@ -32,8 +32,7 @@ describe('Requests to public API', () => {
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
     expect(new Set(response.value.extensions)).toEqual(
       new Set([
-        '.CS',
-        '.Cs',
+        '.cs',
         '.c',
         '.cc',
         '.cpp',
@@ -61,8 +60,6 @@ describe('Requests to public API', () => {
         '.ts',
         '.tsx',
         '.vue',
-        '.ASPX',
-        '.Aspx',
         '.aspx',
         '.ejs',
       ]),
@@ -83,7 +80,7 @@ describe('Requests to public API', () => {
         baseURL,
         sessionToken,
         files,
-        source: 'atom',
+        source,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') {
@@ -142,7 +139,7 @@ describe('Requests to public API', () => {
           sessionToken,
           bundleHash: fakeBundleHashFull,
           severity: 1,
-          source: 'atom',
+          source,
         });
       } while (response.type === 'success');
 
@@ -226,7 +223,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('5bdbdda45cf74752fee89c78558bc8b7b3f09582edf66bbaf206d0b530c15ed8');
+      expect(response.value.bundleHash).toContain('7b0c0099abe1224f0ef92f6a4a0973ec02fa8f57357ec2e7a4e852738bf75178');
       expect(response.value.missingFiles).toHaveLength(11);
     },
     TEST_TIMEOUT,
@@ -242,8 +239,8 @@ describe('Requests to public API', () => {
       const bundleResponse = await createBundle({
         baseURL,
         sessionToken,
+        source,
         files,
-        source: 'atom',
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
@@ -251,6 +248,9 @@ describe('Requests to public API', () => {
       realBundleHashFull = bundleResponse.value.bundleHash;
 
       // Check missing files
+      expect(bundleResponse.value.missingFiles).toEqual([]);
+
+      // Check missing files with separate API call
       const checkResponse = await checkBundle({
         baseURL,
         sessionToken,
@@ -266,9 +266,9 @@ describe('Requests to public API', () => {
       let response = await getAnalysis({
         baseURL,
         sessionToken,
+        source,
         bundleHash: realBundleHashFull,
         severity: 1,
-        source: 'atom',
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -311,7 +311,7 @@ describe('Requests to public API', () => {
           bundleHash: realBundleHashFull,
           severity: 1,
           limitToFiles: [`GitHubAccessTokenScrambler12.java`],
-          source: 'atom',
+          source,
         });
 
         expect(response.type).toEqual('success');
@@ -331,7 +331,7 @@ describe('Requests to public API', () => {
           sessionToken,
           bundleHash: realBundleHashFull,
           severity: 3,
-          source: 'atom',
+          source,
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;

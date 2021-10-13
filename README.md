@@ -92,7 +92,24 @@ Complete list of events:
 const results = await codeClient.analyzeFolders({
   connection: { baseURL, sessionToken, source },
   analysisOptions: {
+    severity: 1
+  },
+  fileOptions: {
+    paths: ['/home/user/repo'],
+    symlinksEnabled: false,
+  },
+});
+
+```
+
+### Run analysis only for specific file, the one just changed for example
+
+```javascript
+const results = await codeClient.analyzeFolders({
+  connection: { baseURL, sessionToken, source },
+  analysisOptions: {
     severity: 1,
+    limitToFiles: ['recently-changed-file.js']
   },
   fileOptions: {
     paths: ['/home/user/repo'],

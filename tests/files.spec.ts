@@ -8,6 +8,7 @@ import {
   composeFilePayloads,
   parseFileIgnores,
   getFileInfo,
+  getBundleFilePath,
 } from '../src/files';
 
 import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
@@ -113,4 +114,16 @@ describe('files', () => {
     const fileMeta = await getFileInfo(filePath, sampleProjectPath);
     expect(fileMeta?.hash).toEqual('3e2979852cc2e97f48f7e7973a8b0837eb73ed0485c868176bc3aa58c499f534');
   });
+
+  it('obtains correct bundle file path if no baseDir specified', () => {
+    const baseDir = '';
+    const darwinPath = '/Users/user/Git/goof/routes/index.js';
+    expect(getBundleFilePath(darwinPath, baseDir)).toEqual(darwinPath);
+
+    const linuxPath = '/home/user/Git/goof/routes/index.js';
+    expect(getBundleFilePath(linuxPath, baseDir)).toEqual(linuxPath);
+
+    const windowsPath = 'C:\\Users\\user\\Git\\goof\\index.js';
+    expect(getBundleFilePath(windowsPath, baseDir)).toEqual(encodeURI(windowsPath));
+  })
 });

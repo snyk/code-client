@@ -351,7 +351,7 @@ export async function prepareExtendingBundle(
 }
 
 function getBundleFilePath(filePath: string, baseDir: string) {
-  const relPath = nodePath.relative(baseDir, filePath);
+  const relPath = baseDir ? nodePath.relative(baseDir, filePath) : filePath; // relPath without explicit base makes no sense
   const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
   return encodeURI(posixPath);
 }

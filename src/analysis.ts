@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import omit from 'lodash.omit';
 
-import { AnalyzeFoldersOptions, prepareExtendingBundle, resolveBundleFilePath } from './files';
+import { AnalyzeFoldersOptions, prepareExtendingBundle, resolveBundleFilePath, calcHash } from './files';
 import { POLLING_INTERVAL } from './constants';
 import {
   GetAnalysisErrorCodes,
@@ -111,6 +111,7 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
     bundleHash: fileBundle.bundleHash,
     ...options.connection,
     ...options.analysisOptions,
+    shard: calcHash(fileBundle.baseDir),
   });
 
   if (analysisResults.type === 'legacy') {
@@ -301,6 +302,7 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
     bundleHash: remoteBundle.bundleHash,
     ...options.connection,
     ...options.analysisOptions,
+    shard: calcHash(fileBundle.baseDir),
     limitToFiles,
   });
 

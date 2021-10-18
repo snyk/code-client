@@ -382,6 +382,7 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
 };
 
 export interface AnalysisOptions {
+  readonly shard?: string;
   readonly severity?: number;
   readonly limitToFiles?: string[];
   readonly prioritized?: boolean;
@@ -407,6 +408,7 @@ export async function getAnalysis(
         type: 'file',
         hash: options.bundleHash,
         limitToFiles: options.limitToFiles || [],
+        ...(options.shard ? {shard: options.shard} : null),
       },
       ...pick(options, ['severity', 'prioritized', 'legacy']),
     },

@@ -356,6 +356,10 @@ export function getBundleFilePath(filePath: string, baseDir: string) {
   return encodeURI(posixPath);
 }
 
+export function calcHash(content: string): string {
+  return crypto.createHash(HASH_ALGORITHM).update(content).digest(ENCODE_TYPE);
+};
+
 export async function getFileInfo(
   filePath: string,
   baseDir: string,
@@ -368,10 +372,6 @@ export async function getFileInfo(
   }
 
   const bundlePath = getBundleFilePath(filePath, baseDir);
-
-  const calcHash = (content: string) => {
-    return crypto.createHash(HASH_ALGORITHM).update(content).digest(ENCODE_TYPE);
-  };
 
   let fileContent = '';
   let fileHash = '';

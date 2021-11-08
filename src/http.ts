@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import pick from 'lodash.pick';
 
-import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES } from './constants';
+import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMPTS } from './constants';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
@@ -25,32 +25,6 @@ export interface ConnectionOptions {
   source: string;
 }
 
-export function determineErrorCode(error: any): ErrorCodes {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { response }: { response: any | undefined } = error;
-  if (response) {
-    return response.statusCode;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { errno, code }: { errno: string | undefined; code: string | number | undefined } = error;
-  if (errno === 'ECONNREFUSED') {
-    // set connectionRefused item
-    return ErrorCodes.connectionRefused;
-  }
-  if (errno === 'ECONNRESET') {
-    // set connectionRefused item
-    return ErrorCodes.connectionRefused;
-  }
-
-  if (code === 'ENOTFOUND') {
-    return ErrorCodes.dnsNotFound;
-  }
-
-  // We must be strict here and if none of our existing logic recognized this error, just throw it up.
-  throw error;
-}
-
 // The trick to typecast union type alias
 function isSubsetErrorCode<T>(code: any, messages: { [c: number]: string }): code is T {
   if (code in messages) {
@@ -59,11 +33,9 @@ function isSubsetErrorCode<T>(code: any, messages: { [c: number]: string }): cod
   return false;
 }
 
-function generateError<E>(error: any, messages: { [c: number]: string }, apiName: string): ResultError<E> {
-  const errorCode = determineErrorCode(error);
-
+function generateError<E>(errorCode: number, messages: { [c: number]: string }, apiName: string): ResultError<E> {
   if (!isSubsetErrorCode<E>(errorCode, messages)) {
-    throw error;
+    throw { errorCode, messages, apiName };
   }
 
   const statusCode = errorCode;
@@ -116,17 +88,17 @@ export type IpFamily = 6 | undefined;
  */
 export async function getIpFamily(authHost: string): Promise<IpFamily> {
   const family = 6;
-  try {
-    // Dispatch a FORCED IPv6 request to test client's ISP and network capability
-    await makeRequest({
+
+  // Dispatch a FORCED IPv6 request to test client's ISP and network capability
+  const res = await makeRequest(
+    {
       url: `${authHost}/verify/callback`,
       method: 'post',
       family, // family param forces the handler to dispatch a request using IP at "family" version
-    });
-    return family;
-  } catch (e) {
-    return undefined;
-  }
+    },
+    0,
+  );
+  return res.success ? family : undefined;
 }
 
 type CheckSessionErrorCodes = GenericErrorTypes | ErrorCodes.unauthorizedUser | ErrorCodes.loginInProgress;
@@ -153,54 +125,44 @@ export async function checkSession(options: CheckSessionOptions): Promise<Result
     value: '',
   };
 
-  try {
-    const { success, response } = await makeRequest({
-      url: `${options.authHost}/api/v1/verify/callback`,
-      body: {
-        token: options.draftToken,
-      },
-      family: options.ipFamily,
-      method: 'post',
-    });
+  const res = await makeRequest<IApiTokenResponse>({
+    url: `${options.authHost}/api/v1/verify/callback`,
+    body: {
+      token: options.draftToken,
+    },
+    family: options.ipFamily,
+    method: 'post',
+  });
 
-    if (success) {
-      const responseBody = response.body as IApiTokenResponse;
-      defaultValue.value = (responseBody.ok && responseBody.api) || '';
-    }
+  if (res.success) {
+    return { ...defaultValue, value: (res.body.ok && res.body.api) || '' };
+  } else if ([ErrorCodes.loginInProgress, ErrorCodes.badRequest, ErrorCodes.unauthorizedUser].includes(res.errorCode)) {
     return defaultValue;
-  } catch (err) {
-    if (
-      [ErrorCodes.loginInProgress, ErrorCodes.badRequest, ErrorCodes.unauthorizedUser].includes(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        err.response?.status,
-      )
-    ) {
-      return defaultValue;
-    }
-
-    return generateError<CheckSessionErrorCodes>(err, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
   }
+
+  return generateError<CheckSessionErrorCodes>(res.errorCode, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
 }
 
-export async function getFilters(baseURL: string, source: string): Promise<Result<SupportedFiles, GenericErrorTypes>> {
+export async function getFilters(
+  baseURL: string,
+  source: string,
+  attempts = MAX_RETRY_ATTEMPTS,
+): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
 
-  try {
-    const { success, response } = await makeRequest({
+  const res = await makeRequest<SupportedFiles>(
+    {
       headers: { source },
       url: `${baseURL}/${apiName}`,
       method: 'get',
-    });
+    },
+    attempts,
+  );
 
-    if (success) {
-      const responseBody = response.body as SupportedFiles;
-      return { type: 'success', value: responseBody };
-    }
-
-    return generateError<GenericErrorTypes>({ response }, GENERIC_ERROR_MESSAGES, apiName);
-  } catch (error) {
-    return generateError<GenericErrorTypes>(error, GENERIC_ERROR_MESSAGES, 'filters');
+  if (res.success) {
+    return { type: 'success', value: res.body };
   }
+  return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName);
 }
 
 function prepareTokenHeaders(sessionToken: string) {
@@ -240,27 +202,21 @@ interface CreateBundleOptions extends ConnectionOptions {
 export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
-  try {
-    const payload: Payload = {
-      headers: {
-        ...prepareTokenHeaders(options.sessionToken),
-        source: options.source,
-      },
-      url: `${options.baseURL}/bundle`,
-      method: 'post',
-      body: options.files,
-    };
+  const payload: Payload = {
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    url: `${options.baseURL}/bundle`,
+    method: 'post',
+    body: options.files,
+  };
 
-    const { response, success } = await makeRequest(payload);
-
-    if (success) {
-      return { type: 'success', value: response.body as RemoteBundle };
-    }
-
-    return generateError<CreateBundleErrorCodes>({ response }, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
-  } catch (error) {
-    return generateError<CreateBundleErrorCodes>(error, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
+  const res = await makeRequest<RemoteBundle>(payload);
+  if (res.success) {
+    return { type: 'success', value: res.body };
   }
+  return generateError<CreateBundleErrorCodes>(res.errorCode, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
 }
 
 export type CheckBundleErrorCodes =
@@ -281,22 +237,17 @@ interface CheckBundleOptions extends ConnectionOptions {
 }
 
 export async function checkBundle(options: CheckBundleOptions): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
-  try {
-    const { response, success } = await makeRequest({
-      headers: {
-        ...prepareTokenHeaders(options.sessionToken),
-        source: options.source,
-      },
-      url: `${options.baseURL}/bundle/${options.bundleHash}`,
-      method: 'get',
-    });
+  const res = await makeRequest<RemoteBundle>({
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    url: `${options.baseURL}/bundle/${options.bundleHash}`,
+    method: 'get',
+  });
 
-    if (success) return { type: 'success', value: response.body as RemoteBundle };
-
-    return generateError<CheckBundleErrorCodes>({ response }, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
-  } catch (error) {
-    return generateError<CheckBundleErrorCodes>(error, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
-  }
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<CheckBundleErrorCodes>(res.errorCode, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
 }
 
 export type ExtendBundleErrorCodes =
@@ -325,23 +276,18 @@ interface ExtendBundleOptions extends ConnectionOptions {
 export async function extendBundle(
   options: ExtendBundleOptions,
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
-  try {
-    const { response, success } = await makeRequest({
-      headers: {
-        ...prepareTokenHeaders(options.sessionToken),
-        source: options.source,
-      },
-      url: `${options.baseURL}/bundle/${options.bundleHash}`,
-      method: 'put',
-      body: pick(options, ['files', 'removedFiles']),
-    });
+  const res = await makeRequest<RemoteBundle>({
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+    },
+    url: `${options.baseURL}/bundle/${options.bundleHash}`,
+    method: 'put',
+    body: pick(options, ['files', 'removedFiles']),
+  });
 
-    if (success) return { type: 'success', value: response.body as RemoteBundle };
-
-    return generateError<ExtendBundleErrorCodes>({ response }, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
-  } catch (error) {
-    return generateError<ExtendBundleErrorCodes>(error, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
-  }
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
 }
 
 // eslint-disable-next-line no-shadow
@@ -408,18 +354,13 @@ export async function getAnalysis(
         type: 'file',
         hash: options.bundleHash,
         limitToFiles: options.limitToFiles || [],
-        ...(options.shard ? {shard: options.shard} : null),
+        ...(options.shard ? { shard: options.shard } : null),
       },
       ...pick(options, ['severity', 'prioritized', 'legacy']),
     },
   };
 
-  try {
-    const { response, success } = await makeRequest(config);
-    if (success) return { type: 'success', value: response.body as GetAnalysisResponseDto };
-
-    return generateError<GetAnalysisErrorCodes>({ response }, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
-  } catch (error) {
-    return generateError<GetAnalysisErrorCodes>(error, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
-  }
+  const res = await makeRequest<GetAnalysisResponseDto>(config);
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
 }

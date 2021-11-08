@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import http, { OutgoingHttpHeaders } from 'http';
 import needle from 'needle';
 import * as querystring from 'querystring';
@@ -5,11 +6,9 @@ import https from 'https';
 import { URL } from 'url';
 import { emitter } from './emitter';
 
-import {
-  ErrorCodes,
-  MAX_RETRY_ATTEMPTS,
-  REQUEST_RETRY_DELAY,
-} from './constants';
+import { ErrorCodes, NETWORK_ERRORS, MAX_RETRY_ATTEMPTS, REQUEST_RETRY_DELAY } from './constants';
+
+const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
 // Snyk CLI allow passing --insecure flag which allows self-signed certificates
 // It updates global namespace property ignoreUnknownCA and we can use it in order
@@ -18,6 +17,8 @@ export declare interface Global extends NodeJS.Global {
   ignoreUnknownCA: boolean;
 }
 declare const global: Global;
+
+const TIMEOUT_DEFAULT = 10000;
 
 const agentOptions = {
   keepAlive: true,
@@ -37,11 +38,21 @@ export interface Payload {
   qs?: querystring.ParsedUrlQueryInput;
   timeout?: number;
   family?: number;
-  attempts?: number;
-  retryDelay?: number;
 }
 
-export async function makeRequest(payload: Payload): Promise<{ success: boolean; response: needle.NeedleResponse }> {
+interface SuccessResponse<T> {
+  success: true;
+  body: T;
+}
+type FailedResponse = {
+  success: false;
+  errorCode: number;
+};
+
+export async function makeRequest<T = void>(
+  payload: Payload,
+  attempts = MAX_RETRY_ATTEMPTS,
+): Promise<SuccessResponse<T> | FailedResponse> {
   const data = JSON.stringify(payload.body);
 
   const parsedUrl = new URL(payload.url);
@@ -60,9 +71,9 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
 
   const options: needle.NeedleOptions = {
     headers: payload.headers,
-    open_timeout: 0, // No timeout
-    response_timeout: payload.timeout,
-    read_timeout: payload.timeout,
+    open_timeout: TIMEOUT_DEFAULT, // No timeout
+    response_timeout: payload.timeout || TIMEOUT_DEFAULT,
+    read_timeout: payload.timeout || TIMEOUT_DEFAULT,
     family: payload.family,
     json: true,
     compressed: true, // sets 'Accept-Encoding' to 'gzip, deflate, br'
@@ -72,35 +83,40 @@ export async function makeRequest(payload: Payload): Promise<{ success: boolean;
   };
 
   emitter.apiRequestLog(`=> HTTP ${method?.toUpperCase()} ${url} ${data ?? ''}`.slice(0, 399));
-  let attempts = payload.attempts ?? MAX_RETRY_ATTEMPTS;
-  let retryDelay = payload.retryDelay ?? REQUEST_RETRY_DELAY;
-  let response, success;
   do {
+    let errorCode: number | undefined;
+    let response: needle.NeedleResponse | undefined;
     try {
       response = await needle(method, url, data, options);
       emitter.apiRequestLog(`<= Response: ${response.statusCode} ${JSON.stringify(response.body)}`);
-      success = !!(response.statusCode && response.statusCode >= 200 && response.statusCode < 300);
-      if (success) return { success, response };
+      const success = !!(response.statusCode && response.statusCode >= 200 && response.statusCode < 300);
+      if (success) return { success, body: response.body as T };
+      errorCode = response.statusCode;
+    } catch (err) {
+      errorCode = NETWORK_ERRORS[err.code || err.errno];
+      emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
+    }
 
-      // Try to avoid breaking requests due to temporary network errors
-      if (attempts > 1 && response.statusCode && [
+    errorCode = errorCode ?? ErrorCodes.serviceUnavailable;
+
+    // Try to avoid breaking requests due to temporary network errors
+    if (
+      attempts > 1 &&
+      [
         ErrorCodes.serviceUnavailable,
         ErrorCodes.badGateway,
         ErrorCodes.connectionRefused,
         ErrorCodes.timeout,
         ErrorCodes.dnsNotFound,
-      ].includes(response.statusCode)) {
-        attempts--;
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-      } else {
-        attempts = 0;
-      }
-    } catch (err) {
-      emitter.apiRequestLog(`Request error --> ${err}`.slice(0, 399));
-      throw err;
+      ].includes(errorCode)
+    ) {
+      attempts--;
+      await sleep(REQUEST_RETRY_DELAY);
+    } else {
+      attempts = 0;
+      return { success: false, errorCode };
     }
   } while (attempts > 0);
-  if (response) return { success, response };
-  // Following line should be unreachable
-  throw new Error('Unknown network error');
+
+  return { success: false, errorCode: ErrorCodes.serviceUnavailable };
 }

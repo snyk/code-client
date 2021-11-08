@@ -2,7 +2,7 @@ import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
-import { fromEntries } from '../src/lib/utils';
+import { emitter } from '../src/emitter';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
@@ -42,7 +42,7 @@ describe('Requests to public API', () => {
         '.erb',
         '.es',
         '.es6',
-	      '.go',
+        '.go',
         '.h',
         '.haml',
         '.hpp',
@@ -55,7 +55,7 @@ describe('Requests to public API', () => {
         '.php',
         '.phtml',
         '.py',
-	      '.rb',
+        '.rb',
         '.rhtml',
         '.slim',
         '.ts',
@@ -70,12 +70,25 @@ describe('Requests to public API', () => {
     expect(response.value.extensions.length).toBeGreaterThan(0);
   });
 
+  it('test network issues', async () => {
+
+    const response = await getFilters('https://faketest.snyk.io', 'test-source', 1);
+    expect(response.type).toEqual('error');
+    if (response.type !== 'error') return;
+    expect(response.error).toMatchObject({
+      apiName: 'filters',
+      statusCode: 452,
+      statusText: '[Connection issue] Could not resolve domain',
+    });
+  });
+
   it(
     'creates bundle successfully',
     async () => {
-      const files: BundleFiles = fromEntries(
-        [...(await bundleFiles).entries()].map(([i, d]) => [d.bundlePath, `${i}`]),
-      );
+      const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj, [i, d]) => {
+        obj[d.bundlePath] = `${i}`;
+        return obj;
+      }, {});
 
       const response = await createBundle({
         baseURL,
@@ -201,9 +214,9 @@ describe('Requests to public API', () => {
       expect(response.type).toEqual('error');
       if (response.type !== 'error') return;
       expect(response.error).toEqual({
-        apiName: "extendBundle",
+        apiName: 'extendBundle',
         statusCode: 404,
-        statusText: "Parent bundle has expired"
+        statusText: 'Parent bundle has expired',
       });
     },
     TEST_TIMEOUT,
@@ -230,7 +243,9 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 
-  it('test successful workflow', async () => {
+  it(
+    'test successful workflow',
+    async () => {
       // Create a bundle first
       const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
         r[d.bundlePath] = pick(d, ['hash', 'content']);

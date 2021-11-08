@@ -14,7 +14,6 @@ import {
   ConnectionOptions,
   GetAnalysisOptions,
 } from './http';
-import { fromEntries } from './lib/utils';
 import { createBundleFromFolders, FileBundle, remoteBundleFactory } from './bundles';
 import { emitter } from './emitter';
 import { AnalysisResult, AnalysisResultLegacy, AnalysisResultSarif, AnalysisFiles, Suggestion } from './interfaces/analysis-result.interface';
@@ -78,12 +77,11 @@ export async function analyzeBundle(options: GetAnalysisOptions): Promise<Analys
 
 function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
   if (baseDir) {
-    return fromEntries(
-      Object.entries(files).map(([path, positions]) => {
-        const filePath = resolveBundleFilePath(baseDir, path);
-        return [filePath, positions];
-      }),
-    );
+    return Object.entries(files).reduce((obj, [path, positions]) => {
+      const filePath = resolveBundleFilePath(baseDir, path);
+      obj[filePath] = positions;
+      return obj;
+    }, {});
   }
   return files;
 }
@@ -216,11 +214,11 @@ const moveSuggestionIndexes = <T>(
   suggestions: { [index: string]: T },
 ): { [index: string]: T } => {
   const entries = Object.entries(suggestions);
-  return fromEntries(
-    entries.map(([i, s]) => {
-      return [`${parseInt(i, 10) + suggestionIndex + 1}`, s];
-    }),
-  );
+
+  return entries.reduce((obj, [i, s]) => {
+    obj[`${parseInt(i, 10) + suggestionIndex + 1}`] = s;
+    return obj;
+  }, {});
 };
 
 function mergeLegacyResults(
@@ -241,11 +239,10 @@ function mergeLegacyResults(
   const newSuggestions = moveSuggestionIndexes<Suggestion>(suggestionIndex, newAnalysisResults.suggestions);
   const suggestions = { ...oldAnalysisResults.suggestions, ...newSuggestions };
 
-  const newFiles = fromEntries(
-    Object.entries(newAnalysisResults.files).map(([fn, s]) => {
-      return [fn, moveSuggestionIndexes(suggestionIndex, s)];
-    }),
-  );
+  const newFiles = Object.entries(newAnalysisResults.files).reduce((obj, [fn, s]) => {
+    obj[fn] = moveSuggestionIndexes(suggestionIndex, s);
+    return obj;
+  }, {});
 
   // expand relative file names to absolute ones only for legacy results
   const changedFiles = [...limitToFiles, ...removedFiles].map(path => resolveBundleFilePath(baseDir, path));

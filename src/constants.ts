@@ -42,6 +42,14 @@ export enum ErrorCodes {
   timeout = 504,
 }
 
+export const NETWORK_ERRORS = {
+  ETIMEDOUT: ErrorCodes.timeout,
+  ECONNREFUSED: ErrorCodes.connectionRefused,
+  ECONNRESET: ErrorCodes.connectionRefused,
+  ENETUNREACH: ErrorCodes.connectionRefused,
+  ENOTFOUND: ErrorCodes.dnsNotFound,
+};
+
 export const DEFAULT_ERROR_MESSAGES: { [P in ErrorCodes]: string } = {
   [ErrorCodes.serverError]: 'Unexpected server error', // 500
   [ErrorCodes.badGateway]: 'Bad gateway', // 502

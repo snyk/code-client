@@ -53,6 +53,7 @@ describe('Requests to public API', () => {
         '.js',
         '.jsx',
         '.php',
+        '.phtml',
         '.py',
 	      '.rb',
         '.rhtml',
@@ -275,7 +276,7 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif' ) {
-        expect(response.value.sarif.runs[0].results).toHaveLength(12);
+        expect(response.value.sarif.runs[0].results).toHaveLength(17);
 
         expect(new Set(response.value.coverage)).toEqual(
           new Set([
@@ -290,14 +291,9 @@ describe('Requests to public API', () => {
               lang: 'C++ (beta)',
             },
             {
-              files: 5,
+              files: 6,
               isSupported: true,
               lang: 'JavaScript',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'JSX',
             },
           ]),
         );
@@ -322,7 +318,7 @@ describe('Requests to public API', () => {
       expect(response.value.type === 'sarif').toBeTruthy();
       if (response.value.type !== 'sarif') return;
 
-      expect(response.value.sarif.runs[0].results).toHaveLength(8);
+      expect(response.value.sarif.runs[0].results).toHaveLength(12);
 
       // Get analysis results with severity 3
       do {

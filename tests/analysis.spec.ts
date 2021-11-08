@@ -68,8 +68,8 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
         if (bundle.analysisResults.type !== 'sarif') return;
 
-        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(7);
-        expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(12);
+        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(10);
+        expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(17);
         const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
           res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`,
         );
@@ -98,14 +98,9 @@ describe('Functional test of analysis', () => {
               lang: 'C++ (beta)',
             },
             {
-              files: 5,
+              files: 6,
               isSupported: true,
               lang: 'JavaScript',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'JSX',
             },
           ]),
         );
@@ -168,7 +163,7 @@ describe('Functional test of analysis', () => {
       if (bundle.analysisResults.type !== 'legacy') return;
 
       expect(Object.keys(bundle.analysisResults.files)).toHaveLength(5);
-      expect(Object.keys(bundle.analysisResults.suggestions)).toHaveLength(8);
+      expect(Object.keys(bundle.analysisResults.suggestions)).toHaveLength(11);
     });
 
     it('analyze folder - with sarif returned', async () => {
@@ -226,8 +221,8 @@ describe('Functional test of analysis', () => {
         expect(fileAnalysis.analysisResults.type === 'sarif').toBeTruthy();
         if (fileAnalysis.analysisResults.type !== 'sarif') return;
 
-        expect(fileAnalysis.analysisResults.sarif.runs[0].tool.driver.rules).toHaveLength(7);
-        expect(fileAnalysis.analysisResults.sarif.runs[0].results).toHaveLength(12);
+        expect(fileAnalysis.analysisResults.sarif.runs[0].tool.driver.rules).toHaveLength(10);
+        expect(fileAnalysis.analysisResults.sarif.runs[0].results).toHaveLength(17);
 
         const extender = await bundleExtender();
         type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
@@ -252,8 +247,8 @@ describe('Functional test of analysis', () => {
 
         const sarifResults = extendedBundle.analysisResults.sarif;
 
-        expect(sarifResults.runs[0].tool.driver.rules).toHaveLength(5);
-        expect(sarifResults.runs[0].results).toHaveLength(10);
+        expect(sarifResults.runs[0].tool.driver.rules).toHaveLength(7);
+        expect(sarifResults.runs[0].results).toHaveLength(15);
         const getRes = (path: string) =>
           sarifResults.runs[0].results!.find(
             res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path,

@@ -2,7 +2,7 @@
 import pick from 'lodash.pick';
 import omit from 'lodash.omit';
 import pMap from 'p-map';
-
+import langMap from 'lang-map';
 import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interface';
 
 import {
@@ -38,7 +38,9 @@ interface PrepareRemoteBundleOptions extends ConnectionOptions {
   removedFiles?: string[];
 }
 
-async function* prepareRemoteBundle(options: PrepareRemoteBundleOptions): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
+async function* prepareRemoteBundle(
+  options: PrepareRemoteBundleOptions,
+): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
   let response: Result<RemoteBundle, BundleErrorCodes>;
   let { bundleHash } = options;
   let cumulativeProgress = 0;
@@ -171,10 +173,6 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
   return remoteBundle;
 }
 
-interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
-  // pass
-}
-
 /**
  * Get supported filters and test baseURL for correctness and availability
  *
@@ -198,7 +196,9 @@ export interface FileBundle extends RemoteBundle {
   supportedFiles: SupportedFiles;
   fileIgnores: string[];
 }
-
+interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+  customerLanguages?: string[];
+}
 /**
  * Creates a remote bundle and returns response from the bundle API
  *
@@ -208,14 +208,26 @@ export interface FileBundle extends RemoteBundle {
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
   const baseDir = determineBaseDir(options.paths);
 
-  const [supportedFiles, fileIgnores] = await Promise.all([
-    // Fetch supporte files to save network traffic
+  const [systemSupportedFiles, fileIgnores] = await Promise.all([
+    // Fetch system supported files to save network traffic
     getSupportedFiles(options.baseURL, options.source),
     // Scan for custom ignore rules
     collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores),
   ]);
 
   emitter.scanFilesProgress(0);
+
+  const supportedFiles = {
+    ...systemSupportedFiles,
+    extensions: [''],
+  };
+  if (options.customerLanguages) {
+    const customerExtensions = convertLanguagesToExtensions(options.customerLanguages);
+    const allowedExtensions = getAllowedExtensions(systemSupportedFiles.extensions, customerExtensions);
+    supportedFiles.extensions = allowedExtensions;
+  } else {
+    supportedFiles.extensions = systemSupportedFiles.extensions;
+  }
   const bundleFiles = [];
   let totalFiles = 0;
   const bundleFileCollector = collectBundleFiles({
@@ -248,4 +260,33 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     supportedFiles,
     fileIgnores,
   };
+}
+
+export function convertLanguagesToExtensions(languages: string[]): string[] {
+  const langDictionary = {
+    csharp: 'c#',
+    cpp: 'c++',
+  };
+  const extensions =
+    languages
+      .map(language => {
+        if (langDictionary[language]) {
+          return langMap.extensions(langDictionary[language]);
+        }
+        return langMap.extensions(language);
+      })
+      .flat()
+      .map(language => `.${language}`) || [];
+
+  return extensions;
+}
+
+function getAllowedExtensions(systemExtensions: string[], customerExtensions: string[]): string[] {
+  const allowedExtensions = customerExtensions.filter(ce => {
+    if (systemExtensions.includes(ce)) {
+      return true;
+    }
+    return false;
+  });
+  return allowedExtensions;
 }

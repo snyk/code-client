@@ -2,13 +2,12 @@ import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
-import { emitter } from '../src/emitter';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleHash = '3691c255a7fa00b47bb3ca96593f7108f3539cbe4bc6836e20e5c43410971979';
+const fakeBundleHash = '66f93024eec238dc454fad6bb8617ce17001c27396336358f200052faff13449';
 let fakeBundleHashFull = '';
-const realBundleHash = '7f1817d92710efc50f3b68a5f5dcca2bfb7d0ce82db78f2ecd30fd9e9a410059';
+const realBundleHash = '';
 let realBundleHashFull = '';
 
 const fakeMissingFiles = [
@@ -35,6 +34,8 @@ describe('Requests to public API', () => {
         '.cs',
         '.c',
         '.cc',
+        '.cjs',
+        '.cls',
         '.cpp',
         '.cs',
         '.cxx',
@@ -52,12 +53,15 @@ describe('Requests to public API', () => {
         '.java',
         '.js',
         '.jsx',
+        '.kt',
+        '.mjs',
         '.php',
         '.phtml',
         '.py',
         '.rb',
         '.rhtml',
         '.slim',
+        '.swift',
         '.ts',
         '.tsx',
         '.vue',
@@ -71,7 +75,6 @@ describe('Requests to public API', () => {
   });
 
   it('test network issues', async () => {
-
     const response = await getFilters('https://faketest.snyk.io', 'test-source', 1);
     expect(response.type).toEqual('error');
     if (response.type !== 'error') return;
@@ -192,7 +195,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
-      expect(response.value.bundleHash).toContain('587a6bcb0095606ad57ccc7bb7ac6401475ce4181c13f7136491a16df06544f1');
+      expect(response.value.bundleHash).toContain('1484a1a5cf09854080e7be7ed023fd085287d5cf71d046aed47d2c03de1190c6');
       expect(response.value.missingFiles).toEqual([`new.js`]);
     },
     TEST_TIMEOUT,
@@ -237,7 +240,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('7b0c0099abe1224f0ef92f6a4a0973ec02fa8f57357ec2e7a4e852738bf75178');
+      expect(response.value.bundleHash).toContain('77d2fc40d9b77f3e8cfc3b5046e634e5edd958ea3a9b00fb12051fa30942d61f');
       expect(response.value.missingFiles).toHaveLength(11);
     },
     TEST_TIMEOUT,
@@ -290,7 +293,7 @@ describe('Requests to public API', () => {
       if (response.type === 'error') return;
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
-      if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif' ) {
+      if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
         expect(response.value.sarif.runs[0].results).toHaveLength(17);
 
         expect(new Set(response.value.coverage)).toEqual(

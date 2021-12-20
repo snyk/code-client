@@ -1,13 +1,20 @@
-import { analyzeFolders, extendAnalysis, FileAnalysis } from './analysis';
+import { analyzeFolders, extendAnalysis } from './analysis';
 import { createBundleFromFolders } from './bundles';
 import { emitter } from './emitter';
 import { startSession, checkSession, getAnalysis, getIpFamily, IpFamily } from './http';
 import * as constants from './constants';
 import { getGlobPatterns } from './files';
 
-import { SupportedFiles } from './interfaces/files.interface';
+import { SupportedFiles, FileAnalysis } from './interfaces/files.interface';
 import { AnalysisSeverity } from './interfaces/analysis-options.interface';
-import { AnalysisResult, AnalysisResultLegacy, FilePath, FileSuggestion, Suggestion, Marker } from './interfaces/analysis-result.interface';
+import {
+  AnalysisResult,
+  AnalysisResultLegacy,
+  FilePath,
+  FileSuggestion,
+  Suggestion,
+  Marker,
+} from './interfaces/analysis-result.interface';
 
 export {
   getGlobPatterns,

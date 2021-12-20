@@ -17,7 +17,7 @@ import {
   CACHE_KEY,
   DOTSNYK_FILENAME,
 } from './constants';
-
+import { CollectBundleFilesOptions } from './interfaces/analysis-options.interface';
 import { SupportedFiles, FileInfo } from './interfaces/files.interface';
 
 const isWindows = nodePath.sep === '\\';
@@ -225,18 +225,6 @@ async function* searchFiles(
   }
 }
 
-export interface AnalyzeFoldersOptions {
-  paths: string[];
-  symlinksEnabled?: boolean;
-  defaultFileIgnores?: string[];
-}
-
-export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
-  supportedFiles: SupportedFiles;
-  baseDir: string;
-  fileIgnores: string[];
-}
-
 /**
  * Returns bundle files from requested paths
  * */
@@ -350,7 +338,7 @@ export async function prepareExtendingBundle(
   };
 }
 
-export function getBundleFilePath(filePath: string, baseDir: string) {
+export function getBundleFilePath(filePath: string, baseDir: string): string {
   const relPath = baseDir ? nodePath.relative(baseDir, filePath) : filePath; // relPath without explicit base makes no sense
   const posixPath = !isWindows ? relPath : relPath.replace(/\\/g, '/');
   return encodeURI(posixPath);
@@ -358,7 +346,7 @@ export function getBundleFilePath(filePath: string, baseDir: string) {
 
 export function calcHash(content: string): string {
   return crypto.createHash(HASH_ALGORITHM).update(content).digest(ENCODE_TYPE);
-};
+}
 
 export async function getFileInfo(
   filePath: string,

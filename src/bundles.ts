@@ -8,7 +8,6 @@ import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interf
 import {
   composeFilePayloads,
   resolveBundleFiles,
-  AnalyzeFoldersOptions,
   collectIgnoreRules,
   determineBaseDir,
   collectBundleFiles,
@@ -29,6 +28,7 @@ import {
 
 import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
 import { emitter } from './emitter';
+import { AnalyzeFoldersOptions } from './interfaces/analysis-options.interface';
 
 type BundleErrorCodes = CreateBundleErrorCodes | CheckBundleErrorCodes | ExtendBundleErrorCodes;
 
@@ -38,7 +38,9 @@ interface PrepareRemoteBundleOptions extends ConnectionOptions {
   removedFiles?: string[];
 }
 
-async function* prepareRemoteBundle(options: PrepareRemoteBundleOptions): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
+async function* prepareRemoteBundle(
+  options: PrepareRemoteBundleOptions,
+): AsyncGenerator<Result<RemoteBundle, BundleErrorCodes>> {
   let response: Result<RemoteBundle, BundleErrorCodes>;
   let { bundleHash } = options;
   let cumulativeProgress = 0;

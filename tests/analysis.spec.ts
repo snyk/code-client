@@ -1,7 +1,7 @@
 import path from 'path';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders, extendAnalysis, FileAnalysis } from '../src/analysis';
+import { analyzeFolders, extendAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFiles, bundleFilesFull, bundleExtender } from './constants/sample';
@@ -262,9 +262,7 @@ describe('Functional test of analysis', () => {
         if (!sampleRes) return; // TS trick
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes!.ruleId).toEqual(
-          sarifResults.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
-        );
+        expect(sampleRes!.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
 
         expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           extendedBundle.analysisResults.timing.fetchingCode,

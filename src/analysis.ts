@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import omit from 'lodash.omit';
 
-import { AnalyzeFoldersOptions, prepareExtendingBundle, resolveBundleFilePath, calcHash } from './files';
+import { prepareExtendingBundle, resolveBundleFilePath, calcHash } from './files';
 import { POLLING_INTERVAL } from './constants';
 import {
   GetAnalysisErrorCodes,
@@ -10,13 +10,19 @@ import {
   Result,
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
-  AnalysisOptions,
-  ConnectionOptions,
   GetAnalysisOptions,
 } from './http';
-import { createBundleFromFolders, FileBundle, remoteBundleFactory } from './bundles';
+import { createBundleFromFolders, remoteBundleFactory } from './bundles';
 import { emitter } from './emitter';
-import { AnalysisResult, AnalysisResultLegacy, AnalysisResultSarif, AnalysisFiles, Suggestion } from './interfaces/analysis-result.interface';
+import {
+  AnalysisResult,
+  AnalysisResultLegacy,
+  AnalysisResultSarif,
+  AnalysisFiles,
+  Suggestion,
+} from './interfaces/analysis-result.interface';
+import { FileAnalysisOptions } from './interfaces/analysis-options.interface';
+import { FileAnalysis } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -86,17 +92,6 @@ function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFi
   return files;
 }
 
-interface FileAnalysisOptions {
-  connection: ConnectionOptions;
-  analysisOptions: AnalysisOptions;
-  fileOptions: AnalyzeFoldersOptions;
-}
-
-export interface FileAnalysis extends FileAnalysisOptions {
-  fileBundle: FileBundle;
-  analysisResults: AnalysisResult;
-}
-
 export async function analyzeFolders(options: FileAnalysisOptions): Promise<FileAnalysis | null> {
   const fileBundle = await createBundleFromFolders({
     ...options.connection,
@@ -120,19 +115,24 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
   return { fileBundle, analysisResults, ...options };
 }
 
-function mergeBundleResults(oldAnalysisResults: AnalysisResult,
+function mergeBundleResults(
+  oldAnalysisResults: AnalysisResult,
   newAnalysisResults: AnalysisResult,
   limitToFiles: string[],
   removedFiles: string[] = [],
   baseDir: string,
 ): AnalysisResult {
-
   if (newAnalysisResults.type == 'sarif') {
     return mergeSarifResults(oldAnalysisResults as AnalysisResultSarif, newAnalysisResults, limitToFiles, removedFiles);
   }
 
-  return mergeLegacyResults(oldAnalysisResults as AnalysisResultLegacy, newAnalysisResults, limitToFiles, removedFiles, baseDir);
-
+  return mergeLegacyResults(
+    oldAnalysisResults as AnalysisResultLegacy,
+    newAnalysisResults,
+    limitToFiles,
+    removedFiles,
+    baseDir,
+  );
 }
 
 function mergeSarifResults(
@@ -227,8 +227,7 @@ function mergeLegacyResults(
   limitToFiles: string[],
   removedFiles: string[] = [],
   baseDir: string,
-  ): AnalysisResultLegacy {
-
+): AnalysisResultLegacy {
   // expand relative file names to absolute ones only for legacy results
   newAnalysisResults.files = normalizeResultFiles(newAnalysisResults.files, baseDir);
 
@@ -259,11 +258,7 @@ function mergeLegacyResults(
   };
 }
 
-interface ExtendAnalysisOptions extends FileAnalysis {
-  files: string[];
-}
-
-export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<FileAnalysis | null> {
+export async function extendAnalysis(options: FileAnalysis & { files: string[] }): Promise<FileAnalysis | null> {
   const { files, removedFiles } = await prepareExtendingBundle(
     options.fileBundle.baseDir,
     options.fileBundle.supportedFiles,
@@ -303,7 +298,13 @@ export async function extendAnalysis(options: ExtendAnalysisOptions): Promise<Fi
     limitToFiles,
   });
 
-  analysisResults = mergeBundleResults(options.analysisResults, analysisResults, limitToFiles, removedFiles, options.fileBundle.baseDir);
+  analysisResults = mergeBundleResults(
+    options.analysisResults,
+    analysisResults,
+    limitToFiles,
+    removedFiles,
+    options.fileBundle.baseDir,
+  );
 
   return { ...options, fileBundle, analysisResults };
 }

@@ -17,23 +17,20 @@ export enum AnalysisSeverity {
 }
 
 export interface AnalysisContext {
-  orgPublicId: string;
-  orgDisplayName: string;
-  projectPublicId: string;
-  projectName: string;
-  initiator: 'IDE' | 'CLI';
-  flow: string;
+  analysisContext?: {
+    orgPublicId?: string;
+    orgDisplayName?: string;
+    projectPublicId?: string;
+    projectName?: string;
+    initiator: 'IDE' | 'CLI';
+    flow?: string;
+  };
 }
 
-export interface AnalysisMetadata {
-  metadata?: Partial<AnalysisContext>;
-}
-
-export interface FileAnalysisOptions {
+export interface FileAnalysisOptions extends AnalysisContext {
   connection: ConnectionOptions;
   analysisOptions: AnalysisOptions;
   fileOptions: AnalyzeFoldersOptions;
-  analysisContext?: Partial<AnalysisContext>;
 }
 
 export interface AnalyzeFoldersOptions {

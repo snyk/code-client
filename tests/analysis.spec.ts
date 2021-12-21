@@ -4,12 +4,13 @@ import jsonschema from 'jsonschema';
 import { analyzeFolders, extendAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { sampleProjectPath, bundleFiles, bundleFilesFull, bundleExtender } from './constants/sample';
+import { sampleProjectPath, bundleFilesFull, bundleExtender } from './constants/sample';
 import { emitter } from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
-import { AnalysisSeverity } from '../src/interfaces/analysis-options.interface';
+import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
+import * as needle from '../src/needle';
 
 describe('Functional test of analysis', () => {
   describe('analyzeFolders', () => {
@@ -77,8 +78,8 @@ describe('Functional test of analysis', () => {
         if (!sampleRes) return; // TS trick
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes!.ruleId).toEqual(
-          bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id,
+        expect(sampleRes.ruleId).toEqual(
+          bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes.ruleIndex].id,
         );
 
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
@@ -228,7 +229,7 @@ describe('Functional test of analysis', () => {
         type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
         let extendedBundle!: Awaited<ReturnType<typeof extendAnalysis>>;
         try {
-          await extender.exec();
+          extender.exec();
           extendedBundle = await extendAnalysis({
             ...fileAnalysis,
             files: extender.files.all,
@@ -237,7 +238,7 @@ describe('Functional test of analysis', () => {
           console.error(err);
           expect(err).toBeFalsy();
         } finally {
-          await extender.restore();
+          extender.restore();
         }
         expect(extendedBundle).toBeTruthy();
         if (!extendedBundle) return; // TS trick
@@ -262,7 +263,7 @@ describe('Functional test of analysis', () => {
         if (!sampleRes) return; // TS trick
         expect(sampleRes.ruleIndex).toBeDefined();
         if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes!.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes!.ruleIndex!].id);
+        expect(sampleRes.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes.ruleIndex].id);
 
         expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
           extendedBundle.analysisResults.timing.fetchingCode,
@@ -295,5 +296,38 @@ describe('Functional test of analysis', () => {
       },
       TEST_TIMEOUT,
     );
+
+    it('sends analysis metadata for analysis request', async () => {
+      const analysisContext: AnalysisContext = {
+        analysisContext: {
+          flow: 'test',
+          initiator: 'CLI',
+          orgDisplayName: 'org',
+          orgPublicId: 'id',
+          projectName: 'proj',
+          projectPublicId: 'id',
+        },
+      };
+
+      const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+
+      await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: {
+          severity: 1,
+        },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+        },
+        ...analysisContext,
+      });
+      const makeRequestSpyLastCalledWith = makeRequestSpy.mock.calls[makeRequestSpy.mock.calls.length - 1][0];
+      expect(makeRequestSpyLastCalledWith).toEqual(
+        expect.objectContaining({
+          body: expect.objectContaining(analysisContext),
+        }),
+      );
+    });
   });
 });

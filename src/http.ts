@@ -6,6 +6,7 @@ import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMP
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 import { makeRequest, Payload } from './needle';
+import { AnalysisOptions, AnalysisMetadata } from './interfaces/analysis-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -327,15 +328,7 @@ const GET_ANALYSIS_ERROR_MESSAGES: { [P in GetAnalysisErrorCodes]: string } = {
   [ErrorCodes.serverError]: 'Getting analysis failed',
 };
 
-export interface AnalysisOptions {
-  readonly shard?: string;
-  readonly severity?: number;
-  readonly limitToFiles?: string[];
-  readonly prioritized?: boolean;
-  readonly legacy?: boolean;
-}
-
-export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions {
+export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions, AnalysisMetadata {
   bundleHash: string;
 }
 
@@ -356,7 +349,7 @@ export async function getAnalysis(
         limitToFiles: options.limitToFiles || [],
         ...(options.shard ? { shard: options.shard } : null),
       },
-      ...pick(options, ['severity', 'prioritized', 'legacy']),
+      ...pick(options, ['severity', 'prioritized', 'legacy', 'metadata']),
     },
   };
 

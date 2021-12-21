@@ -6,7 +6,7 @@ import * as constants from './constants';
 import { getGlobPatterns } from './files';
 
 import { SupportedFiles, FileAnalysis } from './interfaces/files.interface';
-import { AnalysisSeverity } from './interfaces/analysis-options.interface';
+import { AnalysisSeverity, AnalysisContext } from './interfaces/analysis-options.interface';
 import {
   AnalysisResult,
   AnalysisResultLegacy,
@@ -37,4 +37,5 @@ export {
   checkSession,
   getIpFamily,
   IpFamily,
+  AnalysisContext,
 };

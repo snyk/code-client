@@ -4,12 +4,13 @@ import jsonschema from 'jsonschema';
 import { analyzeFolders, extendAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { sampleProjectPath, bundleFiles, bundleFilesFull, bundleExtender } from './constants/sample';
+import { sampleProjectPath, bundleFilesFull, bundleExtender } from './constants/sample';
 import { emitter } from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
-import { AnalysisSeverity } from '../src/interfaces/analysis-options.interface';
+import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
+import * as needle from '../src/needle';
 
 describe('Functional test of analysis', () => {
   describe('analyzeFolders', () => {
@@ -295,5 +296,38 @@ describe('Functional test of analysis', () => {
       },
       TEST_TIMEOUT,
     );
+
+    it('sends analysis metadata for analysis request', async () => {
+      const analysisContext: AnalysisContext = {
+        flow: 'test',
+        initiator: 'CLI',
+        orgDisplayName: 'org',
+        orgPublicId: 'id',
+        projectName: 'proj',
+        projectPublicId: 'id',
+      };
+
+      const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+
+      await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: {
+          severity: 1,
+        },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+        },
+        analysisContext,
+      });
+      const makeRequestSpyLastCalledWith = makeRequestSpy.mock.calls[makeRequestSpy.mock.calls.length - 1][0];
+      expect(makeRequestSpyLastCalledWith).toEqual(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            metadata: analysisContext,
+          }),
+        }),
+      );
+    });
   });
 });

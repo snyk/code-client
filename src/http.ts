@@ -5,7 +5,7 @@ import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMP
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
-import { makeRequest, Payload } from './needle';
+import { FailedResponse, makeRequest, Payload } from './needle';
 import { AnalysisOptions, AnalysisContext } from './interfaces/analysis-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
@@ -99,7 +99,10 @@ export async function getIpFamily(authHost: string): Promise<IpFamily> {
     },
     0,
   );
-  return res.success ? family : undefined;
+
+  const ipv6Incompatible = (<FailedResponse>res).errorCode === ErrorCodes.dnsNotFound;
+
+  return ipv6Incompatible ? undefined : family;
 }
 
 type CheckSessionErrorCodes = GenericErrorTypes | ErrorCodes.unauthorizedUser | ErrorCodes.loginInProgress;

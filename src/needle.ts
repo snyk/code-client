@@ -44,7 +44,7 @@ interface SuccessResponse<T> {
   success: true;
   body: T;
 }
-type FailedResponse = {
+export type FailedResponse = {
   success: false;
   errorCode: number;
 };

@@ -100,7 +100,7 @@ export async function getIpFamily(authHost: string): Promise<IpFamily> {
     0,
   );
 
-  const ipv6Incompatible = (<FailedResponse>res).errorCode === ErrorCodes.dnsNotFound;
+  const ipv6Incompatible = (<FailedResponse>res).error;
 
   return ipv6Incompatible ? undefined : family;
 }

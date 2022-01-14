@@ -248,7 +248,7 @@ describe('Functional test of analysis', () => {
 
         const sarifResults = extendedBundle.analysisResults.sarif;
 
-        expect(sarifResults.runs[0].tool.driver.rules).toHaveLength(7);
+        expect(sarifResults.runs[0].tool.driver.rules).toHaveLength(8);
         expect(sarifResults.runs[0].results).toHaveLength(15);
         const getRes = (path: string) =>
           sarifResults.runs[0].results!.find(

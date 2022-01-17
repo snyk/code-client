@@ -47,6 +47,7 @@ interface SuccessResponse<T> {
 export type FailedResponse = {
   success: false;
   errorCode: number;
+  error: Error | undefined;
 };
 
 export async function makeRequest<T = void>(
@@ -83,8 +84,10 @@ export async function makeRequest<T = void>(
   };
 
   emitter.apiRequestLog(`=> HTTP ${method?.toUpperCase()} ${url} ${data ?? ''}`.slice(0, 399));
+
   do {
     let errorCode: number | undefined;
+    let error: Error | undefined;
     let response: needle.NeedleResponse | undefined;
     try {
       response = await needle(method, url, data, options);
@@ -93,6 +96,7 @@ export async function makeRequest<T = void>(
       if (success) return { success, body: response.body as T };
       errorCode = response.statusCode;
     } catch (err) {
+      error = err; // do not swallow the error, pass further to the caller instead
       errorCode = NETWORK_ERRORS[err.code || err.errno];
       emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
     }
@@ -114,9 +118,9 @@ export async function makeRequest<T = void>(
       await sleep(REQUEST_RETRY_DELAY);
     } else {
       attempts = 0;
-      return { success: false, errorCode };
+      return { success: false, errorCode, error };
     }
   } while (attempts > 0);
 
-  return { success: false, errorCode: ErrorCodes.serviceUnavailable };
+  return { success: false, errorCode: ErrorCodes.serviceUnavailable, error: undefined };
 }

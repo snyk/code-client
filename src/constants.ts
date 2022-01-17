@@ -48,7 +48,6 @@ export const NETWORK_ERRORS = {
   ECONNRESET: ErrorCodes.connectionRefused,
   ENETUNREACH: ErrorCodes.connectionRefused,
   ENOTFOUND: ErrorCodes.dnsNotFound,
-  EADDRNOTAVAIL: ErrorCodes.dnsNotFound, // happens when DNS cannot resolve the IPv6
 };
 
 export const DEFAULT_ERROR_MESSAGES: { [P in ErrorCodes]: string } = {

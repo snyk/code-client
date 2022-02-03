@@ -302,6 +302,10 @@ export async function prepareExtendingBundle(
 
   if (processingFiles.length) {
     // Determine existing files (minus removed)
+    if (isWindows) {
+      processingFiles = processingFiles.map(f => f.replace(/\\/g, '/')); // fg requires forward-slashes in Windows globs
+    }
+
     const entries = await fg(processingFiles, {
       ...fgOptions,
       cwd: baseDir,

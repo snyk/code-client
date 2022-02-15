@@ -24,6 +24,7 @@ export interface ConnectionOptions {
   baseURL: string;
   sessionToken: string;
   source: string;
+  requestId?: string;
 }
 
 // The trick to typecast union type alias
@@ -151,12 +152,13 @@ export async function getFilters(
   baseURL: string,
   source: string,
   attempts = MAX_RETRY_ATTEMPTS,
+  requestId?: string,
 ): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
 
   const res = await makeRequest<SupportedFiles>(
     {
-      headers: { source },
+      headers: { source, ...(requestId && { 'snyk-request-id': requestId }) },
       url: `${baseURL}/${apiName}`,
       method: 'get',
     },
@@ -204,12 +206,13 @@ interface CreateBundleOptions extends ConnectionOptions {
 }
 
 export async function createBundle(
-  options: CreateBundleOptions,
+  options: CreateBundleOptions
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   const payload: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId })
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
@@ -245,6 +248,7 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId })
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'get',
@@ -284,6 +288,7 @@ export async function extendBundle(
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId })
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
@@ -336,12 +341,13 @@ export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions, 
 }
 
 export async function getAnalysis(
-  options: GetAnalysisOptions,
+  options: GetAnalysisOptions
 ): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId })
     },
     url: `${options.baseURL}/analysis`,
     method: 'post',

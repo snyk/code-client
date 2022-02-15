@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import omit from 'lodash.omit';
+import { v4 as uuidv4 } from 'uuid';
 
 import { prepareExtendingBundle, resolveBundleFilePath, calcHash } from './files';
 import { POLLING_INTERVAL } from './constants';
@@ -93,6 +94,9 @@ function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFi
 }
 
 export async function analyzeFolders(options: FileAnalysisOptions): Promise<FileAnalysis | null> {
+  if (!options.connection.requestId) {
+    options.connection.requestId = uuidv4();
+  }
   const fileBundle = await createBundleFromFolders({
     ...options.connection,
     ...options.fileOptions,

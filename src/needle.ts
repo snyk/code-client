@@ -18,7 +18,7 @@ export declare interface Global extends NodeJS.Global {
 }
 declare const global: Global;
 
-const TIMEOUT_DEFAULT = 10000;
+const TIMEOUT_DEFAULT = 600000;
 
 const agentOptions = {
   keepAlive: true,

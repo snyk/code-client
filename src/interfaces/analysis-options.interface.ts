@@ -18,12 +18,24 @@ export enum AnalysisSeverity {
 
 export interface AnalysisContext {
   analysisContext?: {
+    initiator: 'IDE' | 'CLI' | 'GIT' | 'unknown';
+    flow?: string;
+    org?: {
+      name: string;
+      displayName: string;
+      publicId: string;
+      flags: Record<string, boolean>;
+    };
+    project?: {
+      name: string;
+      publicId: string;
+      type: string;
+    };
+    //TODO: this should be removed - leaving here for backwards compatibility
     orgPublicId?: string;
     orgDisplayName?: string;
     projectPublicId?: string;
     projectName?: string;
-    initiator: 'IDE' | 'CLI';
-    flow?: string;
   };
 }
 

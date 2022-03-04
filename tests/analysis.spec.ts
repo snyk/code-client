@@ -3,148 +3,148 @@ import jsonschema from 'jsonschema';
 
 import { analyzeFolders, extendAnalysis } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
-import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { sampleProjectPath, bundleFilesFull, bundleExtender } from './constants/sample';
+import { baseURL, sessionToken, source } from './constants/base';
+import { sampleProjectPath, bundleFilesFull, bundleExtender, supportedFiles } from './constants/sample';
 import { emitter } from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import * as needle from '../src/needle';
+import nock from 'nock';
 
 describe('Functional test of analysis', () => {
+  nock(baseURL).get('/filters').reply(200, supportedFiles);
+  nock(baseURL).post('/bundle').reply(200, { success: true, missingFiles: [], bundleHash: 'bundleHash' });
+  nock(baseURL).post('/analysis').times(1).reply(200, { status: 'FETCHING', progress: 1 });
+  nock(baseURL).post('/analysis').times(1).reply(200, { status: 'ANALYZING', progress: 1 });
+  nock(baseURL).post('/analysis').times(1).reply(200, { status: 'COMPLETE', type: 'sarif' });
+
   describe('analyzeFolders', () => {
-    it(
-      'analyze folder',
-      async () => {
-        const onSupportedFilesLoaded = jest.fn((data: SupportedFiles | null) => {
-          if (data === null) {
-            // all good
-          }
-        });
-        emitter.on(emitter.events.supportedFilesLoaded, onSupportedFilesLoaded);
+    fit('analyze folder', async () => {
+      const onSupportedFilesLoaded = jest.fn((data: SupportedFiles | null) => {
+        if (data === null) {
+          // all good
+        }
+      });
+      emitter.on(emitter.events.supportedFilesLoaded, onSupportedFilesLoaded);
 
-        const bFiles = await bundleFilesFull;
-        const onScanFilesProgress = jest.fn((processed: number) => {
-          expect(typeof processed).toBe('number');
-          expect(processed).toBeGreaterThanOrEqual(0);
-          expect(processed).toBeLessThanOrEqual(bFiles.length);
-        });
-        emitter.on(emitter.events.scanFilesProgress, onScanFilesProgress);
+      const bFiles = await bundleFilesFull;
+      const onScanFilesProgress = jest.fn((processed: number) => {
+        expect(typeof processed).toBe('number');
+        expect(processed).toBeGreaterThanOrEqual(0);
+        expect(processed).toBeLessThanOrEqual(bFiles.length);
+      });
+      emitter.on(emitter.events.scanFilesProgress, onScanFilesProgress);
 
-        const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
-          expect(typeof processed).toBe('number');
-          expect(processed).toBeLessThanOrEqual(total);
-        });
-        emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
+      const onCreateBundleProgress = jest.fn((processed: number, total: number) => {
+        expect(typeof processed).toBe('number');
+        expect(processed).toBeLessThanOrEqual(total);
+      });
+      emitter.on(emitter.events.createBundleProgress, onCreateBundleProgress);
 
-        const onAnalyseProgress = jest.fn((data: AnalysisResponseProgress) => {
-          expect(['WAITING', 'FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
-          expect(typeof data.progress).toBe('number');
-          expect(data.progress).toBeGreaterThanOrEqual(0);
-          expect(data.progress).toBeLessThanOrEqual(1);
-        });
-        emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
+      const onAnalyseProgress = jest.fn((data: AnalysisResponseProgress) => {
+        console.log(data);
+        expect(['WAITING', 'FETCHING', 'ANALYZING', 'DC_DONE']).toContain(data.status);
+        expect(typeof data.progress).toBe('number');
+        expect(data.progress).toBeGreaterThanOrEqual(0);
+        expect(data.progress).toBeLessThanOrEqual(1);
+      });
+      emitter.on(emitter.events.analyseProgress, onAnalyseProgress);
 
-        const onAPIRequestLog = jest.fn((message: string) => {
-          expect(typeof message).toBe('string');
-        });
-        emitter.on(emitter.events.apiRequestLog, onAPIRequestLog);
+      const onAPIRequestLog = jest.fn((message: string) => {
+        expect(typeof message).toBe('string');
+      });
+      emitter.on(emitter.events.apiRequestLog, onAPIRequestLog);
 
-        const bundle = await analyzeFolders({
-          connection: { baseURL, sessionToken, source },
-          analysisOptions: {
-            severity: 1,
-            prioritized: true,
+      const bundle = await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: {
+          severity: 1,
+          prioritized: true,
+        },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+        },
+      });
+
+      expect(bundle).toBeTruthy();
+      if (!bundle) return; // TS trick
+
+      expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
+      if (bundle.analysisResults.type !== 'sarif') return;
+
+      expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(10);
+      expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(17);
+      const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
+        res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`,
+      );
+      expect(sampleRes).toBeTruthy();
+      if (!sampleRes) return; // TS trick
+      expect(sampleRes.ruleIndex).toBeDefined();
+      if (!sampleRes.ruleIndex) return; // TS trick
+      expect(sampleRes.ruleId).toEqual(bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes.ruleIndex].id);
+
+      expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(bundle.analysisResults.timing.fetchingCode);
+      expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
+      expect(new Set(bundle.analysisResults.coverage)).toEqual(
+        new Set([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
           },
-          fileOptions: {
-            paths: [sampleProjectPath],
-            symlinksEnabled: false,
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
           },
-        });
+          {
+            files: 6,
+            isSupported: true,
+            lang: 'JavaScript',
+          },
+        ]),
+      );
 
-        expect(bundle).toBeTruthy();
-        if (!bundle) return; // TS trick
+      // Check if emitter event happened
+      expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
+      expect(onScanFilesProgress).toHaveBeenCalledTimes(10);
+      expect(onCreateBundleProgress).toHaveBeenCalledTimes(2);
+      expect(onAnalyseProgress).toHaveBeenCalled();
+      expect(onAPIRequestLog).toHaveBeenCalled();
 
-        expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
-        if (bundle.analysisResults.type !== 'sarif') return;
+      // Test uploadRemoteBundle with empty list of files
+      await uploadRemoteBundle({
+        baseURL,
+        sessionToken,
+        source,
+        bundleHash: bundle.fileBundle.bundleHash,
+        files: [],
+      });
 
-        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(10);
-        expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(17);
-        const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
-          res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`,
-        );
-        expect(sampleRes).toBeTruthy();
-        if (!sampleRes) return; // TS trick
-        expect(sampleRes.ruleIndex).toBeDefined();
-        if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes.ruleId).toEqual(
-          bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes.ruleIndex].id,
-        );
+      const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
+        expect(typeof processed).toBe('number');
+        expect(processed).toBeLessThanOrEqual(total);
+      });
+      emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
 
-        expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          bundle.analysisResults.timing.fetchingCode,
-        );
-        expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(bundle.analysisResults.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 6,
-              isSupported: true,
-              lang: 'JavaScript',
-            },
-          ]),
-        );
-
-        // Check if emitter event happened
-        expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-        expect(onScanFilesProgress).toHaveBeenCalledTimes(10);
-        expect(onCreateBundleProgress).toHaveBeenCalledTimes(2);
-        expect(onAnalyseProgress).toHaveBeenCalled();
-        expect(onAPIRequestLog).toHaveBeenCalled();
-
-        // Test uploadRemoteBundle with empty list of files
-        await uploadRemoteBundle({
-          baseURL,
-          sessionToken,
-          source,
-          bundleHash: bundle.fileBundle.bundleHash,
-          files: [],
-        });
-
-        const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
-          expect(typeof processed).toBe('number');
-          expect(processed).toBeLessThanOrEqual(total);
-        });
-        emitter.on(emitter.events.uploadBundleProgress, onUploadBundleProgress);
-
-        const shouldNotBeInBundle = [
-          '/.eslintrc.json', // <= no linters on backend
-          'main.js', // <= over MAX_FILE_SIZE
-        ];
-        // Force uploading files one more time
-        await uploadRemoteBundle({
-          baseURL,
-          sessionToken,
-          source,
-          bundleHash: bundle.fileBundle.bundleHash,
-          files: bFiles.filter(({ bundlePath }) => !shouldNotBeInBundle.includes(bundlePath)),
-        });
-        expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
-        expect(onAPIRequestLog).toHaveBeenCalled();
-      },
-      TEST_TIMEOUT,
-    );
+      const shouldNotBeInBundle = [
+        '/.eslintrc.json', // <= no linters on backend
+        'main.js', // <= over MAX_FILE_SIZE
+      ];
+      // Force uploading files one more time
+      await uploadRemoteBundle({
+        baseURL,
+        sessionToken,
+        source,
+        bundleHash: bundle.fileBundle.bundleHash,
+        files: bFiles.filter(({ bundlePath }) => !shouldNotBeInBundle.includes(bundlePath)),
+      });
+      expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
+      expect(onAPIRequestLog).toHaveBeenCalled();
+    });
 
     it('analyze folder legacy json results', async () => {
       const bundle = await analyzeFolders({
@@ -202,100 +202,94 @@ describe('Functional test of analysis', () => {
       expect(bundle).toBeNull();
     });
 
-    it(
-      'extend folder analysis',
-      async () => {
-        const fileAnalysis = await analyzeFolders({
-          connection: { baseURL, sessionToken, source },
-          analysisOptions: {
-            severity: 1,
-          },
-          fileOptions: {
-            paths: [sampleProjectPath],
-            symlinksEnabled: false,
-          },
+    it('extend folder analysis', async () => {
+      const fileAnalysis = await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: {
+          severity: 1,
+        },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+        },
+      });
+
+      expect(fileAnalysis).toBeTruthy();
+      if (!fileAnalysis) return; // TS trick
+
+      expect(fileAnalysis.analysisResults.type === 'sarif').toBeTruthy();
+      if (fileAnalysis.analysisResults.type !== 'sarif') return;
+
+      expect(fileAnalysis.analysisResults.sarif.runs[0].tool.driver.rules?.length).toBeGreaterThan(0);
+      expect(fileAnalysis.analysisResults.sarif.runs[0].results?.length).toBeGreaterThan(0);
+
+      const extender = await bundleExtender();
+      type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
+      let extendedBundle!: Awaited<ReturnType<typeof extendAnalysis>>;
+      try {
+        extender.exec();
+        extendedBundle = await extendAnalysis({
+          ...fileAnalysis,
+          files: extender.files.all,
         });
+      } catch (err) {
+        console.error(err);
+        expect(err).toBeFalsy();
+      } finally {
+        extender.restore();
+      }
+      expect(extendedBundle).toBeTruthy();
+      if (!extendedBundle) return; // TS trick
 
-        expect(fileAnalysis).toBeTruthy();
-        if (!fileAnalysis) return; // TS trick
+      expect(extendedBundle.analysisResults.type === 'sarif').toBeTruthy();
+      if (extendedBundle.analysisResults.type !== 'sarif') return;
 
-        expect(fileAnalysis.analysisResults.type === 'sarif').toBeTruthy();
-        if (fileAnalysis.analysisResults.type !== 'sarif') return;
+      const sarifResults = extendedBundle.analysisResults.sarif;
 
-        expect(fileAnalysis.analysisResults.sarif.runs[0].tool.driver.rules?.length).toBeGreaterThan(0);
-        expect(fileAnalysis.analysisResults.sarif.runs[0].results?.length).toBeGreaterThan(0);
+      expect(sarifResults.runs[0].tool.driver.rules?.length).toBeGreaterThan(0);
+      expect(sarifResults.runs[0].results?.length).toBeGreaterThan(0);
+      const getRes = (path: string) =>
+        sarifResults.runs[0].results!.find(res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path);
+      const sampleRes = getRes(extender.files.added);
+      const changedRes = getRes(extender.files.changed);
+      const removedRes = getRes(extender.files.removed);
+      expect(changedRes).toBeUndefined();
+      expect(removedRes).toBeUndefined();
+      expect(sampleRes).toBeTruthy();
+      if (!sampleRes) return; // TS trick
+      expect(sampleRes.ruleIndex).toBeDefined();
+      if (!sampleRes.ruleIndex) return; // TS trick
+      expect(sampleRes.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes.ruleIndex].id);
 
-        const extender = await bundleExtender();
-        type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
-        let extendedBundle!: Awaited<ReturnType<typeof extendAnalysis>>;
-        try {
-          extender.exec();
-          extendedBundle = await extendAnalysis({
-            ...fileAnalysis,
-            files: extender.files.all,
-          });
-        } catch (err) {
-          console.error(err);
-          expect(err).toBeFalsy();
-        } finally {
-          extender.restore();
-        }
-        expect(extendedBundle).toBeTruthy();
-        if (!extendedBundle) return; // TS trick
-
-        expect(extendedBundle.analysisResults.type === 'sarif').toBeTruthy();
-        if (extendedBundle.analysisResults.type !== 'sarif') return;
-
-        const sarifResults = extendedBundle.analysisResults.sarif;
-
-        expect(sarifResults.runs[0].tool.driver.rules?.length).toBeGreaterThan(0);
-        expect(sarifResults.runs[0].results?.length).toBeGreaterThan(0);
-        const getRes = (path: string) =>
-          sarifResults.runs[0].results!.find(
-            res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === path,
-          );
-        const sampleRes = getRes(extender.files.added);
-        const changedRes = getRes(extender.files.changed);
-        const removedRes = getRes(extender.files.removed);
-        expect(changedRes).toBeUndefined();
-        expect(removedRes).toBeUndefined();
-        expect(sampleRes).toBeTruthy();
-        if (!sampleRes) return; // TS trick
-        expect(sampleRes.ruleIndex).toBeDefined();
-        if (!sampleRes.ruleIndex) return; // TS trick
-        expect(sampleRes.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes.ruleIndex].id);
-
-        expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          extendedBundle.analysisResults.timing.fetchingCode,
-        );
-        expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 4,
-              isSupported: true,
-              lang: 'JavaScript',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'JSX',
-            },
-          ]),
-        );
-      },
-      TEST_TIMEOUT,
-    );
+      expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
+        extendedBundle.analysisResults.timing.fetchingCode,
+      );
+      expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
+      expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(
+        new Set([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
+          },
+          {
+            files: 4,
+            isSupported: true,
+            lang: 'JavaScript',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'JSX',
+          },
+        ]),
+      );
+    });
 
     it('sends analysis metadata for analysis request', async () => {
       const analysisContext: AnalysisContext = {

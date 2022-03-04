@@ -1,6 +1,6 @@
 import pick from 'lodash.pick';
 
-import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
+import { baseURL, sessionToken, source } from './constants/base';
 import { bundleFiles, bundleFilesFull } from './constants/sample';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
@@ -90,278 +90,246 @@ describe('Requests to public API', () => {
     });
   });
 
-  it(
-    'creates bundle successfully',
-    async () => {
-      const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj, [i, d]) => {
-        obj[d.bundlePath] = `${i}`;
-        return obj;
-      }, {});
+  it('creates bundle successfully', async () => {
+    const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj, [i, d]) => {
+      obj[d.bundlePath] = `${i}`;
+      return obj;
+    }, {});
 
-      const response = await createBundle({
+    const response = await createBundle({
+      baseURL,
+      sessionToken,
+      files,
+      source,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') {
+      console.error(response);
+      return;
+    }
+    expect(response.value.bundleHash).toContain(fakeBundleHash);
+    fakeBundleHashFull = response.value.bundleHash;
+    expect(response.value.missingFiles).toEqual(fakeMissingFiles);
+  });
+
+  it('checks bundle successfully', async () => {
+    const response = await checkBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: fakeBundleHashFull,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.bundleHash).toEqual(fakeBundleHashFull);
+    expect(response.value.missingFiles).toEqual(fakeMissingFiles);
+  });
+
+  it('checks expired bundle successfully', async () => {
+    const response = await checkBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: 'mock-expired-bundle-id',
+    });
+    expect(response.type).toEqual('error');
+    // dummy to cheat typescript compiler
+    if (response.type == 'success') return;
+    expect(response.error.statusCode).toEqual(404);
+    expect(response.error.statusText).toEqual('Uploaded bundle has expired');
+  });
+
+  it('request analysis with missing files', async () => {
+    let response;
+    do {
+      response = await getAnalysis({
         baseURL,
         sessionToken,
-        files,
-        source,
-      });
-      expect(response.type).toEqual('success');
-      if (response.type === 'error') {
-        console.error(response);
-        return;
-      }
-      expect(response.value.bundleHash).toContain(fakeBundleHash);
-      fakeBundleHashFull = response.value.bundleHash;
-      expect(response.value.missingFiles).toEqual(fakeMissingFiles);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'checks bundle successfully',
-    async () => {
-      const response = await checkBundle({
-        baseURL,
-        sessionToken,
-        source,
         bundleHash: fakeBundleHashFull,
+        severity: 1,
+        source,
       });
-      expect(response.type).toEqual('success');
-      if (response.type === 'error') return;
-      expect(response.value.bundleHash).toEqual(fakeBundleHashFull);
-      expect(response.value.missingFiles).toEqual(fakeMissingFiles);
-    },
-    TEST_TIMEOUT,
-  );
+    } while (response.type === 'success');
 
-  it(
-    'checks expired bundle successfully',
-    async () => {
-      const response = await checkBundle({
+    expect(response.type).toEqual('error');
+    expect(response.error).toEqual({
+      apiName: 'getAnalysis',
+      statusCode: 404,
+      statusText: 'Not found',
+    });
+  });
+
+  it('extends bundle successfully', async () => {
+    const response = await extendBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: fakeBundleHashFull,
+      files: {
+        'new.js': 'new123',
+      },
+      removedFiles: [
+        `AnnotatorTest.cpp`,
+        `app.js`,
+        `GitHubAccessTokenScrambler12.java`,
+        `db.js`,
+        `main.js`,
+        `not/ignored/this_should_be_ignored.jsx`,
+        `not/ignored/this_should_not_be_ignored.java`,
+        `routes/index.js`,
+        `routes/sharks.js`,
+      ],
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.bundleHash).toContain('1484a1a5cf09854080e7be7ed023fd085287d5cf71d046aed47d2c03de1190c6');
+    expect(response.value.missingFiles).toEqual([`new.js`]);
+  });
+
+  it('extends expired bundle and fails', async () => {
+    const response = await extendBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: 'wrong-bundle-id-2',
+      files: {
+        'new2.js': 'new1234',
+      },
+    });
+
+    expect(response.type).toEqual('error');
+    if (response.type !== 'error') return;
+    expect(response.error).toEqual({
+      apiName: 'extendBundle',
+      statusCode: 404,
+      statusText: 'Parent bundle has expired',
+    });
+  });
+
+  it('uploads fake files to fake bundle', async () => {
+    const response = await extendBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: fakeBundleHashFull,
+      files: {
+        'df.js': { hash: 'df', content: 'const module = new Module();' },
+        'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
+      },
+    });
+    expect(response.type).toEqual('success');
+    if (response.type !== 'success') return; // TS trick
+    expect(response.value.bundleHash).toContain('77d2fc40d9b77f3e8cfc3b5046e634e5edd958ea3a9b00fb12051fa30942d61f');
+    expect(response.value.missingFiles).toHaveLength(11);
+  });
+
+  it('test successful workflow', async () => {
+    // Create a bundle first
+    const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
+      r[d.bundlePath] = pick(d, ['hash', 'content']);
+      return r;
+    }, {});
+
+    const bundleResponse = await createBundle({
+      baseURL,
+      sessionToken,
+      source,
+      files,
+    });
+    expect(bundleResponse.type).toEqual('success');
+    if (bundleResponse.type === 'error') return;
+    expect(bundleResponse.value.bundleHash).toContain(realBundleHash);
+    realBundleHashFull = bundleResponse.value.bundleHash;
+
+    // Check missing files
+    expect(bundleResponse.value.missingFiles).toEqual([]);
+
+    // Check missing files with separate API call
+    const checkResponse = await checkBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: realBundleHashFull,
+    });
+    expect(checkResponse.type).toEqual('success');
+    if (checkResponse.type === 'error') return;
+    expect(checkResponse.value.bundleHash).toEqual(realBundleHashFull);
+    expect(checkResponse.value.missingFiles).toEqual([]);
+
+    // Get analysis results
+    let response = await getAnalysis({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: realBundleHashFull,
+      severity: 1,
+    });
+    expect(response.type).toEqual('success');
+    if (response.type === 'error') return;
+    expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+
+    if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
+      expect(response.value.sarif.runs[0].results).toHaveLength(17);
+
+      expect(new Set(response.value.coverage)).toEqual(
+        new Set([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
+          },
+          {
+            files: 6,
+            isSupported: true,
+            lang: 'JavaScript',
+          },
+        ]),
+      );
+    }
+
+    // Get analysis results limited to 1 file
+    do {
+      response = await getAnalysis({
         baseURL,
         sessionToken,
-        source,
-        bundleHash: 'mock-expired-bundle-id',
-      });
-      expect(response.type).toEqual('error');
-      // dummy to cheat typescript compiler
-      if (response.type == 'success') return;
-      expect(response.error.statusCode).toEqual(404);
-      expect(response.error.statusText).toEqual('Uploaded bundle has expired');
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'request analysis with missing files',
-    async () => {
-      let response;
-      do {
-        response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleHash: fakeBundleHashFull,
-          severity: 1,
-          source,
-        });
-      } while (response.type === 'success');
-
-      expect(response.type).toEqual('error');
-      expect(response.error).toEqual({
-        apiName: 'getAnalysis',
-        statusCode: 404,
-        statusText: 'Not found',
-      });
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'extends bundle successfully',
-    async () => {
-      const response = await extendBundle({
-        baseURL,
-        sessionToken,
-        source,
-        bundleHash: fakeBundleHashFull,
-        files: {
-          'new.js': 'new123',
-        },
-        removedFiles: [
-          `AnnotatorTest.cpp`,
-          `app.js`,
-          `GitHubAccessTokenScrambler12.java`,
-          `db.js`,
-          `main.js`,
-          `not/ignored/this_should_be_ignored.jsx`,
-          `not/ignored/this_should_not_be_ignored.java`,
-          `routes/index.js`,
-          `routes/sharks.js`,
-        ],
-      });
-      expect(response.type).toEqual('success');
-      if (response.type === 'error') return;
-      expect(response.value.bundleHash).toContain('1484a1a5cf09854080e7be7ed023fd085287d5cf71d046aed47d2c03de1190c6');
-      expect(response.value.missingFiles).toEqual([`new.js`]);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'extends expired bundle and fails',
-    async () => {
-      const response = await extendBundle({
-        baseURL,
-        sessionToken,
-        source,
-        bundleHash: 'wrong-bundle-id-2',
-        files: {
-          'new2.js': 'new1234',
-        },
-      });
-
-      expect(response.type).toEqual('error');
-      if (response.type !== 'error') return;
-      expect(response.error).toEqual({
-        apiName: 'extendBundle',
-        statusCode: 404,
-        statusText: 'Parent bundle has expired',
-      });
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'uploads fake files to fake bundle',
-    async () => {
-      const response = await extendBundle({
-        baseURL,
-        sessionToken,
-        source,
-        bundleHash: fakeBundleHashFull,
-        files: {
-          'df.js': { hash: 'df', content: 'const module = new Module();' },
-          'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
-        },
-      });
-      expect(response.type).toEqual('success');
-      if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('77d2fc40d9b77f3e8cfc3b5046e634e5edd958ea3a9b00fb12051fa30942d61f');
-      expect(response.value.missingFiles).toHaveLength(11);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
-    'test successful workflow',
-    async () => {
-      // Create a bundle first
-      const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
-        r[d.bundlePath] = pick(d, ['hash', 'content']);
-        return r;
-      }, {});
-
-      const bundleResponse = await createBundle({
-        baseURL,
-        sessionToken,
-        source,
-        files,
-      });
-      expect(bundleResponse.type).toEqual('success');
-      if (bundleResponse.type === 'error') return;
-      expect(bundleResponse.value.bundleHash).toContain(realBundleHash);
-      realBundleHashFull = bundleResponse.value.bundleHash;
-
-      // Check missing files
-      expect(bundleResponse.value.missingFiles).toEqual([]);
-
-      // Check missing files with separate API call
-      const checkResponse = await checkBundle({
-        baseURL,
-        sessionToken,
-        source,
-        bundleHash: realBundleHashFull,
-      });
-      expect(checkResponse.type).toEqual('success');
-      if (checkResponse.type === 'error') return;
-      expect(checkResponse.value.bundleHash).toEqual(realBundleHashFull);
-      expect(checkResponse.value.missingFiles).toEqual([]);
-
-      // Get analysis results
-      let response = await getAnalysis({
-        baseURL,
-        sessionToken,
-        source,
         bundleHash: realBundleHashFull,
         severity: 1,
+        limitToFiles: [`GitHubAccessTokenScrambler12.java`],
+        source,
+      });
+
+      expect(response.type).toEqual('success');
+      if (response.type === 'error') return;
+      expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+    } while (response.value.status !== AnalysisStatus.complete);
+
+    expect(response.value.type === 'sarif').toBeTruthy();
+    if (response.value.type !== 'sarif') return;
+
+    expect(response.value.sarif.runs[0].results).toHaveLength(12);
+
+    // Get analysis results with severity 3
+    do {
+      response = await getAnalysis({
+        baseURL,
+        sessionToken,
+        bundleHash: realBundleHashFull,
+        severity: 3,
+        source,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
+    } while (response.value.status !== AnalysisStatus.complete);
 
-      if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
-        expect(response.value.sarif.runs[0].results).toHaveLength(17);
+    expect(response.value.type === 'sarif').toBeTruthy();
+    if (response.value.type !== 'sarif') return;
 
-        expect(new Set(response.value.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 6,
-              isSupported: true,
-              lang: 'JavaScript',
-            },
-          ]),
-        );
-      }
-
-      // Get analysis results limited to 1 file
-      do {
-        response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleHash: realBundleHashFull,
-          severity: 1,
-          limitToFiles: [`GitHubAccessTokenScrambler12.java`],
-          source,
-        });
-
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.complete);
-
-      expect(response.value.type === 'sarif').toBeTruthy();
-      if (response.value.type !== 'sarif') return;
-
-      expect(response.value.sarif.runs[0].results).toHaveLength(12);
-
-      // Get analysis results with severity 3
-      do {
-        response = await getAnalysis({
-          baseURL,
-          sessionToken,
-          bundleHash: realBundleHashFull,
-          severity: 3,
-          source,
-        });
-        expect(response.type).toEqual('success');
-        if (response.type === 'error') return;
-        expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
-      } while (response.value.status !== AnalysisStatus.complete);
-
-      expect(response.value.type === 'sarif').toBeTruthy();
-      if (response.value.type !== 'sarif') return;
-
-      expect(response.value.sarif.runs[0].results).toHaveLength(4);
-    },
-    TEST_TIMEOUT,
-  );
+    expect(response.value.sarif.runs[0].results).toHaveLength(4);
+  });
 });

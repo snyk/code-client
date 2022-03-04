@@ -2,9 +2,12 @@ import path from 'path';
 
 import { createBundleFromFolders } from '../src/bundles';
 import { baseURL, sessionToken, source } from './constants/base';
-import { sampleProjectPath } from './constants/sample';
+import { sampleProjectPath, supportedFiles } from './constants/sample';
+import nock from 'nock';
 
 describe('Functional test for bundle creation', () => {
+  nock(baseURL).get('/filters').reply(200, supportedFiles);
+  nock(baseURL).post('/bundle').reply(200, { success: true, missingFiles: [], bundleHash: 'bundleHash' });
   it('should return a bundle with correct parameters', async () => {
     const paths: string[] = [path.join(sampleProjectPath)];
     const symlinksEnabled = false;

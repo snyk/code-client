@@ -100,6 +100,7 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
   const fileBundle = await createBundleFromFolders({
     ...options.connection,
     ...options.fileOptions,
+    languages: options.languages,
   });
   if (fileBundle === null) return null;
 

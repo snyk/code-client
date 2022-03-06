@@ -31,12 +31,14 @@ export interface FileAnalysisOptions extends AnalysisContext {
   connection: ConnectionOptions;
   analysisOptions: AnalysisOptions;
   fileOptions: AnalyzeFoldersOptions;
+  languages?: string[];
 }
 
 export interface AnalyzeFoldersOptions {
   paths: string[];
   symlinksEnabled?: boolean;
   defaultFileIgnores?: string[];
+  languages?: string[];
 }
 
 export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {

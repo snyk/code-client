@@ -183,15 +183,32 @@ interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFolde
  * @param source
  * @returns
  */
-async function getSupportedFiles(baseURL: string, source: string, requestId?: string): Promise<SupportedFiles> {
+async function getSupportedFiles(
+  baseURL: string,
+  source: string,
+  requestId?: string,
+  languages?: string[],
+): Promise<SupportedFiles> {
   emitter.supportedFilesLoaded(null);
   const resp = await getFilters(baseURL, source, undefined, requestId);
   if (resp.type === 'error') {
     throw resp.error;
   }
-  const supportedFiles = resp.value;
-  emitter.supportedFilesLoaded(supportedFiles);
-  return supportedFiles;
+  const supportedFilesFromApi = resp.value;
+  //Given supported languages from 'registy'
+  if (languages) {
+    let supportedFiles: SupportedFiles = {} as any;
+    supportedFiles.configFiles = supportedFilesFromApi.configFiles;
+    supportedFiles.extensions = languages;
+    //For verification only
+    supportedFiles.extensions = supportedFiles.extensions.filter(langExtension =>
+      supportedFilesFromApi.extensions.includes(langExtension),
+    );
+    emitter.supportedFilesLoaded(supportedFiles);
+    return supportedFiles;
+  }
+  emitter.supportedFilesLoaded(supportedFilesFromApi);
+  return supportedFilesFromApi;
 }
 
 export interface FileBundle extends RemoteBundle {
@@ -208,10 +225,9 @@ export interface FileBundle extends RemoteBundle {
  */
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
   const baseDir = determineBaseDir(options.paths);
-
   const [supportedFiles, fileIgnores] = await Promise.all([
     // Fetch supporte files to save network traffic
-    getSupportedFiles(options.baseURL, options.source, options.requestId),
+    getSupportedFiles(options.baseURL, options.source, options.requestId, options.languages),
     // Scan for custom ignore rules
     collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores),
   ]);

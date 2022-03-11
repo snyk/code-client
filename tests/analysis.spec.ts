@@ -82,9 +82,8 @@ describe('Functional test of analysis', () => {
           bundle.analysisResults.sarif.runs[0].tool.driver.rules![sampleRes.ruleIndex].id,
         );
 
-        expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          bundle.analysisResults.timing.fetchingCode,
-        );
+        expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
+        expect(bundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
         expect(new Set(bundle.analysisResults.coverage)).toEqual(
           new Set([
@@ -265,9 +264,8 @@ describe('Functional test of analysis', () => {
         if (!sampleRes.ruleIndex) return; // TS trick
         expect(sampleRes.ruleId).toEqual(sarifResults.runs[0].tool.driver.rules![sampleRes.ruleIndex].id);
 
-        expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(
-          extendedBundle.analysisResults.timing.fetchingCode,
-        );
+        expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
+        expect(extendedBundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
         expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(
           new Set([

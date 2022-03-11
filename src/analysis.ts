@@ -110,7 +110,7 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
     ...options.connection,
     ...options.analysisOptions,
     shard: calcHash(fileBundle.baseDir),
-    analysisContext: options.analysisContext,
+    ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
   });
 
   if (analysisResults.type === 'legacy') {

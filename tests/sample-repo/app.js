@@ -1,7 +1,7 @@
-const express = require('express')
+const express = require('express');
 
 const app = express();
-const router = express.Router()
+const router = express.Router();
 let db = require('./db');
 const sharks = require('./routes/sharks');
 
@@ -15,5 +15,5 @@ app.use(express.static(path));
 app.use('/sharks', sharks);
 
 app.listen(port, function () {
-  console.log(`Example app listening on ${port}!`)
-})
+  console.log(`Example app listening on ${port}!`);
+});

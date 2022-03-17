@@ -206,13 +206,13 @@ interface CreateBundleOptions extends ConnectionOptions {
 }
 
 export async function createBundle(
-  options: CreateBundleOptions
+  options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   const payload: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId })
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
@@ -248,7 +248,7 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId })
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'get',
@@ -288,7 +288,7 @@ export async function extendBundle(
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId })
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
@@ -341,13 +341,13 @@ export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions, 
 }
 
 export async function getAnalysis(
-  options: GetAnalysisOptions
+  options: GetAnalysisOptions,
 ): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId })
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
     },
     url: `${options.baseURL}/analysis`,
     method: 'post',

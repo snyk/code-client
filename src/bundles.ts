@@ -197,7 +197,7 @@ async function getSupportedFiles(
   const supportedFilesFromApi = resp.value;
   //Given supported languages from 'registy'
   if (languages) {
-    let supportedFiles: SupportedFiles = {} as any;
+    const supportedFiles: SupportedFiles = {} as any;
     supportedFiles.configFiles = supportedFilesFromApi.configFiles;
     supportedFiles.extensions = languages;
     //For verification only

@@ -436,7 +436,7 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
   const getFileDataPayloadSize = (fileData: FileInfo) =>
     (fileData.content?.length || 0) + fileData.bundlePath.length + fileData.hash.length;
   const isLowerSize = (size: number, fileData: FileInfo) => size >= getFileDataPayloadSize(fileData);
-  for (let fileData of files) {
+  for (const fileData of files) {
     // This file is empty or too large to send, it should be skipped.
     if (!fileData.size || !isLowerSize(bucketSize, fileData)) continue;
 

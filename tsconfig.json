@@ -19,12 +19,8 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedParameters": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

@@ -14,43 +14,43 @@ var agt = navigator.userAgent.toLowerCase();
 var browserType;
 var browserVer;
 
-if (agt.indexOf("opera") != -1) {
-  browserType = "Opera";
+if (agt.indexOf('opera') != -1) {
+  browserType = 'Opera';
 
-  if (agt.indexOf("opera 7") != -1 || agt.indexOf("opera/7") != -1) {
-    browserVer = "Opera7";
-  } else if (agt.indexOf("opera 8") != -1 || agt.indexOf("opera/8") != -1) {
-    browserVer = "Opera8";
-  } else if (agt.indexOf("opera 9") != -1 || agt.indexOf("opera/9") != -1) {
-    browserVer = "Opera9";
+  if (agt.indexOf('opera 7') != -1 || agt.indexOf('opera/7') != -1) {
+    browserVer = 'Opera7';
+  } else if (agt.indexOf('opera 8') != -1 || agt.indexOf('opera/8') != -1) {
+    browserVer = 'Opera8';
+  } else if (agt.indexOf('opera 9') != -1 || agt.indexOf('opera/9') != -1) {
+    browserVer = 'Opera9';
   }
-} else if (agt.indexOf("applewebkit") != -1) {
-  browserType = "Safari";
+} else if (agt.indexOf('applewebkit') != -1) {
+  browserType = 'Safari';
 
-  if (agt.indexOf("version/3") != -1) {
-    browserVer = "Safari3";
-  } else if (agt.indexOf("safari/4") != -1) {
-    browserVer = "Safari2";
+  if (agt.indexOf('version/3') != -1) {
+    browserVer = 'Safari3';
+  } else if (agt.indexOf('safari/4') != -1) {
+    browserVer = 'Safari2';
   }
-} else if (agt.indexOf("khtml") != -1) {
-  browserType = "Konqueror";
-} else if (agt.indexOf("msie") != -1) {
-  browserType = "IE";
+} else if (agt.indexOf('khtml') != -1) {
+  browserType = 'Konqueror';
+} else if (agt.indexOf('msie') != -1) {
+  browserType = 'IE';
 
-  if (agt.indexOf("msie 6") != -1) {
-    browserVer = "IE6";
-  } else if (agt.indexOf("msie 7") != -1) {
-    browserVer = "IE7";
+  if (agt.indexOf('msie 6') != -1) {
+    browserVer = 'IE6';
+  } else if (agt.indexOf('msie 7') != -1) {
+    browserVer = 'IE7';
   }
-} else if (agt.indexOf("gecko") != -1) {
-  browserType = "Firefox";
+} else if (agt.indexOf('gecko') != -1) {
+  browserType = 'Firefox';
 
-  if (agt.indexOf("rv:1.7") != -1) {
-    browserVer = "Firefox1";
-  } else if (agt.indexOf("rv:1.8)") != -1 || agt.indexOf("rv:1.8.0") != -1) {
-    browserVer = "Firefox15";
-  } else if (agt.indexOf("rv:1.8.1") != -1) {
-    browserVer = "Firefox2";
+  if (agt.indexOf('rv:1.7') != -1) {
+    browserVer = 'Firefox1';
+  } else if (agt.indexOf('rv:1.8)') != -1 || agt.indexOf('rv:1.8.0') != -1) {
+    browserVer = 'Firefox15';
+  } else if (agt.indexOf('rv:1.8.1') != -1) {
+    browserVer = 'Firefox2';
   }
 }
 
@@ -88,8 +88,8 @@ function MoveToPosition(item, x, y) {
   // Opera 5 chokes on the px extension, so it can use the Microsoft one instead.
 
   if (item.style.left != null) {
-    item.style.left = x + "px";
-    item.style.top = y + "px";
+    item.style.left = x + 'px';
+    item.style.top = y + 'px';
   } else if (item.style.pixelLeft != null) {
     item.style.pixelLeft = x;
     item.style.pixelTop = y;
@@ -107,10 +107,10 @@ function ToggleMenu(id) {
 
   var display = window.document.getElementById(id).style.display;
 
-  if (display == "none") {
-    display = "block";
+  if (display == 'none') {
+    display = 'block';
   } else {
-    display = "none";
+    display = 'none';
   }
 
   window.document.getElementById(id).style.display = display;
@@ -118,7 +118,7 @@ function ToggleMenu(id) {
 
 function HideAllBut(ids, max) {
   if (document.getElementById) {
-    ids.sort(function(a, b) {
+    ids.sort(function (a, b) {
       return a - b;
     });
     var number = 1;
@@ -127,8 +127,7 @@ function HideAllBut(ids, max) {
       if (ids.length > 0 && number == ids[0]) {
         ids.shift();
       } else {
-        document.getElementById("MGroupContent" + number).style.display =
-          "none";
+        document.getElementById('MGroupContent' + number).style.display = 'none';
       }
 
       number++;
@@ -150,16 +149,7 @@ function ShowTip(event, tooltipID, linkID) {
   var docX = event.clientX + window.pageXOffset;
   var docY = event.clientY + window.pageYOffset;
 
-  var showCommand =
-    "ReallyShowTip('" +
-    tooltipID +
-    "', '" +
-    linkID +
-    "', " +
-    docX +
-    ", " +
-    docY +
-    ")";
+  var showCommand = "ReallyShowTip('" + tooltipID + "', '" + linkID + "', " + docX + ', ' + docY + ')';
 
   tooltipTimer = setTimeout(showCommand, 1000);
 }
@@ -215,7 +205,7 @@ function ReallyShowTip(tooltipID, linkID, docX, docY) {
     }
 
     MoveToPosition(tooltip, left, top);
-    tooltip.style.visibility = "visible";
+    tooltip.style.visibility = 'visible';
   }
 }
 
@@ -234,7 +224,7 @@ function HideTip(tooltipID) {
   }
 
   if (tooltip) {
-    tooltip.style.visibility = "hidden";
+    tooltip.style.visibility = 'hidden';
   }
 }
 
@@ -243,8 +233,8 @@ function HideTip(tooltipID) {
 // ____________________________________________________________________________
 
 function NDOnLoad() {
-  if (browserVer == "IE6") {
-    var scrollboxes = document.getElementsByTagName("blockquote");
+  if (browserVer == 'IE6') {
+    var scrollboxes = document.getElementsByTagName('blockquote');
 
     if (scrollboxes.item(0)) {
       NDDoResize();
@@ -264,7 +254,7 @@ function NDOnResize() {
 }
 
 function NDDoResize() {
-  var scrollboxes = document.getElementsByTagName("blockquote");
+  var scrollboxes = document.getElementsByTagName('blockquote');
 
   var i;
   var item;
@@ -303,7 +293,7 @@ function NDDoResize() {
 
 function SearchPanel(name, mode, resultsPath) {
   if (!name || !mode || !resultsPath) {
-    alert("Incorrect parameters to SearchPanel.");
+    alert('Incorrect parameters to SearchPanel.');
   }
 
   // Group: Variables
@@ -343,13 +333,13 @@ function SearchPanel(name, mode, resultsPath) {
         var: lastSearchValue
         The last search string executed, or an empty string if none.
     */
-  this.lastSearchValue = "";
+  this.lastSearchValue = '';
 
   /*
         var: lastResultsPage
         The last results page.  The value is only relevant if <lastSearchValue> is set.
     */
-  this.lastResultsPage = "";
+  this.lastResultsPage = '';
 
   /*
         var: deactivateTimeout
@@ -370,28 +360,28 @@ function SearchPanel(name, mode, resultsPath) {
   // ________________________________________________________________________
 
   // Function: DOMSearchField
-  this.DOMSearchField = function() {
-    return document.getElementById("MSearchField");
+  this.DOMSearchField = function () {
+    return document.getElementById('MSearchField');
   };
 
   // Function: DOMSearchType
-  this.DOMSearchType = function() {
-    return document.getElementById("MSearchType");
+  this.DOMSearchType = function () {
+    return document.getElementById('MSearchType');
   };
 
   // Function: DOMPopupSearchResults
-  this.DOMPopupSearchResults = function() {
-    return document.getElementById("MSearchResults");
+  this.DOMPopupSearchResults = function () {
+    return document.getElementById('MSearchResults');
   };
 
   // Function: DOMPopupSearchResultsWindow
-  this.DOMPopupSearchResultsWindow = function() {
-    return document.getElementById("MSearchResultsWindow");
+  this.DOMPopupSearchResultsWindow = function () {
+    return document.getElementById('MSearchResultsWindow');
   };
 
   // Function: DOMSearchPanel
-  this.DOMSearchPanel = function() {
-    return document.getElementById("MSearchPanel");
+  this.DOMSearchPanel = function () {
+    return document.getElementById('MSearchPanel');
   };
 
   // Group: Event Handlers
@@ -401,7 +391,7 @@ function SearchPanel(name, mode, resultsPath) {
         Function: OnSearchFieldFocus
         Called when focus is added or removed from the search field.
     */
-  this.OnSearchFieldFocus = function(isActive) {
+  this.OnSearchFieldFocus = function (isActive) {
     this.Activate(isActive);
   };
 
@@ -409,25 +399,22 @@ function SearchPanel(name, mode, resultsPath) {
         Function: OnSearchFieldChange
         Called when the content of the search field is changed.
     */
-  this.OnSearchFieldChange = function() {
+  this.OnSearchFieldChange = function () {
     if (this.keyTimeout) {
       clearTimeout(this.keyTimeout);
       this.keyTimeout = 0;
     }
 
-    var searchValue = this.DOMSearchField().value.replace(/ +/g, "");
+    var searchValue = this.DOMSearchField().value.replace(/ +/g, '');
 
     if (searchValue != this.lastSearchValue) {
-      if (searchValue != "") {
-        this.keyTimeout = setTimeout(
-          this.name + ".Search()",
-          this.keyTimeoutLength
-        );
+      if (searchValue != '') {
+        this.keyTimeout = setTimeout(this.name + '.Search()', this.keyTimeoutLength);
       } else {
-        if (this.mode == "HTML") {
-          this.DOMPopupSearchResultsWindow().style.display = "none";
+        if (this.mode == 'HTML') {
+          this.DOMPopupSearchResultsWindow().style.display = 'none';
         }
-        this.lastSearchValue = "";
+        this.lastSearchValue = '';
       }
     }
   };
@@ -436,7 +423,7 @@ function SearchPanel(name, mode, resultsPath) {
         Function: OnSearchTypeFocus
         Called when focus is added or removed from the search type.
     */
-  this.OnSearchTypeFocus = function(isActive) {
+  this.OnSearchTypeFocus = function (isActive) {
     this.Activate(isActive);
   };
 
@@ -444,10 +431,10 @@ function SearchPanel(name, mode, resultsPath) {
         Function: OnSearchTypeChange
         Called when the search type is changed.
     */
-  this.OnSearchTypeChange = function() {
-    var searchValue = this.DOMSearchField().value.replace(/ +/g, "");
+  this.OnSearchTypeChange = function () {
+    var searchValue = this.DOMSearchField().value.replace(/ +/g, '');
 
-    if (searchValue != "") {
+    if (searchValue != '') {
       this.Search();
     }
   };
@@ -459,8 +446,8 @@ function SearchPanel(name, mode, resultsPath) {
         Function: CloseResultsWindow
         Closes the results window.
     */
-  this.CloseResultsWindow = function() {
-    this.DOMPopupSearchResultsWindow().style.display = "none";
+  this.CloseResultsWindow = function () {
+    this.DOMPopupSearchResultsWindow().style.display = 'none';
     this.Activate(false, true);
   };
 
@@ -468,10 +455,10 @@ function SearchPanel(name, mode, resultsPath) {
         Function: Search
         Performs a search.
     */
-  this.Search = function() {
+  this.Search = function () {
     this.keyTimeout = 0;
 
-    var searchValue = this.DOMSearchField().value.replace(/^ +/, "");
+    var searchValue = this.DOMSearchField().value.replace(/^ +/, '');
     var searchTopic = this.DOMSearchType().value;
 
     var pageExtension = searchValue.substr(0, 1);
@@ -479,9 +466,9 @@ function SearchPanel(name, mode, resultsPath) {
     if (pageExtension.match(/^[a-z]/i)) {
       pageExtension = pageExtension.toUpperCase();
     } else if (pageExtension.match(/^[0-9]/)) {
-      pageExtension = "Numbers";
+      pageExtension = 'Numbers';
     } else {
-      pageExtension = "Symbols";
+      pageExtension = 'Symbols';
     }
 
     var resultsPage;
@@ -490,21 +477,20 @@ function SearchPanel(name, mode, resultsPath) {
 
     // indexSectionsWithContent is defined in searchdata.js
     if (indexSectionsWithContent[searchTopic][pageExtension] == true) {
-      resultsPage =
-        this.resultsPath + "/" + searchTopic + pageExtension + ".html";
-      resultsPageWithSearch = resultsPage + "?" + escape(searchValue);
+      resultsPage = this.resultsPath + '/' + searchTopic + pageExtension + '.html';
+      resultsPageWithSearch = resultsPage + '?' + escape(searchValue);
       hasResultsPage = true;
     } else {
-      resultsPage = this.resultsPath + "/NoResults.html";
+      resultsPage = this.resultsPath + '/NoResults.html';
       resultsPageWithSearch = resultsPage;
       hasResultsPage = false;
     }
 
     var resultsFrame;
-    if (this.mode == "HTML") {
+    if (this.mode == 'HTML') {
       resultsFrame = window.frames.MSearchResults;
-    } else if (this.mode == "FramedHTML") {
-      resultsFrame = window.top.frames["Content"];
+    } else if (this.mode == 'FramedHTML') {
+      resultsFrame = window.top.frames['Content'];
     }
 
     if (
@@ -513,10 +499,9 @@ function SearchPanel(name, mode, resultsPath) {
       // reason.  It counts the right number of results, and you can even read the display as "block" after setting it, but it
       // just doesn't work in IE 6 or IE 7.  So if we're on the right page but the previous search had no results, reload the
       // page anyway to get around the bug.
-      (browserType == "IE" &&
+      (browserType == 'IE' &&
         hasResultsPage &&
-        (!resultsFrame.searchResults ||
-          resultsFrame.searchResults.lastMatchCount == 0))
+        (!resultsFrame.searchResults || resultsFrame.searchResults.lastMatchCount == 0))
     ) {
       resultsFrame.location.href = resultsPageWithSearch;
     }
@@ -538,17 +523,14 @@ function SearchPanel(name, mode, resultsPath) {
 
     var domPopupSearchResultsWindow = this.DOMPopupSearchResultsWindow();
 
-    if (
-      this.mode == "HTML" &&
-      domPopupSearchResultsWindow.style.display != "block"
-    ) {
+    if (this.mode == 'HTML' && domPopupSearchResultsWindow.style.display != 'block') {
       var domSearchType = this.DOMSearchType();
 
       var left = GetXPosition(domSearchType);
       var top = GetYPosition(domSearchType) + domSearchType.offsetHeight;
 
       MoveToPosition(domPopupSearchResultsWindow, left, top);
-      domPopupSearchResultsWindow.style.display = "block";
+      domPopupSearchResultsWindow.style.display = 'block';
     }
 
     this.lastSearchValue = searchValue;
@@ -570,30 +552,23 @@ function SearchPanel(name, mode, resultsPath) {
             isActive - Whether you're activating or deactivating the panel.
             ignoreDeactivateDelay - Set if you're positive the action will deactivate the panel and thus want to skip the delay.
     */
-  this.Activate = function(isActive, ignoreDeactivateDelay) {
+  this.Activate = function (isActive, ignoreDeactivateDelay) {
     // We want to ignore isActive being false while the results window is open.
-    if (
-      isActive ||
-      (this.mode == "HTML" &&
-        this.DOMPopupSearchResultsWindow().style.display == "block")
-    ) {
+    if (isActive || (this.mode == 'HTML' && this.DOMPopupSearchResultsWindow().style.display == 'block')) {
       if (this.inactivateTimeout) {
         clearTimeout(this.inactivateTimeout);
         this.inactivateTimeout = 0;
       }
 
-      this.DOMSearchPanel().className = "MSearchPanelActive";
+      this.DOMSearchPanel().className = 'MSearchPanelActive';
 
       var searchField = this.DOMSearchField();
 
-      if (searchField.value == "Search") {
-        searchField.value = "";
+      if (searchField.value == 'Search') {
+        searchField.value = '';
       }
     } else if (!ignoreDeactivateDelay) {
-      this.inactivateTimeout = setTimeout(
-        this.name + ".InactivateAfterTimeout()",
-        this.inactivateTimeoutLength
-      );
+      this.inactivateTimeout = setTimeout(this.name + '.InactivateAfterTimeout()', this.inactivateTimeoutLength);
     } else {
       this.InactivateAfterTimeout();
     }
@@ -607,14 +582,14 @@ function SearchPanel(name, mode, resultsPath) {
         actually deactivate the panel because not only would that cause a visible flicker but it could also reset the search value.
         So by doing it on a timeout instead, there's a short period where the second control's OnFocus() can cancel the deactivation.
     */
-  this.InactivateAfterTimeout = function() {
+  this.InactivateAfterTimeout = function () {
     this.inactivateTimeout = 0;
 
-    this.DOMSearchPanel().className = "MSearchPanelInactive";
-    this.DOMSearchField().value = "Search";
+    this.DOMSearchPanel().className = 'MSearchPanelInactive';
+    this.DOMSearchField().value = 'Search';
 
-    this.lastSearchValue = "";
-    this.lastResultsPage = "";
+    this.lastSearchValue = '';
+    this.lastResultsPage = '';
   };
 }
 
@@ -644,8 +619,8 @@ function SearchResults(name, mode) {
         Function: Toggle
         Toggles the visibility of the passed element ID.
     */
-  this.Toggle = function(id) {
-    if (this.mode == "FramedHTML") {
+  this.Toggle = function (id) {
+    if (this.mode == 'FramedHTML') {
       return;
     }
 
@@ -654,15 +629,15 @@ function SearchResults(name, mode) {
     var element = parentElement.firstChild;
 
     while (element && element != parentElement) {
-      if (element.nodeName == "DIV" && element.className == "ISubIndex") {
-        if (element.style.display == "block") {
-          element.style.display = "none";
+      if (element.nodeName == 'DIV' && element.className == 'ISubIndex') {
+        if (element.style.display == 'block') {
+          element.style.display = 'none';
         } else {
-          element.style.display = "block";
+          element.style.display = 'block';
         }
       }
 
-      if (element.nodeName == "DIV" && element.hasChildNodes()) {
+      if (element.nodeName == 'DIV' && element.hasChildNodes()) {
         element = element.firstChild;
       } else if (element.nextSibling) {
         element = element.nextSibling;
@@ -685,83 +660,80 @@ function SearchResults(name, mode) {
 
         Always returns true, since other documents may try to call it and that may or may not be possible.
     */
-  this.Search = function(search) {
+  this.Search = function (search) {
     if (!search) {
       search = window.location.search;
       search = search.substring(1); // Remove the leading ?
       search = unescape(search);
     }
 
-    search = search.replace(/^ +/, "");
-    search = search.replace(/ +$/, "");
+    search = search.replace(/^ +/, '');
+    search = search.replace(/ +$/, '');
     search = search.toLowerCase();
 
     if (search.match(/[^a-z0-9]/)) {
       // Just a little speedup so it doesn't have to go through the below unnecessarily.
-      search = search.replace(/\_/g, "_und");
-      search = search.replace(/\ +/gi, "_spc");
-      search = search.replace(/\~/g, "_til");
-      search = search.replace(/\!/g, "_exc");
-      search = search.replace(/\@/g, "_att");
-      search = search.replace(/\#/g, "_num");
-      search = search.replace(/\$/g, "_dol");
-      search = search.replace(/\%/g, "_pct");
-      search = search.replace(/\^/g, "_car");
-      search = search.replace(/\&/g, "_amp");
-      search = search.replace(/\*/g, "_ast");
-      search = search.replace(/\(/g, "_lpa");
-      search = search.replace(/\)/g, "_rpa");
-      search = search.replace(/\-/g, "_min");
-      search = search.replace(/\+/g, "_plu");
-      search = search.replace(/\=/g, "_equ");
-      search = search.replace(/\{/g, "_lbc");
-      search = search.replace(/\}/g, "_rbc");
-      search = search.replace(/\[/g, "_lbk");
-      search = search.replace(/\]/g, "_rbk");
-      search = search.replace(/\:/g, "_col");
-      search = search.replace(/\;/g, "_sco");
-      search = search.replace(/\"/g, "_quo");
-      search = search.replace(/\'/g, "_apo");
-      search = search.replace(/\</g, "_lan");
-      search = search.replace(/\>/g, "_ran");
-      search = search.replace(/\,/g, "_com");
-      search = search.replace(/\./g, "_per");
-      search = search.replace(/\?/g, "_que");
-      search = search.replace(/\//g, "_sla");
-      search = search.replace(/[^a-z0-9\_]i/gi, "_zzz");
+      search = search.replace(/\_/g, '_und');
+      search = search.replace(/\ +/gi, '_spc');
+      search = search.replace(/\~/g, '_til');
+      search = search.replace(/\!/g, '_exc');
+      search = search.replace(/\@/g, '_att');
+      search = search.replace(/\#/g, '_num');
+      search = search.replace(/\$/g, '_dol');
+      search = search.replace(/\%/g, '_pct');
+      search = search.replace(/\^/g, '_car');
+      search = search.replace(/\&/g, '_amp');
+      search = search.replace(/\*/g, '_ast');
+      search = search.replace(/\(/g, '_lpa');
+      search = search.replace(/\)/g, '_rpa');
+      search = search.replace(/\-/g, '_min');
+      search = search.replace(/\+/g, '_plu');
+      search = search.replace(/\=/g, '_equ');
+      search = search.replace(/\{/g, '_lbc');
+      search = search.replace(/\}/g, '_rbc');
+      search = search.replace(/\[/g, '_lbk');
+      search = search.replace(/\]/g, '_rbk');
+      search = search.replace(/\:/g, '_col');
+      search = search.replace(/\;/g, '_sco');
+      search = search.replace(/\"/g, '_quo');
+      search = search.replace(/\'/g, '_apo');
+      search = search.replace(/\</g, '_lan');
+      search = search.replace(/\>/g, '_ran');
+      search = search.replace(/\,/g, '_com');
+      search = search.replace(/\./g, '_per');
+      search = search.replace(/\?/g, '_que');
+      search = search.replace(/\//g, '_sla');
+      search = search.replace(/[^a-z0-9\_]i/gi, '_zzz');
     }
 
-    var resultRows = document.getElementsByTagName("div");
+    var resultRows = document.getElementsByTagName('div');
     var matches = 0;
 
     var i = 0;
     while (i < resultRows.length) {
       var row = resultRows.item(i);
 
-      if (row.className == "SRResult") {
+      if (row.className == 'SRResult') {
         var rowMatchName = row.id.toLowerCase();
-        rowMatchName = rowMatchName.replace(/^sr\d*_/, "");
+        rowMatchName = rowMatchName.replace(/^sr\d*_/, '');
 
-        if (
-          search.length <= rowMatchName.length &&
-          rowMatchName.substr(0, search.length) == search
-        ) {
-          row.style.display = "block";
+        if (search.length <= rowMatchName.length && rowMatchName.substr(0, search.length) == search) {
+          row.style.display = 'block';
           matches++;
         } else {
-          row.style.display = "none";
+          row.style.display = 'none';
         }
       }
 
       i++;
     }
 
-    document.getElementById("Searching").style.display = "none";
+    document.getElementById('Searching').style.display = 'none';
 
     if (matches == 0) {
-      document.getElementById("NoMatches").style.display = "block";
+      document.getElementById('NoMatches').style.display = 'block';
     } else {
-      document.getElementById("NoMatches").style.display = "none";
+      document.getElementById('NoMatches').style.display = 'none';
     }
 
     this.lastMatchCount = matches;

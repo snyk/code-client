@@ -125,5 +125,5 @@ describe('files', () => {
 
     const windowsPath = 'C:\\Users\\user\\Git\\goof\\index.js';
     expect(getBundleFilePath(windowsPath, baseDir)).toEqual(encodeURI(windowsPath));
-  })
+  });
 });

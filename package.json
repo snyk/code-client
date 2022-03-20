@@ -10,8 +10,10 @@
   "scripts": {
     "build": "tsc -p ./",
     "prepare": "npm run build",
-    "lint": "npx eslint src/**/*.ts",
-    "lint:fix": "npx eslint --fix src/**/*.ts",
+    "lint": "npx eslint 'src/**/*.ts'",
+    "lint:fix": "npx eslint --fix 'src/**/*.ts'",
+    "lint:formatting": "prettier --check '**/*.{js,ts,json,yaml,yml,md}'",
+    "lint:format": "prettier --write '**/*.{js,ts,json,yaml,yml,md}'",
     "watch": "tsc -watch -p ./",
     "test": "jest --coverage --runInBand"
   },
@@ -79,3 +81,4 @@
     "yaml": "^1.10.2"
   }
 }
+

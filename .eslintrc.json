@@ -37,7 +37,7 @@
     "indent": ["warn", 2],
     "quote-props": ["warn", "as-needed"],
     "lines-between-class-members": "off",
-    "prefer-destructuring": ["warn", {"object": true, "array": false}],
+    "prefer-destructuring": ["warn", { "object": true, "array": false }],
     "import/extensions": [
       "error",
       "ignorePackages",

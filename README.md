@@ -92,14 +92,13 @@ Complete list of events:
 const results = await codeClient.analyzeFolders({
   connection: { baseURL, sessionToken, source },
   analysisOptions: {
-    severity: 1
+    severity: 1,
   },
   fileOptions: {
     paths: ['/home/user/repo'],
     symlinksEnabled: false,
   },
 });
-
 ```
 
 ### Run analysis only for specific file, the one just changed for example
@@ -109,14 +108,13 @@ const results = await codeClient.analyzeFolders({
   connection: { baseURL, sessionToken, source },
   analysisOptions: {
     severity: 1,
-    limitToFiles: ['recently-changed-file.js']
+    limitToFiles: ['recently-changed-file.js'],
   },
   fileOptions: {
     paths: ['/home/user/repo'],
     symlinksEnabled: false,
   },
 });
-
 ```
 
 ### Creates a new bundle based on a previously uploaded one

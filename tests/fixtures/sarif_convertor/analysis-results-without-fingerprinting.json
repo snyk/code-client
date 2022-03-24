@@ -1,1608 +1,1045 @@
 {
-    "files": {
-        "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js": {
-            "0": [
+  "files": {
+    "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js": {
+      "0": [
+        {
+          "rows": [45, 45],
+          "cols": [9, 44],
+          "markers": [
+            {
+              "msg": [20, 26],
+              "pos": [
                 {
-                    "rows": [
-                        45,
-                        45
-                    ],
-                    "cols": [
-                        9,
-                        44
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                20,
-                                26
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        45,
-                                        45
-                                    ],
-                                    "cols": [
-                                        9,
-                                        44
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "ae785dddd67d66083bf565a2ab826535bac183b3c477d249649c6596f2405dd6"
-                        },
-                        {
-                            "version": 1,
-                            "fingerprint": "12342"
-                        }
-                    ]
-                },
-                {
-                    "rows": [
-                        97,
-                        97
-                    ],
-                    "cols": [
-                        9,
-                        44
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                20,
-                                26
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        97,
-                                        97
-                                    ],
-                                    "cols": [
-                                        9,
-                                        44
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "1d9d2bce6036443e56e61ffb689caca291b33055d37810ba48423aae6eb29d16"
-                        }
-                    ]
+                  "rows": [45, 45],
+                  "cols": [9, 44],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
                 }
-            ],
-            "1": [
-                {
-                    "rows": [
-                        23,
-                        23
-                    ],
-                    "cols": [
-                        5,
-                        11
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                23,
-                                34
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        175,
-                                        175
-                                    ],
-                                    "cols": [
-                                        14,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                36,
-                                40
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        175,
-                                        175
-                                    ],
-                                    "cols": [
-                                        14,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                },
-                                {
-                                    "rows": [
-                                        23,
-                                        23
-                                    ],
-                                    "cols": [
-                                        25,
-                                        31
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                },
-                                {
-                                    "rows": [
-                                        23,
-                                        23
-                                    ],
-                                    "cols": [
-                                        5,
-                                        21
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                },
-                                {
-                                    "rows": [
-                                        23,
-                                        23
-                                    ],
-                                    "cols": [
-                                        13,
-                                        21
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                47,
-                                47
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        23,
-                                        23
-                                    ],
-                                    "cols": [
-                                        5,
-                                        11
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "c92fd0d8fbb0722ac17a8dfd6b9fd5c0770a64a3f965ed128ecc6ae45c20813b"
-                        }
-                    ]
-                }
-            ]
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "ae785dddd67d66083bf565a2ab826535bac183b3c477d249649c6596f2405dd6"
+            },
+            {
+              "version": 1,
+              "fingerprint": "12342"
+            }
+          ]
         },
-        "/assembly/assembly-swagger-war/src/main/webapp/index.html": {
-            "0": [
+        {
+          "rows": [97, 97],
+          "cols": [9, 44],
+          "markers": [
+            {
+              "msg": [20, 26],
+              "pos": [
                 {
-                    "rows": [
-                        108,
-                        108
-                    ],
-                    "cols": [
-                        9,
-                        41
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                20,
-                                26
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        108,
-                                        108
-                                    ],
-                                    "cols": [
-                                        9,
-                                        41
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "c8ede54bd6611ca074c42baf78809b9fe198c762ba8a1a78571befdf191869e5"
-                        }
-                    ]
+                  "rows": [97, 97],
+                  "cols": [9, 44],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
                 }
-            ],
-            "2": [
-                {
-                    "rows": [
-                        51,
-                        51
-                    ],
-                    "cols": [
-                        13,
-                        21
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                59,
-                                76
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        53,
-                                        53
-                                    ],
-                                    "cols": [
-                                        29,
-                                        60
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                86,
-                                94
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        51,
-                                        51
-                                    ],
-                                    "cols": [
-                                        13,
-                                        21
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": []
-                }
-            ]
-        },
-        "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js": {
-            "0": [
-                {
-                    "rows": [
-                        1052,
-                        1052
-                    ],
-                    "cols": [
-                        17,
-                        30
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                20,
-                                26
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        1052,
-                                        1052
-                                    ],
-                                    "cols": [
-                                        17,
-                                        30
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "8105a5e15b9d725e663009985913a6931ba94ddd56f4854d24ba3565067501b4"
-                        }
-                    ]
-                }
-            ],
-            "5": [
-                {
-                    "rows": [
-                        367,
-                        367
-                    ],
-                    "cols": [
-                        26,
-                        67
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                23,
-                                49
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        50,
-                                        65
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                51,
-                                55
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        50,
-                                        65
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        39,
-                                        48
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        39,
-                                        66
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        25,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        28,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        408,
-                                        408
-                                    ],
-                                    "cols": [
-                                        25,
-                                        26
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        409,
-                                        409
-                                    ],
-                                    "cols": [
-                                        44,
-                                        45
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        421,
-                                        421
-                                    ],
-                                    "cols": [
-                                        9,
-                                        10
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        438,
-                                        438
-                                    ],
-                                    "cols": [
-                                        9,
-                                        10
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        529,
-                                        529
-                                    ],
-                                    "cols": [
-                                        9,
-                                        10
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        540,
-                                        540
-                                    ],
-                                    "cols": [
-                                        24,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        347,
-                                        347
-                                    ],
-                                    "cols": [
-                                        53,
-                                        54
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        347,
-                                        347
-                                    ],
-                                    "cols": [
-                                        53,
-                                        63
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        367,
-                                        367
-                                    ],
-                                    "cols": [
-                                        56,
-                                        66
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                },
-                                {
-                                    "rows": [
-                                        367,
-                                        367
-                                    ],
-                                    "cols": [
-                                        44,
-                                        66
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                114,
-                                124
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        367,
-                                        367
-                                    ],
-                                    "cols": [
-                                        26,
-                                        42
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "2cc2fb05feccfae008104250873928e0d9f1de01f5878d485963f2966edc163e"
-                        }
-                    ]
-                }
-            ],
-            "6": [
-                {
-                    "rows": [
-                        375,
-                        375
-                    ],
-                    "cols": [
-                        44,
-                        61
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                13,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        375,
-                                        375
-                                    ],
-                                    "cols": [
-                                        44,
-                                        61
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                37,
-                                52
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        375,
-                                        375
-                                    ],
-                                    "cols": [
-                                        13,
-                                        32
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "4aaff40942701a6acc92fafebea49f718bdc060012ca10a5f30e9462da6143b9"
-                        }
-                    ]
-                },
-                {
-                    "rows": [
-                        400,
-                        400
-                    ],
-                    "cols": [
-                        44,
-                        61
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                13,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        400,
-                                        400
-                                    ],
-                                    "cols": [
-                                        44,
-                                        61
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                37,
-                                52
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        400,
-                                        400
-                                    ],
-                                    "cols": [
-                                        13,
-                                        32
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "51a2aefac0251d664f40c9741ab9a6af0ad1cdd7a51423db9de5891777960016"
-                        }
-                    ]
-                },
-                {
-                    "rows": [
-                        737,
-                        737
-                    ],
-                    "cols": [
-                        48,
-                        65
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                13,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        737,
-                                        737
-                                    ],
-                                    "cols": [
-                                        48,
-                                        65
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                37,
-                                52
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        737,
-                                        737
-                                    ],
-                                    "cols": [
-                                        17,
-                                        36
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "da1a56ce99d2778caea9103d4aba2292543efa487853e8c161c4573aec8b62f1"
-                        }
-                    ]
-                },
-                {
-                    "rows": [
-                        794,
-                        794
-                    ],
-                    "cols": [
-                        56,
-                        73
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                13,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        794,
-                                        794
-                                    ],
-                                    "cols": [
-                                        56,
-                                        73
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                37,
-                                52
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        794,
-                                        794
-                                    ],
-                                    "cols": [
-                                        25,
-                                        44
-                                    ],
-                                    "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "81afc8333354c3ccd0a8264aab07846cb5a69b35bbeff7a9b6bcdb9fcf3689d0"
-                        }
-                    ]
-                }
-            ]
-        },
-        "/assembly/assembly-root-war/src/main/webapp/_app/loader.js": {
-            "0": [
-                {
-                    "rows": [
-                        84,
-                        84
-                    ],
-                    "cols": [
-                        13,
-                        53
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                20,
-                                26
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        84,
-                                        84
-                                    ],
-                                    "cols": [
-                                        13,
-                                        53
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "8a870ceae63c99fb925bcdcbaca7ce5c8ccf29024898cd1694d930b5d687842e"
-                        }
-                    ]
-                }
-            ],
-            "1": [
-                {
-                    "rows": [
-                        238,
-                        238
-                    ],
-                    "cols": [
-                        9,
-                        20
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                23,
-                                34
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        235,
-                                        235
-                                    ],
-                                    "cols": [
-                                        14,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                36,
-                                40
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        235,
-                                        235
-                                    ],
-                                    "cols": [
-                                        14,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        236,
-                                        236
-                                    ],
-                                    "cols": [
-                                        23,
-                                        34
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        238,
-                                        238
-                                    ],
-                                    "cols": [
-                                        22,
-                                        33
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        35,
-                                        35
-                                    ],
-                                    "cols": [
-                                        11,
-                                        17
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        42,
-                                        42
-                                    ],
-                                    "cols": [
-                                        29,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        42,
-                                        42
-                                    ],
-                                    "cols": [
-                                        9,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                },
-                                {
-                                    "rows": [
-                                        42,
-                                        42
-                                    ],
-                                    "cols": [
-                                        17,
-                                        25
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                47,
-                                47
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        42,
-                                        42
-                                    ],
-                                    "cols": [
-                                        9,
-                                        15
-                                    ],
-                                    "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "2ea8d6c4f7096751e5e6f725a3deeac983fe5fac17cdd64e5f6aa83d49156d67"
-                        }
-                    ]
-                }
-            ]
-        },
-        "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js": {
-            "3": [
-                {
-                    "rows": [
-                        215,
-                        215
-                    ],
-                    "cols": [
-                        16,
-                        29
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                12,
-                                16
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        215,
-                                        215
-                                    ],
-                                    "cols": [
-                                        31,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                21,
-                                27
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        215,
-                                        215
-                                    ],
-                                    "cols": [
-                                        16,
-                                        29
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                48,
-                                55
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        215,
-                                        215
-                                    ],
-                                    "cols": [
-                                        31,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
-                                }
-                            ]
-                        },
-                        {
-                            "msg": [
-                                56,
-                                84
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        215,
-                                        215
-                                    ],
-                                    "cols": [
-                                        31,
-                                        35
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "719d356d9a2efebe9142ca79825c6c0e4b0e6f5013a6e3f3b04630243416ac87"
-                        }
-                    ]
-                }
-            ]
-        },
-        "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js": {
-            "4": [
-                {
-                    "rows": [
-                        98,
-                        98
-                    ],
-                    "cols": [
-                        3,
-                        38
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                21,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        98,
-                                        98
-                                    ],
-                                    "cols": [
-                                        3,
-                                        38
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2"
-                        },
-                        {
-                            "version": 2,
-                            "fingerprint": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2"
-                        },
-                        {
-                            "version": 1,
-                            "fingerprint": "asdf"
-                        }
-                    ]
-                },
-                {
-                    "rows": [
-                        216,
-                        216
-                    ],
-                    "cols": [
-                        3,
-                        21
-                    ],
-                    "markers": [
-                        {
-                            "msg": [
-                                21,
-                                28
-                            ],
-                            "pos": [
-                                {
-                                    "rows": [
-                                        216,
-                                        216
-                                    ],
-                                    "cols": [
-                                        3,
-                                        21
-                                    ],
-                                    "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js"
-                                }
-                            ]
-                        }
-                    ],
-                    "fingerprints": [
-                        {
-                            "version": 0,
-                            "fingerprint": "ce5c43465aac96db6e4505f48df1defaa81a38bf7876a1f0e7431c54304d9ea1"
-                        }
-                    ]
-                }
-            ]
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "1d9d2bce6036443e56e61ffb689caca291b33055d37810ba48423aae6eb29d16"
+            }
+          ]
         }
+      ],
+      "1": [
+        {
+          "rows": [23, 23],
+          "cols": [5, 11],
+          "markers": [
+            {
+              "msg": [23, 34],
+              "pos": [
+                {
+                  "rows": [175, 175],
+                  "cols": [14, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                }
+              ]
+            },
+            {
+              "msg": [36, 40],
+              "pos": [
+                {
+                  "rows": [175, 175],
+                  "cols": [14, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                },
+                {
+                  "rows": [23, 23],
+                  "cols": [25, 31],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                },
+                {
+                  "rows": [23, 23],
+                  "cols": [5, 21],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                },
+                {
+                  "rows": [23, 23],
+                  "cols": [13, 21],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                }
+              ]
+            },
+            {
+              "msg": [47, 47],
+              "pos": [
+                {
+                  "rows": [23, 23],
+                  "cols": [5, 11],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/oauthLoader.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "c92fd0d8fbb0722ac17a8dfd6b9fd5c0770a64a3f965ed128ecc6ae45c20813b"
+            }
+          ]
+        }
+      ]
     },
-    "timing": {
-        "fetchingCode": 17219,
-        "analysis": 131687,
-        "queue": 8
-    },
-    "coverage": [
+    "/assembly/assembly-swagger-war/src/main/webapp/index.html": {
+      "0": [
         {
-            "files": 56,
-            "isSupported": false,
-            "lang": "Shell"
-        },
-        {
-            "files": 167,
-            "isSupported": false,
-            "lang": "YAML"
-        },
-        {
-            "files": 189,
-            "isSupported": false,
-            "lang": "Unknown"
-        },
-        {
-            "files": 47,
-            "isSupported": false,
-            "lang": "Markdown"
-        },
-        {
-            "files": 328,
-            "isSupported": false,
-            "lang": "XML"
-        },
-        {
-            "files": 22,
-            "isSupported": false,
-            "lang": "Text"
-        },
-        {
-            "files": 2557,
-            "isSupported": true,
-            "lang": "Java"
-        },
-        {
-            "files": 4,
-            "isSupported": false,
-            "lang": "SVG"
-        },
-        {
-            "files": 41,
-            "isSupported": true,
-            "lang": "JavaScript"
-        },
-        {
-            "files": 13,
-            "isSupported": false,
-            "lang": "CSS"
-        },
-        {
-            "files": 14,
-            "isSupported": true,
-            "lang": "HTML"
-        },
-        {
-            "files": 21,
-            "isSupported": false,
-            "lang": "Java Properties"
-        },
-        {
-            "files": 89,
-            "isSupported": false,
-            "lang": "SQLPL"
-        },
-        {
-            "files": 88,
-            "isSupported": true,
-            "lang": "TypeScript"
-        },
-        {
-            "files": 72,
-            "isSupported": false,
-            "lang": "JSON"
-        },
-        {
-            "files": 8,
-            "isSupported": false,
-            "lang": "Smarty"
-        },
-        {
-            "files": 1,
-            "isSupported": false,
-            "lang": "TOML"
-        },
-        {
-            "files": 28,
-            "isSupported": false,
-            "lang": "FreeMarker"
-        },
-        {
-            "files": 6,
-            "isSupported": false,
-            "lang": "HTML+ERB"
-        },
-        {
-            "files": 3,
-            "isSupported": false,
-            "lang": "PHP (beta)"
-        },
-        {
-            "files": 3,
-            "isSupported": false,
-            "lang": "C# (beta)"
-        },
-        {
-            "files": 57,
-            "isSupported": false,
-            "lang": "Java Server Pages"
-        },
-        {
-            "files": 4,
-            "isSupported": false,
-            "lang": "C++ (beta)"
-        },
-        {
-            "files": 1,
-            "isSupported": false,
-            "lang": "C (beta)"
-        },
-        {
-            "files": 4,
-            "isSupported": false,
-            "lang": "Python"
-        },
-        {
-            "files": 4,
-            "isSupported": false,
-            "lang": "Less"
-        },
-        {
-            "files": 4,
-            "isSupported": false,
-            "lang": "Go"
-        }
-    ],
-    "suggestions": {
-        "0": {
-            "id": "javascript%2Fdc_interfile_project%2FPromiseNotCaughtGeneral",
-            "rule": "PromiseNotCaughtGeneral",
-            "message": "No catch method for promise. This may result in an unhandled promise rejection.",
-            "severity": 1,
-            "lead_url": "https://javascript.info/promise-error-handling#unhandled-rejections",
-            "leadURL": "https://javascript.info/promise-error-handling#unhandled-rejections",
-            "categories": [
-                "API",
-                "Info"
-            ],
-            "tags": [
-                "maintenance",
-                "error",
-                "tests",
-                "promise"
-            ],
-            "title": "",
-            "cwe": [],
-            "text": "",
-            "repoDatasetSize": 5645,
-            "exampleCommitDescriptions": [
-                "*  fix test error",
-                "testing with promises should return the promise"
-            ],
-            "exampleCommitFixes": []
-        },
-        "1": {
-            "id": "javascript%2Fdc_interfile_project%2FDOMXSS",
-            "rule": "DOMXSS",
-            "message": "Unsanitized input from an exception flows into 0, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
-            "severity": 3,
-            "lead_url": "https://www.owasp.org/index.php/DOM_Based_XSS",
-            "leadURL": "https://www.owasp.org/index.php/DOM_Based_XSS",
-            "categories": [
-                "Security"
-            ],
-            "tags": [
-                "maintenance",
-                "usability",
-                "page",
-                "QUnit",
-                "loading"
-            ],
-            "title": "Cross-site Scripting (XSS)",
-            "cwe": [
-                "CWE-79"
-            ],
-            "text": "## Details\n\nA cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.\n\nThis is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser's Same Origin Policy.\n\nInjecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.\n\nEscaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, `<` can be coded as  `&lt`; and `>` can be coded as `&gt`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses `<` and `>` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they've been correctly escaped in the application code and in this way the attempted attack is diverted.\n\nThe most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware.\n\n### Types of attacks\nThere are a few methods by which XSS can be manipulated:\n\n|Type|Origin|Description|\n|--|--|--|\n|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|\n|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user's browser.|\n|**DOM-based**|Client|The attacker forces the user's browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|\n|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|\n\n### Affected environments\nThe following environments are susceptible to an XSS attack:\n\n* Web servers\n* Application servers\n* Web application environments\n\n### How to prevent\nThis section describes the top best practices designed to specifically protect your code:\n\n* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches.\n* Convert special characters such as `?`, `&`, `/`, `<`, `>` and spaces to their respective HTML or URL encoded equivalents.\n* Give users the option to disable client-side scripts.\n* Redirect invalid requests.\n* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.\n* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.\n* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.",
-            "repoDatasetSize": 439,
-            "exampleCommitDescriptions": [
-                "* Ensure that dgrid.css is explicitly loaded in all test pages",
-                "Added compound test suite and updated QUnit.",
-                "ExampleWidget for testing LESS compilation and load!"
-            ],
-            "exampleCommitFixes": []
-        },
-        "2": {
-            "id": "javascript%2Fdc_interfile_project%2FHardcodedNonCryptoSecret",
-            "rule": "HardcodedNonCryptoSecret",
-            "message": "Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in initOAuth.",
-            "severity": 3,
-            "lead_url": "",
-            "leadURL": "",
-            "categories": [
-                "Security"
-            ],
-            "tags": [
-                "maintenance",
-                "secret",
-                "session",
-                "config"
-            ],
-            "title": "Hardcoded Secret",
-            "cwe": [
-                "CWE-547"
-            ],
-            "text": "",
-            "repoDatasetSize": 390,
-            "exampleCommitDescriptions": [
-                "Make address, passphrase and secret in the tests configurable",
-                "clean console.log + update test for express session",
-                "use config for tests"
-            ],
-            "exampleCommitFixes": []
-        },
-        "3": {
-            "id": "javascript%2Fdc_interfile_project%2FReplacementRegex",
-            "rule": "ReplacementRegex",
-            "message": "The pattern regex in replace may be improved to /\\r?\\n$/to handle different new lines.",
-            "severity": 2,
-            "lead_url": "",
-            "leadURL": "",
-            "categories": [
-                "Defect"
-            ],
-            "tags": [
-                "upgrade",
-                "maintenance",
-                "bug",
-                "newline",
-                "favicon",
-                "auth"
-            ],
-            "title": "",
-            "cwe": [],
-            "text": "",
-            "repoDatasetSize": 53,
-            "exampleCommitDescriptions": [
-                "Fix match on ending newline bug",
-                "Better logging for favicons.",
-                "* Even better auth switching and timeline syntax"
-            ],
-            "exampleCommitFixes": []
-        },
-        "4": {
-            "id": "javascript%2Fdc_interfile_project%2FUseInstead",
-            "rule": "UseInstead",
-            "message": "Use off() instead of unbind().",
-            "severity": 2,
-            "lead_url": "",
-            "leadURL": "",
-            "categories": [
-                "API"
-            ],
-            "tags": [
-                "maintenance",
-                "bug",
-                "jQuery",
-                "event",
-                "binding"
-            ],
-            "title": "",
-            "cwe": [],
-            "text": "",
-            "repoDatasetSize": 1103,
-            "exampleCommitDescriptions": [
-                "- Replaced all the $ for jQuery in the tests and suite.",
-                "new event map and tests",
-                "testing using on instead of bind"
-            ],
-            "exampleCommitFixes": []
-        },
-        "5": {
-            "id": "javascript%2Fdc_interfile_project%2FUserControlledProperty",
-            "rule": "UserControlledProperty",
-            "message": "Unsanitized input from data from a remote resource flows into a member access and is used to access a property of this object by name. This may allow a malicious user to access methods (e.g. toString) as opposed to regular properties of objects and cause a crash, remote code execution or more serious problems. This is known as a Prototype Pollution vulnerability.",
-            "severity": 2,
-            "lead_url": "https://medium.com/node-modules/what-is-prototype-pollution-and-why-is-it-such-a-big-deal-2dd8d89a93c",
-            "leadURL": "https://medium.com/node-modules/what-is-prototype-pollution-and-why-is-it-such-a-big-deal-2dd8d89a93c",
-            "categories": [
-                "Security"
-            ],
-            "tags": [],
-            "title": "",
-            "cwe": [],
-            "text": "",
-            "repoDatasetSize": 0,
-            "exampleCommitDescriptions": [],
-            "exampleCommitFixes": []
-        },
-        "6": {
-            "id": "javascript%2Fdc_interfile_project%2FContentTypeNoCharset",
-            "rule": "ContentTypeNoCharset",
-            "message": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
-            "severity": 2,
-            "lead_url": "",
-            "leadURL": "",
-            "categories": [
-                "Defect"
-            ],
-            "tags": [
-                "bug",
-                "maintenance",
-                "charset",
-                "contenttype",
-                "header"
-            ],
-            "title": "",
-            "cwe": [],
-            "text": "",
-            "repoDatasetSize": 161,
-            "exampleCommitDescriptions": [
-                "Added charset to content-type headers in tests"
-            ],
-            "exampleCommitFixes": [
+          "rows": [108, 108],
+          "cols": [9, 41],
+          "markers": [
+            {
+              "msg": [20, 26],
+              "pos": [
                 {
-                    "commitURL": "https://github.com/FabMo/FabMo-Engine/commit/25fc0c92e6f6f00e5a30fe8cd6f520599c7a4510?diff=split#diff-87379c668bab67fbe451d528e856c4a7L574",
-                    "lines": [
-                        {
-                            "line": "if(!(data instanceof FormData)) {",
-                            "lineNumber": 578,
-                            "lineChange": "none"
-                        },
-                        {
-                            "line": "  xhr.setRequestHeader('Content-Type', 'application/json');",
-                            "lineNumber": 573,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "  xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');",
-                            "lineNumber": 579,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "  if(typeof data != 'string') {",
-                            "lineNumber": 580,
-                            "lineChange": "none"
-                        },
-                        {
-                            "line": "    data = JSON.stringify(data);",
-                            "lineNumber": 581,
-                            "lineChange": "none"
-                        }
-                    ]
-                },
-                {
-                    "commitURL": "https://github.com/Inpassor/centrifuge-ts/commit/b00e64314651b6990ba45c3f000a02dcf25dee0f?diff=split#diff-f658bd2547156630632595517b820ecdL458",
-                    "lines": [
-                        {
-                            "line": "}",
-                            "lineNumber": 455,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');",
-                            "lineNumber": 456,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "xhr.setRequestHeader('Content-Type', 'application/json');",
-                            "lineNumber": 457,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "var _headers = new Headers();",
-                            "lineNumber": 423,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "_headers.append('X-Requested-With', 'XMLHttpRequest');",
-                            "lineNumber": 424,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "_headers.append('Content-Type', 'application/json');",
-                            "lineNumber": 425,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "for (var headerName in headers) {",
-                            "lineNumber": 458,
-                            "lineChange": "none"
-                        },
-                        {
-                            "line": "    if (headers.hasOwnProperty(headerName)) {",
-                            "lineNumber": 459,
-                            "lineChange": "none"
-                        }
-                    ]
-                },
-                {
-                    "commitURL": "https://github.com/infermedica/js-symptom-checker-example/commit/2763d02a591081da11a6c241feb01bbf1a3a260d?diff=split#diff-424c2d7fee9a65c1537c6183d3d4f1e4L23",
-                    "lines": [
-                        {
-                            "line": "  req.setRequestHeader('App-Key', this.appKey);",
-                            "lineNumber": 20,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "  req.setRequestHeader('Model', this.apiModel);",
-                            "lineNumber": 21,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "  req.setRequestHeader('Content-Type', 'application/json');",
-                            "lineNumber": 22,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "  req.onload = () => {",
-                            "lineNumber": 24,
-                            "lineChange": "removed"
-                        },
-                        {
-                            "line": "headers.append('app-key', this.appKey);",
-                            "lineNumber": 17,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "headers.append('model', this.apiModel);",
-                            "lineNumber": 18,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "headers.append('content-type', 'application/json');",
-                            "lineNumber": 19,
-                            "lineChange": "added"
-                        },
-                        {
-                            "line": "return fetch(this.apiUrl + url, {",
-                            "lineNumber": 21,
-                            "lineChange": "added"
-                        }
-                    ]
+                  "rows": [108, 108],
+                  "cols": [9, 41],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
                 }
-            ]
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "c8ede54bd6611ca074c42baf78809b9fe198c762ba8a1a78571befdf191869e5"
+            }
+          ]
         }
+      ],
+      "2": [
+        {
+          "rows": [51, 51],
+          "cols": [13, 21],
+          "markers": [
+            {
+              "msg": [59, 76],
+              "pos": [
+                {
+                  "rows": [53, 53],
+                  "cols": [29, 60],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
+                }
+              ]
+            },
+            {
+              "msg": [86, 94],
+              "pos": [
+                {
+                  "rows": [51, 51],
+                  "cols": [13, 21],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/index.html"
+                }
+              ]
+            }
+          ],
+          "fingerprints": []
+        }
+      ]
+    },
+    "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js": {
+      "0": [
+        {
+          "rows": [1052, 1052],
+          "cols": [17, 30],
+          "markers": [
+            {
+              "msg": [20, 26],
+              "pos": [
+                {
+                  "rows": [1052, 1052],
+                  "cols": [17, 30],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "8105a5e15b9d725e663009985913a6931ba94ddd56f4854d24ba3565067501b4"
+            }
+          ]
+        }
+      ],
+      "5": [
+        {
+          "rows": [367, 367],
+          "cols": [26, 67],
+          "markers": [
+            {
+              "msg": [23, 49],
+              "pos": [
+                {
+                  "rows": [408, 408],
+                  "cols": [50, 65],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [51, 55],
+              "pos": [
+                {
+                  "rows": [408, 408],
+                  "cols": [50, 65],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [408, 408],
+                  "cols": [39, 48],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [408, 408],
+                  "cols": [39, 66],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [408, 408],
+                  "cols": [25, 35],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [408, 408],
+                  "cols": [28, 35],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [408, 408],
+                  "cols": [25, 26],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [409, 409],
+                  "cols": [44, 45],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [421, 421],
+                  "cols": [9, 10],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [438, 438],
+                  "cols": [9, 10],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [529, 529],
+                  "cols": [9, 10],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [540, 540],
+                  "cols": [24, 25],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [347, 347],
+                  "cols": [53, 54],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [347, 347],
+                  "cols": [53, 63],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [367, 367],
+                  "cols": [56, 66],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                },
+                {
+                  "rows": [367, 367],
+                  "cols": [44, 66],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [114, 124],
+              "pos": [
+                {
+                  "rows": [367, 367],
+                  "cols": [26, 42],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "2cc2fb05feccfae008104250873928e0d9f1de01f5878d485963f2966edc163e"
+            }
+          ]
+        }
+      ],
+      "6": [
+        {
+          "rows": [375, 375],
+          "cols": [44, 61],
+          "markers": [
+            {
+              "msg": [13, 28],
+              "pos": [
+                {
+                  "rows": [375, 375],
+                  "cols": [44, 61],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [37, 52],
+              "pos": [
+                {
+                  "rows": [375, 375],
+                  "cols": [13, 32],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "4aaff40942701a6acc92fafebea49f718bdc060012ca10a5f30e9462da6143b9"
+            }
+          ]
+        },
+        {
+          "rows": [400, 400],
+          "cols": [44, 61],
+          "markers": [
+            {
+              "msg": [13, 28],
+              "pos": [
+                {
+                  "rows": [400, 400],
+                  "cols": [44, 61],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [37, 52],
+              "pos": [
+                {
+                  "rows": [400, 400],
+                  "cols": [13, 32],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "51a2aefac0251d664f40c9741ab9a6af0ad1cdd7a51423db9de5891777960016"
+            }
+          ]
+        },
+        {
+          "rows": [737, 737],
+          "cols": [48, 65],
+          "markers": [
+            {
+              "msg": [13, 28],
+              "pos": [
+                {
+                  "rows": [737, 737],
+                  "cols": [48, 65],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [37, 52],
+              "pos": [
+                {
+                  "rows": [737, 737],
+                  "cols": [17, 36],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "da1a56ce99d2778caea9103d4aba2292543efa487853e8c161c4573aec8b62f1"
+            }
+          ]
+        },
+        {
+          "rows": [794, 794],
+          "cols": [56, 73],
+          "markers": [
+            {
+              "msg": [13, 28],
+              "pos": [
+                {
+                  "rows": [794, 794],
+                  "cols": [56, 73],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            },
+            {
+              "msg": [37, 52],
+              "pos": [
+                {
+                  "rows": [794, 794],
+                  "cols": [25, 44],
+                  "file": "/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/keycloak/OIDCKeycloak.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "81afc8333354c3ccd0a8264aab07846cb5a69b35bbeff7a9b6bcdb9fcf3689d0"
+            }
+          ]
+        }
+      ]
+    },
+    "/assembly/assembly-root-war/src/main/webapp/_app/loader.js": {
+      "0": [
+        {
+          "rows": [84, 84],
+          "cols": [13, 53],
+          "markers": [
+            {
+              "msg": [20, 26],
+              "pos": [
+                {
+                  "rows": [84, 84],
+                  "cols": [13, 53],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "8a870ceae63c99fb925bcdcbaca7ce5c8ccf29024898cd1694d930b5d687842e"
+            }
+          ]
+        }
+      ],
+      "1": [
+        {
+          "rows": [238, 238],
+          "cols": [9, 20],
+          "markers": [
+            {
+              "msg": [23, 34],
+              "pos": [
+                {
+                  "rows": [235, 235],
+                  "cols": [14, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                }
+              ]
+            },
+            {
+              "msg": [36, 40],
+              "pos": [
+                {
+                  "rows": [235, 235],
+                  "cols": [14, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [236, 236],
+                  "cols": [23, 34],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [238, 238],
+                  "cols": [22, 33],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [35, 35],
+                  "cols": [11, 17],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [42, 42],
+                  "cols": [29, 35],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [42, 42],
+                  "cols": [9, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                },
+                {
+                  "rows": [42, 42],
+                  "cols": [17, 25],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                }
+              ]
+            },
+            {
+              "msg": [47, 47],
+              "pos": [
+                {
+                  "rows": [42, 42],
+                  "cols": [9, 15],
+                  "file": "/assembly/assembly-root-war/src/main/webapp/_app/loader.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "2ea8d6c4f7096751e5e6f725a3deeac983fe5fac17cdd64e5f6aa83d49156d67"
+            }
+          ]
+        }
+      ]
+    },
+    "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js": {
+      "3": [
+        {
+          "rows": [215, 215],
+          "cols": [16, 29],
+          "markers": [
+            {
+              "msg": [12, 16],
+              "pos": [
+                {
+                  "rows": [215, 215],
+                  "cols": [31, 35],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
+                }
+              ]
+            },
+            {
+              "msg": [21, 27],
+              "pos": [
+                {
+                  "rows": [215, 215],
+                  "cols": [16, 29],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
+                }
+              ]
+            },
+            {
+              "msg": [48, 55],
+              "pos": [
+                {
+                  "rows": [215, 215],
+                  "cols": [31, 35],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
+                }
+              ]
+            },
+            {
+              "msg": [56, 84],
+              "pos": [
+                {
+                  "rows": [215, 215],
+                  "cols": [31, 35],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/marked.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "719d356d9a2efebe9142ca79825c6c0e4b0e6f5013a6e3f3b04630243416ac87"
+            }
+          ]
+        }
+      ]
+    },
+    "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js": {
+      "4": [
+        {
+          "rows": [98, 98],
+          "cols": [3, 38],
+          "markers": [
+            {
+              "msg": [21, 28],
+              "pos": [
+                {
+                  "rows": [98, 98],
+                  "cols": [3, 38],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2"
+            },
+            {
+              "version": 2,
+              "fingerprint": "78d8a8779142d82cf9be9da7a167e8e06236ab0a67d324143494650a5e4badf2"
+            },
+            {
+              "version": 1,
+              "fingerprint": "asdf"
+            }
+          ]
+        },
+        {
+          "rows": [216, 216],
+          "cols": [3, 21],
+          "markers": [
+            {
+              "msg": [21, 28],
+              "pos": [
+                {
+                  "rows": [216, 216],
+                  "cols": [3, 21],
+                  "file": "/assembly/assembly-swagger-war/src/main/webapp/lib/swagger-oauth.js"
+                }
+              ]
+            }
+          ],
+          "fingerprints": [
+            {
+              "version": 0,
+              "fingerprint": "ce5c43465aac96db6e4505f48df1defaa81a38bf7876a1f0e7431c54304d9ea1"
+            }
+          ]
+        }
+      ]
     }
+  },
+  "timing": {
+    "fetchingCode": 17219,
+    "analysis": 131687,
+    "queue": 8
+  },
+  "coverage": [
+    {
+      "files": 56,
+      "isSupported": false,
+      "lang": "Shell"
+    },
+    {
+      "files": 167,
+      "isSupported": false,
+      "lang": "YAML"
+    },
+    {
+      "files": 189,
+      "isSupported": false,
+      "lang": "Unknown"
+    },
+    {
+      "files": 47,
+      "isSupported": false,
+      "lang": "Markdown"
+    },
+    {
+      "files": 328,
+      "isSupported": false,
+      "lang": "XML"
+    },
+    {
+      "files": 22,
+      "isSupported": false,
+      "lang": "Text"
+    },
+    {
+      "files": 2557,
+      "isSupported": true,
+      "lang": "Java"
+    },
+    {
+      "files": 4,
+      "isSupported": false,
+      "lang": "SVG"
+    },
+    {
+      "files": 41,
+      "isSupported": true,
+      "lang": "JavaScript"
+    },
+    {
+      "files": 13,
+      "isSupported": false,
+      "lang": "CSS"
+    },
+    {
+      "files": 14,
+      "isSupported": true,
+      "lang": "HTML"
+    },
+    {
+      "files": 21,
+      "isSupported": false,
+      "lang": "Java Properties"
+    },
+    {
+      "files": 89,
+      "isSupported": false,
+      "lang": "SQLPL"
+    },
+    {
+      "files": 88,
+      "isSupported": true,
+      "lang": "TypeScript"
+    },
+    {
+      "files": 72,
+      "isSupported": false,
+      "lang": "JSON"
+    },
+    {
+      "files": 8,
+      "isSupported": false,
+      "lang": "Smarty"
+    },
+    {
+      "files": 1,
+      "isSupported": false,
+      "lang": "TOML"
+    },
+    {
+      "files": 28,
+      "isSupported": false,
+      "lang": "FreeMarker"
+    },
+    {
+      "files": 6,
+      "isSupported": false,
+      "lang": "HTML+ERB"
+    },
+    {
+      "files": 3,
+      "isSupported": false,
+      "lang": "PHP (beta)"
+    },
+    {
+      "files": 3,
+      "isSupported": false,
+      "lang": "C# (beta)"
+    },
+    {
+      "files": 57,
+      "isSupported": false,
+      "lang": "Java Server Pages"
+    },
+    {
+      "files": 4,
+      "isSupported": false,
+      "lang": "C++ (beta)"
+    },
+    {
+      "files": 1,
+      "isSupported": false,
+      "lang": "C (beta)"
+    },
+    {
+      "files": 4,
+      "isSupported": false,
+      "lang": "Python"
+    },
+    {
+      "files": 4,
+      "isSupported": false,
+      "lang": "Less"
+    },
+    {
+      "files": 4,
+      "isSupported": false,
+      "lang": "Go"
+    }
+  ],
+  "suggestions": {
+    "0": {
+      "id": "javascript%2Fdc_interfile_project%2FPromiseNotCaughtGeneral",
+      "rule": "PromiseNotCaughtGeneral",
+      "message": "No catch method for promise. This may result in an unhandled promise rejection.",
+      "severity": 1,
+      "lead_url": "https://javascript.info/promise-error-handling#unhandled-rejections",
+      "leadURL": "https://javascript.info/promise-error-handling#unhandled-rejections",
+      "categories": ["API", "Info"],
+      "tags": ["maintenance", "error", "tests", "promise"],
+      "title": "",
+      "cwe": [],
+      "text": "",
+      "repoDatasetSize": 5645,
+      "exampleCommitDescriptions": ["*  fix test error", "testing with promises should return the promise"],
+      "exampleCommitFixes": []
+    },
+    "1": {
+      "id": "javascript%2Fdc_interfile_project%2FDOMXSS",
+      "rule": "DOMXSS",
+      "message": "Unsanitized input from an exception flows into 0, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).",
+      "severity": 3,
+      "lead_url": "https://www.owasp.org/index.php/DOM_Based_XSS",
+      "leadURL": "https://www.owasp.org/index.php/DOM_Based_XSS",
+      "categories": ["Security"],
+      "tags": ["maintenance", "usability", "page", "QUnit", "loading"],
+      "title": "Cross-site Scripting (XSS)",
+      "cwe": ["CWE-79"],
+      "text": "## Details\n\nA cross-site scripting attack occurs when the attacker tricks a legitimate web-based application or site to accept a request as originating from a trusted source.\n\nThis is done by escaping the context of the web application; the web application then delivers that data to its users along with other trusted dynamic content, without validating it. The browser unknowingly executes malicious script on the client side (through client-side languages; usually JavaScript or HTML)  in order to perform actions that are otherwise typically blocked by the browser's Same Origin Policy.\n\nInjecting malicious code is the most prevalent manner by which XSS is exploited; for this reason, escaping characters in order to prevent this manipulation is the top method for securing code against this vulnerability.\n\nEscaping means that the application is coded to mark key characters, and particularly key characters included in user input, to prevent those characters from being interpreted in a dangerous context. For example, in HTML, `<` can be coded as  `&lt`; and `>` can be coded as `&gt`; in order to be interpreted and displayed as themselves in text, while within the code itself, they are used for HTML tags. If malicious content is injected into an application that escapes special characters and that malicious content uses `<` and `>` as HTML tags, those characters are nonetheless not interpreted as HTML tags by the browser if they've been correctly escaped in the application code and in this way the attempted attack is diverted.\n\nThe most prominent use of XSS is to steal cookies (source: OWASP HttpOnly) and hijack user sessions, but XSS exploits have been used to expose sensitive information, enable access to privileged services and functionality and deliver malware.\n\n### Types of attacks\nThere are a few methods by which XSS can be manipulated:\n\n|Type|Origin|Description|\n|--|--|--|\n|**Stored**|Server|The malicious code is inserted in the application (usually as a link) by the attacker. The code is activated every time a user clicks the link.|\n|**Reflected**|Server|The attacker delivers a malicious link externally from the vulnerable web site application to a user. When clicked, malicious code is sent to the vulnerable web site, which reflects the attack back to the user's browser.|\n|**DOM-based**|Client|The attacker forces the user's browser to render a malicious page. The data in the page itself delivers the cross-site scripting data.|\n|**Mutated**| |The attacker injects code that appears safe, but is then rewritten and modified by the browser, while parsing the markup. An example is rebalancing unclosed quotation marks or even adding quotation marks to unquoted parameters.|\n\n### Affected environments\nThe following environments are susceptible to an XSS attack:\n\n* Web servers\n* Application servers\n* Web application environments\n\n### How to prevent\nThis section describes the top best practices designed to specifically protect your code:\n\n* Sanitize data input in an HTTP request before reflecting it back, ensuring all data is validated, filtered or escaped before echoing anything back to the user, such as the values of query parameters during searches.\n* Convert special characters such as `?`, `&`, `/`, `<`, `>` and spaces to their respective HTML or URL encoded equivalents.\n* Give users the option to disable client-side scripts.\n* Redirect invalid requests.\n* Detect simultaneous logins, including those from two separate IP addresses, and invalidate those sessions.\n* Use and enforce a Content Security Policy (source: Wikipedia) to disable any features that might be manipulated for an XSS attack.\n* Read the documentation for any of the libraries referenced in your code to understand which elements allow for embedded HTML.",
+      "repoDatasetSize": 439,
+      "exampleCommitDescriptions": [
+        "* Ensure that dgrid.css is explicitly loaded in all test pages",
+        "Added compound test suite and updated QUnit.",
+        "ExampleWidget for testing LESS compilation and load!"
+      ],
+      "exampleCommitFixes": []
+    },
+    "2": {
+      "id": "javascript%2Fdc_interfile_project%2FHardcodedNonCryptoSecret",
+      "rule": "HardcodedNonCryptoSecret",
+      "message": "Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in initOAuth.",
+      "severity": 3,
+      "lead_url": "",
+      "leadURL": "",
+      "categories": ["Security"],
+      "tags": ["maintenance", "secret", "session", "config"],
+      "title": "Hardcoded Secret",
+      "cwe": ["CWE-547"],
+      "text": "",
+      "repoDatasetSize": 390,
+      "exampleCommitDescriptions": [
+        "Make address, passphrase and secret in the tests configurable",
+        "clean console.log + update test for express session",
+        "use config for tests"
+      ],
+      "exampleCommitFixes": []
+    },
+    "3": {
+      "id": "javascript%2Fdc_interfile_project%2FReplacementRegex",
+      "rule": "ReplacementRegex",
+      "message": "The pattern regex in replace may be improved to /\\r?\\n$/to handle different new lines.",
+      "severity": 2,
+      "lead_url": "",
+      "leadURL": "",
+      "categories": ["Defect"],
+      "tags": ["upgrade", "maintenance", "bug", "newline", "favicon", "auth"],
+      "title": "",
+      "cwe": [],
+      "text": "",
+      "repoDatasetSize": 53,
+      "exampleCommitDescriptions": [
+        "Fix match on ending newline bug",
+        "Better logging for favicons.",
+        "* Even better auth switching and timeline syntax"
+      ],
+      "exampleCommitFixes": []
+    },
+    "4": {
+      "id": "javascript%2Fdc_interfile_project%2FUseInstead",
+      "rule": "UseInstead",
+      "message": "Use off() instead of unbind().",
+      "severity": 2,
+      "lead_url": "",
+      "leadURL": "",
+      "categories": ["API"],
+      "tags": ["maintenance", "bug", "jQuery", "event", "binding"],
+      "title": "",
+      "cwe": [],
+      "text": "",
+      "repoDatasetSize": 1103,
+      "exampleCommitDescriptions": [
+        "- Replaced all the $ for jQuery in the tests and suite.",
+        "new event map and tests",
+        "testing using on instead of bind"
+      ],
+      "exampleCommitFixes": []
+    },
+    "5": {
+      "id": "javascript%2Fdc_interfile_project%2FUserControlledProperty",
+      "rule": "UserControlledProperty",
+      "message": "Unsanitized input from data from a remote resource flows into a member access and is used to access a property of this object by name. This may allow a malicious user to access methods (e.g. toString) as opposed to regular properties of objects and cause a crash, remote code execution or more serious problems. This is known as a Prototype Pollution vulnerability.",
+      "severity": 2,
+      "lead_url": "https://medium.com/node-modules/what-is-prototype-pollution-and-why-is-it-such-a-big-deal-2dd8d89a93c",
+      "leadURL": "https://medium.com/node-modules/what-is-prototype-pollution-and-why-is-it-such-a-big-deal-2dd8d89a93c",
+      "categories": ["Security"],
+      "tags": [],
+      "title": "",
+      "cwe": [],
+      "text": "",
+      "repoDatasetSize": 0,
+      "exampleCommitDescriptions": [],
+      "exampleCommitFixes": []
+    },
+    "6": {
+      "id": "javascript%2Fdc_interfile_project%2FContentTypeNoCharset",
+      "rule": "ContentTypeNoCharset",
+      "message": "Content-type application/json set in setRequestHeader does not specify a charset. Add charset=utf-8 or another charset.",
+      "severity": 2,
+      "lead_url": "",
+      "leadURL": "",
+      "categories": ["Defect"],
+      "tags": ["bug", "maintenance", "charset", "contenttype", "header"],
+      "title": "",
+      "cwe": [],
+      "text": "",
+      "repoDatasetSize": 161,
+      "exampleCommitDescriptions": ["Added charset to content-type headers in tests"],
+      "exampleCommitFixes": [
+        {
+          "commitURL": "https://github.com/FabMo/FabMo-Engine/commit/25fc0c92e6f6f00e5a30fe8cd6f520599c7a4510?diff=split#diff-87379c668bab67fbe451d528e856c4a7L574",
+          "lines": [
+            {
+              "line": "if(!(data instanceof FormData)) {",
+              "lineNumber": 578,
+              "lineChange": "none"
+            },
+            {
+              "line": "  xhr.setRequestHeader('Content-Type', 'application/json');",
+              "lineNumber": 573,
+              "lineChange": "removed"
+            },
+            {
+              "line": "  xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');",
+              "lineNumber": 579,
+              "lineChange": "added"
+            },
+            {
+              "line": "  if(typeof data != 'string') {",
+              "lineNumber": 580,
+              "lineChange": "none"
+            },
+            {
+              "line": "    data = JSON.stringify(data);",
+              "lineNumber": 581,
+              "lineChange": "none"
+            }
+          ]
+        },
+        {
+          "commitURL": "https://github.com/Inpassor/centrifuge-ts/commit/b00e64314651b6990ba45c3f000a02dcf25dee0f?diff=split#diff-f658bd2547156630632595517b820ecdL458",
+          "lines": [
+            {
+              "line": "}",
+              "lineNumber": 455,
+              "lineChange": "removed"
+            },
+            {
+              "line": "xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');",
+              "lineNumber": 456,
+              "lineChange": "removed"
+            },
+            {
+              "line": "xhr.setRequestHeader('Content-Type', 'application/json');",
+              "lineNumber": 457,
+              "lineChange": "removed"
+            },
+            {
+              "line": "var _headers = new Headers();",
+              "lineNumber": 423,
+              "lineChange": "added"
+            },
+            {
+              "line": "_headers.append('X-Requested-With', 'XMLHttpRequest');",
+              "lineNumber": 424,
+              "lineChange": "added"
+            },
+            {
+              "line": "_headers.append('Content-Type', 'application/json');",
+              "lineNumber": 425,
+              "lineChange": "added"
+            },
+            {
+              "line": "for (var headerName in headers) {",
+              "lineNumber": 458,
+              "lineChange": "none"
+            },
+            {
+              "line": "    if (headers.hasOwnProperty(headerName)) {",
+              "lineNumber": 459,
+              "lineChange": "none"
+            }
+          ]
+        },
+        {
+          "commitURL": "https://github.com/infermedica/js-symptom-checker-example/commit/2763d02a591081da11a6c241feb01bbf1a3a260d?diff=split#diff-424c2d7fee9a65c1537c6183d3d4f1e4L23",
+          "lines": [
+            {
+              "line": "  req.setRequestHeader('App-Key', this.appKey);",
+              "lineNumber": 20,
+              "lineChange": "removed"
+            },
+            {
+              "line": "  req.setRequestHeader('Model', this.apiModel);",
+              "lineNumber": 21,
+              "lineChange": "removed"
+            },
+            {
+              "line": "  req.setRequestHeader('Content-Type', 'application/json');",
+              "lineNumber": 22,
+              "lineChange": "removed"
+            },
+            {
+              "line": "  req.onload = () => {",
+              "lineNumber": 24,
+              "lineChange": "removed"
+            },
+            {
+              "line": "headers.append('app-key', this.appKey);",
+              "lineNumber": 17,
+              "lineChange": "added"
+            },
+            {
+              "line": "headers.append('model', this.apiModel);",
+              "lineNumber": 18,
+              "lineChange": "added"
+            },
+            {
+              "line": "headers.append('content-type', 'application/json');",
+              "lineNumber": 19,
+              "lineChange": "added"
+            },
+            {
+              "line": "return fetch(this.apiUrl + url, {",
+              "lineNumber": 21,
+              "lineChange": "added"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

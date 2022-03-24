@@ -10,10 +10,12 @@
   "scripts": {
     "build": "tsc -p ./",
     "prepare": "npm run build",
-    "lint": "npx eslint 'src/**/*.ts'",
-    "lint:fix": "npx eslint --fix 'src/**/*.ts'",
+    "lint": "npm-run-all --serial --continue-on-error lint:*",
+    "lint:src": "npx eslint 'src/**/*.ts'",
+    "lint:tsc": "tsc --noEmit",
     "lint:formatting": "prettier --check '**/*.{js,ts,json,yaml,yml,md}'",
-    "lint:format": "prettier --write '**/*.{js,ts,json,yaml,yml,md}'",
+    "eslint:fix": "eslint --fix 'src/**/*.ts'",
+    "format": "prettier --write '**/*.{js,ts,json,yaml,yml,md}'",
     "watch": "tsc -watch -p ./",
     "test": "jest --coverage --runInBand"
   },
@@ -57,6 +59,7 @@
     "jest": "^26.4.2",
     "jsonschema": "^1.2.11",
     "prettier": "^2.1.1",
+    "npm-run-all": "^4.1.5",
     "ts-jest": "^26.3.0",
     "typescript": "^4.0.2",
     "write": "^2.0.0"
@@ -81,4 +84,3 @@
     "yaml": "^1.10.2"
   }
 }
-

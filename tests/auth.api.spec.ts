@@ -1,9 +1,7 @@
-
 import { authHost } from './constants/base';
 import { startSession, checkSession, getIpFamily } from '../src/http';
 
 describe('Requests to public API', () => {
-
   it('starts session successfully', async () => {
     const ipFamily = await getIpFamily(authHost);
 
@@ -41,5 +39,4 @@ describe('Requests to public API', () => {
   //   if (response.type === 'error') return;
   //   expect(response.value).toEqual(true);
   // });
-
 });

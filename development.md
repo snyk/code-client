@@ -34,6 +34,7 @@ $ SNYK_API_HOST=... SNYK_AUTH_HOST=... SNYK_API_KEY=... npm run test
 Make sure you checked documentation about [semantic release prefixes](https://github.com/semantic-release/semantic-release)
 
 For example, to make a major version your message must follow this format:
+
 ```
 feat: <short message>
 

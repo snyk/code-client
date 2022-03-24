@@ -66,15 +66,15 @@ jobs:
 workflows:
   default_workflow:
     jobs:
+      - lint:
+          node_version: '12'
       - test:
           matrix:
             parameters:
               node_version: ['10', '12']
           context: nodejs-install
-      - lint:
-          node_version: '12'
           requires:
-            - test
+            - lint
       - release:
           node_version: '12'
           context: nodejs-lib-release

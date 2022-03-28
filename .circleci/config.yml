@@ -22,6 +22,24 @@ jobs:
           paths:
             - node_modules
       - run: npm run test
+  lint:
+    parameters:
+      node_version:
+        type: string
+    working_directory: ~/code-sdk
+    docker:
+      - image: circleci/node:<< parameters.node_version >>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+            - v2-{{ .Branch }}-<< parameters.node_version >>
+            - v2-<< parameters.node_version >>
+      - run:
+          name: Install
+          command: npm install
+      - run: npm run lint
 
   release:
     parameters:
@@ -48,16 +66,20 @@ jobs:
 workflows:
   default_workflow:
     jobs:
+      - lint:
+          node_version: '12'
       - test:
           matrix:
             parameters:
-              node_version: ["10", "12"]
+              node_version: ['10', '12']
           context: nodejs-install
+          requires:
+            - lint
       - release:
-          node_version: "12"
+          node_version: '12'
           context: nodejs-lib-release
           requires:
-            - test
+            - lint
           filters:
             branches:
               only:

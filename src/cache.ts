@@ -14,7 +14,7 @@ export class Cache {
     }
   }
 
-  public save(noPrune: boolean = false): void {
+  public save(noPrune = false): void {
     !noPrune && this.prune();
     writeJSON(this.pathToFile, this.persisted);
   }
@@ -29,7 +29,7 @@ export class Cache {
     this.persisted[key] = value;
   }
   private prune() {
-    let obj = {};
+    const obj = {};
 
     const keys = Object.keys(this.visited);
 

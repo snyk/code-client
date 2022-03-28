@@ -5,15 +5,17 @@ describe('HTTP', () => {
 
   beforeEach(() => {
     jest.resetModuleRegistry();
-  })
+  });
 
   it('should respolve IPv6, if http request succeeds', async () => {
-    jest.mock('needle', () => jest.fn(() => ({
-      response: {
-        statusCode: 401,
-        body: {}
-      }
-    })));
+    jest.mock('needle', () =>
+      jest.fn(() => ({
+        response: {
+          statusCode: 401,
+          body: {},
+        },
+      })),
+    );
 
     const http = await import('../src');
     const family = await http.getIpFamily(authHost);
@@ -22,7 +24,9 @@ describe('HTTP', () => {
   });
 
   it('shouldn not resolve IPv6, if http request throws an error', async () => {
-    const errorFn = () => { throw new Error(); };
+    const errorFn = () => {
+      throw new Error();
+    };
     jest.mock('needle', () => jest.fn(errorFn));
 
     const http = await import('../src');

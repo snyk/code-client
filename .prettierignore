@@ -1,0 +1,10 @@
+tests/sample-repo
+node_modules
+dist
+coverage
+.yalc
+**/.dccache
+.idea
+tsc.iml
+package-lock.json
+tsconfig.tsbuildinfo

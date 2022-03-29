@@ -129,7 +129,7 @@ describe('Functional test of analysis', () => {
 
         const shouldNotBeInBundle = [
           '/.eslintrc.json', // <= no linters on backend
-          'main.js', // <= over MAX_FILE_SIZE
+          'big-file.js', // <= over MAX_FILE_SIZE
         ];
         // Force uploading files one more time
         await uploadRemoteBundle({

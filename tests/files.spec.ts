@@ -44,7 +44,8 @@ describe('files', () => {
     for await (const f of collector) {
       files.push(f);
     }
-    expect(files).toEqual(await bundleFiles);
+    // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
+    expect(files).toEqual((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
 
     const testFile = files[1];
     expect(testFile.bundlePath).toEqual('AnnotatorTest.cpp');

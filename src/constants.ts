@@ -1,7 +1,7 @@
 import { CustomDCIgnore, DefaultDCIgnore } from '@deepcode/dcignore';
 
 export const MAX_PAYLOAD = 4 * 1024 * 1024;
-export const MAX_FILE_SIZE = 128 * 1024;
+export const MAX_FILE_SIZE = 1024 * 1024;
 export const HASH_ALGORITHM = 'sha256';
 export const ENCODE_TYPE = 'hex';
 export const GIT_FILENAME = '.git';

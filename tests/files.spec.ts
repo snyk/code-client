@@ -41,11 +41,16 @@ describe('files', () => {
       fileIgnores: bundleFileIgnores,
     });
     const files = [];
+    const skippedOversizedFiles = [];
     for await (const f of collector) {
-      files.push(f);
+      typeof f == 'string' ? skippedOversizedFiles.push(f) : files.push(f);
     }
     // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
     expect(files).toEqual((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
+
+    // big-file.js should be added to skippedOversizedFiles
+    expect(skippedOversizedFiles.length).toEqual(1);
+    expect(skippedOversizedFiles[0]).toEqual('big-file.js');
 
     const testFile = files[1];
     expect(testFile.bundlePath).toEqual('AnnotatorTest.cpp');
@@ -79,10 +84,12 @@ describe('files', () => {
       fileIgnores: [],
     });
     const smallFiles = [];
+    const skippedOversizedFiles = [];
     for await (const f of collector) {
-      smallFiles.push(f);
+      typeof f == 'string' ? skippedOversizedFiles.push(f) : smallFiles.push(f);
     }
     expect(smallFiles.length).toEqual(2);
+    expect(skippedOversizedFiles.length).toEqual(0);
     expect(smallFiles.map(f => [f.filePath, f.bundlePath])).toEqual([
       [`${sampleProjectPath}/models/sharks.js`, 'models/sharks.js'],
       [`${sampleProjectPath}/controllers/sharks.js`, 'controllers/sharks.js'],

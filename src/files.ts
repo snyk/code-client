@@ -422,7 +422,11 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
     relPath = relPath.replace(/\//g, '\\');
   }
 
-  return nodePath.resolve(baseDir, decodeURI(relPath));
+  if (baseDir) {
+    return nodePath.resolve(baseDir, decodeURI(relPath));
+  }
+
+  return decodeURI(relPath);
 }
 
 export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD): Generator<FileInfo[]> {

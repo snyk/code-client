@@ -83,14 +83,11 @@ export async function analyzeBundle(options: GetAnalysisOptions): Promise<Analys
 }
 
 function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
-  if (baseDir) {
-    return Object.entries(files).reduce((obj, [path, positions]) => {
-      const filePath = resolveBundleFilePath(baseDir, path);
-      obj[filePath] = positions;
-      return obj;
-    }, {});
-  }
-  return files;
+  return Object.entries(files).reduce((obj, [path, positions]) => {
+    const filePath = resolveBundleFilePath(baseDir, path);
+    obj[filePath] = positions;
+    return obj;
+  }, {});
 }
 
 export async function analyzeFolders(options: FileAnalysisOptions): Promise<FileAnalysis | null> {

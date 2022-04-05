@@ -107,7 +107,7 @@ describe('Functional test of analysis', () => {
 
         // Check if emitter event happened
         expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
-        expect(onScanFilesProgress).toHaveBeenCalledTimes(10);
+        expect(onScanFilesProgress).toHaveBeenCalledTimes(11);
         expect(onCreateBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAnalyseProgress).toHaveBeenCalled();
         expect(onAPIRequestLog).toHaveBeenCalled();

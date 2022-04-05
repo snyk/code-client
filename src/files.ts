@@ -227,6 +227,7 @@ async function* searchFiles(
 
 /**
  * Returns bundle files from requested paths
+ * If a file exceeds the maximum file size, it returns a string with its path
  * */
 export async function* collectBundleFiles({
   symlinksEnabled = false,
@@ -234,7 +235,7 @@ export async function* collectBundleFiles({
   fileIgnores,
   paths,
   supportedFiles,
-}: CollectBundleFilesOptions): AsyncGenerator<FileInfo> {
+}: CollectBundleFilesOptions): AsyncGenerator<FileInfo | string> {
   const cache = new Cache(CACHE_KEY, baseDir);
 
   const files = [];
@@ -247,8 +248,8 @@ export async function* collectBundleFiles({
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled)) continue;
 
-    if (fileStats.isFile() && fileStats.size <= MAX_FILE_SIZE) {
-      files.push(path);
+    if (fileStats.isFile()) {
+      fileStats.size <= MAX_FILE_SIZE ? files.push(path) : yield path;
     } else if (fileStats.isDirectory()) {
       dirs.push(path);
     }
@@ -262,8 +263,8 @@ export async function* collectBundleFiles({
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
-      if (fileInfo && fileInfo.size <= MAX_FILE_SIZE) {
-        yield fileInfo;
+      if (fileInfo) {
+        fileInfo.size <= MAX_FILE_SIZE ? yield fileInfo : yield fileInfo.bundlePath;
       }
     }
   }
@@ -274,8 +275,8 @@ export async function* collectBundleFiles({
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&
-      if (fileInfo && fileInfo.size <= MAX_FILE_SIZE) {
-        yield fileInfo;
+      if (fileInfo) {
+        fileInfo.size <= MAX_FILE_SIZE ? yield fileInfo : yield fileInfo.bundlePath;
       }
     }
   }

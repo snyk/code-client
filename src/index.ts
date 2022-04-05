@@ -2,6 +2,7 @@ import { analyzeFolders, extendAnalysis } from './analysis';
 import { createBundleFromFolders } from './bundles';
 import { emitter } from './emitter';
 import { startSession, checkSession, getAnalysis, getIpFamily, IpFamily } from './http';
+import { MAX_FILE_SIZE } from './constants';
 import * as constants from './constants';
 import { getGlobPatterns } from './files';
 
@@ -22,6 +23,7 @@ export {
   createBundleFromFolders,
   extendAnalysis,
   emitter,
+  MAX_FILE_SIZE,
   constants,
   AnalysisSeverity,
   AnalysisResult,

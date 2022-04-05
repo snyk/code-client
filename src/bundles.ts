@@ -215,6 +215,7 @@ export interface FileBundle extends RemoteBundle {
   baseDir: string;
   supportedFiles: SupportedFiles;
   fileIgnores: string[];
+  skippedOversizedFiles?: string[];
 }
 
 /**
@@ -234,6 +235,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
 
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
+  const skippedOversizedFiles = [];
   let totalFiles = 0;
   const bundleFileCollector = collectBundleFiles({
     ...pick(options, ['paths', 'symlinksEnabled']),
@@ -242,7 +244,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     supportedFiles,
   });
   for await (const f of bundleFileCollector) {
-    bundleFiles.push(f);
+    typeof f == 'string' ? skippedOversizedFiles.push(f) : bundleFiles.push(f);
     totalFiles += 1;
     emitter.scanFilesProgress(totalFiles);
   }
@@ -264,5 +266,6 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     baseDir,
     supportedFiles,
     fileIgnores,
+    skippedOversizedFiles,
   };
 }

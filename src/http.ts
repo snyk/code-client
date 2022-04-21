@@ -25,6 +25,7 @@ export interface ConnectionOptions {
   sessionToken: string;
   source: string;
   requestId?: string;
+  base64Encoding: boolean;
 }
 
 // The trick to typecast union type alias
@@ -208,6 +209,13 @@ interface CreateBundleOptions extends ConnectionOptions {
 export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
+  let payloadBody;
+  if (options.base64Encoding) {
+    const payloadBuffer = Buffer.from(JSON.stringify(options.files));
+    payloadBody = payloadBuffer.toString('base64');
+  } else {
+    payloadBody = options.files;
+  }
   const payload: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
@@ -216,7 +224,7 @@ export async function createBundle(
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
-    body: options.files,
+    body: payloadBody,
   };
 
   const res = await makeRequest<RemoteBundle>(payload);
@@ -284,6 +292,13 @@ interface ExtendBundleOptions extends ConnectionOptions {
 export async function extendBundle(
   options: ExtendBundleOptions,
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
+  let payloadBody;
+  if (options.base64Encoding) {
+    const payloadBuffer = Buffer.from(JSON.stringify(pick(options, ['files', 'removedFiles'])));
+    payloadBody = payloadBuffer.toString('base64');
+  } else {
+    payloadBody = pick(options, ['files', 'removedFiles']);
+  }
   const res = await makeRequest<RemoteBundle>({
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
@@ -292,9 +307,8 @@ export async function extendBundle(
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
-    body: pick(options, ['files', 'removedFiles']),
+    body: payloadBody,
   });
-
   if (res.success) return { type: 'success', value: res.body };
   return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
 }

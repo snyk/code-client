@@ -52,7 +52,7 @@ describe('Functional test of analysis', () => {
         emitter.on(emitter.events.apiRequestLog, onAPIRequestLog);
 
         const bundle = await analyzeFolders({
-          connection: { baseURL, sessionToken, source },
+          connection: { baseURL, sessionToken, source, base64Encoding:false },
           analysisOptions: {
             severity: 1,
             prioritized: true,
@@ -119,6 +119,7 @@ describe('Functional test of analysis', () => {
           source,
           bundleHash: bundle.fileBundle.bundleHash,
           files: [],
+          base64Encoding: false
         });
 
         const onUploadBundleProgress = jest.fn((processed: number, total: number) => {
@@ -138,6 +139,7 @@ describe('Functional test of analysis', () => {
           source,
           bundleHash: bundle.fileBundle.bundleHash,
           files: bFiles.filter(({ bundlePath }) => !shouldNotBeInBundle.includes(bundlePath)),
+          base64Encoding: false,
         });
         expect(onUploadBundleProgress).toHaveBeenCalledTimes(2);
         expect(onAPIRequestLog).toHaveBeenCalled();
@@ -147,7 +149,7 @@ describe('Functional test of analysis', () => {
 
     it('analyze folder legacy json results', async () => {
       const bundle = await analyzeFolders({
-        connection: { baseURL, sessionToken, source },
+        connection: { baseURL, sessionToken, source, base64Encoding:false },
         analysisOptions: { severity: AnalysisSeverity.info, prioritized: true, legacy: true },
         fileOptions: {
           paths: [sampleProjectPath],
@@ -168,7 +170,7 @@ describe('Functional test of analysis', () => {
 
     it('analyze folder - with sarif returned', async () => {
       const bundle = await analyzeFolders({
-        connection: { baseURL, sessionToken, source },
+        connection: { baseURL, sessionToken, source, base64Encoding:false },
         analysisOptions: { severity: AnalysisSeverity.info, prioritized: true },
         fileOptions: {
           paths: [sampleProjectPath],
@@ -189,7 +191,7 @@ describe('Functional test of analysis', () => {
 
     it('analyze empty folder', async () => {
       const bundle = await analyzeFolders({
-        connection: { baseURL, sessionToken, source },
+        connection: { baseURL, sessionToken, source, base64Encoding:false },
         analysisOptions: { severity: AnalysisSeverity.info },
         fileOptions: {
           paths: [path.join(sampleProjectPath, 'only_text')],
@@ -205,7 +207,7 @@ describe('Functional test of analysis', () => {
       'extend folder analysis',
       async () => {
         const fileAnalysis = await analyzeFolders({
-          connection: { baseURL, sessionToken, source },
+          connection: { baseURL, sessionToken, source, base64Encoding:false },
           analysisOptions: {
             severity: 1,
           },
@@ -310,7 +312,7 @@ describe('Functional test of analysis', () => {
       const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
 
       await analyzeFolders({
-        connection: { baseURL, sessionToken, source },
+        connection: { baseURL, sessionToken, source, base64Encoding:false },
         analysisOptions: {
           severity: 1,
         },

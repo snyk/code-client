@@ -104,7 +104,7 @@ describe('Requests to public API', () => {
         sessionToken,
         files,
         source,
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') {
@@ -126,7 +126,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: fakeBundleHashFull,
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -144,7 +144,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: 'mock-expired-bundle-id',
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('error');
       // dummy to cheat typescript compiler
@@ -166,7 +166,7 @@ describe('Requests to public API', () => {
           bundleHash: fakeBundleHashFull,
           severity: 1,
           source,
-          base64Encoding: false
+          base64Encoding: false,
         });
       } while (response.type === 'success');
 
@@ -203,7 +203,7 @@ describe('Requests to public API', () => {
           `routes/index.js`,
           `routes/sharks.js`,
         ],
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -224,7 +224,7 @@ describe('Requests to public API', () => {
         files: {
           'new2.js': 'new1234',
         },
-        base64Encoding: false
+        base64Encoding: false,
       });
 
       expect(response.type).toEqual('error');
@@ -250,7 +250,7 @@ describe('Requests to public API', () => {
           'df.js': { hash: 'df', content: 'const module = new Module();' },
           'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
         },
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
@@ -274,7 +274,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         files,
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
@@ -290,7 +290,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: realBundleHashFull,
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(checkResponse.type).toEqual('success');
       if (checkResponse.type === 'error') return;
@@ -304,7 +304,7 @@ describe('Requests to public API', () => {
         source,
         bundleHash: realBundleHashFull,
         severity: 1,
-        base64Encoding: false
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -343,7 +343,7 @@ describe('Requests to public API', () => {
           severity: 1,
           limitToFiles: [`GitHubAccessTokenScrambler12.java`],
           source,
-          base64Encoding: false
+          base64Encoding: false,
         });
 
         expect(response.type).toEqual('success');
@@ -364,7 +364,7 @@ describe('Requests to public API', () => {
           bundleHash: realBundleHashFull,
           severity: 3,
           source,
-          base64Encoding: false
+          base64Encoding: false,
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;

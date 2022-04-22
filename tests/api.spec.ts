@@ -1,9 +1,11 @@
 import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { bundleFiles, bundleFilesFull } from './constants/sample';
+import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
+import * as needle from '../src/needle';
+import { request } from 'http';
 
 const fakeBundleHash = '0aafac4a1a3daccf80ea53b0e6a946cd9b4d9d2dfb1fc13b5ca3e16b045744b8';
 let fakeBundleHashFull = '';
@@ -379,3 +381,71 @@ describe('Requests to public API', () => {
     TEST_TIMEOUT,
   );
 });
+
+describe('Base64 encoded operations', () => {
+  it('encodes a payload to base64', async () => {
+    // Create a bundle
+    const files: BundleFiles = (await singleBundleFull).reduce((r, d) => {
+      r[d.bundlePath] = pick(d, ['hash', 'content']);
+      return r;
+    }, {});
+    const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+
+    const bundleResponse = await createBundle({
+      baseURL,
+      sessionToken,
+      source,
+      files,
+      base64Encoding: true,
+    });
+
+    const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
+    expect(JSON.parse(Buffer.from(requestBody,'base64').toString())).toEqual(files);
+  }),
+
+  it('extends a base64-encoded bundle', async() => {
+    const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+    const bundleResponse = await extendBundle({
+      baseURL,
+      sessionToken,
+      source,
+      bundleHash: fakeBundleHashFull,
+      files: {
+        'new.js': 'new123',
+      },
+      removedFiles: [
+        `AnnotatorTest.cpp`,
+        `app.js`,
+        `GitHubAccessTokenScrambler12.java`,
+        `db.js`,
+        `main.js`,
+        'big-file.js',
+        `not/ignored/this_should_be_ignored.jsx`,
+        `not/ignored/this_should_not_be_ignored.java`,
+        `routes/index.js`,
+        `routes/sharks.js`,
+      ],
+      base64Encoding: true,
+    })
+    const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
+    expect(JSON.parse(Buffer.from(requestBody,'base64').toString())).toEqual(
+      {
+        files: {
+          'new.js': 'new123',
+        },
+        removedFiles: [
+          `AnnotatorTest.cpp`,
+          `app.js`,
+          `GitHubAccessTokenScrambler12.java`,
+          `db.js`,
+          `main.js`,
+          'big-file.js',
+          `not/ignored/this_should_be_ignored.jsx`,
+          `not/ignored/this_should_not_be_ignored.java`,
+          `routes/index.js`,
+          `routes/sharks.js`,
+        ],
+      }
+    )
+  })
+})

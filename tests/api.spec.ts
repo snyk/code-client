@@ -400,36 +400,15 @@ describe('Base64 encoded operations', () => {
     });
 
     const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
-    expect(JSON.parse(Buffer.from(requestBody,'base64').toString())).toEqual(files);
+    expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual(files);
   }),
-
-  it('extends a base64-encoded bundle', async() => {
-    const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
-    const bundleResponse = await extendBundle({
-      baseURL,
-      sessionToken,
-      source,
-      bundleHash: fakeBundleHashFull,
-      files: {
-        'new.js': 'new123',
-      },
-      removedFiles: [
-        `AnnotatorTest.cpp`,
-        `app.js`,
-        `GitHubAccessTokenScrambler12.java`,
-        `db.js`,
-        `main.js`,
-        'big-file.js',
-        `not/ignored/this_should_be_ignored.jsx`,
-        `not/ignored/this_should_not_be_ignored.java`,
-        `routes/index.js`,
-        `routes/sharks.js`,
-      ],
-      base64Encoding: true,
-    })
-    const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
-    expect(JSON.parse(Buffer.from(requestBody,'base64').toString())).toEqual(
-      {
+    it('extends a base64-encoded bundle', async () => {
+      const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+      const bundleResponse = await extendBundle({
+        baseURL,
+        sessionToken,
+        source,
+        bundleHash: fakeBundleHashFull,
         files: {
           'new.js': 'new123',
         },
@@ -445,7 +424,25 @@ describe('Base64 encoded operations', () => {
           `routes/index.js`,
           `routes/sharks.js`,
         ],
-      }
-    )
-  })
-})
+        base64Encoding: true,
+      });
+      const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
+      expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual({
+        files: {
+          'new.js': 'new123',
+        },
+        removedFiles: [
+          `AnnotatorTest.cpp`,
+          `app.js`,
+          `GitHubAccessTokenScrambler12.java`,
+          `db.js`,
+          `main.js`,
+          'big-file.js',
+          `not/ignored/this_should_be_ignored.jsx`,
+          `not/ignored/this_should_not_be_ignored.java`,
+          `routes/index.js`,
+          `routes/sharks.js`,
+        ],
+      });
+    });
+});

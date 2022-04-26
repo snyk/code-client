@@ -42,7 +42,7 @@ export const bundleFilePaths = [
   'not/ignored/this_should_not_be_ignored.java',
 ];
 
-async function getBundleFiles(withContent: boolean) {
+async function getBundleFiles(withContent: boolean, bundleFilePaths: Array<string>) {
   return (
     await Promise.all(
       bundleFilePaths.map(f => getFileInfo(path.join(sampleProjectPath, f), sampleProjectPath, withContent)),
@@ -50,8 +50,9 @@ async function getBundleFiles(withContent: boolean) {
   ).filter(notEmpty);
 }
 
-export const bundleFiles: Promise<FileInfo[]> = getBundleFiles(false);
-export const bundleFilesFull: Promise<FileInfo[]> = getBundleFiles(true);
+export const bundleFiles: Promise<FileInfo[]> = getBundleFiles(false, bundleFilePaths);
+export const bundleFilesFull: Promise<FileInfo[]> = getBundleFiles(true, bundleFilePaths);
+export const singleBundleFull: Promise<FileInfo[]> = getBundleFiles(true, [bundleFilePaths[0]]);
 
 export const bundleExtender: () => Promise<{
   files: { removed: string; changed: string; added: string; all: string[] };

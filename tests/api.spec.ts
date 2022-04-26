@@ -1,9 +1,11 @@
 import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { bundleFiles, bundleFilesFull } from './constants/sample';
+import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
+import * as needle from '../src/needle';
+import { request } from 'http';
 
 const fakeBundleHash = '0aafac4a1a3daccf80ea53b0e6a946cd9b4d9d2dfb1fc13b5ca3e16b045744b8';
 let fakeBundleHashFull = '';
@@ -104,6 +106,7 @@ describe('Requests to public API', () => {
         sessionToken,
         files,
         source,
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') {
@@ -125,6 +128,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: fakeBundleHashFull,
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -142,6 +146,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: 'mock-expired-bundle-id',
+        base64Encoding: false,
       });
       expect(response.type).toEqual('error');
       // dummy to cheat typescript compiler
@@ -163,6 +168,7 @@ describe('Requests to public API', () => {
           bundleHash: fakeBundleHashFull,
           severity: 1,
           source,
+          base64Encoding: false,
         });
       } while (response.type === 'success');
 
@@ -199,6 +205,7 @@ describe('Requests to public API', () => {
           `routes/index.js`,
           `routes/sharks.js`,
         ],
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -219,6 +226,7 @@ describe('Requests to public API', () => {
         files: {
           'new2.js': 'new1234',
         },
+        base64Encoding: false,
       });
 
       expect(response.type).toEqual('error');
@@ -244,6 +252,7 @@ describe('Requests to public API', () => {
           'df.js': { hash: 'df', content: 'const module = new Module();' },
           'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
         },
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
@@ -267,6 +276,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         files,
+        base64Encoding: false,
       });
       expect(bundleResponse.type).toEqual('success');
       if (bundleResponse.type === 'error') return;
@@ -282,6 +292,7 @@ describe('Requests to public API', () => {
         sessionToken,
         source,
         bundleHash: realBundleHashFull,
+        base64Encoding: false,
       });
       expect(checkResponse.type).toEqual('success');
       if (checkResponse.type === 'error') return;
@@ -295,6 +306,7 @@ describe('Requests to public API', () => {
         source,
         bundleHash: realBundleHashFull,
         severity: 1,
+        base64Encoding: false,
       });
       expect(response.type).toEqual('success');
       if (response.type === 'error') return;
@@ -333,6 +345,7 @@ describe('Requests to public API', () => {
           severity: 1,
           limitToFiles: [`GitHubAccessTokenScrambler12.java`],
           source,
+          base64Encoding: false,
         });
 
         expect(response.type).toEqual('success');
@@ -353,6 +366,7 @@ describe('Requests to public API', () => {
           bundleHash: realBundleHashFull,
           severity: 3,
           source,
+          base64Encoding: false,
         });
         expect(response.type).toEqual('success');
         if (response.type === 'error') return;
@@ -366,4 +380,69 @@ describe('Requests to public API', () => {
     },
     TEST_TIMEOUT,
   );
+});
+
+describe('Base64 encoded operations', () => {
+  it('encodes a payload to base64', async () => {
+    // Create a bundle
+    const files: BundleFiles = (await singleBundleFull).reduce((r, d) => {
+      r[d.bundlePath] = pick(d, ['hash', 'content']);
+      return r;
+    }, {});
+    const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+
+    const bundleResponse = await createBundle({
+      baseURL,
+      sessionToken,
+      source,
+      files,
+      base64Encoding: true,
+    });
+
+    const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
+    expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual(files);
+  }),
+    it('extends a base64-encoded bundle', async () => {
+      const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
+      const bundleResponse = await extendBundle({
+        baseURL,
+        sessionToken,
+        source,
+        bundleHash: fakeBundleHashFull,
+        files: {
+          'new.js': 'new123',
+        },
+        removedFiles: [
+          `AnnotatorTest.cpp`,
+          `app.js`,
+          `GitHubAccessTokenScrambler12.java`,
+          `db.js`,
+          `main.js`,
+          'big-file.js',
+          `not/ignored/this_should_be_ignored.jsx`,
+          `not/ignored/this_should_not_be_ignored.java`,
+          `routes/index.js`,
+          `routes/sharks.js`,
+        ],
+        base64Encoding: true,
+      });
+      const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
+      expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual({
+        files: {
+          'new.js': 'new123',
+        },
+        removedFiles: [
+          `AnnotatorTest.cpp`,
+          `app.js`,
+          `GitHubAccessTokenScrambler12.java`,
+          `db.js`,
+          `main.js`,
+          'big-file.js',
+          `not/ignored/this_should_be_ignored.jsx`,
+          `not/ignored/this_should_not_be_ignored.java`,
+          `routes/index.js`,
+          `routes/sharks.js`,
+        ],
+      });
+    });
 });

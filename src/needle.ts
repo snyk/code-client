@@ -112,6 +112,7 @@ export async function makeRequest<T = void>(
         ErrorCodes.connectionRefused,
         ErrorCodes.timeout,
         ErrorCodes.dnsNotFound,
+        ErrorCodes.serverError,
       ].includes(errorCode)
     ) {
       attempts--;

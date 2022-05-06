@@ -5,7 +5,7 @@ import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/samp
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 import * as needle from '../src/needle';
-import { request } from 'http';
+import { gunzipSync } from 'zlib';
 
 const fakeBundleHash = '0aafac4a1a3daccf80ea53b0e6a946cd9b4d9d2dfb1fc13b5ca3e16b045744b8';
 let fakeBundleHashFull = '';
@@ -399,8 +399,19 @@ describe('Base64 encoded operations', () => {
       base64Encoding: true,
     });
 
-    const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
-    expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual(files);
+    const request = makeRequestSpy.mock.calls[0][0];
+    const requestBody = request.body as string;
+    const requestHeaders = request.headers;
+    const decompressedBody = gunzipSync(Buffer.from(requestBody)).toString();
+    console.log(request);
+    expect(requestHeaders).toEqual(
+      expect.objectContaining({
+        'content-type': 'application/octet-stream',
+        'content-encoding': 'gzip',
+      }),
+    );
+    expect(request.isJson).toBe(false);
+    expect(JSON.parse(Buffer.from(decompressedBody, 'base64').toString())).toEqual(files);
   }),
     it('extends a base64-encoded bundle', async () => {
       const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
@@ -426,8 +437,18 @@ describe('Base64 encoded operations', () => {
         ],
         base64Encoding: true,
       });
-      const requestBody = makeRequestSpy.mock.calls[0][0].body as string;
-      expect(JSON.parse(Buffer.from(requestBody, 'base64').toString())).toEqual({
+      const request = makeRequestSpy.mock.calls[0][0];
+      const requestBody = request.body as string;
+      const requestHeaders = request.headers;
+      const decompressedBody = gunzipSync(Buffer.from(requestBody)).toString();
+      expect(requestHeaders).toEqual(
+        expect.objectContaining({
+          'content-type': 'application/octet-stream',
+          'content-encoding': 'gzip',
+        }),
+      );
+      expect(request.isJson).toBe(false);
+      expect(JSON.parse(Buffer.from(decompressedBody, 'base64').toString())).toEqual({
         files: {
           'new.js': 'new123',
         },

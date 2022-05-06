@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import pick from 'lodash.pick';
+import { gzipSync } from 'zlib';
 
 import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMPTS } from './constants';
 
@@ -71,6 +72,11 @@ const GENERIC_ERROR_MESSAGES: { [P in GenericErrorTypes]: string } = {
 interface StartSessionOptions {
   readonly authHost: string;
   readonly source: string;
+}
+
+export function compressAndEncode(payload: any): Buffer {
+  // encode payload and compress;
+  return gzipSync(Buffer.from(JSON.stringify(payload)).toString('base64'));
 }
 
 export function startSession(options: StartSessionOptions): StartSessionResponseDto {
@@ -209,10 +215,9 @@ interface CreateBundleOptions extends ConnectionOptions {
 export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
-  let payloadBody;
+  let payloadBody: Payload['body'];
   if (options.base64Encoding) {
-    const payloadBuffer = Buffer.from(JSON.stringify(options.files));
-    payloadBody = payloadBuffer.toString('base64');
+    payloadBody = compressAndEncode(options.files);
   } else {
     payloadBody = options.files;
   }
@@ -221,10 +226,12 @@ export async function createBundle(
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
     body: payloadBody,
+    isJson: options.base64Encoding ? false : true,
   };
 
   const res = await makeRequest<RemoteBundle>(payload);
@@ -294,8 +301,7 @@ export async function extendBundle(
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
   let payloadBody;
   if (options.base64Encoding) {
-    const payloadBuffer = Buffer.from(JSON.stringify(pick(options, ['files', 'removedFiles'])));
-    payloadBody = payloadBuffer.toString('base64');
+    payloadBody = compressAndEncode(pick(options, ['files', 'removedFiles']));
   } else {
     payloadBody = pick(options, ['files', 'removedFiles']);
   }
@@ -304,10 +310,12 @@ export async function extendBundle(
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
     body: payloadBody,
+    isJson: options.base64Encoding ? false : true,
   });
   if (res.success) return { type: 'success', value: res.body };
   return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');

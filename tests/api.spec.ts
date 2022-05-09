@@ -403,7 +403,6 @@ describe('Base64 encoded operations', () => {
     const requestBody = request.body as string;
     const requestHeaders = request.headers;
     const decompressedBody = gunzipSync(Buffer.from(requestBody)).toString();
-    console.log(request);
     expect(requestHeaders).toEqual(
       expect.objectContaining({
         'content-type': 'application/octet-stream',

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import pick from 'lodash.pick';
-import { gzipSync } from 'zlib';
+import { gzip } from 'zlib';
+import { promisify } from 'util';
 
 import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMPTS } from './constants';
 
@@ -74,9 +75,11 @@ interface StartSessionOptions {
   readonly source: string;
 }
 
-export function compressAndEncode(payload: any): Buffer {
+export async function compressAndEncode(payload: any): Promise<Buffer> {
   // encode payload and compress;
-  return gzipSync(Buffer.from(JSON.stringify(payload)).toString('base64'));
+  const deflate = promisify(gzip);
+  const compressedPayload = await deflate(Buffer.from(JSON.stringify(payload)).toString('base64'));
+  return compressedPayload;
 }
 
 export function startSession(options: StartSessionOptions): StartSessionResponseDto {
@@ -217,7 +220,7 @@ export async function createBundle(
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   let payloadBody: Payload['body'];
   if (options.base64Encoding) {
-    payloadBody = compressAndEncode(options.files);
+    payloadBody = await compressAndEncode(options.files);
   } else {
     payloadBody = options.files;
   }
@@ -301,7 +304,7 @@ export async function extendBundle(
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
   let payloadBody;
   if (options.base64Encoding) {
-    payloadBody = compressAndEncode(pick(options, ['files', 'removedFiles']));
+    payloadBody = await compressAndEncode(pick(options, ['files', 'removedFiles']));
   } else {
     payloadBody = pick(options, ['files', 'removedFiles']);
   }

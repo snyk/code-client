@@ -78,7 +78,7 @@
     "lodash.pick": "^4.4.0",
     "lodash.union": "^4.6.0",
     "multimatch": "^5.0.0",
-    "needle": "^3.0.0",
+    "needle": "~3.0.0",
     "p-map": "^3.0.0",
     "uuid": "^8.3.2",
     "yaml": "^2.0.1"

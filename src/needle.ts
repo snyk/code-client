@@ -38,6 +38,7 @@ export interface Payload {
   qs?: querystring.ParsedUrlQueryInput;
   timeout?: number;
   family?: number;
+  isJson?: boolean;
 }
 
 interface SuccessResponse<T> {
@@ -54,7 +55,12 @@ export async function makeRequest<T = void>(
   payload: Payload,
   attempts = MAX_RETRY_ATTEMPTS,
 ): Promise<SuccessResponse<T> | FailedResponse> {
-  const data = JSON.stringify(payload.body);
+  let data;
+  if (!payload.isJson && payload.body) {
+    data = payload.body;
+  } else {
+    data = JSON.stringify(payload.body);
+  }
 
   const parsedUrl = new URL(payload.url);
   const agent = parsedUrl.protocol === 'http:' ? new http.Agent(agentOptions) : new https.Agent(agentOptions);
@@ -76,7 +82,7 @@ export async function makeRequest<T = void>(
     response_timeout: payload.timeout || TIMEOUT_DEFAULT,
     read_timeout: payload.timeout || TIMEOUT_DEFAULT,
     family: payload.family,
-    json: true,
+    json: payload.isJson || true,
     compressed: true, // sets 'Accept-Encoding' to 'gzip, deflate, br'
     follow_max: 5, // follow up to five redirects
     rejectUnauthorized: !global.ignoreUnknownCA, // verify SSL certificate

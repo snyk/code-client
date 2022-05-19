@@ -8,6 +8,8 @@ import { emitter } from './emitter';
 
 import { ErrorCodes, NETWORK_ERRORS, MAX_RETRY_ATTEMPTS, REQUEST_RETRY_DELAY } from './constants';
 
+import { HttpsProxyAgent } from 'hpagent';
+
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
 // Snyk CLI allow passing --insecure flag which allows self-signed certificates
@@ -63,7 +65,21 @@ export async function makeRequest<T = void>(
   }
 
   const parsedUrl = new URL(payload.url);
-  const agent = parsedUrl.protocol === 'http:' ? new http.Agent(agentOptions) : new https.Agent(agentOptions);
+  let agent: http.Agent;
+
+  if (parsedUrl.protocol === 'http:') {
+    if (process.env.HTTP_PROXY) {
+      agent = new HttpsProxyAgent({ ...agentOptions, proxy: process.env.HTTP_PROXY });
+    } else {
+      agent = new http.Agent(agentOptions);
+    }
+  } else {
+    if (process.env.HTTPS_PROXY) {
+      agent = new HttpsProxyAgent({ ...agentOptions, proxy: process.env.HTTPS_PROXY });
+    } else {
+      agent = new https.Agent(agentOptions);
+    }
+  }
 
   const method = (payload.method || 'get').toLowerCase() as needle.NeedleHttpVerbs;
   let { url } = payload;

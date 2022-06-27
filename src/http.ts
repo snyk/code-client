@@ -75,6 +75,20 @@ interface StartSessionOptions {
   readonly source: string;
 }
 
+export function setBase64Encoding(options: ConnectionOptions): boolean {
+  if (!options.base64Encoding) {
+    const { hostname } = new URL(options.baseURL);
+    const rg = new RegExp('^(|dev.)snyk.io');
+    if (rg.test(hostname.slice(hostname.indexOf('.') + 1))) {
+      return options.base64Encoding;
+    } else {
+      return true;
+    }
+  } else {
+    return options.base64Encoding;
+  }
+}
+
 export async function compressAndEncode(payload: any): Promise<Buffer> {
   // encode payload and compress;
   const deflate = promisify(gzip);
@@ -218,8 +232,9 @@ interface CreateBundleOptions extends ConnectionOptions {
 export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
+  const base64Encoding = setBase64Encoding(options);
   let payloadBody: Payload['body'];
-  if (options.base64Encoding) {
+  if (base64Encoding) {
     payloadBody = await compressAndEncode(options.files);
   } else {
     payloadBody = options.files;
@@ -229,12 +244,12 @@ export async function createBundle(
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(options.base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
     body: payloadBody,
-    isJson: options.base64Encoding ? false : true,
+    isJson: base64Encoding ? false : true,
   };
 
   const res = await makeRequest<RemoteBundle>(payload);
@@ -302,8 +317,9 @@ interface ExtendBundleOptions extends ConnectionOptions {
 export async function extendBundle(
   options: ExtendBundleOptions,
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
+  const base64Encoding = setBase64Encoding(options);
   let payloadBody;
-  if (options.base64Encoding) {
+  if (base64Encoding) {
     payloadBody = await compressAndEncode(pick(options, ['files', 'removedFiles']));
   } else {
     payloadBody = pick(options, ['files', 'removedFiles']);
@@ -313,12 +329,12 @@ export async function extendBundle(
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(options.base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
     body: payloadBody,
-    isJson: options.base64Encoding ? false : true,
+    isJson: base64Encoding ? false : true,
   });
   if (res.success) return { type: 'success', value: res.body };
   return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');

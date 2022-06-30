@@ -1,4 +1,5 @@
 import needle from 'needle';
+import { getVerifyCallbackUrl } from '../src/http';
 
 describe('HTTP', () => {
   const authHost = 'https://dev.snyk.io';
@@ -33,5 +34,11 @@ describe('HTTP', () => {
     const family = await http.getIpFamily(authHost);
 
     expect(family).toBe(undefined);
+  });
+
+  it('should obtain correct verify/callback endpoint url', async () => {
+    const url = getVerifyCallbackUrl(authHost);
+
+    expect(url).toBe(`${authHost}/api/verify/callback`);
   });
 });

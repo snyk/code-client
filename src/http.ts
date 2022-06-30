@@ -155,7 +155,7 @@ export async function checkSession(options: CheckSessionOptions): Promise<Result
   };
 
   const res = await makeRequest<IApiTokenResponse>({
-    url: `${options.authHost}/api/v1/verify/callback`,
+    url: `${options.authHost}/api/verify/callback`,
     body: {
       token: options.draftToken,
     },

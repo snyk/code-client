@@ -2,7 +2,15 @@ import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
-import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
+import {
+  getFilters,
+  createBundle,
+  checkBundle,
+  extendBundle,
+  getAnalysis,
+  AnalysisStatus,
+  setBase64Encoding,
+} from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 import * as needle from '../src/needle';
 import { gunzipSync } from 'zlib';
@@ -65,6 +73,7 @@ describe('Requests to public API', () => {
         '.py',
         '.rb',
         '.rhtml',
+        '.scala',
         '.slim',
         '.swift',
         '.ts',
@@ -402,13 +411,9 @@ describe('Base64 encoded operations', () => {
     const request = makeRequestSpy.mock.calls[0][0];
     const requestBody = request.body as string;
     const requestHeaders = request.headers;
+    expect(requestHeaders!['content-type']).toEqual('application/octet-stream');
+    expect(requestHeaders!['content-encoding']).toEqual('gzip');
     const decompressedBody = gunzipSync(Buffer.from(requestBody)).toString();
-    expect(requestHeaders).toEqual(
-      expect.objectContaining({
-        'content-type': 'application/octet-stream',
-        'content-encoding': 'gzip',
-      }),
-    );
     expect(request.isJson).toBe(false);
     expect(JSON.parse(Buffer.from(decompressedBody, 'base64').toString())).toEqual(files);
   }),
@@ -439,13 +444,9 @@ describe('Base64 encoded operations', () => {
       const request = makeRequestSpy.mock.calls[0][0];
       const requestBody = request.body as string;
       const requestHeaders = request.headers;
+      expect(requestHeaders!['content-type']).toEqual('application/octet-stream');
+      expect(requestHeaders!['content-encoding']).toEqual('gzip');
       const decompressedBody = gunzipSync(Buffer.from(requestBody)).toString();
-      expect(requestHeaders).toEqual(
-        expect.objectContaining({
-          'content-type': 'application/octet-stream',
-          'content-encoding': 'gzip',
-        }),
-      );
       expect(request.isJson).toBe(false);
       expect(JSON.parse(Buffer.from(decompressedBody, 'base64').toString())).toEqual({
         files: {
@@ -465,4 +466,15 @@ describe('Base64 encoded operations', () => {
         ],
       });
     });
+
+  describe('it auto-sets base64 encoding if needed', () => {
+    expect(setBase64Encoding({ baseURL, sessionToken, source, base64Encoding: false })).toBe(false);
+    expect(setBase64Encoding({ baseURL, sessionToken, source, base64Encoding: true })).toBe(true);
+    expect(
+      setBase64Encoding({ baseURL: 'https://deeproxy.dev.eu.snyk.io', sessionToken, source, base64Encoding: false }),
+    ).toBe(true);
+    expect(
+      setBase64Encoding({ baseURL: 'https://deeproxy.snyk.io', sessionToken, source, base64Encoding: false }),
+    ).toBe(false);
+  });
 });

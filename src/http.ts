@@ -9,6 +9,7 @@ import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 import { FailedResponse, makeRequest, Payload } from './needle';
 import { AnalysisOptions, AnalysisContext } from './interfaces/analysis-options.interface';
+import { URL } from 'url';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -118,7 +119,7 @@ export async function getIpFamily(authHost: string): Promise<IpFamily> {
   // Dispatch a FORCED IPv6 request to test client's ISP and network capability
   const res = await makeRequest(
     {
-      url: `${authHost}/verify/callback`,
+      url: getVerifyCallbackUrl(authHost),
       method: 'post',
       family, // family param forces the handler to dispatch a request using IP at "family" version
     },
@@ -155,7 +156,7 @@ export async function checkSession(options: CheckSessionOptions): Promise<Result
   };
 
   const res = await makeRequest<IApiTokenResponse>({
-    url: `${options.authHost}/api/v1/verify/callback`,
+    url: getVerifyCallbackUrl(options.authHost),
     body: {
       token: options.draftToken,
     },
@@ -406,4 +407,8 @@ export async function getAnalysis(
   const res = await makeRequest<GetAnalysisResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
   return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
+}
+
+export function getVerifyCallbackUrl(authHost: string): string {
+  return `${authHost}/api/verify/callback`;
 }

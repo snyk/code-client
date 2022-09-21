@@ -98,6 +98,7 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
     ...options.connection,
     ...options.fileOptions,
     languages: options.languages,
+    ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
   });
   if (fileBundle === null) return null;
 

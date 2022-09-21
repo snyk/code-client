@@ -46,7 +46,7 @@ export interface FileAnalysisOptions extends AnalysisContext {
   languages?: string[];
 }
 
-export interface AnalyzeFoldersOptions {
+export interface AnalyzeFoldersOptions extends AnalysisContext {
   paths: string[];
   symlinksEnabled?: boolean;
   defaultFileIgnores?: string[];

@@ -69,8 +69,8 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.type === 'sarif').toBeTruthy();
         if (bundle.analysisResults.type !== 'sarif') return;
 
-        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toEqual(10);
-        expect(bundle.analysisResults.sarif.runs[0].results?.length).toEqual(17);
+        expect(bundle.analysisResults.sarif.runs[0].tool.driver.rules?.length).toBeGreaterThan(0);
+        expect(bundle.analysisResults.sarif.runs[0].results?.length).toBeGreaterThan(0);
         const sampleRes = bundle.analysisResults.sarif.runs[0].results!.find(
           res => res.locations?.[0].physicalLocation?.artifactLocation?.uri === `GitHubAccessTokenScrambler12.java`,
         );

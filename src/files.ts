@@ -1,6 +1,6 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
-import fg from '@snyk/fast-glob';
+import fg from 'fast-glob';
 import multimatch from 'multimatch';
 import crypto from 'crypto';
 import { parse as parseYaml } from 'yaml';

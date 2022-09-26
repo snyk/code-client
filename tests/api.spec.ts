@@ -322,7 +322,7 @@ describe('Requests to public API', () => {
       expect(response.value.status !== AnalysisStatus.failed).toBeTruthy();
 
       if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
-        expect(response.value.sarif.runs[0].results).toBeGreaterThan(0);
+        expect(response.value.sarif.runs[0].results?.length).toBeGreaterThan(0);
 
         expect(new Set(response.value.coverage)).toEqual(
           new Set([

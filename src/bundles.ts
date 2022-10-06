@@ -47,7 +47,7 @@ async function* prepareRemoteBundle(
   emitter.createBundleProgress(cumulativeProgress, options.files.length);
   for (const chunkedFiles of composeFilePayloads(options.files, MAX_PAYLOAD)) {
     const apiParams = {
-      ...pick(options, ['baseURL', 'sessionToken', 'source', 'removedFiles', 'requestId', 'base64Encoding']),
+      ...pick(options, ['baseURL', 'sessionToken', 'source', 'removedFiles', 'requestId', 'base64Encoding', 'org']),
       files: chunkedFiles.reduce((d, f) => {
         // deepcode ignore PrototypePollution: FP this is an internal code
         d[f.bundlePath] = f.hash;
@@ -91,7 +91,15 @@ interface UpdateRemoteBundleOptions extends ConnectionOptions {
 export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Promise<void> {
   let uploadedFiles = 0;
   emitter.uploadBundleProgress(0, options.files.length);
-  const apiParams = pick(options, ['baseURL', 'sessionToken', 'source', 'bundleHash', 'requestId', 'base64Encoding']);
+  const apiParams = pick(options, [
+    'baseURL',
+    'sessionToken',
+    'source',
+    'bundleHash',
+    'requestId',
+    'base64Encoding',
+    'org',
+  ]);
 
   const uploadFileChunks = async (bucketFiles: FileInfo[]): Promise<void> => {
     // Note: we specifically create __new__ isolated bundles here to faster files upload
@@ -129,7 +137,7 @@ async function fullfillRemoteBundle(options: FullfillRemoteBundleOptions): Promi
   // Check remove bundle to make sure no missing files left
   let attempts = 0;
   let { remoteBundle } = options;
-  const connectionOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'base64Encoding']);
+  const connectionOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'base64Encoding', 'org']);
 
   while (remoteBundle.missingFiles.length && attempts < (options.maxAttempts || MAX_UPLOAD_ATTEMPTS)) {
     const missingFiles = await resolveBundleFiles(options.baseDir, remoteBundle.missingFiles);
@@ -156,7 +164,15 @@ interface RemoteBundleFactoryOptions extends PrepareRemoteBundleOptions {
 
 export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): Promise<RemoteBundle | null> {
   let remoteBundle: RemoteBundle | null = null;
-  const baseOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'baseDir', 'requestId', 'base64Encoding']);
+  const baseOptions = pick(options, [
+    'baseURL',
+    'sessionToken',
+    'source',
+    'baseDir',
+    'requestId',
+    'base64Encoding',
+    'org',
+  ]);
   const bundleFactory = prepareRemoteBundle(omit(options, ['baseDir']));
   for await (const response of bundleFactory) {
     if (response.type === 'error') {
@@ -253,6 +269,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'base64Encoding']),
     baseDir,
     files: bundleFiles,
+    ...(options.analysisContext?.org?.name ? { org: options.analysisContext.org.name } : {}),
   };
 
   // Create remote bundle

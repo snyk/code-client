@@ -29,6 +29,7 @@ export interface ConnectionOptions {
   source: string;
   requestId?: string;
   base64Encoding: boolean;
+  org?: string;
 }
 
 // The trick to typecast union type alias
@@ -246,6 +247,7 @@ export async function createBundle(
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
       ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
@@ -283,6 +285,7 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'get',
@@ -331,6 +334,7 @@ export async function extendBundle(
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
       ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
@@ -390,6 +394,7 @@ export async function getAnalysis(
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/analysis`,
     method: 'post',

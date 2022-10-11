@@ -32,6 +32,7 @@ export const bundleFilePaths = [
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',
+  'file-with-capital-extension.JS',
   'main.js',
   'big-file.js', // <= file size is over the custom MAX_FILE_SIZE
   'routes/index.js',

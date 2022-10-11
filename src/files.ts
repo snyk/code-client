@@ -1,6 +1,6 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
-import fg from 'fast-glob';
+import fg, { Options } from 'fast-glob';
 import multimatch from 'multimatch';
 import crypto from 'crypto';
 import { parse as parseYaml } from 'yaml';
@@ -183,6 +183,7 @@ async function* searchFiles(
   symlinksEnabled: boolean,
   ignores: string[],
 ): AsyncGenerator<string | Buffer> {
+  const optionsForFileSearch: Options = {...fgOptions, caseSensitiveMatch: false}
   const positiveIgnores = ignores.filter(rule => !rule.startsWith('!'));
   const negativeIgnores = ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
@@ -193,7 +194,7 @@ async function* searchFiles(
   // expands those branches that should be excluded from the ignore rules throught the negative ignores as search term
   // and then matches the extensions as a second step to exclude any file that should not be analyzed.
   const positiveSearcher = fg.stream(patterns, {
-    ...fgOptions,
+    ...optionsForFileSearch,
     cwd,
     followSymbolicLinks: symlinksEnabled,
     ignore: positiveIgnores,
@@ -208,7 +209,7 @@ async function* searchFiles(
   // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
   if (negativeIgnores.length) {
     const negativeSearcher = fg.stream(negativeIgnores, {
-      ...fgOptions,
+      ...optionsForFileSearch,
       cwd,
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,

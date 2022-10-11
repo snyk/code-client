@@ -100,8 +100,8 @@ describe('files', () => {
   it('compose file payloads', async () => {
     // Prepare all missing files first
     const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
-    expect(payloads.length).toEqual(3); // 3 chunks
-    expect(payloads[0].length).toEqual(2);
+    expect(payloads.length).toEqual(4); // 3 chunks
+    expect(payloads[0].length).toEqual(3);
 
     const testPayload = payloads[0][1];
     expect(testPayload.filePath).toEqual(`${sampleProjectPath}/routes/sharks.js`);

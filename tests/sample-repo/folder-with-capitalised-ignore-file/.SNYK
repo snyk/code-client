@@ -1,0 +1,3 @@
+exclude:
+  global:
+    - rule-that-should-not-be-here-because-file-is-capitalised

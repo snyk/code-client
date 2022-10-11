@@ -23,7 +23,7 @@ export const bundleFileIgnores = [
   `${sampleProjectPath}/**/*.jsx`,
   `${sampleProjectPath}/**/exclude/excluded-file.js/**`,
   `${sampleProjectPath}/**/exclude/excluded-file.js`,
-  `${sampleProjectPath}/exclude/excluded-folder/**`,
+  `${sampleProjectPath}/exclude/excluded-folder/**`
 ];
 
 export const bundleFilePaths = [

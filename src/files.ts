@@ -48,20 +48,33 @@ export function notEmpty<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
-const multiMatchOptions = { matchBase: true, dot: true };
-const fgOptions = {
-  dot: true,
+const DEFAULT_FILE_SEARCH_OPTIONS = {
+  searchFilesWithDot: true,
+  matchBase: true,
+  caseSensitive: false
+}
+
+const defaultFastGlobOptions: Options = {
+  dot: DEFAULT_FILE_SEARCH_OPTIONS.searchFilesWithDot,
+  baseNameMatch: DEFAULT_FILE_SEARCH_OPTIONS.matchBase,
+  caseSensitiveMatch: DEFAULT_FILE_SEARCH_OPTIONS.caseSensitive,
   absolute: true,
-  baseNameMatch: true,
   onlyFiles: true,
   suppressErrors: true,
 };
+
+const defaultMultimatchOptions: multimatch.Options = {
+  matchBase: DEFAULT_FILE_SEARCH_OPTIONS.matchBase, 
+  dot: DEFAULT_FILE_SEARCH_OPTIONS.searchFilesWithDot,
+  nocase: DEFAULT_FILE_SEARCH_OPTIONS.caseSensitive
+}
+
 
 type CachedData = [number, number, string];
 
 function filterSupportedFiles(files: string[], supportedFiles: SupportedFiles): string[] {
   const patters = getGlobPatterns(supportedFiles);
-  return multimatch(files, patters, multiMatchOptions);
+  return multimatch(files, patters, defaultMultimatchOptions);
 }
 
 function parseIgnoreRulesToGlobs(rules: string[], baseDir: string): string[] {
@@ -147,14 +160,14 @@ export async function collectIgnoreRules(
     const fileStats = await lStat(folder);
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
-
     // Find ignore files inside this directory
     const localIgnoreFiles = await fg(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
-        ...fgOptions,
+        ...defaultFastGlobOptions,
         cwd: folder,
         followSymbolicLinks: symlinksEnabled,
+        caseSensitiveMatch: true
       },
     );
     // Read ignore files and merge new patterns
@@ -183,7 +196,6 @@ async function* searchFiles(
   symlinksEnabled: boolean,
   ignores: string[],
 ): AsyncGenerator<string | Buffer> {
-  const optionsForFileSearch: Options = {...fgOptions, caseSensitiveMatch: false}
   const positiveIgnores = ignores.filter(rule => !rule.startsWith('!'));
   const negativeIgnores = ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
@@ -194,7 +206,7 @@ async function* searchFiles(
   // expands those branches that should be excluded from the ignore rules throught the negative ignores as search term
   // and then matches the extensions as a second step to exclude any file that should not be analyzed.
   const positiveSearcher = fg.stream(patterns, {
-    ...optionsForFileSearch,
+    ...defaultFastGlobOptions,
     cwd,
     followSymbolicLinks: symlinksEnabled,
     ignore: positiveIgnores,
@@ -209,7 +221,7 @@ async function* searchFiles(
   // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
   if (negativeIgnores.length) {
     const negativeSearcher = fg.stream(negativeIgnores, {
-      ...optionsForFileSearch,
+      ...defaultFastGlobOptions,
       cwd,
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,
@@ -309,7 +321,7 @@ export async function prepareExtendingBundle(
     }
 
     const entries = await fg(processingFiles, {
-      ...fgOptions,
+      ...defaultFastGlobOptions,
       cwd: baseDir,
       followSymbolicLinks: symlinksEnabled,
       objectMode: true,
@@ -471,5 +483,5 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 }
 
 export function isMatch(filePath: string, rules: string[]): boolean {
-  return !!multimatch([filePath], rules, { ...multiMatchOptions, matchBase: false }).length;
+  return !!multimatch([filePath], rules, { ...defaultMultimatchOptions, matchBase: false }).length;
 }

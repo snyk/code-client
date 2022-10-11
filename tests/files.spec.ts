@@ -11,6 +11,7 @@ import {
   getBundleFilePath,
   resolveBundleFilePath,
 } from '../src/files';
+import { FileInfo } from '../src/interfaces/files.interface';
 
 import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
@@ -36,9 +37,14 @@ describe('files', () => {
       const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
       expect(ignoreRules).toEqual(bundleFileIgnores);
     })
+
+    it('should not contain the rule from .SNYK file', async () => {
+      const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
+      expect(ignoreRules).not.toContain(`${sampleProjectPath}/folder-with-capitalised-ignore-file/**/rule-that-should-not-be-here-because-file-is-capitalised`);
+    })
   });
 
-  describe('collect bundle files', () => {
+  describe('collectBundleFiles', () => {
     it('should collect bundle files', async () => {
       // TODO: We should introduce some performance test using a big enough repo to avoid flaky results
       const collector = collectBundleFiles({
@@ -88,6 +94,42 @@ describe('files', () => {
         [`${sampleProjectPath}/controllers/sharks.js`, 'controllers/sharks.js'],
       ]);
     });
+
+    it('should collect bundle files with capitalised file extension', async() => {
+      const collector = collectBundleFiles({
+        baseDir: sampleProjectPath,
+        paths: [sampleProjectPath],
+        supportedFiles,
+        fileIgnores: bundleFileIgnores,
+      });
+      const files: FileInfo[] = [];
+      for await (const f of collector) {
+        if ( typeof f != 'string' ) {
+          files.push(f)
+        };
+      }
+
+      const fileNames = files.map(file => file.bundlePath);
+      expect(fileNames).toContain("file-with-capital-extensioN.JS")
+    })
+
+    it('should not collect bundle files that have a different ', async() => {
+      const collector = collectBundleFiles({
+        baseDir: sampleProjectPath,
+        paths: [sampleProjectPath],
+        supportedFiles,
+        fileIgnores: bundleFileIgnores,
+      });
+      const files: FileInfo[] = [];
+      for await (const f of collector) {
+        if ( typeof f != 'string' ) {
+          files.push(f)
+        };
+      }
+
+      const fileNames = files.map(file => file.bundlePath);
+      expect(fileNames).toContain("file-with-capital-extension.JS")
+    })
   });
 
   describe('prepareExtendingBundle', () => {

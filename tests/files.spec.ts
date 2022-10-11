@@ -103,7 +103,7 @@ describe('files', () => {
     expect(payloads.length).toEqual(4); // 3 chunks
     expect(payloads[0].length).toEqual(3);
 
-    const testPayload = payloads[0][1];
+    const testPayload = payloads[3][0];
     expect(testPayload.filePath).toEqual(`${sampleProjectPath}/routes/sharks.js`);
     expect(testPayload.bundlePath).toEqual(`routes/sharks.js`);
     expect(testPayload.size).toEqual(363);

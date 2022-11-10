@@ -78,6 +78,7 @@ describe('Requests to public API', () => {
         '.swift',
         '.ts',
         '.tsx',
+        '.vb',
         '.vue',
         '.wxs',
         '.xml',

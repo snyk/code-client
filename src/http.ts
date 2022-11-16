@@ -9,7 +9,6 @@ import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult } from './interfaces/analysis-result.interface';
 import { FailedResponse, makeRequest, Payload } from './needle';
 import { AnalysisOptions, AnalysisContext } from './interfaces/analysis-options.interface';
-import { URL } from 'url';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -28,7 +27,6 @@ export interface ConnectionOptions {
   sessionToken: string;
   source: string;
   requestId?: string;
-  base64Encoding: boolean;
   org?: string;
 }
 
@@ -77,21 +75,7 @@ interface StartSessionOptions {
   readonly source: string;
 }
 
-export function setBase64Encoding(options: ConnectionOptions): boolean {
-  if (!options.base64Encoding) {
-    const { hostname } = new URL(options.baseURL);
-    const rg = new RegExp('^(|dev.)snyk.io');
-    if (rg.test(hostname.slice(hostname.indexOf('.') + 1))) {
-      return options.base64Encoding;
-    } else {
-      return true;
-    }
-  } else {
-    return options.base64Encoding;
-  }
-}
-
-export async function compressAndEncode(payload: any): Promise<Buffer> {
+export async function compressAndEncode(payload: unknown): Promise<Buffer> {
   // encode payload and compress;
   const deflate = promisify(gzip);
   const compressedPayload = await deflate(Buffer.from(JSON.stringify(payload)).toString('base64'));
@@ -234,25 +218,19 @@ interface CreateBundleOptions extends ConnectionOptions {
 export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
-  const base64Encoding = setBase64Encoding(options);
-  let payloadBody: Payload['body'];
-  if (base64Encoding) {
-    payloadBody = await compressAndEncode(options.files);
-  } else {
-    payloadBody = options.files;
-  }
+  const payloadBody = await compressAndEncode(options.files);
   const payload: Payload = {
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...{ 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' },
       ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
     body: payloadBody,
-    isJson: base64Encoding ? false : true,
+    isJson: false,
   };
 
   const res = await makeRequest<RemoteBundle>(payload);
@@ -321,25 +299,19 @@ interface ExtendBundleOptions extends ConnectionOptions {
 export async function extendBundle(
   options: ExtendBundleOptions,
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
-  const base64Encoding = setBase64Encoding(options);
-  let payloadBody;
-  if (base64Encoding) {
-    payloadBody = await compressAndEncode(pick(options, ['files', 'removedFiles']));
-  } else {
-    payloadBody = pick(options, ['files', 'removedFiles']);
-  }
+  const payloadBody = await compressAndEncode(pick(options, ['files', 'removedFiles']));
   const res = await makeRequest<RemoteBundle>({
     headers: {
       ...prepareTokenHeaders(options.sessionToken),
       source: options.source,
       ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(base64Encoding ? { 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' } : null),
+      ...{ 'content-type': 'application/octet-stream', 'content-encoding': 'gzip' },
       ...(options.org && { 'snyk-org-name': options.org }),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
     body: payloadBody,
-    isJson: base64Encoding ? false : true,
+    isJson: false,
   });
   if (res.success) return { type: 'success', value: res.body };
   return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');

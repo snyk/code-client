@@ -32,8 +32,8 @@ describe('Requests to public API', () => {
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
-    expect(new Set(response.value.extensions)).toEqual(
-      new Set([
+    expect(response.value.extensions).toEqual(
+      expect.arrayContaining([
         '.cs',
         '.c',
         '.cc',
@@ -56,8 +56,6 @@ describe('Requests to public API', () => {
         '.hxx',
         '.java',
         '.js',
-        '.jsp',
-        '.jspx',
         '.jsx',
         '.kt',
         '.mjs',

@@ -9,7 +9,6 @@ describe('Functional test for bundle creation', () => {
     const paths: string[] = [path.join(sampleProjectPath)];
     const symlinksEnabled = false;
     const defaultFileIgnores = undefined;
-    const base64Encoding = false;
 
     const result = await createBundleFromFolders({
       baseURL,
@@ -18,7 +17,6 @@ describe('Functional test for bundle creation', () => {
       paths,
       symlinksEnabled,
       defaultFileIgnores,
-      base64Encoding,
     });
 
     expect(result).not.toBeNull();

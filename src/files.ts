@@ -16,6 +16,7 @@ import {
   IGNORE_FILES_NAMES,
   CACHE_KEY,
   DOTSNYK_FILENAME,
+  EXCLUDED_NAMES,
 } from './constants';
 import { CollectBundleFilesOptions } from './interfaces/analysis-options.interface';
 import { SupportedFiles, FileInfo } from './interfaces/files.interface';
@@ -134,7 +135,7 @@ export function parseFileIgnores(path: string): string[] {
 export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
   return [
     ...supportedFiles.extensions.map(e => `*${e}`),
-    ...supportedFiles.configFiles.filter(e => !IGNORE_FILES_NAMES.includes(e)),
+    ...supportedFiles.configFiles.filter(e => !EXCLUDED_NAMES.includes(e)),
   ];
 }
 

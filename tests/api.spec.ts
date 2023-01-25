@@ -7,7 +7,7 @@ import { BundleFiles } from '../src/interfaces/files.interface';
 import * as needle from '../src/needle';
 import { gunzipSync } from 'zlib';
 
-const fakeBundleHash = '0aafac4a1a3daccf80ea53b0e6a946cd9b4d9d2dfb1fc13b5ca3e16b045744b8';
+const fakeBundleHash = 'd9f1171fb6f6bf12eb217fee43eef3cebd6a85cc78bc333035bf4cc3ebf1cf68';
 let fakeBundleHashFull = '';
 const realBundleHash = '';
 let realBundleHashFull = '';
@@ -31,7 +31,7 @@ describe('Requests to public API', () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore']));
+    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore', '.snyk']));
     expect(response.value.extensions).toEqual(
       expect.arrayContaining([
         '.cs',
@@ -56,6 +56,8 @@ describe('Requests to public API', () => {
         '.hxx',
         '.java',
         '.js',
+        '.jsp',
+        '.jspx',
         '.jsx',
         '.kt',
         '.mjs',
@@ -251,7 +253,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('06c8969ce7bce4c62e28f96cf9fc54a68cf25644aebd53be09094f365058f4a6');
+      expect(response.value.bundleHash).toContain('0124f75771f3d782d370ea2fedf87d2af434c40d740a10e9a5980633ce3b704d');
       expect(response.value.missingFiles).toHaveLength(12);
     },
     TEST_TIMEOUT,

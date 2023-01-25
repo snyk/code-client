@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
+import 'jest-extended';
 
 import {
   collectIgnoreRules,
@@ -47,7 +48,7 @@ describe('files', () => {
       typeof f == 'string' ? skippedOversizedFiles.push(f) : files.push(f);
     }
     // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
-    expect(files).toEqual((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
+    expect(files).toIncludeSameMembers((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
 
     // big-file.js should be added to skippedOversizedFiles
     expect(skippedOversizedFiles.length).toEqual(1);
@@ -100,10 +101,10 @@ describe('files', () => {
   it('compose file payloads', async () => {
     // Prepare all missing files first
     const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
-    expect(payloads.length).toEqual(3); // 3 chunks
-    expect(payloads[0].length).toEqual(2);
+    expect(payloads.length).toEqual(4); // 4 chunks
+    expect(payloads[0].length).toEqual(3);
 
-    const testPayload = payloads[0][1];
+    const testPayload = payloads[3][0];
     expect(testPayload.filePath).toEqual(`${sampleProjectPath}/routes/sharks.js`);
     expect(testPayload.bundlePath).toEqual(`routes/sharks.js`);
     expect(testPayload.size).toEqual(363);

@@ -6,19 +6,17 @@ jobs:
         type: string
     working_directory: ~/code-sdk
     docker:
-      - image: circleci/node:<< parameters.node_version >>
+      - image: cimg/node:<< parameters.node_version >>
     steps:
       - checkout
       - restore_cache:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
-            - v2-{{ .Branch }}-<< parameters.node_version >>
-            - v2-<< parameters.node_version >>
       - run:
           name: Install
           command: npm install
       - save_cache:
-          key: v2-{{ .Branch }}-{{ .Revision }}
+          key: v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
           paths:
             - node_modules
       - run: npm run test
@@ -28,14 +26,12 @@ jobs:
         type: string
     working_directory: ~/code-sdk
     docker:
-      - image: circleci/node:<< parameters.node_version >>
+      - image: cimg/node:<< parameters.node_version >>
     steps:
       - checkout
       - restore_cache:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
-            - v2-{{ .Branch }}-<< parameters.node_version >>
-            - v2-<< parameters.node_version >>
       - run:
           name: Install
           command: npm install
@@ -47,14 +43,12 @@ jobs:
         type: string
     working_directory: ~/code-sdk
     docker:
-      - image: circleci/node:<< parameters.node_version >>
+      - image: cimg/node:<< parameters.node_version >>
     steps:
       - checkout
       - restore_cache:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
-            - v2-{{ .Branch }}-<< parameters.node_version >>
-            - v2-<< parameters.node_version >>
       - run:
           name: Install
           command: npm install
@@ -67,16 +61,16 @@ workflows:
   default_workflow:
     jobs:
       - lint:
-          node_version: '12'
+          node_version: '12.22.7'
       - test:
           matrix:
             parameters:
-              node_version: ['10', '12']
+              node_version: ['10.24.0', '12.22.7']
           context: nodejs-install
           requires:
             - lint
       - release:
-          node_version: '12'
+          node_version: '12.22.7'
           context: nodejs-lib-release
           requires:
             - lint

@@ -43,6 +43,7 @@ export interface FileAnalysisOptions extends AnalysisContext {
   connection: ConnectionOptions;
   analysisOptions: AnalysisOptions;
   fileOptions: AnalyzeFoldersOptions;
+  reportOptions?: ReportOptions;
   languages?: string[];
 }
 
@@ -57,4 +58,10 @@ export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
   supportedFiles: SupportedFiles;
   baseDir: string;
   fileIgnores: string[];
+}
+
+export interface ReportOptions {
+  enabled: boolean;
+  projectName?: string;
+  targetRef?: string;
 }

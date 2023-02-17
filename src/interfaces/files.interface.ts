@@ -1,6 +1,7 @@
 import { AnalysisResult } from '..';
 import { FileBundle } from '../bundles';
 import { FileAnalysisOptions } from './analysis-options.interface';
+import { ReportUploadResult } from './analysis-result.interface';
 
 export interface File {
   hash: string;
@@ -27,4 +28,5 @@ export type SupportedFiles = {
 export interface FileAnalysis extends FileAnalysisOptions {
   fileBundle: FileBundle;
   analysisResults: AnalysisResult;
+  reportResults?: ReportUploadResult;
 }

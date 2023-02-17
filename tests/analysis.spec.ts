@@ -11,6 +11,7 @@ import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
 import * as needle from '../src/needle';
+import * as report from '../src/report';
 
 describe('Functional test of analysis', () => {
   describe('analyzeFolders', () => {
@@ -326,6 +327,30 @@ describe('Functional test of analysis', () => {
           body: expect.objectContaining(analysisContext),
         }),
       );
+    });
+
+    // TODO: this test is being skipped for now since the /report flow hasn't been fully rolled out and it can't succeed for now
+    it.skip('should successfully analyze folder with the report option enabled', async () => {
+      const mockReportBundle = jest.spyOn(report, 'reportBundle');
+
+      const bundle = await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: { severity: AnalysisSeverity.info, prioritized: true, legacy: true },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+          defaultFileIgnores: undefined,
+        },
+        reportOptions: {
+          enabled: true,
+          projectName: 'test-project',
+        },
+      });
+
+      expect(mockReportBundle).toHaveBeenCalledTimes(1);
+
+      // TODO: check if bundle was successfully created
+      console.log(bundle);
     });
   });
 });

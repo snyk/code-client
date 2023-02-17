@@ -6,9 +6,9 @@ import { promisify } from 'util';
 import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMPTS } from './constants';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
-import { AnalysisResult } from './interfaces/analysis-result.interface';
+import { AnalysisResult, ReportResult } from './interfaces/analysis-result.interface';
 import { FailedResponse, makeRequest, Payload } from './needle';
-import { AnalysisOptions, AnalysisContext } from './interfaces/analysis-options.interface';
+import { AnalysisOptions, AnalysisContext, ReportOptions } from './interfaces/analysis-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -384,6 +384,72 @@ export async function getAnalysis(
   const res = await makeRequest<GetAnalysisResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
   return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
+}
+
+export interface UploadReportOptions extends GetAnalysisOptions {
+  report: ReportOptions;
+}
+export interface GetReportOptions extends ConnectionOptions {
+  reportId: string;
+}
+
+export type InitUploadResponseDto = {
+  reportId: string;
+};
+
+export type UploadReportResponseDto = ReportResult | AnalysisFailedResponse | AnalysisResponseProgress;
+
+export async function initReport(
+  options: UploadReportOptions,
+): Promise<Result<InitUploadResponseDto, GetAnalysisErrorCodes>> {
+  const config: Payload = {
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.org && { 'snyk-org-name': options.org }),
+    },
+    url: `${options.baseURL}/report`,
+    method: 'post',
+    body: {
+      workflowData: {
+        projectName: options.report.projectName,
+      },
+      key: {
+        type: 'file',
+        hash: options.bundleHash,
+        limitToFiles: options.limitToFiles || [],
+        ...(options.shard ? { shard: options.shard } : null),
+      },
+      ...pick(options, ['severity', 'prioritized', 'legacy', 'analysisContext']),
+    },
+  };
+
+  const res = await makeRequest<InitUploadResponseDto>(config);
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'initReport');
+}
+
+export async function getReport(
+  options: GetReportOptions,
+): Promise<Result<UploadReportResponseDto, GetAnalysisErrorCodes>> {
+  const config: Payload = {
+    headers: {
+      ...prepareTokenHeaders(options.sessionToken),
+      source: options.source,
+      ...(options.requestId && { 'snyk-request-id': options.requestId }),
+      ...(options.org && { 'snyk-org-name': options.org }),
+    },
+    url: `${options.baseURL}/report/${options.reportId}`,
+    method: 'get',
+    body: {
+      reportId: options.reportId,
+    },
+  };
+
+  const res = await makeRequest<UploadReportResponseDto>(config);
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getReport');
 }
 
 export function getVerifyCallbackUrl(authHost: string): string {

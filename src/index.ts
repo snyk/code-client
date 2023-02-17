@@ -10,11 +10,13 @@ import { SupportedFiles, FileAnalysis } from './interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from './interfaces/analysis-options.interface';
 import {
   AnalysisResult,
+  AnalysisResultSarif,
   AnalysisResultLegacy,
   FilePath,
   FileSuggestion,
   Suggestion,
   Marker,
+  ReportResult,
 } from './interfaces/analysis-result.interface';
 
 export {
@@ -27,6 +29,7 @@ export {
   constants,
   AnalysisSeverity,
   AnalysisResult,
+  AnalysisResultSarif,
   AnalysisResultLegacy,
   SupportedFiles,
   FileAnalysis,
@@ -40,4 +43,5 @@ export {
   getIpFamily,
   IpFamily,
   AnalysisContext,
+  ReportResult,
 };

@@ -442,9 +442,6 @@ export async function getReport(
     },
     url: `${options.baseURL}/report/${options.reportId}`,
     method: 'get',
-    body: {
-      reportId: options.reportId,
-    },
   };
 
   const res = await makeRequest<UploadReportResponseDto>(config);

@@ -14,6 +14,7 @@ import {
   GetAnalysisOptions,
 } from './http';
 import { createBundleFromFolders, remoteBundleFactory } from './bundles';
+import { reportBundle } from './report';
 import { emitter } from './emitter';
 import {
   AnalysisResult,
@@ -21,8 +22,9 @@ import {
   AnalysisResultSarif,
   AnalysisFiles,
   Suggestion,
+  ReportUploadResult,
 } from './interfaces/analysis-result.interface';
-import { FileAnalysisOptions } from './interfaces/analysis-options.interface';
+import { FileAnalysisOptions, ReportOptions } from './interfaces/analysis-options.interface';
 import { FileAnalysis } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
@@ -102,21 +104,38 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
   });
   if (fileBundle === null) return null;
 
-  // Analyze bundle
-  const analysisResults = await analyzeBundle({
+  const config = {
     bundleHash: fileBundle.bundleHash,
     ...options.connection,
     ...options.analysisOptions,
     shard: calcHash(fileBundle.baseDir),
     ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
-  });
+  };
+
+  let analysisResults: AnalysisResult;
+
+  // Whether this is a report/result upload operation.
+  const isReport = options.reportOptions?.enabled ?? false;
+  let reportResults: ReportUploadResult | undefined;
+  if (isReport && options.reportOptions) {
+    // Analyze and upload bundle results.
+    const reportRes = await reportBundle({
+      ...config,
+      report: options.reportOptions,
+    });
+    analysisResults = reportRes.analysisResult;
+    reportResults = reportRes.uploadResult;
+  } else {
+    // Analyze bundle.
+    analysisResults = await analyzeBundle(config);
+  }
 
   if (analysisResults.type === 'legacy') {
     // expand relative file names to absolute ones only for legacy results
     analysisResults.files = normalizeResultFiles(analysisResults.files, fileBundle.baseDir);
   }
 
-  return { fileBundle, analysisResults, ...options };
+  return { fileBundle, analysisResults, reportResults, ...options };
 }
 
 function mergeBundleResults(

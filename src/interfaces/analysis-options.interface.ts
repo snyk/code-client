@@ -39,15 +39,7 @@ export interface AnalysisContext {
   };
 }
 
-export interface FileAnalysisOptions extends AnalysisContext {
-  connection: ConnectionOptions;
-  analysisOptions: AnalysisOptions;
-  fileOptions: AnalyzeFoldersOptions;
-  reportOptions?: ReportOptions;
-  languages?: string[];
-}
-
-export interface AnalyzeFoldersOptions extends AnalysisContext {
+export interface AnalyzeFoldersOptions {
   paths: string[];
   symlinksEnabled?: boolean;
   defaultFileIgnores?: string[];
@@ -64,4 +56,12 @@ export interface ReportOptions {
   enabled: boolean;
   projectName?: string;
   targetRef?: string;
+}
+
+export interface FileAnalysisOptions extends AnalysisContext {
+  connection: ConnectionOptions;
+  analysisOptions: AnalysisOptions;
+  fileOptions: AnalyzeFoldersOptions;
+  reportOptions?: ReportOptions;
+  languages?: string[];
 }

@@ -179,7 +179,7 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
  * @param source
  * @returns
  */
-async function getSupportedFiles(
+export async function getSupportedFiles(
   baseURL: string,
   source: string,
   requestId?: string,

@@ -1,5 +1,5 @@
 import { analyzeFolders, extendAnalysis } from './analysis';
-import { createBundleFromFolders, createBundleWithCustomFiles } from './bundles';
+import { getSupportedFiles, createBundleFromFolders, createBundleWithCustomFiles } from './bundles';
 import { emitter } from './emitter';
 import { startSession, checkSession, getAnalysis, getIpFamily, IpFamily } from './http';
 import { MAX_FILE_SIZE } from './constants';
@@ -22,6 +22,7 @@ import {
 export {
   getGlobPatterns,
   analyzeFolders,
+  getSupportedFiles,
   createBundleFromFolders,
   createBundleWithCustomFiles,
   extendAnalysis,

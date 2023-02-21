@@ -1,7 +1,7 @@
 import path from 'path';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders, extendAnalysis } from '../src/analysis';
+import { analyzeFolders, extendAnalysis, analyzeBundle } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFilesFull, bundleExtender } from './constants/sample';
@@ -301,30 +301,49 @@ describe('Functional test of analysis', () => {
         analysisContext: {
           flow: 'test',
           initiator: 'CLI',
-          orgDisplayName: 'org',
-          orgPublicId: 'id',
-          projectName: 'proj',
-          projectPublicId: 'id',
+          org: {
+            name: 'org',
+            displayName: 'organization',
+            publicId: 'id',
+            flags: {},
+          },
+          project: {
+            name: 'proj',
+            publicId: 'id',
+            type: 'code',
+          },
         },
       };
 
       const makeRequestSpy = jest.spyOn(needle, 'makeRequest');
 
-      await analyzeFolders({
-        connection: { baseURL, sessionToken, source },
-        analysisOptions: {
+      try {
+        await analyzeBundle({
+          baseURL,
+          sessionToken,
+          source,
           severity: 1,
-        },
-        fileOptions: {
-          paths: [sampleProjectPath],
-          symlinksEnabled: false,
-        },
-        ...analysisContext,
-      });
+          bundleHash: 'hash',
+          shard: sampleProjectPath,
+          ...analysisContext,
+        });
+      } catch (err) {
+        // Authentication mechanism should deny the request as this user does not belong to the org 'org'
+        expect(err).toEqual({
+          apiName: 'getAnalysis',
+          statusCode: 401,
+          statusText: 'Missing, revoked or inactive token',
+        });
+      }
+
       const makeRequestSpyLastCalledWith = makeRequestSpy.mock.calls[makeRequestSpy.mock.calls.length - 1][0];
       expect(makeRequestSpyLastCalledWith).toEqual(
         expect.objectContaining({
           body: expect.objectContaining(analysisContext),
+          headers: expect.objectContaining({
+            'snyk-org-name': 'org',
+            source: 'test-source',
+          }),
         }),
       );
     });

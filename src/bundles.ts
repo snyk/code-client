@@ -172,10 +172,6 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
   return remoteBundle;
 }
 
-interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
-  // pass
-}
-
 /**
  * Get supported filters and test baseURL for correctness and availability
  *
@@ -218,6 +214,10 @@ export interface FileBundle extends RemoteBundle {
   skippedOversizedFiles?: string[];
 }
 
+interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+  // pass
+}
+
 /**
  * Creates a remote bundle and returns response from the bundle API
  *
@@ -225,14 +225,29 @@ export interface FileBundle extends RemoteBundle {
  * @returns {Promise<FileBundle | null>}
  */
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
-  const baseDir = determineBaseDir(options.paths);
-  const [supportedFiles, fileIgnores] = await Promise.all([
-    // Fetch supporte files to save network traffic
-    getSupportedFiles(options.baseURL, options.source, options.requestId, options.languages),
-    // Scan for custom ignore rules
-    collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores),
-  ]);
+  // Fetch supported files to save network traffic
+  const supportedFiles = await getSupportedFiles(options.baseURL, options.source, options.requestId, options.languages);
 
+  // Collect files and create a remote bundle
+  return await createBundleWithCustomFiles(options, supportedFiles);
+}
+
+/**
+ * Creates a remote bundle and returns response from the bundle API
+ * This function is used to create a bundle with a custom list of supported file extensions
+ *
+ * @param {CreateBundleFromFoldersOptions} options
+ * @param {SupportedFiles} supportedFiles
+ * @returns {Promise<FileBundle | null>}
+ */
+export async function createBundleWithCustomFiles(
+  options: CreateBundleFromFoldersOptions,
+  supportedFiles: SupportedFiles,
+): Promise<FileBundle | null> {
+  // Scan for custom ignore rules
+  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
+
+  const baseDir = determineBaseDir(options.paths);
   emitter.scanFilesProgress(0);
   const bundleFiles = [];
   const skippedOversizedFiles = [];

@@ -250,10 +250,9 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
   }
 
   const bundleOptions = {
-    ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId']),
+    ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org']),
     baseDir,
     files: bundleFiles,
-    ...(options.analysisContext?.org?.name ? { org: options.analysisContext.org.name } : {}),
   };
 
   // Create remote bundle

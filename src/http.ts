@@ -181,7 +181,7 @@ export async function getFilters(
   return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName);
 }
 
-function prepareHeaders(options: ConnectionOptions) {
+function commonHttpHeaders(options: ConnectionOptions) {
   return {
     'Session-Token': options.sessionToken,
     // We need to be able to test code-client without deepcode locally
@@ -226,7 +226,7 @@ export async function createBundle(
     headers: {
       'content-type': 'application/octet-stream',
       'content-encoding': 'gzip',
-      ...prepareHeaders(options),
+      ...commonHttpHeaders(options),
     },
     url: `${options.baseURL}/bundle`,
     method: 'post',
@@ -260,7 +260,9 @@ interface CheckBundleOptions extends ConnectionOptions {
 
 export async function checkBundle(options: CheckBundleOptions): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
   const res = await makeRequest<RemoteBundle>({
-    headers: prepareHeaders(options),
+    headers: {
+      ...commonHttpHeaders(options),
+    },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'get',
   });
@@ -300,7 +302,7 @@ export async function extendBundle(
     headers: {
       'content-type': 'application/octet-stream',
       'content-encoding': 'gzip',
-      ...prepareHeaders(options),
+      ...commonHttpHeaders(options),
     },
     url: `${options.baseURL}/bundle/${options.bundleHash}`,
     method: 'put',
@@ -357,8 +359,7 @@ export async function getAnalysis(
 ): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
     headers: {
-      ...prepareHeaders(options),
-      ...(options.analysisContext?.org?.name && { 'snyk-org-name': options.analysisContext.org.name }),
+      ...commonHttpHeaders(options),
     },
     url: `${options.baseURL}/analysis`,
     method: 'post',
@@ -396,10 +397,7 @@ export async function initReport(
 ): Promise<Result<InitUploadResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
     headers: {
-      ...prepareTokenHeaders(options.sessionToken),
-      source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(options.org && { 'snyk-org-name': options.org }),
+      ...commonHttpHeaders(options),
     },
     url: `${options.baseURL}/report`,
     method: 'post',
@@ -427,10 +425,7 @@ export async function getReport(
 ): Promise<Result<UploadReportResponseDto, GetAnalysisErrorCodes>> {
   const config: Payload = {
     headers: {
-      ...prepareTokenHeaders(options.sessionToken),
-      source: options.source,
-      ...(options.requestId && { 'snyk-request-id': options.requestId }),
-      ...(options.org && { 'snyk-org-name': options.org }),
+      ...commonHttpHeaders(options),
     },
     url: `${options.baseURL}/report/${options.reportId}`,
     method: 'get',

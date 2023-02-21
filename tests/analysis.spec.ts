@@ -322,6 +322,7 @@ describe('Functional test of analysis', () => {
           baseURL,
           sessionToken,
           source,
+          org: 'org',
           severity: 1,
           bundleHash: 'hash',
           shard: sampleProjectPath,

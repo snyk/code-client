@@ -28,6 +28,7 @@ export interface ConnectionOptions {
   source: string;
   requestId?: string;
   org?: string;
+  extraHeaders?: { [key: string]: string };
 }
 
 // The trick to typecast union type alias
@@ -189,6 +190,7 @@ function commonHttpHeaders(options: ConnectionOptions) {
     source: options.source,
     ...(options.requestId && { 'snyk-request-id': options.requestId }),
     ...(options.org && { 'snyk-org-name': options.org }),
+    ...options.extraHeaders,
   };
 }
 

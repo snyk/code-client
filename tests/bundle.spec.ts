@@ -34,6 +34,7 @@ describe('Functional test for bundle creation', () => {
         sessionToken,
         source,
         org: 'org',
+        extraHeaders: { 'x-custom-header': 'custom-value' },
         paths: [sampleProjectPath],
         symlinksEnabled: false,
       });
@@ -52,6 +53,7 @@ describe('Functional test for bundle creation', () => {
         headers: expect.objectContaining({
           'snyk-org-name': 'org',
           source: 'test-source',
+          'x-custom-header': 'custom-value',
         }),
       }),
     );

@@ -10,6 +10,7 @@ import {
   getAnalysis,
   AnalysisStatus,
   initReport,
+  getReport,
 } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 import * as needle from '../src/needle';
@@ -382,49 +383,4 @@ describe('Requests to public API', () => {
     },
     TEST_TIMEOUT,
   );
-
-  // TODO: this test is being skipped for now since the /report flow hasn't been fully rolled out and it can't succeed for now
-  it.skip('test successful report workflow', async () => {
-    // Create a bundle first
-    const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
-      r[d.bundlePath] = pick(d, ['hash', 'content']);
-      return r;
-    }, {});
-
-    const bundleResponse = await createBundle({
-      baseURL,
-      sessionToken,
-      source,
-      files,
-    });
-    expect(bundleResponse.type).toEqual('success');
-    if (bundleResponse.type === 'error') return;
-    const bundleHash = bundleResponse.value.bundleHash;
-
-    const initReportResponse = await initReport({
-      baseURL,
-      sessionToken,
-      source,
-      bundleHash: bundleHash,
-      report: {
-        enabled: true,
-        projectName: 'test-project',
-      },
-    });
-
-    expect(initReportResponse.type).toEqual('success');
-
-    // TODO: getReport with reportId
-    // example options:
-    // {
-    //   baseURL: 'http://localhost:11981',
-    //   sessionToken: 'token 2bee9fd5-f9b6-48d7-a159-300216f99af4',
-    //   source: 'snyk-cli',
-    //   requestId: 'a00a3aba-eba4-4e17-ad0b-0cd7bf0cbd5c',
-    //   reportId: '004355be-5424-4a2c-ad53-44841a83e185'
-    // }
-
-    if (initReportResponse.type === 'error') return;
-    console.log(initReportResponse.value);
-  });
 });

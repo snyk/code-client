@@ -4,9 +4,9 @@ import jsonschema from 'jsonschema';
 import { analyzeFolders, extendAnalysis, analyzeBundle } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
-import { sampleProjectPath, bundleFilesFull, bundleExtender } from './constants/sample';
+import { sampleProjectPath, bundleFilesFull, bundleExtender, getReportReturn } from './constants/sample';
 import { emitter } from '../src/emitter';
-import { AnalysisResponseProgress } from '../src/http';
+import { AnalysisResponseProgress, Result, UploadReportResponseDto, GetAnalysisErrorCodes } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
@@ -349,17 +349,16 @@ describe('Functional test of analysis', () => {
       );
     });
 
-    // TODO: this test is being skipped for now since the /report flow hasn't been fully rolled out and it can't succeed for now
-    it.skip('should successfully analyze folder with the report option enabled', async () => {
+    it('should successfully analyze folder with the report option enabled', async () => {
       const mockReportBundle = jest.spyOn(report, 'reportBundle');
+      mockReportBundle.mockReturnValueOnce(Promise.resolve(getReportReturn));
 
       const bundle = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
-        analysisOptions: { severity: AnalysisSeverity.info, prioritized: true, legacy: true },
+        analysisOptions: { severity: AnalysisSeverity.info },
         fileOptions: {
           paths: [sampleProjectPath],
           symlinksEnabled: false,
-          defaultFileIgnores: undefined,
         },
         reportOptions: {
           enabled: true,
@@ -368,9 +367,23 @@ describe('Functional test of analysis', () => {
       });
 
       expect(mockReportBundle).toHaveBeenCalledTimes(1);
+      expect(bundle).toBeTruthy();
+    });
 
-      // TODO: check if bundle was successfully created
-      console.log(bundle);
+    it('should successfully analyze folder but not report with the report option disabled', async () => {
+      const mockReportBundle = jest.spyOn(report, 'reportBundle');
+
+      const bundle = await analyzeFolders({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: { severity: AnalysisSeverity.info },
+        fileOptions: {
+          paths: [sampleProjectPath],
+          symlinksEnabled: false,
+        },
+      });
+
+      expect(mockReportBundle).not.toHaveBeenCalled();
+      expect(bundle).toBeTruthy();
     });
   });
 });

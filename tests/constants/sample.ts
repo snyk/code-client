@@ -3,6 +3,7 @@ import fs from 'fs';
 
 import { FileInfo } from '../../src/interfaces/files.interface';
 import { getFileInfo, notEmpty } from '../../src/files';
+import { ReportResult } from '../../src';
 
 export const sampleProjectPath = path.resolve(__dirname, '../sample-repo');
 export const supportedFiles = {
@@ -88,3 +89,18 @@ export const bundleExtender: () => Promise<{
     },
   };
 };
+
+export const initReportReturn = { reportId: 'test-reportId' };
+
+export const getReportReturn = {
+  status: 'COMPLETE',
+  uploadResult: {
+    projectId: 'test-projectId',
+    snapshotId: 'test-snapshotId',
+    reportUrl: 'test-reportUrl',
+  },
+  analysisResult: {
+    type: 'sarif',
+    sarif: {},
+  },
+} as ReportResult;

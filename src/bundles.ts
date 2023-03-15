@@ -26,7 +26,7 @@ import {
   getFilters,
 } from './http';
 
-import { MAX_PAYLOAD, MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
+import { MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
 import { emitter } from './emitter';
 import { AnalyzeFoldersOptions } from './interfaces/analysis-options.interface';
 
@@ -45,7 +45,7 @@ async function* prepareRemoteBundle(
   let { bundleHash } = options;
   let cumulativeProgress = 0;
   emitter.createBundleProgress(cumulativeProgress, options.files.length);
-  for (const chunkedFiles of composeFilePayloads(options.files, MAX_PAYLOAD)) {
+  for (const chunkedFiles of composeFilePayloads(options.files)) {
     const apiParams = {
       ...pick(options, ['baseURL', 'sessionToken', 'source', 'extraHeaders', 'removedFiles', 'requestId', 'org']),
       files: chunkedFiles.reduce((d, f) => {
@@ -118,7 +118,7 @@ export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Pr
   };
 
   const files: FileInfo[][] = [];
-  for (const bucketFiles of composeFilePayloads(options.files, MAX_PAYLOAD)) {
+  for (const bucketFiles of composeFilePayloads(options.files)) {
     files.push(bucketFiles);
   }
   await pMap(files, async (task: FileInfo[]) => await uploadFileChunks(task), {
@@ -230,7 +230,7 @@ export interface FileBundle extends RemoteBundle {
   skippedOversizedFiles?: string[];
 }
 
-interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
+export interface CreateBundleFromFoldersOptions extends ConnectionOptions, AnalyzeFoldersOptions {
   // pass
 }
 

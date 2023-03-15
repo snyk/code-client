@@ -431,7 +431,8 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
   return decodeURI(relPath);
 }
 
-export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD): Generator<FileInfo[]> {
+// MAX_PAYLOAD / 2 is because every char takes 2 bytes in the payload
+export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD / 2): Generator<FileInfo[]> {
   type Bucket = {
     size: number;
     files: FileInfo[];
@@ -440,7 +441,10 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 
   let bucketIndex = -1;
   const getFileDataPayloadSize = (fileData: FileInfo) =>
-    (fileData.content?.length || 0) + fileData.bundlePath.length + fileData.hash.length;
+    (fileData.content?.length ? fileData.content.length + 16 : 0) +
+    fileData.bundlePath.length +
+    fileData.hash.length +
+    6; // constants is for the separators
   const isLowerSize = (size: number, fileData: FileInfo) => size >= getFileDataPayloadSize(fileData);
   for (const fileData of files) {
     // This file is empty or too large to send, it should be skipped.

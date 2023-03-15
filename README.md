@@ -56,7 +56,7 @@ const isLoggedIn = sessionResponse.value; // boolean
 
 ```javascript
 /** Building bundle process started with provided data */
-codeClient.emitter.on('scanFilesProgress', (processed: number) = {
+codeClient.emitter.on('scanFilesProgress', (processed: number) => {
   console.log(`Indexed ${processed} files`);
 });
 
@@ -71,10 +71,9 @@ codeClient.emitter.on('sendError', error => {
 });
 
 /** Logs HTTP requests sent to the API **/
-codeClient.emitter.on('apiRequestLog', (message) => {
+codeClient.emitter.on('apiRequestLog', message => {
   console.log(message);
 });
-
 ```
 
 Complete list of events:
@@ -136,4 +135,36 @@ If there are any errors the result of every call will contain the following:
 
 ```javascript
 const { error, statusCode, statusText } = result;
+```
+
+## CLI
+
+There is a way to run separate calls using a CLI
+
+### Create bundle
+
+Help manifest: `time npm run cli -- help bundle:create`
+
+```
+Usage: CLI bundle:create [options]
+
+create a new bundle and return its ID with meta info
+
+Options:
+  --patterns [string...]     supported file patterns
+  --ignore [path...]         ignored path glob
+  --path [path...]           source code dir
+  --url <url>                service URL
+  --token <hash>             user token
+  --org <string>             organization
+  --source <string>          source identifier (default: "code-client")
+  -H, --headers [string...]  custom headers e.g. "X-Custom-Header: some value". Can have multiple values diveded by space
+  --debug                    enable debug mode
+  -h, --help                 display help for command
+```
+
+Example call:
+
+```bash
+npm run cli -- bundle:create --url="<service url>" --token="<snyk token>" --headers="<extra>" --patterns=".*" --path="<absolute path>"
 ```

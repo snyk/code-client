@@ -1,11 +1,11 @@
 import path from 'path';
-import { createBundleFromFolders } from '../src/bundles';
 import { baseURL, sessionToken, source } from './constants/base';
 import { reportBundle } from '../src/report';
 import * as http from '../src/http';
 import { sampleProjectPath, initReportReturn, getReportReturn } from './constants/sample';
 
-jest.spyOn(http, 'initReport').mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
+const mockInitReport = jest.spyOn(http, 'initReport');
+mockInitReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
 jest.spyOn(http, 'getReport').mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
 
 describe('Functional test for report', () => {
@@ -18,24 +18,26 @@ describe('Functional test for report', () => {
     paths,
   };
 
-  it('should report a bundle with correct parameters', async () => {
+  it('should complete report with correct parameters', async () => {
     const reportConfig = {
       enabled: true,
       projectName: 'test-project',
+      targetName: 'test-target',
+      targetRef: 'test-ref',
+      remoteRepoUrl: 'https://github.com/owner/repo',
     };
 
-    const bundleResult = await createBundleFromFolders(baseConfig);
-
-    expect(bundleResult).not.toBeNull();
-    expect(bundleResult).toHaveProperty('bundleHash');
-    const bundleHash = bundleResult?.bundleHash;
-    if (!bundleHash) return;
-
     const result = await reportBundle({
-      bundleHash,
+      bundleHash: 'dummy-bundle',
       ...baseConfig,
       report: reportConfig,
     });
+
+    expect(mockInitReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        report: reportConfig,
+      }),
+    );
 
     expect(result).not.toBeNull();
     expect(result.status).toBe('COMPLETE');
@@ -49,16 +51,9 @@ describe('Functional test for report', () => {
       projectName: undefined,
     };
 
-    const bundleResult = await createBundleFromFolders(baseConfig);
-
-    expect(bundleResult).not.toBeNull();
-    expect(bundleResult).toHaveProperty('bundleHash');
-    const bundleHash = bundleResult?.bundleHash;
-    if (!bundleHash) return;
-
     expect(async () => {
       await reportBundle({
-        bundleHash,
+        bundleHash: 'dummy-bundle',
         ...baseConfig,
         report: reportConfig,
       });

@@ -55,7 +55,9 @@ export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
 export interface ReportOptions {
   enabled: boolean;
   projectName?: string;
+  targetName?: string;
   targetRef?: string;
+  remoteRepoUrl?: string;
 }
 
 export interface FileAnalysisOptions extends AnalysisContext {

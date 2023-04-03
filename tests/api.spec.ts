@@ -2,19 +2,8 @@ import pick from 'lodash.pick';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
-import {
-  getFilters,
-  createBundle,
-  checkBundle,
-  extendBundle,
-  getAnalysis,
-  AnalysisStatus,
-  initReport,
-  getReport,
-} from '../src/http';
+import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
-import * as needle from '../src/needle';
-import { gunzipSync } from 'zlib';
 
 const fakeBundleHash = 'd9f1171fb6f6bf12eb217fee43eef3cebd6a85cc78bc333035bf4cc3ebf1cf68';
 let fakeBundleHashFull = '';

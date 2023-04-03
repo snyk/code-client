@@ -406,6 +406,9 @@ export async function initReport(
     body: {
       workflowData: {
         projectName: options.report.projectName,
+        targetName: options.report.targetName,
+        targetRef: options.report.targetRef,
+        remoteRepoUrl: options.report.remoteRepoUrl,
       },
       key: {
         type: 'file',

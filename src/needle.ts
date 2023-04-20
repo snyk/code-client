@@ -107,6 +107,8 @@ export async function makeRequest<T = void>(
       emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
     }
 
+    const errorMessage = new Object(response?.body)['error'];
+    error = error ?? new Error(errorMessage);
     errorCode = errorCode ?? ErrorCodes.serviceUnavailable;
 
     // Try to avoid breaking requests due to temporary network errors

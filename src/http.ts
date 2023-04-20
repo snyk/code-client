@@ -39,13 +39,18 @@ function isSubsetErrorCode<T>(code: any, messages: { [c: number]: string }): cod
   return false;
 }
 
-function generateError<E>(errorCode: number, messages: { [c: number]: string }, apiName: string): ResultError<E> {
+function generateError<E>(
+  errorCode: number,
+  messages: { [c: number]: string },
+  apiName: string,
+  error?: string,
+): ResultError<E> {
   if (!isSubsetErrorCode<E>(errorCode, messages)) {
     throw { errorCode, messages, apiName };
   }
 
   const statusCode = errorCode;
-  const statusText = messages[errorCode];
+  const statusText = error ?? messages[errorCode];
 
   return {
     type: 'error',
@@ -379,6 +384,22 @@ export async function getAnalysis(
   return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
 }
 
+export type ReportErrorCodes =
+  | GenericErrorTypes
+  | ErrorCodes.unauthorizedUser
+  | ErrorCodes.unauthorizedBundleAccess
+  | ErrorCodes.badRequest
+  | ErrorCodes.notFound;
+
+const REPORT_ERROR_MESSAGES: { [P in ReportErrorCodes]: string } = {
+  ...GENERIC_ERROR_MESSAGES,
+  [ErrorCodes.unauthorizedUser]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedUser],
+  [ErrorCodes.unauthorizedBundleAccess]: DEFAULT_ERROR_MESSAGES[ErrorCodes.unauthorizedBundleAccess],
+  [ErrorCodes.notFound]: DEFAULT_ERROR_MESSAGES[ErrorCodes.notFound],
+  [ErrorCodes.badRequest]: DEFAULT_ERROR_MESSAGES[ErrorCodes.badRequest],
+  [ErrorCodes.serverError]: 'Getting report failed',
+};
+
 export interface UploadReportOptions extends GetAnalysisOptions {
   report: ReportOptions;
 }
@@ -394,7 +415,7 @@ export type UploadReportResponseDto = ReportResult | AnalysisFailedResponse | An
 
 export async function initReport(
   options: UploadReportOptions,
-): Promise<Result<InitUploadResponseDto, GetAnalysisErrorCodes>> {
+): Promise<Result<InitUploadResponseDto, ReportErrorCodes>> {
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
@@ -420,12 +441,10 @@ export async function initReport(
 
   const res = await makeRequest<InitUploadResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'initReport');
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport');
 }
 
-export async function getReport(
-  options: GetReportOptions,
-): Promise<Result<UploadReportResponseDto, GetAnalysisErrorCodes>> {
+export async function getReport(options: GetReportOptions): Promise<Result<UploadReportResponseDto, ReportErrorCodes>> {
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
@@ -436,7 +455,7 @@ export async function getReport(
 
   const res = await makeRequest<UploadReportResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getReport');
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'getReport', res.error?.message);
 }
 
 export function getVerifyCallbackUrl(authHost: string): string {

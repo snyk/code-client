@@ -18,10 +18,16 @@ const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, d
 async function pollReport(
   options: UploadReportOptions,
 ): Promise<Result<AnalysisFailedResponse | ReportResult, GetAnalysisErrorCodes>> {
-  // Return early if project name is not provided.
   const projectName = options.report?.projectName?.trim();
+  const projectNameMaxLength = 64;
   if (!projectName || projectName.length === 0) {
     throw new Error('"project-name" must be provided for "report"');
+  }
+  if (projectName.length > projectNameMaxLength) {
+    throw new Error(`"project-name" must not exceed ${projectNameMaxLength} characters`);
+  }
+  if (/[^A-Za-z0-9-_/]/g.test(projectName)) {
+    throw new Error(`"project-name" must not contain spaces or special characters except [/-_]`);
   }
 
   emitter.analyseProgress({

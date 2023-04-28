@@ -5,12 +5,14 @@ import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/samp
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleHash = 'd9f1171fb6f6bf12eb217fee43eef3cebd6a85cc78bc333035bf4cc3ebf1cf68';
+const fakeBundleHash = '08b08b0419aa344b21ee3a84790cf551df341d10a1e6114a1f8a6079abc462f1';
 let fakeBundleHashFull = '';
 const realBundleHash = '';
 let realBundleHashFull = '';
 
 const fakeMissingFiles = [
+  '.eslintrc.json',
+  '.snyk',
   'AnnotatorTest.cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',
@@ -29,7 +31,7 @@ describe('Requests to public API', () => {
     const response = await getFilters(baseURL, '');
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore', '.snyk']));
+    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore', '.snyk', '.snyk-rules']));
     expect(response.value.extensions).toEqual(
       expect.arrayContaining([
         '.cs',
@@ -253,8 +255,8 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('0124f75771f3d782d370ea2fedf87d2af434c40d740a10e9a5980633ce3b704d');
-      expect(response.value.missingFiles).toHaveLength(12);
+      expect(response.value.bundleHash).toContain('86707863de50a374f9a69c2570b71b5a1be8bc083d0012e4728f89bfe4acf481');
+      expect(response.value.missingFiles).toHaveLength(14);
     },
     TEST_TIMEOUT,
   );
@@ -315,16 +317,25 @@ describe('Requests to public API', () => {
               files: 2,
               isSupported: true,
               lang: 'Java',
+              type: 'SUPPORTED',
             },
             {
               files: 1,
               isSupported: true,
               lang: 'C++ (beta)',
+              type: 'SUPPORTED',
             },
             {
-              files: 7,
+              files: 1,
               isSupported: true,
               lang: 'JavaScript',
+              type: 'SUPPORTED',
+            },
+            {
+              files: 6,
+              isSupported: true,
+              lang: 'JavaScript',
+              type: 'SUPPORTED',
             },
           ]),
         );

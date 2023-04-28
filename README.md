@@ -10,7 +10,7 @@ This package is published using:
 
 # Installation
 
-```shell script
+```shell script2
 $ npm install --save @snyk/code-client
 ```
 

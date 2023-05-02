@@ -184,9 +184,7 @@ export async function getFilters(
 
 function commonHttpHeaders(options: ConnectionOptions) {
   return {
-    'Session-Token': options.sessionToken,
-    // We need to be able to test code-client without deepcode locally
-    Authorization: `Bearer ${options.sessionToken}`,
+    Authorization: options.sessionToken,
     source: options.source,
     ...(options.requestId && { 'snyk-request-id': options.requestId }),
     ...(options.org && { 'snyk-org-name': options.org }),

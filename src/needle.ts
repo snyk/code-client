@@ -107,6 +107,11 @@ export async function makeRequest<T = void>(
       emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const errorMessage = response?.body?.error;
+    if (errorMessage) {
+      error = error ?? new Error(errorMessage);
+    }
     errorCode = errorCode ?? ErrorCodes.serviceUnavailable;
 
     // Try to avoid breaking requests due to temporary network errors

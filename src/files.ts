@@ -134,17 +134,23 @@ export function parseFileIgnores(path: string): string[] {
 
 export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
   return [
-    ...supportedFiles.extensions.map(e => `*.${generateAllCaseGlobPattern(e)}`),
+    ...supportedFiles.extensions.map(e => `*${generateAllCaseGlobPattern(e)}`),
     ...supportedFiles.configFiles.filter(e => !EXCLUDED_NAMES.includes(e)),
   ];
 }
 
+// Generates glob patterns for case-insensitive file extension matching.
+// E.g. *.[jJ][sS] for matching .js files without case-sensitivity.
 function generateAllCaseGlobPattern(fileExtension: string): string {
   const chars = Array.from(fileExtension);
   const p = chars.reduce((pattern: string[], extensionChar, i) => {
     if (i == 0) {
-      // first char is always '.', no need to generate multiple cases for it
-      return pattern;
+      // first char is always '.', no need to generate multiple cases for file extension character
+      if (extensionChar != '.') {
+        throw new Error('Unexpected file extension pattern when constructing glob patterns.');
+      }
+
+      return [extensionChar];
     }
 
     const regexCharPattern = `[${extensionChar.toLowerCase()}${extensionChar.toUpperCase()}]`;

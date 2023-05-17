@@ -62,7 +62,7 @@ export const bundleExtender: () => Promise<{
   restore: () => void;
 }> = async () => {
   const fBundle = await bundleFilesFull;
-  const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.cpp`];
+  const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.Cpp`];
   const addedFilesNames = [`GHATS12.java`];
   const [changedFiles, addedFiles] = [changedFilesNames, addedFilesNames].map(arr =>
     arr.map(name => `${sampleProjectPath}/${name}`),

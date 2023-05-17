@@ -13,7 +13,7 @@ let realBundleHashFull = '';
 const fakeMissingFiles = [
   '.eslintrc.json',
   '.snyk',
-  'AnnotatorTest.cpp',
+  'AnnotatorTest.Cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',
@@ -196,7 +196,7 @@ describe('Requests to public API', () => {
         removedFiles: [
           '.eslintrc.json',
           '.snyk',
-          `AnnotatorTest.cpp`,
+          `AnnotatorTest.Cpp`,
           `app.js`,
           `GitHubAccessTokenScrambler12.java`,
           `db.js`,

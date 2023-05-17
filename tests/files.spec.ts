@@ -14,6 +14,7 @@ import {
 } from '../src/files';
 
 import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
+import { getGlobPatterns } from '../src';
 
 describe('files', () => {
   it('parse dc ignore file', () => {
@@ -55,10 +56,10 @@ describe('files', () => {
     expect(skippedOversizedFiles[0]).toEqual('big-file.js');
 
     const testFile = files[1];
-    expect(testFile.bundlePath).toEqual('AnnotatorTest.cpp');
+    expect(testFile.bundlePath).toEqual('AnnotatorTest.Cpp');
     expect(testFile.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
-    expect(testFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.cpp`);
-    expect(testFile.bundlePath).toEqual(`AnnotatorTest.cpp`);
+    expect(testFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.Cpp`);
+    expect(testFile.bundlePath).toEqual(`AnnotatorTest.Cpp`);
     expect(testFile.size).toEqual(239);
   });
 
@@ -147,5 +148,18 @@ describe('files', () => {
 
     const windowsPath = 'C:\\Users\\user\\Git\\goof%20test\\index.js';
     expect(resolveBundleFilePath(baseDir, windowsPath)).toEqual(decodeURI(windowsPath));
+  });
+
+  it('generates correct glob patterns for supported files', () => {
+    const globPatterns = getGlobPatterns(supportedFiles);
+
+    expect(globPatterns).toEqual([
+      "*.[jJ][sS]",
+      "*.[jJ][sS][xX]",
+      "*.[cC][pP][pP]",
+      "*.[jJ][aA][vV][aA]",
+      ".eslintrc.json",
+      ".snyk",
+    ]);
   });
 });

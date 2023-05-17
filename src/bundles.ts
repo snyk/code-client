@@ -209,12 +209,14 @@ export async function getSupportedFiles(
   const supportedFilesFromApi = resp.value;
   //Given supported languages from 'registy'
   if (languages) {
-    const supportedFiles: SupportedFiles = {} as any;
+    const supportedFiles = {} as SupportedFiles;
     supportedFiles.configFiles = supportedFilesFromApi.configFiles;
     supportedFiles.extensions = languages;
+
     //For verification only
+    const userSupportedExtensions = supportedFilesFromApi.extensions.map(e => e.toLowerCase());
     supportedFiles.extensions = supportedFiles.extensions.filter(langExtension =>
-      supportedFilesFromApi.extensions.includes(langExtension),
+      userSupportedExtensions.includes(langExtension.toLowerCase()),
     );
     emitter.supportedFilesLoaded(supportedFiles);
     return supportedFiles;

@@ -30,7 +30,7 @@ export const bundleFileIgnores = [
 export const bundleFilePaths = [
   '/.eslintrc.json', // <= we are not running linters in the backend anymore
   '.snyk',
-  'AnnotatorTest.cpp',
+  'AnnotatorTest.Cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',

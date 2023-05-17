@@ -134,9 +134,23 @@ export function parseFileIgnores(path: string): string[] {
 
 export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
   return [
-    ...supportedFiles.extensions.map(e => `*${e}`),
+    ...supportedFiles.extensions.map(e => `*.${generateAllCaseGlobPattern(e)}`),
     ...supportedFiles.configFiles.filter(e => !EXCLUDED_NAMES.includes(e)),
   ];
+}
+
+function generateAllCaseGlobPattern(fileExtension: string): string {
+  const chars = Array.from(fileExtension);
+  const p = chars.reduce((pattern: string[], extensionChar, i) => {
+    if (i == 0) {
+      // first char is always '.', no need to generate multiple cases for it
+      return pattern;
+    }
+
+    const regexCharPattern = `[${extensionChar.toLowerCase()}${extensionChar.toUpperCase()}]`;
+    return pattern.concat(regexCharPattern);
+  }, []);
+  return p.join('');
 }
 
 export async function collectIgnoreRules(

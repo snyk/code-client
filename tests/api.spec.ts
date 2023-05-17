@@ -5,7 +5,7 @@ import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/samp
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleHash = '08b08b0419aa344b21ee3a84790cf551df341d10a1e6114a1f8a6079abc462f1';
+const fakeBundleHash = '4ff3f91bee2ec5e681e75e935cb9d98318bb9cf9b341894d8cdeed8b9cbd4108';
 let fakeBundleHashFull = '';
 const realBundleHash = '';
 let realBundleHashFull = '';
@@ -255,7 +255,7 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('86707863de50a374f9a69c2570b71b5a1be8bc083d0012e4728f89bfe4acf481');
+      expect(response.value.bundleHash).toContain('36b2e311cda184992c485ecfa6d58a006562763ae115558632467bb0e880cbe9');
       expect(response.value.missingFiles).toHaveLength(14);
     },
     TEST_TIMEOUT,

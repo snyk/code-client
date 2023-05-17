@@ -154,12 +154,12 @@ describe('files', () => {
     const globPatterns = getGlobPatterns(supportedFiles);
 
     expect(globPatterns).toEqual([
-      "*.[jJ][sS]",
-      "*.[jJ][sS][xX]",
-      "*.[cC][pP][pP]",
-      "*.[jJ][aA][vV][aA]",
-      ".eslintrc.json",
-      ".snyk",
+      '*.[jJ][sS]',
+      '*.[jJ][sS][xX]',
+      '*.[cC][pP][pP]',
+      '*.[jJ][aA][vV][aA]',
+      '.eslintrc.json',
+      '.snyk',
     ]);
   });
 });

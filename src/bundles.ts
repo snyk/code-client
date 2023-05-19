@@ -209,11 +209,13 @@ export async function getSupportedFiles(
   const supportedFilesFromApi = resp.value;
   //Given supported languages from 'registy'
   if (languages) {
-    const supportedFiles = {} as SupportedFiles;
-    supportedFiles.configFiles = supportedFilesFromApi.configFiles;
-    supportedFiles.extensions = languages;
+    const supportedFiles: SupportedFiles = {
+      configFiles: supportedFilesFromApi.configFiles,
+      extensions: languages,
+    };
 
     //For verification only
+    // Make sure we compare file extensions between results from `registry` and `deeproxy` without case sensitivity to avoid missing some of supported extensions.
     const userSupportedExtensions = supportedFilesFromApi.extensions.map(e => e.toLowerCase());
     supportedFiles.extensions = supportedFiles.extensions.filter(langExtension =>
       userSupportedExtensions.includes(langExtension.toLowerCase()),

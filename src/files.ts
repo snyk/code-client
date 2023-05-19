@@ -134,7 +134,7 @@ export function parseFileIgnores(path: string): string[] {
 
 export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
   return [
-    ...supportedFiles.extensions.map(e => `*${generateAllCaseGlobPattern(e)}`),
+    ...supportedFiles.extensions.map(e => `${generateAllCaseGlobPattern(e)}`),
     ...supportedFiles.configFiles.filter(e => !EXCLUDED_NAMES.includes(e)),
   ];
 }
@@ -143,20 +143,33 @@ export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {
 // E.g. *.[jJ][sS] for matching .js files without case-sensitivity.
 function generateAllCaseGlobPattern(fileExtension: string): string {
   const chars = Array.from(fileExtension);
-  const p = chars.reduce((pattern: string[], extensionChar, i) => {
-    if (i == 0) {
-      // first char is always '.', no need to generate multiple cases for file extension character
-      if (extensionChar != '.') {
-        throw new Error('Unexpected file extension pattern when constructing glob patterns.');
-      }
+  if (!chars.length) {
+    console.log('Invalid file extension pattern: file extension is empty.');
+    return '';
+  }
 
-      return [extensionChar];
+  if (chars[0] != '.') {
+    console.log(
+      "Invalid file extension pattern: missing '.' in the beginning of the file extension. Some files may not be included in the analysis.",
+    );
+    return '';
+  }
+
+  const caseInsensitivePatterns = chars.reduce((pattern: string[], extensionChar, i) => {
+    if (i == 0) {
+      // first char should always be '.', no need to generate multiple cases for file extension character
+      return ['*.'];
     }
 
-    const regexCharPattern = `[${extensionChar.toLowerCase()}${extensionChar.toUpperCase()}]`;
-    return pattern.concat(regexCharPattern);
+    if (extensionChar.toLowerCase() == extensionChar.toUpperCase()) {
+      // Char doesn't have case variant, return as-is.
+      return pattern.concat(extensionChar);
+    }
+
+    const globCharPattern = `[${extensionChar.toLowerCase()}${extensionChar.toUpperCase()}]`;
+    return pattern.concat(globCharPattern);
   }, []);
-  return p.join('');
+  return caseInsensitivePatterns.join('');
 }
 
 export async function collectIgnoreRules(

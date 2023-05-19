@@ -150,16 +150,44 @@ describe('files', () => {
     expect(resolveBundleFilePath(baseDir, windowsPath)).toEqual(decodeURI(windowsPath));
   });
 
-  it('generates correct glob patterns for supported files', () => {
-    const globPatterns = getGlobPatterns(supportedFiles);
+  describe('getGlobPatterns', () => {
+    it('generates correct glob patterns for supported files', () => {
+      const globPatterns = getGlobPatterns(supportedFiles);
+      expect(globPatterns).toEqual([
+        '*.[jJ][sS]',
+        '*.[jJ][sS][xX]',
+        '*.[cC][pP][pP]',
+        '*.[jJ][aA][vV][aA]',
+        '.eslintrc.json',
+        '.snyk',
+      ]);
+    });
 
-    expect(globPatterns).toEqual([
-      '*.[jJ][sS]',
-      '*.[jJ][sS][xX]',
-      '*.[cC][pP][pP]',
-      '*.[jJ][aA][vV][aA]',
-      '.eslintrc.json',
-      '.snyk',
-    ]);
+    it("doesn't generate any pattern for an empty file extension", () => {
+      const supportedFiles = {
+        extensions: ['', '.cs'],
+        configFiles: [],
+      };
+      const globPatterns = getGlobPatterns(supportedFiles);
+      expect(globPatterns).toEqual(['', '*.[cC][sS]']);
+    });
+
+    it("doesn't generate any pattern for invalid file extension", () => {
+      const supportedFiles = {
+        extensions: ['js', '.cs'],
+        configFiles: [],
+      };
+      const globPatterns = getGlobPatterns(supportedFiles);
+      expect(globPatterns).toEqual(['', '*.[cC][sS]']);
+    });
+
+    it("doesn't generate case variant pattern for chars without case variant", () => {
+      const supportedFiles = {
+        extensions: ['.ps1', '.ps'],
+        configFiles: [],
+      };
+      const globPatterns = getGlobPatterns(supportedFiles);
+      expect(globPatterns).toEqual(['*.[pP][sS]1', '*.[pP][sS]']);
+    });
   });
 });

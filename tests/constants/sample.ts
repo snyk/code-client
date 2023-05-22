@@ -30,7 +30,7 @@ export const bundleFileIgnores = [
 export const bundleFilePaths = [
   '/.eslintrc.json', // <= we are not running linters in the backend anymore
   '.snyk',
-  'AnnotatorTest.cpp',
+  'AnnotatorTest.Cpp',
   'GitHubAccessTokenScrambler12.java',
   'app.js',
   'db.js',
@@ -62,7 +62,7 @@ export const bundleExtender: () => Promise<{
   restore: () => void;
 }> = async () => {
   const fBundle = await bundleFilesFull;
-  const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.cpp`];
+  const changedFilesNames = [`GitHubAccessTokenScrambler12.java`, `AnnotatorTest.Cpp`];
   const addedFilesNames = [`GHATS12.java`];
   const [changedFiles, addedFiles] = [changedFilesNames, addedFilesNames].map(arr =>
     arr.map(name => `${sampleProjectPath}/${name}`),

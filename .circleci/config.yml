@@ -1,4 +1,8 @@
 version: 2.1
+
+orbs:
+  prodsec: snyk/prodsec-orb@1.0.2
+
 jobs:
   test:
     parameters:
@@ -60,8 +64,14 @@ jobs:
 workflows:
   default_workflow:
     jobs:
+      - prodsec/secrets-scan:
+          context:
+            - snyk-bot-slack
+          channel: code-alerts
       - lint:
           node_version: '12.22.7'
+          requires:
+            - prodsec/secrets-scan
       - test:
           matrix:
             parameters:

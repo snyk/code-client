@@ -91,7 +91,7 @@ export const bundleExtender: () => Promise<{
   };
 };
 
-export const initReportReturn = { reportId: 'test-reportId' };
+export const initReportReturn = 'test-reportId';
 
 export const getReportReturn = {
   status: 'COMPLETE',

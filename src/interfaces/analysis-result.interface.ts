@@ -99,3 +99,8 @@ export interface ReportResult {
 }
 
 export type AnalysisResult = AnalysisResultSarif | AnalysisResultLegacy;
+
+export interface ScmAnalysis {
+  analysisResults: AnalysisResultSarif;
+  reportResults?: ReportUploadResult;
+}

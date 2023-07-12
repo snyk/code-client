@@ -14,7 +14,7 @@ import {
   GetAnalysisOptions,
 } from './http';
 import { createBundleFromFolders, remoteBundleFactory } from './bundles';
-import { reportBundle } from './report';
+import { reportBundle, reportScm } from './report';
 import { emitter } from './emitter';
 import {
   AnalysisResult,
@@ -23,8 +23,9 @@ import {
   AnalysisFiles,
   Suggestion,
   ReportUploadResult,
+  ScmAnalysis,
 } from './interfaces/analysis-result.interface';
-import { FileAnalysisOptions, ReportOptions } from './interfaces/analysis-options.interface';
+import { FileAnalysisOptions, ScmAnalysisOptions } from './interfaces/analysis-options.interface';
 import { FileAnalysis } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
@@ -92,6 +93,10 @@ function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFi
   }, {});
 }
 
+/**
+ * Perform a file-based analysis.
+ * Optionally with reporting of results to the platform.
+ */
 export async function analyzeFolders(options: FileAnalysisOptions): Promise<FileAnalysis | null> {
   if (!options.connection.requestId) {
     options.connection.requestId = uuidv4();
@@ -329,4 +334,23 @@ export async function extendAnalysis(options: FileAnalysis & { files: string[] }
   );
 
   return { ...options, fileBundle, analysisResults };
+}
+
+/**
+ * Perform an SCM-based analysis for an existing project,
+ * with reporting of results to the platform.
+ */
+export async function analyzeScmProject(options: ScmAnalysisOptions): Promise<ScmAnalysis | null> {
+  if (!options.connection.requestId) {
+    options.connection.requestId = uuidv4();
+  }
+
+  const { analysisResult: analysisResults, uploadResult: reportResults } = await reportScm({
+    ...options.connection,
+    ...options.analysisOptions,
+    ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
+    ...options.reportOptions,
+  });
+
+  return { analysisResults, reportResults };
 }

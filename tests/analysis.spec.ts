@@ -1,12 +1,12 @@
 import path from 'path';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders, extendAnalysis, analyzeBundle } from '../src/analysis';
+import { analyzeFolders, extendAnalysis, analyzeBundle, analyzeScmProject } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFilesFull, bundleExtender, getReportReturn } from './constants/sample';
 import { emitter } from '../src/emitter';
-import { AnalysisResponseProgress, Result, UploadReportResponseDto, GetAnalysisErrorCodes } from '../src/http';
+import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
@@ -384,6 +384,27 @@ describe('Functional test of analysis', () => {
 
       expect(mockReportBundle).not.toHaveBeenCalled();
       expect(bundle).toBeTruthy();
+    });
+  });
+
+  describe('analyzeScmProject', () => {
+    it('should successfully analyze SCM project', async () => {
+      const mockReportScm = jest.spyOn(report, 'reportScm');
+      mockReportScm.mockReturnValueOnce(Promise.resolve(getReportReturn));
+
+      const result = await analyzeScmProject({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: { severity: AnalysisSeverity.info },
+        reportOptions: {
+          projectId: '00000000-0000-0000-0000-000000000000',
+          commitId: '0000000',
+        },
+      });
+
+      expect(mockReportScm).toHaveBeenCalledTimes(1);
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('analysisResults');
+      expect(result).toHaveProperty('reportResults');
     });
   });
 });

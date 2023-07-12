@@ -116,6 +116,25 @@ const results = await codeClient.analyzeFolders({
 });
 ```
 
+### Run analysis and report results to platform
+
+```javascript
+const results = await codeClient.analyzeFolders({
+  connection: { baseURL, sessionToken, source },
+  analysisOptions: {
+    severity: 1,
+  },
+  fileOptions: {
+    paths: ['/home/user/repo'],
+    symlinksEnabled: false,
+  },
+  reportOptions: {
+    enabled: true,
+    projectName: 'example-project',
+  },
+});
+```
+
 ### Creates a new bundle based on a previously uploaded one
 
 ```javascript
@@ -127,6 +146,21 @@ const results = await codeClient.extendAnalysis({
   },
 });
 
+```
+
+### Run analysis on an existing SCM project and report results to platform
+
+```javascript
+const results = await codeClient.analyzeScmProject({
+  connection: { baseURL, sessionToken, source },
+  analysisOptions: {
+    severity: 1,
+  },
+  reportOptions: {
+    projectId: '<Snyk Project UUID>',
+    commitId: '<Commit SHA to scan>',
+  },
+});
 ```
 
 ### Errors

@@ -14,52 +14,26 @@ import {
   getReport,
   getScmReport,
   ScmUploadReportOptions,
+  GetReportOptions,
 } from './http';
 import { ReportResult } from './interfaces/analysis-result.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
-async function initAndPollReport(
-  options: UploadReportOptions,
-): Promise<Result<AnalysisFailedResponse | ReportResult, GetAnalysisErrorCodes>> {
-  const projectName = options.report?.projectName?.trim();
-  const projectNameMaxLength = 64;
-  if (!projectName || projectName.length === 0) {
-    throw new Error('"project-name" must be provided for "report"');
-  }
-  if (projectName.length > projectNameMaxLength) {
-    throw new Error(`"project-name" must not exceed ${projectNameMaxLength} characters`);
-  }
-  if (/[^A-Za-z0-9-_/]/g.test(projectName)) {
-    throw new Error(`"project-name" must not contain spaces or special characters except [/-_]`);
-  }
+type InitReportGenericType = (
+  options: ScmUploadReportOptions | UploadReportOptions,
+) => Promise<Result<string, GetAnalysisErrorCodes>>;
 
-  return initAndPollReportGeneric(initReport, getReport, options);
-}
+type GetReportGenericType = (
+  options: GetReportOptions,
+) => Promise<Result<UploadReportResponseDto, GetAnalysisErrorCodes>>;
 
-async function initAndPollScmReport(
-  options: ScmUploadReportOptions,
-): Promise<Result<AnalysisFailedResponse | ReportResult, GetAnalysisErrorCodes>> {
-  const projectId = options.projectId?.trim();
-  if (!projectId || projectId.length === 0) {
-    throw new Error('"project-id" must be provided for "report"');
-  }
-  if (!uuid.validate(projectId)) {
-    throw new Error('"project-id" must be a valid UUID');
-  }
-
-  const commitId = options.commitId?.trim();
-  if (!commitId || commitId.length === 0) {
-    throw new Error('"commit-id" must be provided for "report"');
-  }
-
-  return initAndPollReportGeneric(initScmReport, getScmReport, options);
-}
+type ReportOptionsGenericType = UploadReportOptions | ScmUploadReportOptions;
 
 async function initAndPollReportGeneric(
-  initReportFunc: typeof initReport | typeof initScmReport,
-  getReportFunc: typeof getReport | typeof getScmReport,
-  options: UploadReportOptions | ScmUploadReportOptions,
+  initReportFunc: InitReportGenericType,
+  getReportFunc: GetReportGenericType,
+  options: ReportOptionsGenericType,
 ) {
   emitter.analyseProgress({
     status: AnalysisStatus.waiting,
@@ -67,8 +41,7 @@ async function initAndPollReportGeneric(
   });
 
   // First init the report
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const initResponse = await initReportFunc(options as unknown as any);
+  const initResponse = await initReportFunc(options);
 
   if (initResponse.type === 'error') {
     return initResponse;
@@ -114,8 +87,20 @@ async function initAndPollReportGeneric(
 }
 
 export async function reportBundle(options: UploadReportOptions): Promise<ReportResult> {
-  // Call remote bundle for analysis results and emit intermediate progress
-  const response = await initAndPollReport(options);
+  const projectName = options.report?.projectName?.trim();
+  const projectNameMaxLength = 64;
+  if (!projectName || projectName.length === 0) {
+    throw new Error('"project-name" must be provided for "report"');
+  }
+  if (projectName.length > projectNameMaxLength) {
+    throw new Error(`"project-name" must not exceed ${projectNameMaxLength} characters`);
+  }
+  if (/[^A-Za-z0-9-_/]/g.test(projectName)) {
+    throw new Error(`"project-name" must not contain spaces or special characters except [/-_]`);
+  }
+
+  // Trigger bundle analysis and emit intermediate progress.
+  const response = await initAndPollReportGeneric(initReport, getReport, options);
 
   if (response.type === 'error') {
     throw response.error;
@@ -127,8 +112,21 @@ export async function reportBundle(options: UploadReportOptions): Promise<Report
 }
 
 export async function reportScm(options: ScmUploadReportOptions): Promise<ReportResult> {
-  // Call remote bundle for analysis results and emit intermediate progress
-  const response = await initAndPollScmReport(options);
+  const projectId = options.projectId?.trim();
+  if (!projectId || projectId.length === 0) {
+    throw new Error('"project-id" must be provided for "report"');
+  }
+  if (!uuid.validate(projectId)) {
+    throw new Error('"project-id" must be a valid UUID');
+  }
+
+  const commitId = options.commitId?.trim();
+  if (!commitId || commitId.length === 0) {
+    throw new Error('"commit-id" must be provided for "report"');
+  }
+
+  // Trigger SCM project analysis and emit intermediate progress.
+  const response = await initAndPollReportGeneric(initScmReport, getScmReport, options);
 
   if (response.type === 'error') {
     throw response.error;

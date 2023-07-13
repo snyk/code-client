@@ -12,6 +12,7 @@ import {
   GetAnalysisResponseDto,
   AnalysisFailedResponse,
   GetAnalysisOptions,
+  ConnectionOptions,
 } from './http';
 import { createBundleFromFolders, remoteBundleFactory } from './bundles';
 import { reportBundle, reportScm } from './report';
@@ -25,10 +26,24 @@ import {
   ReportUploadResult,
   ScmAnalysis,
 } from './interfaces/analysis-result.interface';
-import { FileAnalysisOptions, ScmAnalysisOptions } from './interfaces/analysis-options.interface';
+import { AnalysisContext, FileAnalysisOptions, ScmAnalysisOptions } from './interfaces/analysis-options.interface';
 import { FileAnalysis } from './interfaces/files.interface';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
+
+function getConnectionOptions(connectionOptions: ConnectionOptions): ConnectionOptions {
+  return {
+    ...connectionOptions,
+    // Ensure requestId is set.
+    requestId: connectionOptions.requestId ?? uuidv4(),
+  };
+}
+
+function getAnalysisContext(
+  analysisContext: AnalysisContext['analysisContext'] | undefined,
+): AnalysisContext | Record<string, never> {
+  return analysisContext ? { analysisContext } : {};
+}
 
 async function pollAnalysis(
   options: GetAnalysisOptions,
@@ -98,11 +113,11 @@ function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFi
  * Optionally with reporting of results to the platform.
  */
 export async function analyzeFolders(options: FileAnalysisOptions): Promise<FileAnalysis | null> {
-  if (!options.connection.requestId) {
-    options.connection.requestId = uuidv4();
-  }
+  const connectionOptions = getConnectionOptions(options.connection);
+  const analysisContext = getAnalysisContext(options.analysisContext);
+
   const fileBundle = await createBundleFromFolders({
-    ...options.connection,
+    ...connectionOptions,
     ...options.fileOptions,
     languages: options.languages,
   });
@@ -110,10 +125,10 @@ export async function analyzeFolders(options: FileAnalysisOptions): Promise<File
 
   const config = {
     bundleHash: fileBundle.bundleHash,
-    ...options.connection,
+    ...connectionOptions,
     ...options.analysisOptions,
     shard: calcHash(fileBundle.baseDir),
-    ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
+    ...analysisContext,
   };
 
   let analysisResults: AnalysisResult;
@@ -341,15 +356,14 @@ export async function extendAnalysis(options: FileAnalysis & { files: string[] }
  * with reporting of results to the platform.
  */
 export async function analyzeScmProject(options: ScmAnalysisOptions): Promise<ScmAnalysis | null> {
-  if (!options.connection.requestId) {
-    options.connection.requestId = uuidv4();
-  }
+  const connectionOptions = getConnectionOptions(options.connection);
+  const analysisContext = getAnalysisContext(options.analysisContext);
 
   const { analysisResult: analysisResults, uploadResult: reportResults } = await reportScm({
-    ...options.connection,
+    ...connectionOptions,
     ...options.analysisOptions,
-    ...(options.analysisContext ? { analysisContext: options.analysisContext } : {}),
     ...options.reportOptions,
+    ...analysisContext,
   });
 
   return { analysisResults, reportResults };

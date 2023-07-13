@@ -35,6 +35,7 @@ export const bundleFilePaths = [
   'app.js',
   'db.js',
   'main.js',
+  'exclude/.snyk',
   'big-file.js', // <= file size is over the custom MAX_FILE_SIZE
   'routes/index.js',
   'routes/sharks.js',

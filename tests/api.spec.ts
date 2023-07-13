@@ -5,7 +5,7 @@ import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/samp
 import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
-const fakeBundleHash = '4ff3f91bee2ec5e681e75e935cb9d98318bb9cf9b341894d8cdeed8b9cbd4108';
+const fakeBundleHash = '7055a4c63c339c31bdf28defcced19a64e5e87905b896befc522a11d35fbcdc4';
 let fakeBundleHashFull = '';
 const realBundleHash = '';
 let realBundleHashFull = '';
@@ -18,6 +18,7 @@ const fakeMissingFiles = [
   'app.js',
   'db.js',
   'main.js',
+  'exclude/.snyk',
   'big-file.js',
   'routes/index.js',
   'routes/sharks.js',
@@ -201,6 +202,7 @@ describe('Requests to public API', () => {
           `GitHubAccessTokenScrambler12.java`,
           `db.js`,
           `main.js`,
+          'exclude/.snyk',
           'big-file.js',
           `not/ignored/this_should_be_ignored.jsx`,
           `not/ignored/this_should_not_be_ignored.java`,
@@ -255,8 +257,8 @@ describe('Requests to public API', () => {
       });
       expect(response.type).toEqual('success');
       if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('36b2e311cda184992c485ecfa6d58a006562763ae115558632467bb0e880cbe9');
-      expect(response.value.missingFiles).toHaveLength(14);
+      expect(response.value.bundleHash).toContain('f7c882573beea05f39af5d1ce92408eb4addfae860f6d8b665ceb1b82765d87e');
+      expect(response.value.missingFiles).toHaveLength(15);
     },
     TEST_TIMEOUT,
   );

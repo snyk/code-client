@@ -12,9 +12,9 @@ import {
   getBundleFilePath,
   resolveBundleFilePath,
 } from '../src/files';
-
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 import { getGlobPatterns } from '../src';
+import { FileInfo } from '../src/interfaces/files.interface';
+import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
 
 describe('files', () => {
   it('parse dc ignore file', () => {
@@ -43,8 +43,8 @@ describe('files', () => {
       supportedFiles,
       fileIgnores: bundleFileIgnores,
     });
-    const files = [];
-    const skippedOversizedFiles = [];
+    const files: FileInfo[] = [];
+    const skippedOversizedFiles: string[] = [];
     for await (const f of collector) {
       typeof f == 'string' ? skippedOversizedFiles.push(f) : files.push(f);
     }
@@ -55,12 +55,11 @@ describe('files', () => {
     expect(skippedOversizedFiles.length).toEqual(1);
     expect(skippedOversizedFiles[0]).toEqual('big-file.js');
 
-    const testFile = files[1];
-    expect(testFile.bundlePath).toEqual('AnnotatorTest.Cpp');
-    expect(testFile.hash).toEqual('61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc');
-    expect(testFile.filePath).toEqual(`${sampleProjectPath}/AnnotatorTest.Cpp`);
-    expect(testFile.bundlePath).toEqual(`AnnotatorTest.Cpp`);
-    expect(testFile.size).toEqual(239);
+    const filesWithoutBasePath = files.map(f => ({
+      ...f,
+      filePath: f.filePath.replace(sampleProjectPath, '<basePath>'),
+    }));
+    expect(filesWithoutBasePath).toMatchSnapshot();
   });
 
   it('extend bundle files', async () => {
@@ -86,8 +85,8 @@ describe('files', () => {
       supportedFiles,
       fileIgnores: [],
     });
-    const smallFiles = [];
-    const skippedOversizedFiles = [];
+    const smallFiles: FileInfo[] = [];
+    const skippedOversizedFiles: string[] = [];
     for await (const f of collector) {
       typeof f == 'string' ? skippedOversizedFiles.push(f) : smallFiles.push(f);
     }
@@ -103,7 +102,7 @@ describe('files', () => {
     // Prepare all missing files first
     const payloads = [...composeFilePayloads(await bundleFilesFull, 1024)];
     expect(payloads.length).toEqual(4); // 4 chunks
-    expect(payloads[0].length).toEqual(3);
+    expect(payloads[0].length).toEqual(4); // 4 files in first chunk
 
     const testPayload = payloads[3][0];
     expect(testPayload.filePath).toEqual(`${sampleProjectPath}/routes/sharks.js`);

@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`files collect bundle files 1`] = `
+Array [
+  Object {
+    "bundlePath": ".eslintrc.json",
+    "content": undefined,
+    "filePath": "<basePath>/.eslintrc.json",
+    "hash": "d3332248171b63cf6f785a3750a27bf1cd03bc0462458943d937c34494f08106",
+    "size": 186,
+  },
+  Object {
+    "bundlePath": ".snyk",
+    "content": undefined,
+    "filePath": "<basePath>/.snyk",
+    "hash": "92f1200f08dba7ec777a8499f5a6d8ac63d5c3d6ddca58b2069a840fd0132790",
+    "size": 92,
+  },
+  Object {
+    "bundlePath": "AnnotatorTest.Cpp",
+    "content": undefined,
+    "filePath": "<basePath>/AnnotatorTest.Cpp",
+    "hash": "61b028b49c2a4513b1c7c161b5f491264fe71c9c29bc0ae8e6d760c156b45edc",
+    "size": 239,
+  },
+  Object {
+    "bundlePath": "GitHubAccessTokenScrambler12.java",
+    "content": undefined,
+    "filePath": "<basePath>/GitHubAccessTokenScrambler12.java",
+    "hash": "63184d2adbf4a3fe17430f1029eb9d7c0aaa8cf8a00f20199b921175c0f30d2b",
+    "size": 949,
+  },
+  Object {
+    "bundlePath": "app.js",
+    "content": undefined,
+    "filePath": "<basePath>/app.js",
+    "hash": "40f937553fda7b9986c3a87d39802b96e77fb2ba306dd602f9b2d28949316c98",
+    "size": 510,
+  },
+  Object {
+    "bundlePath": "db.js",
+    "content": undefined,
+    "filePath": "<basePath>/db.js",
+    "hash": "6f8d7925b5c86bd6d31b0b23bdce1dcfc94e28a1d5ebdc0ba91fac7dc7e95657",
+    "size": 533,
+  },
+  Object {
+    "bundlePath": "main.js",
+    "content": undefined,
+    "filePath": "<basePath>/main.js",
+    "hash": "3e2979852cc2e97f48f7e7973a8b0837eb73ed0485c868176bc3aa58c499f534",
+    "size": 23098,
+  },
+  Object {
+    "bundlePath": "exclude/.snyk",
+    "content": undefined,
+    "filePath": "<basePath>/exclude/.snyk",
+    "hash": "b33a7db205b03ccb488773ea895d70b6a777366ae850d2f4e3bcec7293831d71",
+    "size": 45,
+  },
+  Object {
+    "bundlePath": "routes/index.js",
+    "content": undefined,
+    "filePath": "<basePath>/routes/index.js",
+    "hash": "86ad66d869e6a1bfb5edbc6a82203eece06db4690e4480b3b69274a5c91052bd",
+    "size": 300,
+  },
+  Object {
+    "bundlePath": "routes/sharks.js",
+    "content": undefined,
+    "filePath": "<basePath>/routes/sharks.js",
+    "hash": "f870a225bfad387cd3c46ccfb0be52415aa2e07767b53edae54c41fa8e12e82e",
+    "size": 363,
+  },
+  Object {
+    "bundlePath": "not/ignored/this_should_be_ignored.jsx",
+    "content": undefined,
+    "filePath": "<basePath>/not/ignored/this_should_be_ignored.jsx",
+    "hash": "3dce2c0456d5f9b6ff64c589047f359b0a7ec390ec1edd20b0070d3399e4e96a",
+    "size": 252,
+  },
+  Object {
+    "bundlePath": "not/ignored/this_should_not_be_ignored.java",
+    "content": undefined,
+    "filePath": "<basePath>/not/ignored/this_should_not_be_ignored.java",
+    "hash": "63184d2adbf4a3fe17430f1029eb9d7c0aaa8cf8a00f20199b921175c0f30d2b",
+    "size": 949,
+  },
+]
+`;

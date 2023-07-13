@@ -5,13 +5,9 @@ import * as needle from '../src/needle';
 import { initReportReturn, getReportReturn } from './constants/sample';
 
 const mockInitReport = jest.spyOn(http, 'initReport');
-mockInitReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
 const mockGetReport = jest.spyOn(http, 'getReport');
-mockGetReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
 const mockInitScmReport = jest.spyOn(http, 'initScmReport');
-mockInitScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
 const mockGetScmReport = jest.spyOn(http, 'getScmReport');
-mockGetScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
 
 describe('Functional test for report', () => {
   const baseConfig = {
@@ -21,6 +17,16 @@ describe('Functional test for report', () => {
   };
 
   describe('reportBundle - File-based (bundle) report', () => {
+    beforeAll(() => {
+      mockInitReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
+      mockGetReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
+    });
+
+    afterAll(() => {
+      mockInitReport.mockRestore();
+      mockGetReport.mockRestore();
+    });
+
     it('should complete report with correct parameters', async () => {
       const reportConfig = {
         enabled: true,
@@ -129,6 +135,16 @@ describe('Functional test for report', () => {
   });
 
   describe('reportScm - SCM-based (Git) report', () => {
+    beforeAll(() => {
+      mockInitScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
+      mockGetScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
+    });
+
+    afterAll(() => {
+      mockInitScmReport.mockRestore();
+      mockGetScmReport.mockRestore();
+    });
+
     it('should complete report with correct parameters', async () => {
       const reportConfig = {
         projectId: '00000000-0000-0000-0000-000000000000',

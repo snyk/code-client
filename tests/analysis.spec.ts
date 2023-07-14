@@ -351,7 +351,7 @@ describe('Functional test of analysis', () => {
 
     it('should successfully analyze folder with the report option enabled', async () => {
       const mockReportBundle = jest.spyOn(report, 'reportBundle');
-      mockReportBundle.mockReturnValueOnce(Promise.resolve(getReportReturn));
+      mockReportBundle.mockResolvedValueOnce(getReportReturn);
 
       const bundle = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
@@ -390,7 +390,7 @@ describe('Functional test of analysis', () => {
   describe('analyzeScmProject', () => {
     it('should successfully analyze SCM project', async () => {
       const mockReportScm = jest.spyOn(report, 'reportScm');
-      mockReportScm.mockReturnValueOnce(Promise.resolve(getReportReturn));
+      mockReportScm.mockResolvedValueOnce(getReportReturn);
 
       const result = await analyzeScmProject({
         connection: { baseURL, sessionToken, source },

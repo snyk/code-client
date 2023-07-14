@@ -18,8 +18,8 @@ describe('Functional test for report', () => {
 
   describe('reportBundle - File-based (bundle) report', () => {
     beforeAll(() => {
-      mockInitReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
-      mockGetReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
+      mockInitReport.mockResolvedValue({ type: 'success', value: initReportReturn });
+      mockGetReport.mockResolvedValue({ type: 'success', value: getReportReturn });
     });
 
     afterAll(() => {
@@ -108,9 +108,7 @@ describe('Functional test for report', () => {
       mockGetReport.mockRestore();
       jest
         .spyOn(needle, 'makeRequest')
-        .mockReturnValue(
-          Promise.resolve({ success: false, errorCode: statusCode, error: new Error(expectedErrorMessage) }),
-        );
+        .mockResolvedValueOnce({ success: false, errorCode: statusCode, error: new Error(expectedErrorMessage) });
 
       const reportConfig = {
         enabled: true,
@@ -136,8 +134,8 @@ describe('Functional test for report', () => {
 
   describe('reportScm - SCM-based (Git) report', () => {
     beforeAll(() => {
-      mockInitScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: initReportReturn }));
-      mockGetScmReport.mockReturnValue(Promise.resolve({ type: 'success', value: getReportReturn }));
+      mockInitScmReport.mockResolvedValue({ type: 'success', value: initReportReturn });
+      mockGetScmReport.mockResolvedValue({ type: 'success', value: getReportReturn });
     });
 
     afterAll(() => {
@@ -201,9 +199,7 @@ describe('Functional test for report', () => {
       mockGetScmReport.mockRestore();
       jest
         .spyOn(needle, 'makeRequest')
-        .mockReturnValue(
-          Promise.resolve({ success: false, errorCode: statusCode, error: new Error(expectedErrorMessage) }),
-        );
+        .mockResolvedValueOnce({ success: false, errorCode: statusCode, error: new Error(expectedErrorMessage) });
 
       const reportConfig = {
         projectId: '00000000-0000-0000-0000-000000000000',

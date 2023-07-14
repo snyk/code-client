@@ -87,25 +87,26 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
         expect(bundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(bundle.analysisResults.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 6,
-              isSupported: true,
-              lang: 'JavaScript',
-            },
-          ]),
-        );
+        expect(bundle.analysisResults.coverage).toIncludeSameMembers([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 6,
+            isSupported: true,
+            lang: 'JavaScript',
+            type: 'SUPPORTED',
+          },
+        ]);
 
         // Check if emitter event happened
         expect(onSupportedFilesLoaded).toHaveBeenCalledTimes(2);
@@ -269,30 +270,32 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
         expect(extendedBundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(new Set(extendedBundle.analysisResults.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-            },
-            {
-              files: 4,
-              isSupported: true,
-              lang: 'JavaScript',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'JSX',
-            },
-          ]),
-        );
+        expect(extendedBundle.analysisResults.coverage).toIncludeSameMembers([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 4,
+            isSupported: true,
+            lang: 'JavaScript',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'JSX',
+            type: 'SUPPORTED',
+          },
+        ]);
       },
       TEST_TIMEOUT,
     );

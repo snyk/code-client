@@ -1,4 +1,5 @@
 import path from 'path';
+import nock from 'nock';
 import jsonschema from 'jsonschema';
 
 import { analyzeFolders, extendAnalysis, analyzeBundle, analyzeScmProject } from '../src/analysis';
@@ -349,11 +350,14 @@ describe('Functional test of analysis', () => {
       );
     });
 
-    it('should successfully analyze folder with the report option enabled', async () => {
-      const mockReportBundle = jest.spyOn(report, 'reportBundle');
-      mockReportBundle.mockResolvedValueOnce(getReportReturn);
+    it('should successfully analyze folder and report results with the report option enabled', async () => {
+      nock(baseURL, { allowUnmocked: true })
+        .post('/report')
+        .reply(200, { reportId: 'report-id' })
+        .get('/report/report-id')
+        .reply(200, getReportReturn);
 
-      const bundle = await analyzeFolders({
+      const result = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
         analysisOptions: { severity: AnalysisSeverity.info },
         fileOptions: {
@@ -366,8 +370,12 @@ describe('Functional test of analysis', () => {
         },
       });
 
-      expect(mockReportBundle).toHaveBeenCalledTimes(1);
-      expect(bundle).toBeTruthy();
+      nock.cleanAll();
+
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('fileBundle');
+      expect(result).toHaveProperty('analysisResults');
+      expect(result).toHaveProperty('reportResults');
     });
 
     it('should successfully analyze folder but not report with the report option disabled', async () => {
@@ -388,9 +396,12 @@ describe('Functional test of analysis', () => {
   });
 
   describe('analyzeScmProject', () => {
-    it('should successfully analyze SCM project', async () => {
-      const mockReportScm = jest.spyOn(report, 'reportScm');
-      mockReportScm.mockResolvedValueOnce(getReportReturn);
+    it('should successfully analyze SCM project and report results', async () => {
+      nock(baseURL, { allowUnmocked: true })
+        .post('/test')
+        .reply(200, { testId: 'test-id' })
+        .get('/test/test-id')
+        .reply(200, getReportReturn);
 
       const result = await analyzeScmProject({
         connection: { baseURL, sessionToken, source },
@@ -401,7 +412,8 @@ describe('Functional test of analysis', () => {
         },
       });
 
-      expect(mockReportScm).toHaveBeenCalledTimes(1);
+      nock.cleanAll();
+
       expect(result).not.toBeNull();
       expect(result).toHaveProperty('analysisResults');
       expect(result).toHaveProperty('reportResults');

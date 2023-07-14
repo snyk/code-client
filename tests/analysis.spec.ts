@@ -1,12 +1,13 @@
 import path from 'path';
+import nock from 'nock';
 import jsonschema from 'jsonschema';
 
-import { analyzeFolders, extendAnalysis, analyzeBundle } from '../src/analysis';
+import { analyzeFolders, extendAnalysis, analyzeBundle, analyzeScmProject } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { sampleProjectPath, bundleFilesFull, bundleExtender, getReportReturn } from './constants/sample';
 import { emitter } from '../src/emitter';
-import { AnalysisResponseProgress, Result, UploadReportResponseDto, GetAnalysisErrorCodes } from '../src/http';
+import { AnalysisResponseProgress } from '../src/http';
 import { SupportedFiles } from '../src/interfaces/files.interface';
 import { AnalysisSeverity, AnalysisContext } from '../src/interfaces/analysis-options.interface';
 import * as sarifSchema from './sarif-schema-2.1.0.json';
@@ -349,11 +350,14 @@ describe('Functional test of analysis', () => {
       );
     });
 
-    it('should successfully analyze folder with the report option enabled', async () => {
-      const mockReportBundle = jest.spyOn(report, 'reportBundle');
-      mockReportBundle.mockReturnValueOnce(Promise.resolve(getReportReturn));
+    it('should successfully analyze folder and report results with the report option enabled', async () => {
+      nock(baseURL, { allowUnmocked: true })
+        .post('/report')
+        .reply(200, { reportId: 'report-id' })
+        .get('/report/report-id')
+        .reply(200, getReportReturn);
 
-      const bundle = await analyzeFolders({
+      const result = await analyzeFolders({
         connection: { baseURL, sessionToken, source },
         analysisOptions: { severity: AnalysisSeverity.info },
         fileOptions: {
@@ -366,8 +370,12 @@ describe('Functional test of analysis', () => {
         },
       });
 
-      expect(mockReportBundle).toHaveBeenCalledTimes(1);
-      expect(bundle).toBeTruthy();
+      nock.cleanAll();
+
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('fileBundle');
+      expect(result).toHaveProperty('analysisResults');
+      expect(result).toHaveProperty('reportResults');
     });
 
     it('should successfully analyze folder but not report with the report option disabled', async () => {
@@ -384,6 +392,31 @@ describe('Functional test of analysis', () => {
 
       expect(mockReportBundle).not.toHaveBeenCalled();
       expect(bundle).toBeTruthy();
+    });
+  });
+
+  describe('analyzeScmProject', () => {
+    it('should successfully analyze SCM project and report results', async () => {
+      nock(baseURL, { allowUnmocked: true })
+        .post('/test')
+        .reply(200, { testId: 'test-id' })
+        .get('/test/test-id')
+        .reply(200, getReportReturn);
+
+      const result = await analyzeScmProject({
+        connection: { baseURL, sessionToken, source },
+        analysisOptions: { severity: AnalysisSeverity.info },
+        reportOptions: {
+          projectId: '00000000-0000-0000-0000-000000000000',
+          commitId: '0000000',
+        },
+      });
+
+      nock.cleanAll();
+
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('analysisResults');
+      expect(result).toHaveProperty('reportResults');
     });
   });
 });

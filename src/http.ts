@@ -8,7 +8,12 @@ import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMP
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult, ReportResult } from './interfaces/analysis-result.interface';
 import { FailedResponse, makeRequest, Payload } from './needle';
-import { AnalysisOptions, AnalysisContext, ReportOptions } from './interfaces/analysis-options.interface';
+import {
+  AnalysisOptions,
+  AnalysisContext,
+  ReportOptions,
+  ScmReportOptions,
+} from './interfaces/analysis-options.interface';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -32,6 +37,7 @@ export interface ConnectionOptions {
 }
 
 // The trick to typecast union type alias
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isSubsetErrorCode<T>(code: any, messages: { [c: number]: string }): code is T {
   if (code in messages) {
     return true;
@@ -96,6 +102,10 @@ export function startSession(options: StartSessionOptions): StartSessionResponse
     draftToken,
     loginURL: `${authHost}/login?token=${draftToken}&utm_medium=${source}&utm_source=${source}&utm_campaign=${source}&docker=false`,
   };
+}
+
+export function getVerifyCallbackUrl(authHost: string): string {
+  return `${authHost}/api/verify/callback`;
 }
 
 export type IpFamily = 6 | undefined;
@@ -403,19 +413,27 @@ const REPORT_ERROR_MESSAGES: { [P in ReportErrorCodes]: string } = {
 export interface UploadReportOptions extends GetAnalysisOptions {
   report: ReportOptions;
 }
+
+export interface ScmUploadReportOptions extends ConnectionOptions, AnalysisOptions, AnalysisContext, ScmReportOptions {}
+
 export interface GetReportOptions extends ConnectionOptions {
-  reportId: string;
+  pollId: string;
 }
 
 export type InitUploadResponseDto = {
   reportId: string;
 };
 
+export type InitScmUploadResponseDto = {
+  testId: string;
+};
+
 export type UploadReportResponseDto = ReportResult | AnalysisFailedResponse | AnalysisResponseProgress;
 
-export async function initReport(
-  options: UploadReportOptions,
-): Promise<Result<InitUploadResponseDto, ReportErrorCodes>> {
+/**
+ * Trigger a file-based test with reporting.
+ */
+export async function initReport(options: UploadReportOptions): Promise<Result<string, ReportErrorCodes>> {
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
@@ -440,16 +458,19 @@ export async function initReport(
   };
 
   const res = await makeRequest<InitUploadResponseDto>(config);
-  if (res.success) return { type: 'success', value: res.body };
+  if (res.success) return { type: 'success', value: res.body.reportId };
   return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport');
 }
 
+/**
+ * Retrieve a file-based test with reporting.
+ */
 export async function getReport(options: GetReportOptions): Promise<Result<UploadReportResponseDto, ReportErrorCodes>> {
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/report/${options.reportId}`,
+    url: `${options.baseURL}/report/${options.pollId}`,
     method: 'get',
   };
 
@@ -458,6 +479,45 @@ export async function getReport(options: GetReportOptions): Promise<Result<Uploa
   return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'getReport', res.error?.message);
 }
 
-export function getVerifyCallbackUrl(authHost: string): string {
-  return `${authHost}/api/verify/callback`;
+/**
+ * Trigger an SCM-based test with reporting.
+ */
+export async function initScmReport(options: ScmUploadReportOptions): Promise<Result<string, ReportErrorCodes>> {
+  const config: Payload = {
+    headers: {
+      ...commonHttpHeaders(options),
+    },
+    url: `${options.baseURL}/test`,
+    method: 'post',
+    body: {
+      workflowData: {
+        projectId: options.projectId,
+        commitHash: options.commitId,
+      },
+      ...pick(options, ['severity', 'prioritized', 'analysisContext']),
+    },
+  };
+
+  const res = await makeRequest<InitScmUploadResponseDto>(config);
+  if (res.success) return { type: 'success', value: res.body.testId };
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport');
+}
+
+/**
+ * Fetch an SCM-based test with reporting.
+ */
+export async function getScmReport(
+  options: GetReportOptions,
+): Promise<Result<UploadReportResponseDto, ReportErrorCodes>> {
+  const config: Payload = {
+    headers: {
+      ...commonHttpHeaders(options),
+    },
+    url: `${options.baseURL}/test/${options.pollId}`,
+    method: 'get',
+  };
+
+  const res = await makeRequest<UploadReportResponseDto>(config);
+  if (res.success) return { type: 'success', value: res.body };
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'getReport', res.error?.message);
 }

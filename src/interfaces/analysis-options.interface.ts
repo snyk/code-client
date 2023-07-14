@@ -60,10 +60,21 @@ export interface ReportOptions {
   remoteRepoUrl?: string;
 }
 
+export interface ScmReportOptions {
+  projectId?: string;
+  commitId?: string;
+}
+
 export interface FileAnalysisOptions extends AnalysisContext {
   connection: ConnectionOptions;
   analysisOptions: AnalysisOptions;
   fileOptions: AnalyzeFoldersOptions;
   reportOptions?: ReportOptions;
   languages?: string[];
+}
+
+export interface ScmAnalysisOptions extends AnalysisContext {
+  connection: ConnectionOptions;
+  analysisOptions: AnalysisOptions;
+  reportOptions: ScmReportOptions;
 }

@@ -1,4 +1,4 @@
-import { analyzeFolders, extendAnalysis } from './analysis';
+import { analyzeFolders, extendAnalysis, analyzeScmProject } from './analysis';
 import { getSupportedFiles, createBundleFromFolders, createBundleWithCustomFiles } from './bundles';
 import { emitter } from './emitter';
 import { startSession, checkSession, getAnalysis, getIpFamily, IpFamily } from './http';
@@ -17,11 +17,13 @@ import {
   Suggestion,
   Marker,
   ReportResult,
+  ScmAnalysis,
 } from './interfaces/analysis-result.interface';
 
 export {
   getGlobPatterns,
   analyzeFolders,
+  analyzeScmProject,
   getSupportedFiles,
   createBundleFromFolders,
   createBundleWithCustomFiles,
@@ -46,4 +48,5 @@ export {
   IpFamily,
   AnalysisContext,
   ReportResult,
+  ScmAnalysis,
 };

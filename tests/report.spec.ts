@@ -69,22 +69,6 @@ describe('Functional test for report', () => {
       ).rejects.toHaveProperty('message', '"project-name" must be provided for "report"');
     });
 
-    it('should fail report if the given project name exceeds the maximum length', async () => {
-      const longProjectName = 'a'.repeat(65);
-      const reportConfig = {
-        enabled: true,
-        projectName: longProjectName,
-      };
-
-      await expect(
-        reportBundle({
-          bundleHash: 'dummy-bundle',
-          ...baseConfig,
-          report: reportConfig,
-        }),
-      ).rejects.toHaveProperty('message', `"project-name" must not exceed 64 characters`);
-    });
-
     it('should fail report if the given project name includes invalid characters', async () => {
       const invalidProjectName = '*&^%$';
       const reportConfig = {

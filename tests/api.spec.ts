@@ -1,4 +1,5 @@
 import pick from 'lodash.pick';
+import 'jest-extended';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';

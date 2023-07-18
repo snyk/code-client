@@ -327,13 +327,7 @@ describe('Requests to public API', () => {
             type: 'SUPPORTED',
           },
           {
-            files: 1,
-            isSupported: true,
-            lang: 'JavaScript',
-            type: 'SUPPORTED',
-          },
-          {
-            files: 6,
+            files: 7,
             isSupported: true,
             lang: 'JavaScript',
             type: 'SUPPORTED',

@@ -88,12 +88,8 @@ async function initAndPollReportGeneric(
 
 export async function reportBundle(options: UploadReportOptions): Promise<ReportResult> {
   const projectName = options.report?.projectName?.trim();
-  const projectNameMaxLength = 64;
   if (!projectName || projectName.length === 0) {
     throw new Error('"project-name" must be provided for "report"');
-  }
-  if (projectName.length > projectNameMaxLength) {
-    throw new Error(`"project-name" must not exceed ${projectNameMaxLength} characters`);
   }
   if (/[^A-Za-z0-9-_/]/g.test(projectName)) {
     throw new Error(`"project-name" must not contain spaces or special characters except [/-_]`);

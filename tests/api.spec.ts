@@ -1,4 +1,5 @@
 import pick from 'lodash.pick';
+import 'jest-extended';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
@@ -313,34 +314,26 @@ describe('Requests to public API', () => {
       if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
         expect(response.value.sarif.runs[0].results?.length).toBeGreaterThan(0);
 
-        expect(new Set(response.value.coverage)).toEqual(
-          new Set([
-            {
-              files: 2,
-              isSupported: true,
-              lang: 'Java',
-              type: 'SUPPORTED',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'C++ (beta)',
-              type: 'SUPPORTED',
-            },
-            {
-              files: 1,
-              isSupported: true,
-              lang: 'JavaScript',
-              type: 'SUPPORTED',
-            },
-            {
-              files: 6,
-              isSupported: true,
-              lang: 'JavaScript',
-              type: 'SUPPORTED',
-            },
-          ]),
-        );
+        expect(response.value.coverage).toIncludeSameMembers([
+          {
+            files: 2,
+            isSupported: true,
+            lang: 'Java',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 1,
+            isSupported: true,
+            lang: 'C++ (beta)',
+            type: 'SUPPORTED',
+          },
+          {
+            files: 7,
+            isSupported: true,
+            lang: 'JavaScript',
+            type: 'SUPPORTED',
+          },
+        ]);
       }
 
       // Get analysis results limited to 1 file

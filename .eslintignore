@@ -6,5 +6,4 @@ coverage
 **/.dccache
 .idea
 tsc.iml
-package-lock.json
 tsconfig.tsbuildinfo

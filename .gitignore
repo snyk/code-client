@@ -5,5 +5,4 @@ dist
 .idea
 coverage
 tsc.iml
-package-lock.json
 tsconfig.tsbuildinfo

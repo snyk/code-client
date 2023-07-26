@@ -17,7 +17,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>>-{{ checksum "package-lock.json" }}
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>>-<< parameters.package-lock >>>
       - when:
           condition: << parameters.package-lock >> == "locked-dependencies"
           steps:
@@ -31,7 +31,7 @@ jobs:
                 name: Install without locked dependencies
                 command: npm install --no-package-lock
       - save_cache:
-          key: v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>-{{ checksum "package-lock.json" }}
+          key: v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>-<< parameters.package-lock >>>
           paths:
             - node_modules
       - run: npm run test

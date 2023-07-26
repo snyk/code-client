@@ -9,7 +9,7 @@ jobs:
       node_version:
         type: string
       package-lock:
-        type: boolean
+        type: string
     working_directory: ~/code-sdk
     docker:
       - image: cimg/node:<< parameters.node_version >>

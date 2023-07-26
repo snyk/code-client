@@ -19,7 +19,7 @@ jobs:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>>-{{ checksum "package-lock.json" }}
       - when:
-          condition: << parameters.package-lock >>
+          condition: << parameters.package-lock >> == "locked-dependencies"
           steps:
             - run:
                 name: Install
@@ -88,7 +88,7 @@ workflows:
           matrix:
             parameters:
               node_version: ['10.24.0', '12.22.7']
-              package-lock: [true, false]
+              package-lock: ['locked-dependencies', 'no-package-lock']
           context: nodejs-install
           requires:
             - lint

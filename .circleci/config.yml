@@ -8,6 +8,8 @@ jobs:
     parameters:
       node_version:
         type: string
+      package-lock:
+        type: boolean
     working_directory: ~/code-sdk
     docker:
       - image: cimg/node:<< parameters.node_version >>
@@ -15,15 +17,25 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
-      - run:
-          name: Install
-          command: npm install
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>>-{{ checksum "package-lock.json" }}
+      - when:
+          condition: << parameters.package-lock >>
+          steps:
+            - run:
+                name: Install
+                command: npm install
+      - unless:
+          condition: << parameters.package-lock >>
+          steps:
+            - run:
+                name: Install without locked dependencies
+                command: npm install --no-package-lock
       - save_cache:
-          key: v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+          key: v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
       - run: npm run test
+
   lint:
     parameters:
       node_version:
@@ -76,6 +88,7 @@ workflows:
           matrix:
             parameters:
               node_version: ['10.24.0', '12.22.7']
+              package-lock: [true, false]
           context: nodejs-install
           requires:
             - lint

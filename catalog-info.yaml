@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: code-client
+  annotations:
+    circleci.com/project-slug: github/snyk/code-client
+    github.com/project-slug: snyk/code-client
+    github.com/team-slug: snyk/zenith
+    backstage.io/techdocs-ref: dir:.
+  labels:
+    snyk.io/businessCriticality: medium
+    snyk.io/visibility: public
+    snyk.io/metadata-version: '2021-14-10'
+  tags:
+    - typescript
+spec:
+  type: library
+  lifecycle: production
+  owner: zenith
+  system: snyk-code

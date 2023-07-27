@@ -1,3 +1,3 @@
 # code-client
 
-Typescript consumer of public API
+Typescript consumer of the Snyk Code public API

@@ -1,6 +1,6 @@
 # code-client
 
-Typescript consumer of public API
+Typescript consumer of the Snyk Code public API
 
 [![npm version](https://img.shields.io/npm/v/@snyk/code-client.svg?style=flat-square)](https://www.npmjs.org/package/@snyk/code-client)
 [![npm downloads](https://img.shields.io/npm/dm/@snyk/code-client.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@snyk/code-client)

@@ -1,0 +1,8 @@
+site_name: 'code-client'
+
+plugins:
+  - techdocs-core
+  - search
+
+markdown_extensions:
+  - markdown_inline_mermaid

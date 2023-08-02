@@ -29,6 +29,9 @@ describe('files', () => {
     const patterns = parseFileIgnores(`${sampleProjectPath}/exclude/.snyk`);
     expect(patterns).toEqual(bundleFileIgnores.slice(12));
   });
+  it('fails to parse dot snyk file with invalid field', () => {
+    expect(() => parseFileIgnores(`${sampleProjectPath}/invalid-dot-snyk/.snyk.invalid`)).toThrow('Ignore rules should be in .gitignore format');
+  });
 
   it('collect ignore rules', async () => {
     const ignoreRules = await collectIgnoreRules([sampleProjectPath]);

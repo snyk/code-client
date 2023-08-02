@@ -1,0 +1,6 @@
+exclude:
+  global:
+    - some/excluded/folder:
+        reason: None Given
+        expires: 2022-04-17T12:57:47.569Z
+        created: 2022-03-18T12:57:47.576Z

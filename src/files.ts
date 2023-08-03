@@ -132,7 +132,7 @@ export function parseFileIgnores(path: string): string[] {
   try {
     return parseIgnoreRulesToGlobs(rules, dirname);
   } catch (err) {
-    console.error('Could not parse ignore rules to glob', { path, error: (err as Error).message });
+    console.error('Could not parse ignore rules to glob', { path });
     throw new Error('Ignore rules should be in .gitignore format');
   }
 }

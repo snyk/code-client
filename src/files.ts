@@ -129,7 +129,12 @@ export function parseFileIgnores(path: string): string[] {
       );
     }
   }
-  return parseIgnoreRulesToGlobs(rules, dirname);
+  try {
+    return parseIgnoreRulesToGlobs(rules, dirname);
+  } catch (err) {
+    console.error('Could not parse ignore rules to glob', { path });
+    throw new Error('Please make sure ignore file follows correct syntax');
+  }
 }
 
 export function getGlobPatterns(supportedFiles: SupportedFiles): string[] {

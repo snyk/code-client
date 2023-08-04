@@ -31,7 +31,7 @@ describe('files', () => {
   });
   it('fails to parse dot snyk file with invalid field', () => {
     expect(() => parseFileIgnores(`${sampleProjectPath}/invalid-dot-snyk/.snyk.invalid`)).toThrow(
-      'Ignore rules should be in .gitignore format',
+      'Please make sure ignore file follows correct syntax',
     );
   });
 

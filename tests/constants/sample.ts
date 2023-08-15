@@ -27,6 +27,8 @@ export const bundleFileIgnores = [
   `${sampleProjectPath}/exclude/excluded-folder/**`,
 ];
 
+export const fileIgnoresFixtures = path.resolve(__dirname, '../fixtures/file-ignores');
+
 export const bundleFilePaths = [
   '/.eslintrc.json', // <= we are not running linters in the backend anymore
   '.snyk',

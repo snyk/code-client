@@ -1,0 +1,6 @@
+exclude:
+  code:
+    - /root-excluded
+    - /root-excluded-contents/
+    - deep-excluded
+    - deep-excluded-contents/

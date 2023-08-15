@@ -47,7 +47,7 @@ describe('file ignores', () => {
       `);
     });
 
-    it('from dot snyk files', async () => {
+    it('from dot snyk files (with deduplication)', async () => {
       const collectPath = `${fileIgnoresFixtures}/dot-snyk-excludes`;
       const ignoreRules = await collectIgnoreRules([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
@@ -61,8 +61,6 @@ describe('file ignores', () => {
           "${collectPath}/**/deep-excluded-contents/**",
           "${collectPath}/sub/root-excluded/**",
           "${collectPath}/sub/root-excluded",
-          "${collectPath}/sub/**/deep-excluded/**",
-          "${collectPath}/sub/**/deep-excluded",
         ]
       `);
     });

@@ -200,7 +200,17 @@ export async function collectIgnoreRules(
     return union(...localIgnoreFiles.map(parseFileIgnores));
   });
   const customRules = await Promise.all(tasks);
-  return union(fileIgnores, ...customRules);
+
+  const rules = union(fileIgnores, ...customRules);
+  const deduplicatedRules: string[] = [];
+
+  for (const rule of rules) {
+    if (!deduplicatedRules.some(existingRule => multimatch(rule, [existingRule]).length > 0)) {
+      deduplicatedRules.push(rule);
+    }
+  }
+
+  return deduplicatedRules;
 }
 
 export function determineBaseDir(paths: string[]): string {

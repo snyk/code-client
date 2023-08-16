@@ -64,5 +64,23 @@ describe('file ignores', () => {
         ]
       `);
     });
+
+    it('from dot dcignore file', async () => {
+      const collectPath = `${fileIgnoresFixtures}/dot-dcignore-rules`;
+      const ignoreRules = await collectIgnoreRules([collectPath]);
+      expect(ignoreRules).toMatchInlineSnapshot(`
+      Array [
+        "**/.git/**",
+        "${collectPath}/root-excluded/**",
+        "${collectPath}/root-excluded",
+        "${collectPath}/root-excluded-contents/**",
+        "${collectPath}/**/deep-excluded/**",
+        "${collectPath}/**/deep-excluded",
+        "${collectPath}/**/deep-excluded-contents/**",
+        "!${collectPath}/not/deep-excluded/**",
+        "!${collectPath}/not/deep-excluded",
+      ]
+    `);
+    });
   });
 });

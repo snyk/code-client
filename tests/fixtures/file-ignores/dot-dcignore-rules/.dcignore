@@ -1,0 +1,5 @@
+/root-excluded
+/root-excluded-contents/
+deep-excluded
+deep-excluded-contents/
+!/not/deep-excluded

@@ -187,13 +187,18 @@ export async function collectIgnoreRules(
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
 
-    // Find ignore files inside this directory
+    // Parse top-level .snyk file inside this directory
+    const topLevelSnykIgnores = parseFileIgnores(`${folder}/${DOTSNYK_FILENAME}`);
+
+    // Find ignore files inside this directory, excluding
+    // paths that are ignored by top-level .snyk exclude rules.
     const localIgnoreFiles = await fg(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
         ...fgOptions,
         cwd: folder,
         followSymbolicLinks: symlinksEnabled,
+        ignore: topLevelSnykIgnores,
       },
     );
     // Read ignore files and merge new patterns

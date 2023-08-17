@@ -201,23 +201,35 @@ export async function collectIgnoreRules(
         ignore: topLevelSnykIgnores,
       },
     );
-    // Read ignore files and merge new patterns
-    return union(...localIgnoreFiles.map(parseFileIgnores));
+
+    // Read ignore files and merge patterns.
+    const localIgnoreRules = union(...localIgnoreFiles.map(parseFileIgnores));
+
+    // Final array of rules after processing to return.
+    const rulesAfterProcessing: string[] = [];
+
+    for (const rule of localIgnoreRules) {
+      // Identify and remove negative rules that are superseded by top-level .snyk rules.
+      // i.e. if a directory "foo" is ignored by a top-level .snyk rule, then a negative match
+      // for "!foo" from another ignore file is superseded and needs to be removed.
+      const negativeRuleIsSupersededBySnykExcludes =
+        rule.startsWith('!') &&
+        topLevelSnykIgnores.some(existingRule => multimatch(rule.slice(1), existingRule).length > 0);
+      // Deduplicate rules, such as "**/dir" and "sub/dir".
+      // In this case "sub/dir" is a subset of the first rule and thus redundant.
+      const ruleIsRedundant = rulesAfterProcessing.some(existingRule => multimatch(rule, existingRule).length > 0);
+
+      if (!negativeRuleIsSupersededBySnykExcludes && !ruleIsRedundant) {
+        rulesAfterProcessing.push(rule);
+      }
+    }
+
+    return rulesAfterProcessing;
   });
+
   const customRules = await Promise.all(tasks);
 
-  const rules = union(fileIgnores, ...customRules);
-
-  // Deduplicate rules, such as "**/dir" and "sub/dir".
-  // In this case "sub/dir" is a subset of the first rule and thus redundant.
-  const deduplicatedRules: string[] = [];
-  for (const rule of rules) {
-    if (!deduplicatedRules.some(existingRule => multimatch(rule, existingRule).length > 0)) {
-      deduplicatedRules.push(rule);
-    }
-  }
-
-  return deduplicatedRules;
+  return union(fileIgnores, ...customRules);
 }
 
 export function determineBaseDir(paths: string[]): string {

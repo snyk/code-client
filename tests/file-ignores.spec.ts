@@ -100,5 +100,35 @@ describe('file ignores', () => {
         ]
       `);
     });
+
+    it('from combined files (excluding top-level ignored directories)', async () => {
+      const collectPath = `${fileIgnoresFixtures}/combined`;
+      const ignoreRules = await collectIgnoreRules([collectPath]);
+      expect(ignoreRules).toMatchInlineSnapshot(`
+        Array [
+          "**/.git/**",
+          "${collectPath}/dcignore-root-excluded/**",
+          "${collectPath}/dcignore-root-excluded",
+          "${collectPath}/**/dcignore-deep-excluded/**",
+          "${collectPath}/**/dcignore-deep-excluded",
+          "!${collectPath}/dcignore-root-not-excluded/**",
+          "!${collectPath}/dcignore-root-not-excluded",
+          "!${collectPath}/**/dcignore-deep-not-excluded/**",
+          "!${collectPath}/**/dcignore-deep-not-excluded",
+          "${collectPath}/gitignore-root-excluded/**",
+          "${collectPath}/gitignore-root-excluded",
+          "${collectPath}/**/gitignore-deep-excluded/**",
+          "${collectPath}/**/gitignore-deep-excluded",
+          "!${collectPath}/gitignore-root-not-excluded/**",
+          "!${collectPath}/gitignore-root-not-excluded",
+          "!${collectPath}/**/gitignore-deep-not-excluded/**",
+          "!${collectPath}/**/gitignore-deep-not-excluded",
+          "${collectPath}/snyk-root-excluded/**",
+          "${collectPath}/snyk-root-excluded",
+          "${collectPath}/**/snyk-deep-excluded/**",
+          "${collectPath}/**/snyk-deep-excluded",
+        ]
+      `);
+    });
   });
 });

@@ -1,0 +1,4 @@
+exclude:
+  global:
+    - /snyk-root-excluded
+    - snyk-deep-excluded

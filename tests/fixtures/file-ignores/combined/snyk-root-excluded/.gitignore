@@ -1,0 +1,3 @@
+# We expect this rule not to be collected,
+# since the parent dir is excluded by the root rules.
+!/snyk-deep-excluded

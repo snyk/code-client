@@ -69,18 +69,36 @@ describe('file ignores', () => {
       const collectPath = `${fileIgnoresFixtures}/dot-dcignore-rules`;
       const ignoreRules = await collectIgnoreRules([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-      Array [
-        "**/.git/**",
-        "${collectPath}/root-excluded/**",
-        "${collectPath}/root-excluded",
-        "${collectPath}/root-excluded-contents/**",
-        "${collectPath}/**/deep-excluded/**",
-        "${collectPath}/**/deep-excluded",
-        "${collectPath}/**/deep-excluded-contents/**",
-        "!${collectPath}/not/deep-excluded/**",
-        "!${collectPath}/not/deep-excluded",
-      ]
-    `);
+        Array [
+          "**/.git/**",
+          "${collectPath}/root-excluded/**",
+          "${collectPath}/root-excluded",
+          "${collectPath}/root-excluded-contents/**",
+          "${collectPath}/**/deep-excluded/**",
+          "${collectPath}/**/deep-excluded",
+          "${collectPath}/**/deep-excluded-contents/**",
+          "!${collectPath}/not/deep-excluded/**",
+          "!${collectPath}/not/deep-excluded",
+        ]
+      `);
+    });
+
+    it('from dot gitignore file', async () => {
+      const collectPath = `${fileIgnoresFixtures}/dot-gitignore-rules`;
+      const ignoreRules = await collectIgnoreRules([collectPath]);
+      expect(ignoreRules).toMatchInlineSnapshot(`
+        Array [
+          "**/.git/**",
+          "${collectPath}/root-excluded/**",
+          "${collectPath}/root-excluded",
+          "${collectPath}/root-excluded-contents/**",
+          "${collectPath}/**/deep-excluded/**",
+          "${collectPath}/**/deep-excluded",
+          "${collectPath}/**/deep-excluded-contents/**",
+          "!${collectPath}/not/deep-excluded/**",
+          "!${collectPath}/not/deep-excluded",
+        ]
+      `);
     });
   });
 });

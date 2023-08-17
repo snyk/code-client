@@ -130,5 +130,18 @@ describe('file ignores', () => {
         ]
       `);
     });
+
+    it('from combined files (overriding negative matches)', async () => {
+      const collectPath = `${fileIgnoresFixtures}/negative-overrides`;
+      const ignoreRules = await collectIgnoreRules([collectPath]);
+      expect(ignoreRules).toMatchInlineSnapshot(`
+        Array [
+          "**/.git/**",
+          "${collectPath}/snyk-excluded-file.ext/**",
+          "${collectPath}/snyk-excluded-file.ext",
+          "${collectPath}/**/snyk-excluded-dir/**",
+        ]
+      `);
+    });
   });
 });

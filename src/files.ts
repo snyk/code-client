@@ -202,10 +202,12 @@ export async function collectIgnoreRules(
   const customRules = await Promise.all(tasks);
 
   const rules = union(fileIgnores, ...customRules);
-  const deduplicatedRules: string[] = [];
 
+  // Deduplicate rules, such as "**/dir" and "sub/dir".
+  // In this case "sub/dir" is a subset of the first rule and thus redundant.
+  const deduplicatedRules: string[] = [];
   for (const rule of rules) {
-    if (!deduplicatedRules.some(existingRule => multimatch(rule, [existingRule]).length > 0)) {
+    if (!deduplicatedRules.some(existingRule => multimatch(rule, existingRule).length > 0)) {
       deduplicatedRules.push(rule);
     }
   }

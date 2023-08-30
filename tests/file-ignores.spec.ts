@@ -34,20 +34,6 @@ describe('file ignores', () => {
 
   describe('collects correct ignore rules', () => {
     it('from dot snyk files', async () => {
-      const collectPath = `${fileIgnoresFixtures}/dot-snyk-excludes/sub`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
-      expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "${collectPath}/root-excluded/**",
-          "${collectPath}/root-excluded",
-          "${collectPath}/**/deep-excluded/**",
-          "${collectPath}/**/deep-excluded",
-        ]
-      `);
-    });
-
-    it('from dot snyk files (with deduplication)', async () => {
       const collectPath = `${fileIgnoresFixtures}/dot-snyk-excludes`;
       const ignoreRules = await collectIgnoreRules([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
@@ -101,7 +87,7 @@ describe('file ignores', () => {
       `);
     });
 
-    it('from combined files (excluding top-level ignored directories)', async () => {
+    it('from combined files', async () => {
       const collectPath = `${fileIgnoresFixtures}/combined`;
       const ignoreRules = await collectIgnoreRules([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
@@ -127,11 +113,13 @@ describe('file ignores', () => {
           "${collectPath}/snyk-root-excluded",
           "${collectPath}/**/snyk-deep-excluded/**",
           "${collectPath}/**/snyk-deep-excluded",
+          "${collectPath}/sub/snyk-nested-excluded/**",
+          "${collectPath}/sub/snyk-nested-excluded",
         ]
       `);
     });
 
-    it('from combined files (overriding negative matches)', async () => {
+    it('from combined files, overriding negative matches', async () => {
       const collectPath = `${fileIgnoresFixtures}/negative-overrides`;
       const ignoreRules = await collectIgnoreRules([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`

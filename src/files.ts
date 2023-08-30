@@ -177,6 +177,12 @@ function generateAllCaseGlobPattern(fileExtension: string): string {
   return caseInsensitivePatterns.join('');
 }
 
+/**
+ * Recursively collect all exclude and ignore rules from directory.
+ *
+ * Exclude rules from .snyk files and ignore rules from .[*]ignore files are collected separately.
+ * Any .[*]ignore files in paths excluded by .snyk exclude rules are ignored.
+ */
 export async function collectIgnoreRules(
   dirs: string[],
   symlinksEnabled = false,
@@ -187,49 +193,59 @@ export async function collectIgnoreRules(
     // Check if symlink and exclude if requested
     if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
 
-    // Parse top-level .snyk file inside this directory
-    const topLevelSnykIgnores = parseFileIgnores(`${folder}/${DOTSNYK_FILENAME}`);
-
-    // Find ignore files inside this directory, excluding
-    // paths that are ignored by top-level .snyk exclude rules.
-    const localIgnoreFiles = await fg(
+    // Find .snyk and .[*]ignore files inside this directory.
+    const allIgnoredFiles = await fg(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
         ...fgOptions,
         cwd: folder,
         followSymbolicLinks: symlinksEnabled,
-        ignore: topLevelSnykIgnores,
       },
     );
 
-    // Read ignore files and merge patterns.
-    const localIgnoreRules = union(...localIgnoreFiles.map(parseFileIgnores));
+    // Parse rules from all .snyk files inside this directory.
+    const snykFiles = allIgnoredFiles.filter(f => f.endsWith(DOTSNYK_FILENAME));
+    const snykExcludeRules = union(...snykFiles.map(parseFileIgnores));
 
-    // Final array of rules after processing to return.
-    const rulesAfterProcessing: string[] = [];
+    // Parse rules from all .[*]ignore files inside this directory.
+    const ignoreFiles = allIgnoredFiles.filter(
+      // Exclude .snyk files (parsed separately above) and files in paths excluded by .snyk files.
+      f => !f.endsWith(DOTSNYK_FILENAME) && multimatch(f, snykExcludeRules).length === 0,
+    );
 
-    for (const rule of localIgnoreRules) {
-      // Identify and remove negative rules that are superseded by top-level .snyk rules.
-      // i.e. if a directory "foo" is ignored by a top-level .snyk rule, then a negative match
-      // for "!foo" from another ignore file is superseded and needs to be removed.
-      const negativeRuleIsSupersededBySnykExcludes =
-        rule.startsWith('!') &&
-        topLevelSnykIgnores.some(existingRule => multimatch(rule.slice(1), existingRule).length > 0);
-      // Deduplicate rules, such as "**/dir" and "sub/dir".
-      // In this case "sub/dir" is a subset of the first rule and thus redundant.
-      const ruleIsRedundant = rulesAfterProcessing.some(existingRule => multimatch(rule, existingRule).length > 0);
-
-      if (!negativeRuleIsSupersededBySnykExcludes && !ruleIsRedundant) {
-        rulesAfterProcessing.push(rule);
-      }
-    }
-
-    return rulesAfterProcessing;
+    return parseIgnoreRulesFromFiles(ignoreFiles, snykExcludeRules);
   });
 
   const customRules = await Promise.all(tasks);
 
   return union(fileIgnores, ...customRules);
+}
+
+/**
+ * Parse and collect ignore rules from .[*]ignore files.
+ * Removes redundant rules for efficiency.
+ * Removes negative rules that are superseded by .snyk exclude rules.
+ */
+function parseIgnoreRulesFromFiles(ignoreFiles: string[], snykExcludeRules: string[]): string[] {
+  // Read ignore files and merge patterns.
+  const localIgnoreRules = union(...ignoreFiles.map(parseFileIgnores));
+
+  const rulesAfterProcessing: string[] = [];
+  return union(localIgnoreRules, snykExcludeRules).filter((rule: string) => {
+    // Identify and remove negative rules that are superseded by .snyk exclude rules.
+    // i.e. if a directory "foo" is ignored by a .snyk exclude rule, then a negative match
+    // for "!foo" from another ignore file is superseded and needs to be removed.
+    const negativeRuleIsSupersededBySnykExcludes =
+      rule.startsWith('!') && snykExcludeRules.some(existingRule => multimatch(rule.slice(1), existingRule).length > 0);
+    // Deduplicate rules, such as "**/dir" and "sub/dir".
+    // In this case "sub/dir" is a subset of the first rule and thus redundant.
+    const ruleIsRedundant = rulesAfterProcessing.some(existingRule => multimatch(rule, existingRule).length > 0);
+
+    const ruleIsValid = !negativeRuleIsSupersededBySnykExcludes && !ruleIsRedundant;
+    if (ruleIsValid) rulesAfterProcessing.push(rule);
+
+    return ruleIsValid;
+  });
 }
 
 export function determineBaseDir(paths: string[]): string {

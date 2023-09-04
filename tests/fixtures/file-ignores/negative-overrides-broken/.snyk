@@ -1,0 +1,3 @@
+exclude:
+  global:
+    - sub/**/exclude.txt

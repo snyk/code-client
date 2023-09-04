@@ -125,9 +125,18 @@ describe('file ignores', () => {
       expect(ignoreRules).toMatchInlineSnapshot(`
         Array [
           "**/.git/**",
-          "${collectPath}/snyk-excluded-file.ext/**",
-          "${collectPath}/snyk-excluded-file.ext",
-          "${collectPath}/**/snyk-excluded-dir/**",
+          "`);
+    });
+
+    it('from combined files, overriding negative matches [BROKEN]', async () => {
+      const collectPath = `${fileIgnoresFixtures}/negative-overrides-broken`;
+      const ignoreRules = await collectIgnoreRules([collectPath]);
+      expect(ignoreRules).toMatchInlineSnapshot(`
+        Array [
+          "**/.git/**",
+          "!${fileIgnoresFixtures}/negative-overrides-broken/**/sub/**",
+          "${fileIgnoresFixtures}/negative-overrides-broken/**/sub/**/exclude.txt/**",
+          "${fileIgnoresFixtures}/negative-overrides-broken/**/sub/**/exclude.txt",
         ]
       `);
     });

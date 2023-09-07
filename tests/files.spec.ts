@@ -9,10 +9,18 @@ import {
   getFileInfo,
   getBundleFilePath,
   resolveBundleFilePath,
+  collectIgnoreRules,
 } from '../src/files';
 import { getGlobPatterns } from '../src';
 import { FileInfo } from '../src/interfaces/files.interface';
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
+import {
+  sampleProjectPath,
+  supportedFiles,
+  bundleFiles,
+  bundleFilesFull,
+  bundleFileIgnores,
+  fileIgnoresFixtures,
+} from './constants/sample';
 
 describe('files', () => {
   it('collect bundle files', async () => {
@@ -40,6 +48,24 @@ describe('files', () => {
       filePath: f.filePath.replace(sampleProjectPath, '<basePath>'),
     }));
     expect(filesWithoutBasePath).toMatchSnapshot();
+  });
+
+  it('collects only non-excluded files', async () => {
+    const testPath = `${fileIgnoresFixtures}/negative-overrides`;
+    const ignoreRules = await collectIgnoreRules([testPath]);
+    const collector = collectBundleFiles({
+      baseDir: testPath,
+      paths: [testPath],
+      supportedFiles,
+      fileIgnores: ignoreRules,
+    });
+    const files: FileInfo[] = [];
+    for await (const f of collector) {
+      typeof f !== 'string' && files.push(f);
+    }
+
+    expect(files).toHaveLength(1);
+    expect(files[0].bundlePath).toBe('.snyk');
   });
 
   it('extend bundle files', async () => {

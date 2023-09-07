@@ -1,2 +1,3 @@
 !/snyk-excluded-file.ext
 !/snyk-excluded-dir/
+!/sub

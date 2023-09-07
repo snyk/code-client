@@ -125,9 +125,13 @@ describe('file ignores', () => {
       expect(ignoreRules).toMatchInlineSnapshot(`
         Array [
           "**/.git/**",
+          "!${collectPath}/sub/**",
+          "!${collectPath}/sub",
           "${collectPath}/snyk-excluded-file.ext/**",
           "${collectPath}/snyk-excluded-file.ext",
           "${collectPath}/**/snyk-excluded-dir/**",
+          "${collectPath}/sub/snyk-excluded-file.js/**",
+          "${collectPath}/sub/snyk-excluded-file.js",
         ]
       `);
     });

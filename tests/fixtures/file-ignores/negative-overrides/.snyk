@@ -2,3 +2,4 @@ exclude:
   global:
     - /snyk-excluded-file.ext
     - snyk-excluded-dir/
+    - /sub/snyk-excluded-file.js

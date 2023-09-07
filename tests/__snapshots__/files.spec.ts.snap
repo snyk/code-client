@@ -73,13 +73,6 @@ Array [
     "size": 363,
   },
   Object {
-    "bundlePath": "not/ignored/this_should_be_ignored.jsx",
-    "content": undefined,
-    "filePath": "<basePath>/not/ignored/this_should_be_ignored.jsx",
-    "hash": "3dce2c0456d5f9b6ff64c589047f359b0a7ec390ec1edd20b0070d3399e4e96a",
-    "size": 252,
-  },
-  Object {
     "bundlePath": "not/ignored/this_should_not_be_ignored.java",
     "content": undefined,
     "filePath": "<basePath>/not/ignored/this_should_not_be_ignored.java",

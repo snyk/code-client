@@ -41,9 +41,6 @@ export const bundleFilePaths = [
   'big-file.js', // <= file size is over the custom MAX_FILE_SIZE
   'routes/index.js',
   'routes/sharks.js',
-  // TODO: This should be ignored for consistency with the .gitignore format (see last rule above),
-  // however we decided to tune down correctness in favour of perfomance for now.
-  'not/ignored/this_should_be_ignored.jsx',
   'not/ignored/this_should_not_be_ignored.java',
 ];
 

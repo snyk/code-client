@@ -285,26 +285,26 @@ async function* searchFiles(
   for await (const filePath of positiveSearcher) {
     yield filePath;
   }
+
+  const deepPatterns = patterns.map(p => `**/${p}`);
   // TODO: This is incorrect because the .gitignore format allows to specify exceptions to previous rules, therefore
   // the separation between positive and negative ignores is incorrect in a scenario with 2+ exeptions like the one below:
   // `node_module/` <= ignores everything in a `node_module` folder and it's relative subfolders
   // `!node_module/my_module/` <= excludes the `my_module` subfolder from the ignore
   // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
+  // We feed any positive ignore rules that also match patterns back into the matcher to ensure any paths matching our
+  // patterns for supported files that were marked as ignored are not re-surfaced by the second pass.
+  const positivePatternIgnores = positiveIgnores.filter((rule: string) => isMatch(rule, deepPatterns));
   if (negativeIgnores.length) {
     const negativeSearcher = fg.stream(negativeIgnores, {
       ...fgOptions,
       cwd,
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,
+      ignore: positivePatternIgnores,
     });
     for await (const filePath of negativeSearcher) {
-      if (
-        isMatch(
-          filePath.toString(),
-          patterns.map(p => `**/${p}`),
-        )
-      )
-        yield filePath;
+      if (isMatch(filePath.toString(), deepPatterns)) yield filePath;
     }
   }
 }

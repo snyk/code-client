@@ -9,7 +9,7 @@ import {
   getFileInfo,
   getBundleFilePath,
   resolveBundleFilePath,
-  collectIgnoreRules,
+  collectFilePolicies,
 } from '../src/files';
 import { getGlobPatterns } from '../src';
 import { FileInfo } from '../src/interfaces/files.interface';
@@ -20,6 +20,7 @@ import {
   bundleFilesFull,
   bundleFileIgnores,
   fileIgnoresFixtures,
+  bundleFilePolicies,
 } from './constants/sample';
 
 describe('files', () => {
@@ -29,7 +30,7 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: [sampleProjectPath],
       supportedFiles,
-      fileIgnores: bundleFileIgnores,
+      filePolicies: bundleFilePolicies,
     });
     const files: FileInfo[] = [];
     const skippedOversizedFiles: string[] = [];
@@ -37,7 +38,9 @@ describe('files', () => {
       typeof f == 'string' ? skippedOversizedFiles.push(f) : files.push(f);
     }
     // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
-    expect(files).toIncludeSameMembers((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
+    const expectedFiles = (await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js'));
+    expect(files.map(f => f.filePath)).toIncludeSameMembers(expectedFiles.map(f => f.filePath)); // Assert same files in bundle
+    expect(files).toIncludeSameMembers(expectedFiles); // Assert same properties for files in bundle
 
     // big-file.js should be added to skippedOversizedFiles
     expect(skippedOversizedFiles.length).toEqual(1);
@@ -52,12 +55,12 @@ describe('files', () => {
 
   it('collects only non-excluded files', async () => {
     const testPath = `${fileIgnoresFixtures}/negative-overrides`;
-    const ignoreRules = await collectIgnoreRules([testPath]);
+    const filePolicies = await collectFilePolicies([testPath]);
     const collector = collectBundleFiles({
       baseDir: testPath,
       paths: [testPath],
       supportedFiles,
-      fileIgnores: ignoreRules,
+      filePolicies,
     });
     const files: FileInfo[] = [];
     for await (const f of collector) {
@@ -70,7 +73,7 @@ describe('files', () => {
 
   it('extend bundle files', async () => {
     const testNewFiles = [`app.js`, `not/ignored/this_should_not_be_ignored.java`];
-    const testRemovedFiles = [`removed_from_the_parent_bundle.java`, `ignored/this_should_be_ignored.java`];
+    const testRemovedFiles = [`removed_from_the_parent_bundle.java`];
     const newBundle = [...testNewFiles, ...testRemovedFiles];
     const { files, removedFiles } = await prepareExtendingBundle(
       sampleProjectPath,
@@ -89,7 +92,6 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: folders,
       supportedFiles,
-      fileIgnores: [],
     });
     const smallFiles: FileInfo[] = [];
     const skippedOversizedFiles: string[] = [];

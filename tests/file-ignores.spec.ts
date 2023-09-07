@@ -1,7 +1,7 @@
 import 'jest-extended';
 
-import { collectIgnoreRules, parseFileIgnores } from '../src/files';
-import { sampleProjectPath, fileIgnoresFixtures, bundleFileIgnores } from './constants/sample';
+import { collectFilePolicies, parseFileIgnores } from '../src/files';
+import { sampleProjectPath, fileIgnoresFixtures, bundleFileIgnores, bundleFilePolicies } from './constants/sample';
 
 describe('file ignores', () => {
   describe('sample-repo', () => {
@@ -27,112 +27,111 @@ describe('file ignores', () => {
     });
 
     it('collects ignore rules', async () => {
-      const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
-      expect(ignoreRules).toEqual(bundleFileIgnores);
+      const ignoreRules = await collectFilePolicies([sampleProjectPath]);
+      expect(ignoreRules).toEqual(bundleFilePolicies);
     });
   });
 
   describe('collects correct ignore rules', () => {
     it('from dot snyk files', async () => {
       const collectPath = `${fileIgnoresFixtures}/dot-snyk-excludes`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
+      const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "${collectPath}/root-excluded/**",
-          "${collectPath}/root-excluded",
-          "${collectPath}/root-excluded-contents/**",
-          "${collectPath}/**/deep-excluded/**",
-          "${collectPath}/**/deep-excluded",
-          "${collectPath}/**/deep-excluded-contents/**",
-          "${collectPath}/sub/root-excluded/**",
-          "${collectPath}/sub/root-excluded",
-        ]
+        Object {
+          "excludes": Array [
+            "${collectPath}/root-excluded/**",
+            "${collectPath}/root-excluded",
+            "${collectPath}/root-excluded-contents/**",
+            "${collectPath}/**/deep-excluded/**",
+            "${collectPath}/**/deep-excluded",
+            "${collectPath}/**/deep-excluded-contents/**",
+            "${collectPath}/sub/root-excluded/**",
+            "${collectPath}/sub/root-excluded",
+            "${collectPath}/sub/**/deep-excluded/**",
+            "${collectPath}/sub/**/deep-excluded",
+          ],
+          "ignores": Array [
+            "**/.git/**",
+          ],
+        }
       `);
     });
 
     it('from dot dcignore file', async () => {
       const collectPath = `${fileIgnoresFixtures}/dot-dcignore-rules`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
+      const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "${collectPath}/root-excluded/**",
-          "${collectPath}/root-excluded",
-          "${collectPath}/root-excluded-contents/**",
-          "${collectPath}/**/deep-excluded/**",
-          "${collectPath}/**/deep-excluded",
-          "${collectPath}/**/deep-excluded-contents/**",
-          "!${collectPath}/not/deep-excluded/**",
-          "!${collectPath}/not/deep-excluded",
-        ]
+        Object {
+          "excludes": Array [],
+          "ignores": Array [
+            "**/.git/**",
+            "${collectPath}/root-excluded/**",
+            "${collectPath}/root-excluded",
+            "${collectPath}/root-excluded-contents/**",
+            "${collectPath}/**/deep-excluded/**",
+            "${collectPath}/**/deep-excluded",
+            "${collectPath}/**/deep-excluded-contents/**",
+            "!${collectPath}/not/deep-excluded/**",
+            "!${collectPath}/not/deep-excluded",
+          ],
+        }
       `);
     });
 
     it('from dot gitignore file', async () => {
       const collectPath = `${fileIgnoresFixtures}/dot-gitignore-rules`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
+      const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "${collectPath}/root-excluded/**",
-          "${collectPath}/root-excluded",
-          "${collectPath}/root-excluded-contents/**",
-          "${collectPath}/**/deep-excluded/**",
-          "${collectPath}/**/deep-excluded",
-          "${collectPath}/**/deep-excluded-contents/**",
-          "!${collectPath}/not/deep-excluded/**",
-          "!${collectPath}/not/deep-excluded",
-        ]
+        Object {
+          "excludes": Array [],
+          "ignores": Array [
+            "**/.git/**",
+            "${collectPath}/root-excluded/**",
+            "${collectPath}/root-excluded",
+            "${collectPath}/root-excluded-contents/**",
+            "${collectPath}/**/deep-excluded/**",
+            "${collectPath}/**/deep-excluded",
+            "${collectPath}/**/deep-excluded-contents/**",
+            "!${collectPath}/not/deep-excluded/**",
+            "!${collectPath}/not/deep-excluded",
+          ],
+        }
       `);
     });
 
     it('from combined files', async () => {
       const collectPath = `${fileIgnoresFixtures}/combined`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
+      const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "${collectPath}/dcignore-root-excluded/**",
-          "${collectPath}/dcignore-root-excluded",
-          "${collectPath}/**/dcignore-deep-excluded/**",
-          "${collectPath}/**/dcignore-deep-excluded",
-          "!${collectPath}/dcignore-root-not-excluded/**",
-          "!${collectPath}/dcignore-root-not-excluded",
-          "!${collectPath}/**/dcignore-deep-not-excluded/**",
-          "!${collectPath}/**/dcignore-deep-not-excluded",
-          "${collectPath}/gitignore-root-excluded/**",
-          "${collectPath}/gitignore-root-excluded",
-          "${collectPath}/**/gitignore-deep-excluded/**",
-          "${collectPath}/**/gitignore-deep-excluded",
-          "!${collectPath}/gitignore-root-not-excluded/**",
-          "!${collectPath}/gitignore-root-not-excluded",
-          "!${collectPath}/**/gitignore-deep-not-excluded/**",
-          "!${collectPath}/**/gitignore-deep-not-excluded",
-          "${collectPath}/snyk-root-excluded/**",
-          "${collectPath}/snyk-root-excluded",
-          "${collectPath}/**/snyk-deep-excluded/**",
-          "${collectPath}/**/snyk-deep-excluded",
-          "${collectPath}/sub/snyk-nested-excluded/**",
-          "${collectPath}/sub/snyk-nested-excluded",
-        ]
-      `);
-    });
-
-    it('from combined files, overriding negative matches', async () => {
-      const collectPath = `${fileIgnoresFixtures}/negative-overrides`;
-      const ignoreRules = await collectIgnoreRules([collectPath]);
-      expect(ignoreRules).toMatchInlineSnapshot(`
-        Array [
-          "**/.git/**",
-          "!${collectPath}/sub/**",
-          "!${collectPath}/sub",
-          "${collectPath}/snyk-excluded-file.ext/**",
-          "${collectPath}/snyk-excluded-file.ext",
-          "${collectPath}/**/snyk-excluded-dir/**",
-          "${collectPath}/sub/snyk-excluded-file.js/**",
-          "${collectPath}/sub/snyk-excluded-file.js",
-        ]
+        Object {
+          "excludes": Array [
+            "${collectPath}/snyk-root-excluded/**",
+            "${collectPath}/snyk-root-excluded",
+            "${collectPath}/**/snyk-deep-excluded/**",
+            "${collectPath}/**/snyk-deep-excluded",
+            "${collectPath}/sub/snyk-nested-excluded/**",
+            "${collectPath}/sub/snyk-nested-excluded",
+          ],
+          "ignores": Array [
+            "**/.git/**",
+            "${collectPath}/dcignore-root-excluded/**",
+            "${collectPath}/dcignore-root-excluded",
+            "${collectPath}/**/dcignore-deep-excluded/**",
+            "${collectPath}/**/dcignore-deep-excluded",
+            "!${collectPath}/dcignore-root-not-excluded/**",
+            "!${collectPath}/dcignore-root-not-excluded",
+            "!${collectPath}/**/dcignore-deep-not-excluded/**",
+            "!${collectPath}/**/dcignore-deep-not-excluded",
+            "${collectPath}/gitignore-root-excluded/**",
+            "${collectPath}/gitignore-root-excluded",
+            "${collectPath}/**/gitignore-deep-excluded/**",
+            "${collectPath}/**/gitignore-deep-excluded",
+            "!${collectPath}/gitignore-root-not-excluded/**",
+            "!${collectPath}/gitignore-root-not-excluded",
+            "!${collectPath}/**/gitignore-deep-not-excluded/**",
+            "!${collectPath}/**/gitignore-deep-not-excluded",
+          ],
+        }
       `);
     });
   });

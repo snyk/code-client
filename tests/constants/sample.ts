@@ -27,6 +27,26 @@ export const bundleFileIgnores = [
   `${sampleProjectPath}/exclude/excluded-folder/**`,
 ];
 
+export const bundleFilePolicies = {
+  excludes: [
+    `${sampleProjectPath}/**/exclude/excluded-file.js/**`,
+    `${sampleProjectPath}/**/exclude/excluded-file.js`,
+    `${sampleProjectPath}/exclude/excluded-folder/**`,
+  ],
+  ignores: [
+    '**/.git/**',
+    `${sampleProjectPath}/**/mode_nodules/**`,
+    `${sampleProjectPath}/models/**`,
+    `${sampleProjectPath}/**/controllers/**`,
+    `${sampleProjectPath}/**/ignored/**`,
+    `${sampleProjectPath}/**/ignored`,
+    `!${sampleProjectPath}/**/not/ignored/**`,
+    `!${sampleProjectPath}/**/not/ignored`,
+    `${sampleProjectPath}/**/*.jsx/**`,
+    `${sampleProjectPath}/**/*.jsx`,
+  ],
+};
+
 export const fileIgnoresFixtures = path.resolve(__dirname, '../fixtures/file-ignores');
 
 export const bundleFilePaths = [
@@ -41,6 +61,9 @@ export const bundleFilePaths = [
   'big-file.js', // <= file size is over the custom MAX_FILE_SIZE
   'routes/index.js',
   'routes/sharks.js',
+  // TODO: This should be ignored for consistency with the .gitignore format (see last rule above),
+  // however we decided to tune down correctness in favour of perfomance for now.
+  'not/ignored/this_should_be_ignored.jsx',
   'not/ignored/this_should_not_be_ignored.java',
 ];
 

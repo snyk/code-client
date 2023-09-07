@@ -8,7 +8,7 @@ import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interf
 import {
   composeFilePayloads,
   resolveBundleFiles,
-  collectIgnoreRules,
+  collectFilePolicies,
   determineBaseDir,
   collectBundleFiles,
 } from './files';
@@ -265,7 +265,7 @@ export async function createBundleWithCustomFiles(
   supportedFiles: SupportedFiles,
 ): Promise<FileBundle | null> {
   // Scan for custom ignore rules
-  const fileIgnores = await collectIgnoreRules(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
+  const filePolicies = await collectFilePolicies(options.paths, options.symlinksEnabled, options.defaultFileIgnores);
 
   const baseDir = determineBaseDir(options.paths);
   emitter.scanFilesProgress(0);
@@ -275,7 +275,7 @@ export async function createBundleWithCustomFiles(
   const bundleFileCollector = collectBundleFiles({
     ...pick(options, ['paths', 'symlinksEnabled']),
     baseDir,
-    fileIgnores,
+    filePolicies,
     supportedFiles,
   });
   for await (const f of bundleFileCollector) {
@@ -300,7 +300,7 @@ export async function createBundleWithCustomFiles(
     ...remoteBundle,
     baseDir,
     supportedFiles,
-    fileIgnores,
+    fileIgnores: [...filePolicies.excludes, ...filePolicies.ignores],
     skippedOversizedFiles,
   };
 }

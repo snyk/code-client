@@ -92,6 +92,10 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: folders,
       supportedFiles,
+      filePolicies: {
+        excludes: [],
+        ignores: [],
+      },
     });
     const smallFiles: FileInfo[] = [];
     const skippedOversizedFiles: string[] = [];

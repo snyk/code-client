@@ -54,7 +54,7 @@ export interface FilePolicies {
 export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
   supportedFiles: SupportedFiles;
   baseDir: string;
-  filePolicies?: FilePolicies;
+  filePolicies: FilePolicies;
 }
 
 export interface ReportOptions {

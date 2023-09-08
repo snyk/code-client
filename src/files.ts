@@ -249,14 +249,10 @@ async function* searchFiles(
   patterns: string[],
   cwd: string,
   symlinksEnabled: boolean,
-  policies?: FilePolicies,
+  policies: FilePolicies,
 ): AsyncGenerator<string | Buffer> {
-  const positiveIgnores = policies
-    ? [...policies.excludes, ...policies.ignores.filter(rule => !rule.startsWith('!'))]
-    : [];
-  const negativeIgnores = policies
-    ? policies.ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1))
-    : [];
+  const positiveIgnores = [...policies.excludes, ...policies.ignores.filter(rule => !rule.startsWith('!'))];
+  const negativeIgnores = policies.ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
   // that should be ignored, leading to performance issues (the parser would look stuck while analyzing each ignored file).
   // However, fast-glob doesn't address the negative rules in the ignore option correctly.
@@ -287,7 +283,7 @@ async function* searchFiles(
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,
       // Exclude rules should still be respected
-      ignore: policies?.excludes ?? [],
+      ignore: policies.excludes,
     });
     for await (const filePath of negativeSearcher) {
       if (isMatch(filePath.toString(), deepPatterns)) yield filePath;

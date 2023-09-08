@@ -228,12 +228,9 @@ export async function collectFilePolicies(
   const collectedRules = await Promise.all(tasks);
 
   return {
-    excludes: collectedRules.flatMap(policies => policies.excludes),
-    ignores: [
-      // Merge external and collected ignore rules
-      ...fileIgnores,
-      ...collectedRules.flatMap(policies => policies.ignores),
-    ],
+    excludes: union(...collectedRules.map(policies => policies.excludes)),
+    // Merge external and collected ignore rules
+    ignores: union(fileIgnores, ...collectedRules.map(policies => policies.ignores)),
   };
 }
 

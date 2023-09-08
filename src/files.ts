@@ -188,15 +188,15 @@ export async function collectFilePolicies(
   symlinksEnabled = false,
   fileIgnores: string[] = IGNORES_DEFAULT,
 ): Promise<FilePolicies> {
-  const excludes: Set<string> = new Set();
-  const ignores: Set<string> = new Set();
-
-  fileIgnores.map((rule: string) => ignores.add(rule));
-
   const tasks = dirs.map(async folder => {
     const fileStats = await lStat(folder);
     // Check if symlink and exclude if requested
-    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
+    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) {
+      return {
+        excludes: [],
+        ignores: [],
+      };
+    }
 
     // Find .snyk and .[*]ignore files inside this directory.
     const allIgnoredFiles = await fg(
@@ -212,8 +212,6 @@ export async function collectFilePolicies(
     const snykFiles = allIgnoredFiles.filter(f => f.endsWith(DOTSNYK_FILENAME));
     const snykExcludeRules = union(...snykFiles.map(parseFileIgnores));
 
-    snykExcludeRules.map((rule: string) => excludes.add(rule));
-
     // Parse rules from relevant .[*]ignore files inside this directory.
     // Exclude ignore files under paths excluded by .snyk files.
     const ignoreFiles = allIgnoredFiles.filter(
@@ -221,14 +219,21 @@ export async function collectFilePolicies(
     );
     const ignoreFileRules = union(...ignoreFiles.map(parseFileIgnores));
 
-    ignoreFileRules.map((rule: string) => ignores.add(rule));
+    return {
+      excludes: snykExcludeRules,
+      ignores: ignoreFileRules,
+    };
   });
 
-  await Promise.all(tasks);
+  const collectedRules = await Promise.all(tasks);
 
   return {
-    excludes: Array.from(excludes),
-    ignores: Array.from(ignores),
+    excludes: collectedRules.flatMap(policies => policies.excludes),
+    ignores: [
+      // Merge external and collected ignore rules
+      ...fileIgnores,
+      ...collectedRules.flatMap(policies => policies.ignores),
+    ],
   };
 }
 

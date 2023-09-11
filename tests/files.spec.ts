@@ -3,50 +3,34 @@ import * as nodePath from 'path';
 import 'jest-extended';
 
 import {
-  collectIgnoreRules,
   collectBundleFiles,
   prepareExtendingBundle,
   composeFilePayloads,
-  parseFileIgnores,
   getFileInfo,
   getBundleFilePath,
   resolveBundleFilePath,
+  collectFilePolicies,
 } from '../src/files';
 import { getGlobPatterns } from '../src';
 import { FileInfo } from '../src/interfaces/files.interface';
-import { sampleProjectPath, supportedFiles, bundleFiles, bundleFilesFull, bundleFileIgnores } from './constants/sample';
+import {
+  sampleProjectPath,
+  supportedFiles,
+  bundleFiles,
+  bundleFilesFull,
+  bundleFileIgnores,
+  fileIgnoresFixtures,
+  bundleFilePolicies,
+} from './constants/sample';
 
 describe('files', () => {
-  it('parse dc ignore file', () => {
-    const patterns = parseFileIgnores(`${sampleProjectPath}/.dcignore`);
-    expect(patterns).toEqual(bundleFileIgnores.slice(1, 10));
-  });
-  it('parse dot snyk file', () => {
-    const patterns = parseFileIgnores(`${sampleProjectPath}/.snyk`);
-    expect(patterns).toEqual(bundleFileIgnores.slice(10));
-  });
-  it('parse dot snyk file with only one field', () => {
-    const patterns = parseFileIgnores(`${sampleProjectPath}/exclude/.snyk`);
-    expect(patterns).toEqual(bundleFileIgnores.slice(12));
-  });
-  it('fails to parse dot snyk file with invalid field', () => {
-    expect(() => parseFileIgnores(`${sampleProjectPath}/invalid-dot-snyk/.snyk.invalid`)).toThrow(
-      'Please make sure ignore file follows correct syntax',
-    );
-  });
-
-  it('collect ignore rules', async () => {
-    const ignoreRules = await collectIgnoreRules([sampleProjectPath]);
-    expect(ignoreRules).toEqual(bundleFileIgnores);
-  });
-
   it('collect bundle files', async () => {
     // TODO: We should introduce some performance test using a big enough repo to avoid flaky results
     const collector = collectBundleFiles({
       baseDir: sampleProjectPath,
       paths: [sampleProjectPath],
       supportedFiles,
-      fileIgnores: bundleFileIgnores,
+      filePolicies: bundleFilePolicies,
     });
     const files: FileInfo[] = [];
     const skippedOversizedFiles: string[] = [];
@@ -54,7 +38,9 @@ describe('files', () => {
       typeof f == 'string' ? skippedOversizedFiles.push(f) : files.push(f);
     }
     // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
-    expect(files).toIncludeSameMembers((await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js')));
+    const expectedFiles = (await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js'));
+    expect(files.map(f => f.filePath)).toIncludeSameMembers(expectedFiles.map(f => f.filePath)); // Assert same files in bundle
+    expect(files).toIncludeSameMembers(expectedFiles); // Assert same properties for files in bundle
 
     // big-file.js should be added to skippedOversizedFiles
     expect(skippedOversizedFiles.length).toEqual(1);
@@ -67,9 +53,27 @@ describe('files', () => {
     expect(filesWithoutBasePath).toMatchSnapshot();
   });
 
+  it('collects only non-excluded files', async () => {
+    const testPath = `${fileIgnoresFixtures}/negative-overrides`;
+    const filePolicies = await collectFilePolicies([testPath]);
+    const collector = collectBundleFiles({
+      baseDir: testPath,
+      paths: [testPath],
+      supportedFiles,
+      filePolicies,
+    });
+    const files: FileInfo[] = [];
+    for await (const f of collector) {
+      typeof f !== 'string' && files.push(f);
+    }
+
+    expect(files).toHaveLength(1);
+    expect(files[0].bundlePath).toBe('.snyk');
+  });
+
   it('extend bundle files', async () => {
     const testNewFiles = [`app.js`, `not/ignored/this_should_not_be_ignored.java`];
-    const testRemovedFiles = [`removed_from_the_parent_bundle.java`, `ignored/this_should_be_ignored.java`];
+    const testRemovedFiles = [`removed_from_the_parent_bundle.java`];
     const newBundle = [...testNewFiles, ...testRemovedFiles];
     const { files, removedFiles } = await prepareExtendingBundle(
       sampleProjectPath,
@@ -88,7 +92,10 @@ describe('files', () => {
       baseDir: sampleProjectPath,
       paths: folders,
       supportedFiles,
-      fileIgnores: [],
+      filePolicies: {
+        excludes: [],
+        ignores: [],
+      },
     });
     const smallFiles: FileInfo[] = [];
     const skippedOversizedFiles: string[] = [];

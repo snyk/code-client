@@ -18,7 +18,7 @@ import {
   DOTSNYK_FILENAME,
   EXCLUDED_NAMES,
 } from './constants';
-import { CollectBundleFilesOptions } from './interfaces/analysis-options.interface';
+import { CollectBundleFilesOptions, FilePolicies } from './interfaces/analysis-options.interface';
 import { SupportedFiles, FileInfo } from './interfaces/files.interface';
 
 const isWindows = nodePath.sep === '\\';
@@ -177,18 +177,29 @@ function generateAllCaseGlobPattern(fileExtension: string): string {
   return caseInsensitivePatterns.join('');
 }
 
-export async function collectIgnoreRules(
+/**
+ * Recursively collect all exclude and ignore rules from "dirs".
+ *
+ * Exclude rules from .snyk files and ignore rules from .[*]ignore files are collected separately.
+ * Any .[*]ignore files in paths excluded by .snyk exclude rules are ignored.
+ */
+export async function collectFilePolicies(
   dirs: string[],
   symlinksEnabled = false,
   fileIgnores: string[] = IGNORES_DEFAULT,
-): Promise<string[]> {
+): Promise<FilePolicies> {
   const tasks = dirs.map(async folder => {
     const fileStats = await lStat(folder);
     // Check if symlink and exclude if requested
-    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) return [];
+    if (!fileStats || (fileStats.isSymbolicLink() && !symlinksEnabled) || fileStats.isFile()) {
+      return {
+        excludes: [],
+        ignores: [],
+      };
+    }
 
-    // Find ignore files inside this directory
-    const localIgnoreFiles = await fg(
+    // Find .snyk and .[*]ignore files inside this directory.
+    const allIgnoredFiles = await fg(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
         ...fgOptions,
@@ -196,11 +207,31 @@ export async function collectIgnoreRules(
         followSymbolicLinks: symlinksEnabled,
       },
     );
-    // Read ignore files and merge new patterns
-    return union(...localIgnoreFiles.map(parseFileIgnores));
+
+    // Parse rules from all .snyk files inside this directory.
+    const snykFiles = allIgnoredFiles.filter(f => f.endsWith(DOTSNYK_FILENAME));
+    const snykExcludeRules = union(...snykFiles.map(parseFileIgnores));
+
+    // Parse rules from relevant .[*]ignore files inside this directory.
+    // Exclude ignore files under paths excluded by .snyk files.
+    const ignoreFiles = allIgnoredFiles.filter(
+      f => !f.endsWith(DOTSNYK_FILENAME) && multimatch([nodePath.dirname(f)], snykExcludeRules).length === 0,
+    );
+    const ignoreFileRules = union(...ignoreFiles.map(parseFileIgnores));
+
+    return {
+      excludes: snykExcludeRules,
+      ignores: ignoreFileRules,
+    };
   });
-  const customRules = await Promise.all(tasks);
-  return union(fileIgnores, ...customRules);
+
+  const collectedRules = await Promise.all(tasks);
+
+  return {
+    excludes: union(...collectedRules.map(policies => policies.excludes)),
+    // Merge external and collected ignore rules
+    ignores: union(fileIgnores, ...collectedRules.map(policies => policies.ignores)),
+  };
 }
 
 export function determineBaseDir(paths: string[]): string {
@@ -220,10 +251,10 @@ async function* searchFiles(
   patterns: string[],
   cwd: string,
   symlinksEnabled: boolean,
-  ignores: string[],
+  policies: FilePolicies,
 ): AsyncGenerator<string | Buffer> {
-  const positiveIgnores = ignores.filter(rule => !rule.startsWith('!'));
-  const negativeIgnores = ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
+  const positiveIgnores = [...policies.excludes, ...policies.ignores.filter(rule => !rule.startsWith('!'))];
+  const negativeIgnores = policies.ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
   // that should be ignored, leading to performance issues (the parser would look stuck while analyzing each ignored file).
   // However, fast-glob doesn't address the negative rules in the ignore option correctly.
@@ -240,6 +271,8 @@ async function* searchFiles(
   for await (const filePath of positiveSearcher) {
     yield filePath;
   }
+
+  const deepPatterns = patterns.map(p => `**/${p}`);
   // TODO: This is incorrect because the .gitignore format allows to specify exceptions to previous rules, therefore
   // the separation between positive and negative ignores is incorrect in a scenario with 2+ exeptions like the one below:
   // `node_module/` <= ignores everything in a `node_module` folder and it's relative subfolders
@@ -251,15 +284,11 @@ async function* searchFiles(
       cwd,
       followSymbolicLinks: symlinksEnabled,
       baseNameMatch: false,
+      // Exclude rules should still be respected
+      ignore: policies.excludes,
     });
     for await (const filePath of negativeSearcher) {
-      if (
-        isMatch(
-          filePath.toString(),
-          patterns.map(p => `**/${p}`),
-        )
-      )
-        yield filePath;
+      if (isMatch(filePath.toString(), deepPatterns)) yield filePath;
     }
   }
 }
@@ -271,7 +300,7 @@ async function* searchFiles(
 export async function* collectBundleFiles({
   symlinksEnabled = false,
   baseDir,
-  fileIgnores,
+  filePolicies,
   paths,
   supportedFiles,
 }: CollectBundleFilesOptions): AsyncGenerator<FileInfo | string> {
@@ -297,7 +326,7 @@ export async function* collectBundleFiles({
   // Scan folders
   const globPatterns = getGlobPatterns(supportedFiles);
   for (const folder of dirs) {
-    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, fileIgnores);
+    const searcher = searchFiles(globPatterns, folder, symlinksEnabled, filePolicies);
     // eslint-disable-next-line no-await-in-loop
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
@@ -310,7 +339,7 @@ export async function* collectBundleFiles({
 
   // Sanitize files
   if (files.length) {
-    const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, fileIgnores);
+    const searcher = searchFiles(filterSupportedFiles(files, supportedFiles), baseDir, symlinksEnabled, filePolicies);
     for await (const filePath of searcher) {
       const fileInfo = await getFileInfo(filePath.toString(), baseDir, false, cache);
       // dc ignore AttrAccessOnNull: false positive, there is a precondition with &&

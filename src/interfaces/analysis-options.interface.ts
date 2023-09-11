@@ -46,10 +46,15 @@ export interface AnalyzeFoldersOptions {
   languages?: string[];
 }
 
+export interface FilePolicies {
+  excludes: string[];
+  ignores: string[];
+}
+
 export interface CollectBundleFilesOptions extends AnalyzeFoldersOptions {
   supportedFiles: SupportedFiles;
   baseDir: string;
-  fileIgnores: string[];
+  filePolicies: FilePolicies;
 }
 
 export interface ReportOptions {

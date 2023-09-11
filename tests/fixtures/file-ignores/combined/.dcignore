@@ -1,0 +1,4 @@
+/dcignore-root-excluded
+dcignore-deep-excluded
+!/dcignore-root-not-excluded
+!dcignore-deep-not-excluded

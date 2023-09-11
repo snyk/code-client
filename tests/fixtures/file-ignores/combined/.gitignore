@@ -1,0 +1,4 @@
+/gitignore-root-excluded
+gitignore-deep-excluded
+!/gitignore-root-not-excluded
+!gitignore-deep-not-excluded

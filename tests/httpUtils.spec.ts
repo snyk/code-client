@@ -24,10 +24,6 @@ describe('getURL', () => {
     const base = 'api.snykgov.io';
     const path = '/analysis';
 
-    try {
-      const result = getURL(base, path);
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
+    expect(() => getURL(base, path)).toThrowError('Org is required for this operation');
   });
 });

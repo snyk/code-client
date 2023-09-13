@@ -14,6 +14,7 @@ import {
   ReportOptions,
   ScmReportOptions,
 } from './interfaces/analysis-options.interface';
+import { getURL } from './utils/httpUtils';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 type ResultError<E> = {
@@ -181,11 +182,18 @@ export async function getFilters(
   requestId?: string,
 ): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
+  let url: string;
+
+  try {
+    url = getURL(baseURL, '/' + apiName, 'no-org-for-filters');
+  } catch (err) {
+    return generateError<GenericErrorTypes>(400, err.message, apiName);
+  }
 
   const res = await makeRequest<SupportedFiles>(
     {
       headers: { source, ...(requestId && { 'snyk-request-id': requestId }) },
-      url: `${baseURL}/${apiName}`,
+      url,
       method: 'get',
     },
     attempts,
@@ -237,13 +245,21 @@ export async function createBundle(
   options: CreateBundleOptions,
 ): Promise<Result<RemoteBundle, CreateBundleErrorCodes>> {
   const payloadBody = await compressAndEncode(options.files);
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, '/bundle', options.org);
+  } catch (err) {
+    return generateError<CreateBundleErrorCodes>(400, err.message, 'createBundle');
+  }
+
   const payload: Payload = {
     headers: {
       'content-type': 'application/octet-stream',
       'content-encoding': 'gzip',
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/bundle`,
+    url,
     method: 'post',
     body: payloadBody,
     isJson: false,
@@ -274,11 +290,19 @@ interface CheckBundleOptions extends ConnectionOptions {
 }
 
 export async function checkBundle(options: CheckBundleOptions): Promise<Result<RemoteBundle, CheckBundleErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.org);
+  } catch (err) {
+    return generateError<CheckBundleErrorCodes>(400, err.message, 'checkBundle');
+  }
+
   const res = await makeRequest<RemoteBundle>({
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/bundle/${options.bundleHash}`,
+    url,
     method: 'get',
   });
 
@@ -313,13 +337,21 @@ export async function extendBundle(
   options: ExtendBundleOptions,
 ): Promise<Result<RemoteBundle, ExtendBundleErrorCodes>> {
   const payloadBody = await compressAndEncode(pick(options, ['files', 'removedFiles']));
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.org);
+  } catch (err) {
+    return generateError<ExtendBundleErrorCodes>(400, err.message, 'extendBundle');
+  }
+
   const res = await makeRequest<RemoteBundle>({
     headers: {
       'content-type': 'application/octet-stream',
       'content-encoding': 'gzip',
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/bundle/${options.bundleHash}`,
+    url,
     method: 'put',
     body: payloadBody,
     isJson: false,
@@ -372,11 +404,18 @@ export interface GetAnalysisOptions extends ConnectionOptions, AnalysisOptions, 
 export async function getAnalysis(
   options: GetAnalysisOptions,
 ): Promise<Result<GetAnalysisResponseDto, GetAnalysisErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, '/analysis', options.org);
+  } catch (err) {
+    return generateError<GetAnalysisErrorCodes>(400, err.message, 'getAnalysis');
+  }
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/analysis`,
+    url,
     method: 'post',
     body: {
       key: {
@@ -434,11 +473,19 @@ export type UploadReportResponseDto = ReportResult | AnalysisFailedResponse | An
  * Trigger a file-based test with reporting.
  */
 export async function initReport(options: UploadReportOptions): Promise<Result<string, ReportErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/report`, options.org);
+  } catch (err) {
+    return generateError<ReportErrorCodes>(400, err.message, 'initReport');
+  }
+
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/report`,
+    url,
     method: 'post',
     body: {
       workflowData: {
@@ -466,11 +513,19 @@ export async function initReport(options: UploadReportOptions): Promise<Result<s
  * Retrieve a file-based test with reporting.
  */
 export async function getReport(options: GetReportOptions): Promise<Result<UploadReportResponseDto, ReportErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/report/${options.pollId}`, options.org);
+  } catch (err) {
+    return generateError<ReportErrorCodes>(400, err.message, 'getReport');
+  }
+
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/report/${options.pollId}`,
+    url,
     method: 'get',
   };
 
@@ -483,11 +538,18 @@ export async function getReport(options: GetReportOptions): Promise<Result<Uploa
  * Trigger an SCM-based test with reporting.
  */
 export async function initScmReport(options: ScmUploadReportOptions): Promise<Result<string, ReportErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/test`, options.org);
+  } catch (err) {
+    return generateError<ReportErrorCodes>(400, err.message, 'initReport');
+  }
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/test`,
+    url,
     method: 'post',
     body: {
       workflowData: {
@@ -509,11 +571,19 @@ export async function initScmReport(options: ScmUploadReportOptions): Promise<Re
 export async function getScmReport(
   options: GetReportOptions,
 ): Promise<Result<UploadReportResponseDto, ReportErrorCodes>> {
+  let url: string;
+
+  try {
+    url = getURL(options.baseURL, `/test/${options.pollId}`, options.org);
+  } catch (err) {
+    return generateError<ReportErrorCodes>(400, err.message, 'getReport');
+  }
+
   const config: Payload = {
     headers: {
       ...commonHttpHeaders(options),
     },
-    url: `${options.baseURL}/test/${options.pollId}`,
+    url,
     method: 'get',
   };
 

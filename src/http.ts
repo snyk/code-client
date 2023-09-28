@@ -185,7 +185,7 @@ export async function getFilters(
   let url: string;
 
   try {
-    url = getURL(baseURL, '/' + apiName, 'no-org-for-filters');
+    url = getURL(baseURL, '/' + apiName, '00000000-0000-0000-0000-00000000');
   } catch (err) {
     return generateError<GenericErrorTypes>(400, err.message, apiName);
   }

@@ -34,6 +34,7 @@ export interface ConnectionOptions {
   source: string;
   requestId?: string;
   org?: string;
+  orgId?: string;
   extraHeaders?: { [key: string]: string };
 }
 
@@ -180,12 +181,13 @@ export async function getFilters(
   source: string,
   attempts = MAX_RETRY_ATTEMPTS,
   requestId?: string,
+  orgId?: string,
 ): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
   let url: string;
 
   try {
-    url = getURL(baseURL, '/' + apiName, '00000000-0000-0000-0000-00000000');
+    url = getURL(baseURL, '/' + apiName, orgId);
   } catch (err) {
     return generateError<GenericErrorTypes>(400, err.message, apiName);
   }
@@ -248,7 +250,7 @@ export async function createBundle(
   let url: string;
 
   try {
-    url = getURL(options.baseURL, '/bundle', options.org);
+    url = getURL(options.baseURL, '/bundle', options.orgId);
   } catch (err) {
     return generateError<CreateBundleErrorCodes>(400, err.message, 'createBundle');
   }
@@ -293,7 +295,7 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.org);
+    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.orgId);
   } catch (err) {
     return generateError<CheckBundleErrorCodes>(400, err.message, 'checkBundle');
   }
@@ -340,7 +342,7 @@ export async function extendBundle(
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.org);
+    url = getURL(options.baseURL, `/bundle/${options.bundleHash}`, options.orgId);
   } catch (err) {
     return generateError<ExtendBundleErrorCodes>(400, err.message, 'extendBundle');
   }
@@ -407,7 +409,7 @@ export async function getAnalysis(
   let url: string;
 
   try {
-    url = getURL(options.baseURL, '/analysis', options.org);
+    url = getURL(options.baseURL, '/analysis', options.orgId);
   } catch (err) {
     return generateError<GetAnalysisErrorCodes>(400, err.message, 'getAnalysis');
   }
@@ -476,7 +478,7 @@ export async function initReport(options: UploadReportOptions): Promise<Result<s
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/report`, options.org);
+    url = getURL(options.baseURL, `/report`, options.orgId);
   } catch (err) {
     return generateError<ReportErrorCodes>(400, err.message, 'initReport');
   }
@@ -516,7 +518,7 @@ export async function getReport(options: GetReportOptions): Promise<Result<Uploa
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/report/${options.pollId}`, options.org);
+    url = getURL(options.baseURL, `/report/${options.pollId}`, options.orgId);
   } catch (err) {
     return generateError<ReportErrorCodes>(400, err.message, 'getReport');
   }
@@ -541,7 +543,7 @@ export async function initScmReport(options: ScmUploadReportOptions): Promise<Re
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/test`, options.org);
+    url = getURL(options.baseURL, `/test`, options.orgId);
   } catch (err) {
     return generateError<ReportErrorCodes>(400, err.message, 'initReport');
   }
@@ -574,7 +576,7 @@ export async function getScmReport(
   let url: string;
 
   try {
-    url = getURL(options.baseURL, `/test/${options.pollId}`, options.org);
+    url = getURL(options.baseURL, `/test/${options.pollId}`, options.orgId);
   } catch (err) {
     return generateError<ReportErrorCodes>(400, err.message, 'getReport');
   }

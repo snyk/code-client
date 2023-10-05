@@ -26,7 +26,7 @@ import {
   getFilters,
 } from './http';
 
-import { MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
+import { MAX_RETRY_ATTEMPTS, MAX_UPLOAD_ATTEMPTS, UPLOAD_CONCURRENCY } from './constants';
 import { emitter } from './emitter';
 import { AnalyzeFoldersOptions } from './interfaces/analysis-options.interface';
 
@@ -200,9 +200,10 @@ export async function getSupportedFiles(
   source: string,
   requestId?: string,
   languages?: string[],
+  orgId?: string,
 ): Promise<SupportedFiles> {
   emitter.supportedFilesLoaded(null);
-  const resp = await getFilters(baseURL, source, undefined, requestId);
+  const resp = await getFilters(baseURL, source, MAX_RETRY_ATTEMPTS, requestId, orgId);
   if (resp.type === 'error') {
     throw resp.error;
   }
@@ -246,7 +247,13 @@ export interface CreateBundleFromFoldersOptions extends ConnectionOptions, Analy
  */
 export async function createBundleFromFolders(options: CreateBundleFromFoldersOptions): Promise<FileBundle | null> {
   // Fetch supported files to save network traffic
-  const supportedFiles = await getSupportedFiles(options.baseURL, options.source, options.requestId, options.languages);
+  const supportedFiles = await getSupportedFiles(
+    options.baseURL,
+    options.source,
+    options.requestId,
+    options.languages,
+    options.orgId,
+  );
 
   // Collect files and create a remote bundle
   return await createBundleWithCustomFiles(options, supportedFiles);

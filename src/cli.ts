@@ -39,8 +39,8 @@ function parseConnectionOptions(options: {
   };
 }
 
-async function filtersAction(options: { url: string; token: string; source: string; org?: string }) {
-  const response = await getSupportedFiles(options.url, options.source);
+async function filtersAction(options: { url: string; token: string; source: string; org?: string; orgId?: string }) {
+  const response = await getSupportedFiles(options.url, options.source, undefined, [], options.orgId);
   console.log(JSON.stringify(response, null, 2));
 }
 

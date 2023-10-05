@@ -47,7 +47,16 @@ async function* prepareRemoteBundle(
   emitter.createBundleProgress(cumulativeProgress, options.files.length);
   for (const chunkedFiles of composeFilePayloads(options.files)) {
     const apiParams = {
-      ...pick(options, ['baseURL', 'sessionToken', 'source', 'extraHeaders', 'removedFiles', 'requestId', 'org']),
+      ...pick(options, [
+        'baseURL',
+        'sessionToken',
+        'source',
+        'extraHeaders',
+        'removedFiles',
+        'requestId',
+        'org',
+        'orgId',
+      ]),
       files: chunkedFiles.reduce((d, f) => {
         // deepcode ignore PrototypePollution: FP this is an internal code
         d[f.bundlePath] = f.hash;
@@ -98,6 +107,7 @@ export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Pr
     'bundleHash',
     'requestId',
     'org',
+    'orgId',
     'extraHeaders',
   ]);
 
@@ -137,7 +147,15 @@ async function fullfillRemoteBundle(options: FullfillRemoteBundleOptions): Promi
   // Check remove bundle to make sure no missing files left
   let attempts = 0;
   let { remoteBundle } = options;
-  const connectionOptions = pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org', 'extraHeaders']);
+  const connectionOptions = pick(options, [
+    'baseURL',
+    'sessionToken',
+    'source',
+    'requestId',
+    'org',
+    'orgId',
+    'extraHeaders',
+  ]);
 
   while (remoteBundle.missingFiles.length && attempts < (options.maxAttempts || MAX_UPLOAD_ATTEMPTS)) {
     const missingFiles = await resolveBundleFiles(options.baseDir, remoteBundle.missingFiles);
@@ -171,6 +189,7 @@ export async function remoteBundleFactory(options: RemoteBundleFactoryOptions): 
     'baseDir',
     'requestId',
     'org',
+    'orgId',
     'extraHeaders',
   ]);
   const bundleFactory = prepareRemoteBundle(omit(options, ['baseDir']));
@@ -292,7 +311,7 @@ export async function createBundleWithCustomFiles(
   }
 
   const bundleOptions = {
-    ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org', 'extraHeaders']),
+    ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org', 'orgId', 'extraHeaders']),
     baseDir,
     files: bundleFiles,
   };

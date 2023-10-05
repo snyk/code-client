@@ -19,6 +19,7 @@ function parseConnectionOptions(options: {
   token: string;
   source: string;
   org?: string;
+  orgId?: string;
   headers?: string[];
 }): ConnectionOptions {
   let headers: { [key: string]: string } = {};
@@ -34,6 +35,7 @@ function parseConnectionOptions(options: {
     sessionToken: options.token,
     source: options.source,
     ...(options.org ? { org: options.org } : {}),
+    ...(options.orgId ? { orgId: options.orgId } : {}),
     extraHeaders: headers,
     // requestId?: string; - not supported
   };
@@ -79,7 +81,7 @@ async function createBundleAction(options: {
 
 async function readBundleAction(
   bundleHash: string,
-  options: { url: string; token: string; source: string; org?: string },
+  options: { url: string; token: string; source: string; org?: string; orgId?: string },
 ) {
   const opts = {
     ...parseConnectionOptions(options),
@@ -95,7 +97,7 @@ async function readBundleAction(
 
 async function analysisBundleAction(
   bundleHash: string,
-  options: { url: string; token: string; source: string; org?: string },
+  options: { url: string; token: string; source: string; org?: string; orgId?: string },
 ) {
   const opts = {
     ...parseConnectionOptions(options),

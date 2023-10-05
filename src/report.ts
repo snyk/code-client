@@ -54,7 +54,7 @@ async function initAndPollReportGeneric(
   while (true) {
     // eslint-disable-next-line no-await-in-loop
     apiResponse = await getReportFunc({
-      ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org']),
+      ...pick(options, ['baseURL', 'sessionToken', 'source', 'requestId', 'org', 'orgId']),
       pollId,
     });
 

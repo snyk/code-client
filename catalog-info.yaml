@@ -14,7 +14,7 @@ metadata:
   tags:
     - typescript
 spec:
-  type: library
-  lifecycle: production
+  type: external-library
+  lifecycle: '-'
   owner: zenith
   system: snyk-code

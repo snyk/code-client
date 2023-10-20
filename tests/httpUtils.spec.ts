@@ -13,7 +13,7 @@ describe('getURL', () => {
   it('should return base + org routing + path if fedramp', () => {
     const base = 'api.snykgov.io';
     const path = '/analysis';
-    const orgId = '1-2-3-4';
+    const orgId = '12345678-1234-1234-1234-1234567890ab';
 
     const result = getURL(base, path, orgId);
 
@@ -24,6 +24,14 @@ describe('getURL', () => {
     const base = 'api.snykgov.io';
     const path = '/analysis';
 
-    expect(() => getURL(base, path)).toThrowError('Org is required for this operation');
+    expect(() => getURL(base, path)).toThrowError('A valid Org id is required for this operation');
+  });
+
+  it('should throw an error if fedramp and org is invalid', () => {
+    const base = 'api.snykgov.io';
+    const path = '/analysis';
+    const orgId = '1-2-3-4';
+
+    expect(() => getURL(base, path, orgId)).toThrowError('A valid Org id is required for this operation');
   });
 });

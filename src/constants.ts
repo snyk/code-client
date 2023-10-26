@@ -15,6 +15,7 @@ export const UPLOAD_CONCURRENCY = 2;
 export const POLLING_INTERVAL = 500;
 export const MAX_RETRY_ATTEMPTS = 10; // Request retries on network errors
 export const REQUEST_RETRY_DELAY = 5 * 1000; // delay between retries in milliseconds
+export const ORG_ID_REGEXP = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export const IGNORES_DEFAULT = [`**/${GIT_FILENAME}/**`];
 

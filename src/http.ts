@@ -3,26 +3,28 @@ import pick from 'lodash.pick';
 import { gzip } from 'zlib';
 import { promisify } from 'util';
 
-import { ErrorCodes, GenericErrorTypes, DEFAULT_ERROR_MESSAGES, MAX_RETRY_ATTEMPTS } from './constants';
+import { DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes, MAX_RETRY_ATTEMPTS } from './constants';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult, ReportResult } from './interfaces/analysis-result.interface';
 import { FailedResponse, makeRequest, Payload } from './needle';
 import {
-  AnalysisOptions,
   AnalysisContext,
+  AnalysisOptions,
   ReportOptions,
   ScmReportOptions,
 } from './interfaces/analysis-options.interface';
-import { getURL } from './utils/httpUtils';
+import { generateJsonApiError, getURL, isJsonApiErrors } from './utils/httpUtils';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
-type ResultError<E> = {
+
+export type ResultError<E> = {
   type: 'error';
   error: {
-    statusCode: E;
+    statusCode: E | number;
     statusText: string;
     apiName: string;
+    detail?: string | undefined;
   };
 };
 
@@ -41,24 +43,26 @@ export interface ConnectionOptions {
 // The trick to typecast union type alias
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isSubsetErrorCode<T>(code: any, messages: { [c: number]: string }): code is T {
-  if (code in messages) {
-    return true;
-  }
-  return false;
+  return code in messages;
 }
 
 function generateError<E>(
   errorCode: number,
   messages: { [c: number]: string },
   apiName: string,
-  error?: string,
+  errorMessage?: string,
+  errors?: unknown,
 ): ResultError<E> {
+  if (isJsonApiErrors(errors)) {
+    return generateJsonApiError<E>(errors, errorCode, apiName);
+  }
+
   if (!isSubsetErrorCode<E>(errorCode, messages)) {
-    throw { errorCode, messages, apiName };
+    throw { statusCode: errorCode, statusText: errorMessage || 'unknown error occurred', apiName };
   }
 
   const statusCode = errorCode;
-  const statusText = error ?? messages[errorCode];
+  const statusText = errorMessage ?? messages[errorCode];
 
   return {
     type: 'error',
@@ -92,8 +96,7 @@ interface StartSessionOptions {
 export async function compressAndEncode(payload: unknown): Promise<Buffer> {
   // encode payload and compress;
   const deflate = promisify(gzip);
-  const compressedPayload = await deflate(Buffer.from(JSON.stringify(payload)).toString('base64'));
-  return compressedPayload;
+  return await deflate(Buffer.from(JSON.stringify(payload)).toString('base64'));
 }
 
 export function startSession(options: StartSessionOptions): StartSessionResponseDto {
@@ -271,7 +274,13 @@ export async function createBundle(
   if (res.success) {
     return { type: 'success', value: res.body };
   }
-  return generateError<CreateBundleErrorCodes>(res.errorCode, CREATE_BUNDLE_ERROR_MESSAGES, 'createBundle');
+  return generateError<CreateBundleErrorCodes>(
+    res.errorCode,
+    CREATE_BUNDLE_ERROR_MESSAGES,
+    'createBundle',
+    undefined,
+    res.errors,
+  );
 }
 
 export type CheckBundleErrorCodes =
@@ -359,7 +368,13 @@ export async function extendBundle(
     isJson: false,
   });
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<ExtendBundleErrorCodes>(res.errorCode, EXTEND_BUNDLE_ERROR_MESSAGES, 'extendBundle');
+  return generateError<ExtendBundleErrorCodes>(
+    res.errorCode,
+    EXTEND_BUNDLE_ERROR_MESSAGES,
+    'extendBundle',
+    undefined,
+    res.errors,
+  );
 }
 
 // eslint-disable-next-line no-shadow
@@ -431,8 +446,16 @@ export async function getAnalysis(
   };
 
   const res = await makeRequest<GetAnalysisResponseDto>(config);
-  if (res.success) return { type: 'success', value: res.body };
-  return generateError<GetAnalysisErrorCodes>(res.errorCode, GET_ANALYSIS_ERROR_MESSAGES, 'getAnalysis');
+  if (res.success) {
+    return { type: 'success', value: res.body };
+  }
+  return generateError<GetAnalysisErrorCodes>(
+    res.errorCode,
+    GET_ANALYSIS_ERROR_MESSAGES,
+    'getAnalysis',
+    undefined,
+    res.errors,
+  );
 }
 
 export type ReportErrorCodes =

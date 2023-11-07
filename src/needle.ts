@@ -45,10 +45,12 @@ interface SuccessResponse<T> {
   success: true;
   body: T;
 }
+
 export type FailedResponse = {
   success: false;
   errorCode: number;
   error: Error | undefined;
+  errors?: unknown;
 };
 
 export async function makeRequest<T = void>(
@@ -109,6 +111,9 @@ export async function makeRequest<T = void>(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const errorMessage = response?.body?.error;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const errors = response?.body?.errors as unknown;
+
     if (errorMessage) {
       error = error ?? new Error(errorMessage);
     }
@@ -130,7 +135,7 @@ export async function makeRequest<T = void>(
       await sleep(REQUEST_RETRY_DELAY);
     } else {
       attempts = 0;
-      return { success: false, errorCode, error };
+      return { success: false, errorCode, error, errors };
     }
   } while (attempts > 0);
 

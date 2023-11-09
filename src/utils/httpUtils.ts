@@ -42,7 +42,9 @@ export function isJsonApiErrors(input: unknown): input is JsonApiError[] {
 
 export function generateErrorWithDetail<E>(error: JsonApiError, statusCode: number, apiName: string): ResultError<E> {
   const errorLink = error.links?.about;
-  const detail = `${error.title}: ${error.detail}${errorLink ? ` (more info: ${errorLink})` : ``}`;
+  const detail = `${error.title}${error.detail ? `: ${error.detail}` : ''}${
+    errorLink ? ` (more info: ${errorLink})` : ``
+  }`;
   const statusText = error.title;
   return {
     type: 'error',

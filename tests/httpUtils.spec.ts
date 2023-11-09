@@ -112,4 +112,45 @@ describe('generateErrorWithDetail', () => {
       },
     });
   });
+
+  it('should return detail with title and link when detail is empty string', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: '',
+      links: {
+        about: 'https://snyk.io',
+      },
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error (more info: https://snyk.io)',
+      },
+    });
+  });
+
+  it('should return detail with title when detail is empty string and no link', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: '',
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error',
+      },
+    });
+  });
 });

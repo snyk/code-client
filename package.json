@@ -74,7 +74,7 @@
   },
   "dependencies": {
     "@deepcode/dcignore": "^1.0.4",
-    "@types/flat-cache": "^2.0.0",
+    "@types/flat-cache": "^2.0.1",
     "@types/lodash.omit": "^4.5.7",
     "@types/lodash.pick": "^4.4.7",
     "@types/lodash.union": "^4.6.7",

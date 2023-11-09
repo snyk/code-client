@@ -1,4 +1,4 @@
-import { generateJsonApiError, getURL, isJsonApiErrors } from '../src/utils/httpUtils';
+import { generateErrorWithDetail, getURL, isJsonApiErrors } from '../src/utils/httpUtils';
 
 describe('getURL', () => {
   it('should return base + path if not fedramp', () => {
@@ -67,11 +67,11 @@ describe('isJsonApiErrors', () => {
     const jsonApiError = {
       status: '422',
     };
-    expect(isJsonApiErrors(jsonApiError)).toBeFalsy();
+    expect(isJsonApiErrors([jsonApiError])).toBeFalsy();
   });
 });
 
-describe('generateJsonApiError', () => {
+describe('generateErrorWithDetail', () => {
   it('should return detail with link', () => {
     const jsonApiError = {
       status: '422',
@@ -83,7 +83,7 @@ describe('generateJsonApiError', () => {
       },
     };
 
-    expect(generateJsonApiError([jsonApiError], 422, 'test')).toEqual({
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
       type: 'error',
       error: {
         apiName: 'test',
@@ -102,7 +102,7 @@ describe('generateJsonApiError', () => {
       detail: 'detail',
     };
 
-    expect(generateJsonApiError([jsonApiError], 422, 'test')).toEqual({
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
       type: 'error',
       error: {
         apiName: 'test',

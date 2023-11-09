@@ -40,8 +40,7 @@ export function isJsonApiErrors(input: unknown): input is JsonApiError[] {
   return true;
 }
 
-export function generateJsonApiError<E>(errors: JsonApiError[], statusCode: number, apiName: string): ResultError<E> {
-  const error = errors[0];
+export function generateErrorWithDetail<E>(error: JsonApiError, statusCode: number, apiName: string): ResultError<E> {
   const errorLink = error.links?.about;
   const detail = `${error.title}: ${error.detail}${errorLink ? ` (more info: ${errorLink})` : ``}`;
   const statusText = error.title;
@@ -49,7 +48,7 @@ export function generateJsonApiError<E>(errors: JsonApiError[], statusCode: numb
     type: 'error',
     error: {
       apiName,
-      statusCode,
+      statusCode: statusCode as unknown as E,
       statusText,
       detail,
     },

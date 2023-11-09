@@ -7,6 +7,8 @@ import { URL } from 'url';
 import { emitter } from './emitter';
 
 import { ErrorCodes, NETWORK_ERRORS, MAX_RETRY_ATTEMPTS, REQUEST_RETRY_DELAY } from './constants';
+import { JsonApiError } from './interfaces/json-api';
+import { isJsonApiErrors } from './utils/httpUtils';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
@@ -50,7 +52,7 @@ export type FailedResponse = {
   success: false;
   errorCode: number;
   error: Error | undefined;
-  errors?: unknown;
+  jsonApiError?: JsonApiError | undefined;
 };
 
 export async function makeRequest<T = void>(
@@ -96,7 +98,9 @@ export async function makeRequest<T = void>(
   do {
     let errorCode: number | undefined;
     let error: Error | undefined;
+    let jsonApiError: JsonApiError | undefined;
     let response: needle.NeedleResponse | undefined;
+
     try {
       response = await needle(method, url, data, options);
       emitter.apiRequestLog(`<= Response: ${response.statusCode} ${JSON.stringify(response.body)}`);
@@ -111,8 +115,12 @@ export async function makeRequest<T = void>(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const errorMessage = response?.body?.error;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const errors = response?.body?.errors as unknown;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    const errors = response?.body?.errors;
+
+    if (isJsonApiErrors(errors)) {
+      jsonApiError = errors[0];
+    }
 
     if (errorMessage) {
       error = error ?? new Error(errorMessage);
@@ -135,7 +143,7 @@ export async function makeRequest<T = void>(
       await sleep(REQUEST_RETRY_DELAY);
     } else {
       attempts = 0;
-      return { success: false, errorCode, error, errors };
+      return { success: false, errorCode, error, jsonApiError };
     }
   } while (attempts > 0);
 

@@ -14,14 +14,15 @@ import {
   ReportOptions,
   ScmReportOptions,
 } from './interfaces/analysis-options.interface';
-import { generateJsonApiError, getURL, isJsonApiErrors } from './utils/httpUtils';
+import { generateErrorWithDetail, getURL } from './utils/httpUtils';
+import { JsonApiError } from './interfaces/json-api';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 
 export type ResultError<E> = {
   type: 'error';
   error: {
-    statusCode: E | number;
+    statusCode: E;
     statusText: string;
     apiName: string;
     detail?: string | undefined;
@@ -51,10 +52,10 @@ function generateError<E>(
   messages: { [c: number]: string },
   apiName: string,
   errorMessage?: string,
-  errors?: unknown,
+  jsonApiError?: JsonApiError,
 ): ResultError<E> {
-  if (isJsonApiErrors(errors)) {
-    return generateJsonApiError<E>(errors, errorCode, apiName);
+  if (jsonApiError) {
+    return generateErrorWithDetail<E>(jsonApiError, errorCode, apiName);
   }
 
   if (!isSubsetErrorCode<E>(errorCode, messages)) {
@@ -279,7 +280,7 @@ export async function createBundle(
     CREATE_BUNDLE_ERROR_MESSAGES,
     'createBundle',
     undefined,
-    res.errors,
+    res.jsonApiError,
   );
 }
 
@@ -373,7 +374,7 @@ export async function extendBundle(
     EXTEND_BUNDLE_ERROR_MESSAGES,
     'extendBundle',
     undefined,
-    res.errors,
+    res.jsonApiError,
   );
 }
 
@@ -454,7 +455,7 @@ export async function getAnalysis(
     GET_ANALYSIS_ERROR_MESSAGES,
     'getAnalysis',
     undefined,
-    res.errors,
+    res.jsonApiError,
   );
 }
 

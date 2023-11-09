@@ -21,7 +21,7 @@ function isValidOrg(orgId?: string): boolean {
 }
 
 export function isJsonApiErrors(input: unknown): input is JsonApiError[] {
-  if (!Array.isArray(input)) {
+  if (!Array.isArray(input) || input.length < 1) {
     return false;
   }
 

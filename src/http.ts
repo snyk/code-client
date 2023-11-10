@@ -208,7 +208,7 @@ export async function getFilters(
   if (res.success) {
     return { type: 'success', value: res.body };
   }
-  return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName);
+  return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName, undefined, res.jsonApiError);
 }
 
 function commonHttpHeaders(options: ConnectionOptions) {
@@ -319,7 +319,13 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
   });
 
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<CheckBundleErrorCodes>(res.errorCode, CHECK_BUNDLE_ERROR_MESSAGES, 'checkBundle');
+  return generateError<CheckBundleErrorCodes>(
+    res.errorCode,
+    CHECK_BUNDLE_ERROR_MESSAGES,
+    'checkBundle',
+    undefined,
+    res.jsonApiError,
+  );
 }
 
 export type ExtendBundleErrorCodes =
@@ -532,7 +538,13 @@ export async function initReport(options: UploadReportOptions): Promise<Result<s
 
   const res = await makeRequest<InitUploadResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body.reportId };
-  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport');
+  return generateError<ReportErrorCodes>(
+    res.errorCode,
+    REPORT_ERROR_MESSAGES,
+    'initReport',
+    undefined,
+    res.jsonApiError,
+  );
 }
 
 /**
@@ -557,7 +569,13 @@ export async function getReport(options: GetReportOptions): Promise<Result<Uploa
 
   const res = await makeRequest<UploadReportResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'getReport', res.error?.message);
+  return generateError<ReportErrorCodes>(
+    res.errorCode,
+    REPORT_ERROR_MESSAGES,
+    'getReport',
+    res.error?.message,
+    res.jsonApiError,
+  );
 }
 
 /**
@@ -588,7 +606,13 @@ export async function initScmReport(options: ScmUploadReportOptions): Promise<Re
 
   const res = await makeRequest<InitScmUploadResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body.testId };
-  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport');
+  return generateError<ReportErrorCodes>(
+    res.errorCode,
+    REPORT_ERROR_MESSAGES,
+    'initReport',
+    undefined,
+    res.jsonApiError,
+  );
 }
 
 /**
@@ -615,5 +639,11 @@ export async function getScmReport(
 
   const res = await makeRequest<UploadReportResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body };
-  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'getReport', res.error?.message);
+  return generateError<ReportErrorCodes>(
+    res.errorCode,
+    REPORT_ERROR_MESSAGES,
+    'getReport',
+    res.error?.message,
+    res.jsonApiError,
+  );
 }

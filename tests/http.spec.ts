@@ -1,4 +1,14 @@
-import { createBundle, extendBundle, getAnalysis, getVerifyCallbackUrl, ResultError } from '../src/http';
+import {
+  checkBundle,
+  createBundle,
+  extendBundle,
+  getAnalysis,
+  getFilters,
+  getReport,
+  getVerifyCallbackUrl,
+  initReport,
+  ResultError,
+} from '../src/http';
 import { baseURL, source } from './constants/base';
 import * as needle from '../src/needle';
 import * as httpUtils from '../src/utils/httpUtils';
@@ -54,6 +64,27 @@ describe('HTTP', () => {
     const url = getVerifyCallbackUrl(authHost);
 
     expect(url).toBe(`${authHost}/api/verify/callback`);
+  });
+
+  describe('getFilters', () => {
+    it('should return error on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 500, error });
+
+      const result = (await getFilters(baseURL, source)) as ResultError<number>;
+
+      expect(result.error.apiName).toEqual('filters');
+      expect(result.error.statusText).toBeTruthy();
+      expect(result.error.statusCode).toEqual(500);
+    });
+
+    it('should return error with detail for json api type errors on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
+
+      await getFilters(baseURL, source);
+
+      expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'filters');
+    });
   });
 
   describe('getAnalysis', () => {
@@ -115,6 +146,36 @@ describe('HTTP', () => {
     });
   });
 
+  describe('checkBundle', () => {
+    const options = {
+      baseURL,
+      sessionToken: 'token',
+      bundleHash: '123',
+      severity: 1,
+      source,
+      files: {},
+    };
+
+    it('should return error on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 404, error });
+
+      const result = (await checkBundle(options)) as ResultError<number>;
+
+      expect(result.error.apiName).toEqual('checkBundle');
+      expect(result.error.statusText).toBeTruthy();
+      expect(result.error.statusCode).toEqual(404);
+    });
+
+    it('should return error with detail for json api type errors on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
+
+      await checkBundle(options);
+
+      expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'checkBundle');
+    });
+  });
+
   describe('extendBundle', () => {
     const options = {
       baseURL,
@@ -142,6 +203,65 @@ describe('HTTP', () => {
       await extendBundle(options);
 
       expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'extendBundle');
+    });
+  });
+
+  describe('initReport', () => {
+    const options = {
+      baseURL,
+      sessionToken: 'token',
+      bundleHash: '123',
+      source,
+      report: {
+        enabled: true,
+      },
+    };
+
+    it('should return error on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 400, error });
+
+      const result = (await initReport(options)) as ResultError<number>;
+
+      expect(result.error.apiName).toEqual('initReport');
+      expect(result.error.statusText).toBeTruthy();
+      expect(result.error.statusCode).toEqual(400);
+    });
+
+    it('should return error with detail for json api type errors on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
+
+      await initReport(options);
+
+      expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'initReport');
+    });
+  });
+
+  describe('getReport', () => {
+    const options = {
+      baseURL,
+      sessionToken: 'token',
+      source,
+      pollId: '1',
+    };
+
+    it('should return error on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 400, error });
+
+      const result = (await getReport(options)) as ResultError<number>;
+
+      expect(result.error.apiName).toEqual('getReport');
+      expect(result.error.statusText).toBeTruthy();
+      expect(result.error.statusCode).toEqual(400);
+    });
+
+    it('should return error with detail for json api type errors on failed response', async () => {
+      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
+
+      await getReport(options);
+
+      expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'getReport');
     });
   });
 });

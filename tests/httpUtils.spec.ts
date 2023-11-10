@@ -1,4 +1,4 @@
-import { getURL } from '../src/utils/httpUtils';
+import { generateErrorWithDetail, getURL, isJsonApiErrors } from '../src/utils/httpUtils';
 
 describe('getURL', () => {
   it('should return base + path if not fedramp', () => {
@@ -33,5 +33,124 @@ describe('getURL', () => {
     const orgId = '1-2-3-4';
 
     expect(() => getURL(base, path, orgId)).toThrowError('A valid Org id is required for this operation');
+  });
+});
+
+describe('isJsonApiErrors', () => {
+  it('should return true if input is an array of json api formatted errors', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: 'bad error: detail',
+      links: {
+        about: 'https://snyk.io',
+      },
+    };
+    expect(isJsonApiErrors([jsonApiError])).toBeTruthy();
+  });
+
+  it('should return false if input is not an array', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: 'bad error: detail',
+      links: {
+        about: 'https://snyk.io',
+      },
+    };
+    expect(isJsonApiErrors(jsonApiError)).toBeFalsy();
+  });
+
+  it('should return false if input is an array of non json api formatted errors', () => {
+    const jsonApiError = {
+      status: '422',
+    };
+    expect(isJsonApiErrors([jsonApiError])).toBeFalsy();
+  });
+});
+
+describe('generateErrorWithDetail', () => {
+  it('should return detail with link', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: 'detail',
+      links: {
+        about: 'https://snyk.io',
+      },
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error: detail (more info: https://snyk.io)',
+      },
+    });
+  });
+
+  it('should return detail with no link if not present', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: 'detail',
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error: detail',
+      },
+    });
+  });
+
+  it('should return detail with title and link when detail is empty string', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: '',
+      links: {
+        about: 'https://snyk.io',
+      },
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error (more info: https://snyk.io)',
+      },
+    });
+  });
+
+  it('should return detail with title when detail is empty string and no link', () => {
+    const jsonApiError = {
+      status: '422',
+      code: 'SNYK_0001',
+      title: 'bad error',
+      detail: '',
+    };
+
+    expect(generateErrorWithDetail(jsonApiError, 422, 'test')).toEqual({
+      type: 'error',
+      error: {
+        apiName: 'test',
+        statusCode: 422,
+        statusText: 'bad error',
+        detail: 'bad error',
+      },
+    });
   });
 });

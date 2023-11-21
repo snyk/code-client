@@ -220,9 +220,17 @@ export async function getSupportedFiles(
   requestId?: string,
   languages?: string[],
   orgId?: string,
+  extraHeaders?: Record<string, string>,
 ): Promise<SupportedFiles> {
   emitter.supportedFilesLoaded(null);
-  const resp = await getFilters(baseURL, source, MAX_RETRY_ATTEMPTS, requestId, orgId);
+  const resp = await getFilters({
+    baseURL,
+    source,
+    orgId,
+    requestId,
+    attempts: MAX_RETRY_ATTEMPTS,
+    extraHeaders: extraHeaders ?? {},
+  });
   if (resp.type === 'error') {
     throw resp.error;
   }
@@ -272,6 +280,7 @@ export async function createBundleFromFolders(options: CreateBundleFromFoldersOp
     options.requestId,
     options.languages,
     options.orgId,
+    options.extraHeaders,
   );
 
   // Collect files and create a remote bundle

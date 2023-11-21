@@ -12,6 +12,7 @@ import {
 import { baseURL, source } from './constants/base';
 import * as needle from '../src/needle';
 import * as httpUtils from '../src/utils/httpUtils';
+import { FilterArgs } from '../src/http';
 
 const jsonApiError = {
   status: '422',
@@ -70,7 +71,7 @@ describe('HTTP', () => {
     it('should return error on failed response', async () => {
       jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 500, error });
 
-      const result = (await getFilters(baseURL, source)) as ResultError<number>;
+      const result = (await getFilters({ baseURL, source, attempts: 1, extraHeaders: {} })) as ResultError<number>;
 
       expect(result.error.apiName).toEqual('filters');
       expect(result.error.statusText).toBeTruthy();
@@ -81,7 +82,7 @@ describe('HTTP', () => {
       jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
-      await getFilters(baseURL, source);
+      await getFilters({ baseURL, source, attempts: 1, extraHeaders: {} });
 
       expect(spy).toHaveBeenCalledWith(jsonApiError, 422, 'filters');
     });

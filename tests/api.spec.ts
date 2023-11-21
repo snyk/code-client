@@ -3,7 +3,15 @@ import 'jest-extended';
 
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
-import { getFilters, createBundle, checkBundle, extendBundle, getAnalysis, AnalysisStatus } from '../src/http';
+import {
+  getFilters,
+  createBundle,
+  checkBundle,
+  extendBundle,
+  getAnalysis,
+  AnalysisStatus,
+  FilterArgs,
+} from '../src/http';
 import { BundleFiles } from '../src/interfaces/files.interface';
 
 const fakeBundleHash = '7055a4c63c339c31bdf28defcced19a64e5e87905b896befc522a11d35fbcdc4';
@@ -30,7 +38,7 @@ const fakeMissingFiles = [
 
 describe('Requests to public API', () => {
   it('gets filters successfully', async () => {
-    const response = await getFilters(baseURL, '');
+    const response = await getFilters({ baseURL, source: 'api-test', attempts: 1, extraHeaders: {} });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
     expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore', '.snyk', '.snyk-rules']));
@@ -89,7 +97,12 @@ describe('Requests to public API', () => {
   });
 
   it('test network issues', async () => {
-    const response = await getFilters('https://faketest.snyk.io', 'test-source', 1);
+    const response = await getFilters({
+      baseURL: 'https://faketest.snyk.io',
+      source: 'test-source',
+      attempts: 1,
+      extraHeaders: {},
+    });
     expect(response.type).toEqual('error');
     if (response.type !== 'error') return;
     expect(response.error).toMatchObject({

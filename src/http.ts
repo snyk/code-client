@@ -3,7 +3,7 @@ import pick from 'lodash.pick';
 import { gzip } from 'zlib';
 import { promisify } from 'util';
 
-import { DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes, MAX_RETRY_ATTEMPTS } from './constants';
+import { DEFAULT_ERROR_MESSAGES, ErrorCodes, GenericErrorTypes } from './constants';
 
 import { BundleFiles, SupportedFiles } from './interfaces/files.interface';
 import { AnalysisResult, ReportResult } from './interfaces/analysis-result.interface';
@@ -180,13 +180,23 @@ export async function checkSession(options: CheckSessionOptions): Promise<Result
   return generateError<CheckSessionErrorCodes>(res.errorCode, CHECK_SESSION_ERROR_MESSAGES, 'checkSession');
 }
 
-export async function getFilters(
-  baseURL: string,
-  source: string,
-  attempts = MAX_RETRY_ATTEMPTS,
-  requestId?: string,
-  orgId?: string,
-): Promise<Result<SupportedFiles, GenericErrorTypes>> {
+export interface FilterArgs {
+  extraHeaders: Record<string, string>;
+  attempts: number;
+  baseURL: string;
+  source: string;
+  requestId?: string;
+  orgId?: string;
+}
+
+export async function getFilters({
+  baseURL,
+  orgId,
+  attempts,
+  source,
+  extraHeaders,
+  requestId,
+}: FilterArgs): Promise<Result<SupportedFiles, GenericErrorTypes>> {
   const apiName = 'filters';
   let url: string;
 
@@ -198,7 +208,11 @@ export async function getFilters(
 
   const res = await makeRequest<SupportedFiles>(
     {
-      headers: { source, ...(requestId && { 'snyk-request-id': requestId }) },
+      headers: {
+        source,
+        ...extraHeaders,
+        ...(requestId && { 'snyk-request-id': requestId }),
+      },
       url,
       method: 'get',
     },

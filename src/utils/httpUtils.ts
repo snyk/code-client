@@ -1,5 +1,5 @@
 import { ORG_ID_REGEXP } from '../constants';
-import { JsonApiError } from '../interfaces/json-api';
+import { JsonApiErrorObject } from '../interfaces/json-api';
 import { ResultError } from '../http';
 
 export function getURL(baseURL: string, path: string, orgId?: string): string {
@@ -20,27 +20,11 @@ function isValidOrg(orgId?: string): boolean {
   return orgId !== undefined && ORG_ID_REGEXP.test(orgId);
 }
 
-export function isJsonApiErrors(input: unknown): input is JsonApiError[] {
-  if (!Array.isArray(input) || input.length < 1) {
-    return false;
-  }
-
-  for (const element of input) {
-    if (
-      typeof element !== 'object' ||
-      !('status' in element) ||
-      !('code' in element) ||
-      !('title' in element) ||
-      !('detail' in element)
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-export function generateErrorWithDetail<E>(error: JsonApiError, statusCode: number, apiName: string): ResultError<E> {
+export function generateErrorWithDetail<E>(
+  error: JsonApiErrorObject,
+  statusCode: number,
+  apiName: string,
+): ResultError<E> {
   const errorLink = error.links?.about;
   const detail = `${error.title}${error.detail ? `: ${error.detail}` : ''}${
     errorLink ? ` (more info: ${errorLink})` : ``

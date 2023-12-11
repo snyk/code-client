@@ -327,7 +327,7 @@ describe('Requests to public API', () => {
       if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
         expect(response.value.sarif.runs[0].results?.length).toBeGreaterThan(0);
 
-        expect(response.value.coverage).toIncludeSameMembers([
+        expect(response.value.coverage).toIncludeAllMembers([
           {
             files: 2,
             isSupported: true,

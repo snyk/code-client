@@ -22,6 +22,9 @@ const jsonApiError = {
   links: {
     about: 'https://snyk.io',
   },
+  meta: {
+    isErrorCatalogError: true,
+  },
 };
 
 const error = new Error('uh oh');
@@ -79,7 +82,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await getFilters({ baseURL, source, attempts: 1, extraHeaders: {} });
@@ -108,7 +113,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await getAnalysis(options);
@@ -138,7 +145,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await createBundle(options);
@@ -168,7 +177,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await checkBundle(options);
@@ -198,7 +209,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await extendBundle(options);
@@ -229,7 +242,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await initReport(options);
@@ -257,7 +272,9 @@ describe('HTTP', () => {
     });
 
     it('should return error with detail for json api type errors on failed response', async () => {
-      jest.spyOn(needle, 'makeRequest').mockResolvedValue({ success: false, errorCode: 422, error, jsonApiError });
+      jest
+        .spyOn(needle, 'makeRequest')
+        .mockResolvedValue({ success: false, errorCode: 422, error, errors: [jsonApiError] });
       const spy = jest.spyOn(httpUtils, 'generateErrorWithDetail');
 
       await getReport(options);

@@ -15,7 +15,7 @@ import {
   ScmReportOptions,
 } from './interfaces/analysis-options.interface';
 import { generateErrorWithDetail, getURL } from './utils/httpUtils';
-import { JsonApiError } from './interfaces/json-api';
+import { JsonApiErrorObject } from './interfaces/json-api';
 
 type ResultSuccess<T> = { type: 'success'; value: T };
 
@@ -52,10 +52,10 @@ function generateError<E>(
   messages: { [c: number]: string },
   apiName: string,
   errorMessage?: string,
-  jsonApiError?: JsonApiError,
+  errors?: JsonApiErrorObject[],
 ): ResultError<E> {
-  if (jsonApiError) {
-    return generateErrorWithDetail<E>(jsonApiError, errorCode, apiName);
+  if (errors) {
+    return generateErrorWithDetail<E>(errors[0], errorCode, apiName);
   }
 
   if (!isSubsetErrorCode<E>(errorCode, messages)) {
@@ -222,7 +222,7 @@ export async function getFilters({
   if (res.success) {
     return { type: 'success', value: res.body };
   }
-  return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName, undefined, res.jsonApiError);
+  return generateError<GenericErrorTypes>(res.errorCode, GENERIC_ERROR_MESSAGES, apiName, undefined, res.errors);
 }
 
 function commonHttpHeaders(options: ConnectionOptions) {
@@ -294,7 +294,7 @@ export async function createBundle(
     CREATE_BUNDLE_ERROR_MESSAGES,
     'createBundle',
     undefined,
-    res.jsonApiError,
+    res.errors,
   );
 }
 
@@ -338,7 +338,7 @@ export async function checkBundle(options: CheckBundleOptions): Promise<Result<R
     CHECK_BUNDLE_ERROR_MESSAGES,
     'checkBundle',
     undefined,
-    res.jsonApiError,
+    res.errors,
   );
 }
 
@@ -394,7 +394,7 @@ export async function extendBundle(
     EXTEND_BUNDLE_ERROR_MESSAGES,
     'extendBundle',
     undefined,
-    res.jsonApiError,
+    res.errors,
   );
 }
 
@@ -475,7 +475,7 @@ export async function getAnalysis(
     GET_ANALYSIS_ERROR_MESSAGES,
     'getAnalysis',
     undefined,
-    res.jsonApiError,
+    res.errors,
   );
 }
 
@@ -552,13 +552,7 @@ export async function initReport(options: UploadReportOptions): Promise<Result<s
 
   const res = await makeRequest<InitUploadResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body.reportId };
-  return generateError<ReportErrorCodes>(
-    res.errorCode,
-    REPORT_ERROR_MESSAGES,
-    'initReport',
-    undefined,
-    res.jsonApiError,
-  );
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport', undefined, res.errors);
 }
 
 /**
@@ -588,7 +582,7 @@ export async function getReport(options: GetReportOptions): Promise<Result<Uploa
     REPORT_ERROR_MESSAGES,
     'getReport',
     res.error?.message,
-    res.jsonApiError,
+    res.errors,
   );
 }
 
@@ -620,13 +614,7 @@ export async function initScmReport(options: ScmUploadReportOptions): Promise<Re
 
   const res = await makeRequest<InitScmUploadResponseDto>(config);
   if (res.success) return { type: 'success', value: res.body.testId };
-  return generateError<ReportErrorCodes>(
-    res.errorCode,
-    REPORT_ERROR_MESSAGES,
-    'initReport',
-    undefined,
-    res.jsonApiError,
-  );
+  return generateError<ReportErrorCodes>(res.errorCode, REPORT_ERROR_MESSAGES, 'initReport', undefined, res.errors);
 }
 
 /**
@@ -658,6 +646,6 @@ export async function getScmReport(
     REPORT_ERROR_MESSAGES,
     'getReport',
     res.error?.message,
-    res.jsonApiError,
+    res.errors,
   );
 }

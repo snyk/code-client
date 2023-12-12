@@ -98,7 +98,7 @@ describe('Functional test of analysis', () => {
           {
             files: 1,
             isSupported: true,
-            lang: 'C++ (beta)',
+            lang: 'C++',
             type: 'SUPPORTED',
           },
           {
@@ -281,7 +281,7 @@ describe('Functional test of analysis', () => {
           {
             files: 1,
             isSupported: true,
-            lang: 'C++ (beta)',
+            lang: 'C++',
             type: 'SUPPORTED',
           },
           {

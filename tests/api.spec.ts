@@ -337,7 +337,7 @@ describe('Requests to public API', () => {
           {
             files: 1,
             isSupported: true,
-            lang: 'C++ (beta)',
+            lang: 'C++',
             type: 'SUPPORTED',
           },
           {

@@ -80,6 +80,7 @@ export async function makeRequest<T = void>(
   }
 
   const options: needle.NeedleOptions = {
+    use_proxy_from_env_var: false,
     headers: payload.headers,
     open_timeout: TIMEOUT_DEFAULT, // No timeout
     response_timeout: payload.timeout || TIMEOUT_DEFAULT,

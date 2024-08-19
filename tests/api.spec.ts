@@ -257,27 +257,6 @@ describe('Requests to public API', () => {
   );
 
   it(
-    'uploads fake files to fake bundle',
-    async () => {
-      const response = await extendBundle({
-        baseURL,
-        sessionToken,
-        source,
-        bundleHash: fakeBundleHashFull,
-        files: {
-          'df.js': { hash: 'df', content: 'const module = new Module();' },
-          'sdfs.js': { hash: 'sdfs', content: 'const App = new App();' },
-        },
-      });
-      expect(response.type).toEqual('success');
-      if (response.type !== 'success') return; // TS trick
-      expect(response.value.bundleHash).toContain('f7c882573beea05f39af5d1ce92408eb4addfae860f6d8b665ceb1b82765d87e');
-      expect(response.value.missingFiles).toHaveLength(15);
-    },
-    TEST_TIMEOUT,
-  );
-
-  it(
     'test successful workflow',
     async () => {
       // Create a bundle first

@@ -1,4 +1,3 @@
 # Snyk Code will be required for a review on every PR
 
-*  @snyk/zenith
-
+*  @snyk/team-workspaces

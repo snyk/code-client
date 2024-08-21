@@ -1,9 +1,29 @@
 version: 2.1
 
 orbs:
-  prodsec: snyk/prodsec-orb@1.0
+  prodsec: snyk/prodsec-orb@1
 
 jobs:
+  security-scans:
+    parameters:
+      node_version:
+        type: string
+    working_directory: ~/code-sdk
+    docker:
+      - image: cimg/node:<< parameters.node_version >>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+      - run:
+          name: Install
+          command: npm install
+      - prodsec/security_scans:
+          mode: auto
+          release-branch: master
+          iac-scan: disabled
+
   test:
     parameters:
       node_version:
@@ -79,11 +99,18 @@ workflows:
       - prodsec/secrets-scan:
           context:
             - snyk-bot-slack
-          channel: code-alerts
+          channel: workspaces-alerts
+          filters:
+            branches:
+              ignore:
+                - master
+      - security-scans:
+          node_version: '12.22.7'
+          name: Security Scans
+          context:
+            - analysis_workspaces
       - lint:
           node_version: '12.22.7'
-          requires:
-            - prodsec/secrets-scan
       - test:
           matrix:
             parameters:

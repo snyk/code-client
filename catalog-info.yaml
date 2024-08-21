@@ -5,7 +5,7 @@ metadata:
   annotations:
     circleci.com/project-slug: github/snyk/code-client
     github.com/project-slug: snyk/code-client
-    github.com/team-slug: snyk/zenith
+    github.com/team-slug: snyk/team-workspaces
     backstage.io/techdocs-ref: dir:.
   labels:
     snyk.io/businessCriticality: medium
@@ -16,5 +16,5 @@ metadata:
 spec:
   type: external-library
   lifecycle: '-'
-  owner: zenith
+  owner: team-workspaces
   system: snyk-code

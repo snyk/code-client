@@ -1,3 +1,4 @@
 4785e1148780801b72918d10066ffbf360ed25c1:tests/fixtures/sarif_convertor/shallow_sast_webgoat/DeserializeTest.java:generic-api-key:82
 4785e1148780801b72918d10066ffbf360ed25c1:tests/fixtures/sarif_convertor/shallow_sast_webgoat/JWTRefreshEndpoint.java:generic-api-key:48
 4785e1148780801b72918d10066ffbf360ed25c1:tests/fixtures/sarif_convertor/shallow_sast_webgoat/JWTRefreshEndpoint.java:generic-api-key:49
+4785e1148780801b72918d10066ffbf360ed25c1:tests/fixtures/sarif_convertor/shallow_sast_webgoat/JWTFinalEndpointTest.java:jwt:31

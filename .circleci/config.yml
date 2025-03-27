@@ -116,7 +116,9 @@ workflows:
             parameters:
               node_version: ['10.24.0', '12.22.7']
               package-lock: ['locked-dependencies', 'no-package-lock']
-          context: nodejs-install
+          context:
+            - nodejs-install
+            - code-client-integration-test
           requires:
             - lint
       - release:

@@ -99,7 +99,7 @@ workflows:
       - prodsec/secrets-scan:
           context:
             - snyk-bot-slack
-          channel: workspaces-alerts
+          channel: snyk-on-snyk-codesec_code-integrations
           filters:
             branches:
               ignore:
@@ -108,8 +108,8 @@ workflows:
           node_version: '12.22.7'
           name: Security Scans
           context:
-            - analysis_workspaces
             - prodsec-orb-runtime
+            - codesec_code-integrations
       - lint:
           node_version: '12.22.7'
       - test:

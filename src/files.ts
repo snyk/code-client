@@ -417,6 +417,18 @@ export function getBundleFilePath(filePath: string, baseDir: string): string {
   return encodeURI(posixPath);
 }
 
+function assertPathWithinBaseDir(baseDir: string, filePath: string): string {
+  const normalizedBaseDir = nodePath.resolve(baseDir);
+  const resolvedPath = nodePath.resolve(filePath);
+  const relativePath = nodePath.relative(normalizedBaseDir, resolvedPath);
+
+  if (!relativePath.startsWith('..') && !nodePath.isAbsolute(relativePath)) {
+    return resolvedPath;
+  }
+
+  throw new Error(`Resolved path escapes base directory: ${filePath}`);
+}
+
 export function calcHash(content: string): string {
   return crypto.createHash(HASH_ALGORITHM).update(content).digest(ENCODE_TYPE);
 }
@@ -427,18 +439,19 @@ export async function getFileInfo(
   withContent = false,
   cache: Cache | null = null,
 ): Promise<FileInfo | null> {
-  const fileStats = await lStat(filePath);
+  const safeFilePath = baseDir ? assertPathWithinBaseDir(baseDir, filePath) : filePath;
+  const fileStats = await lStat(safeFilePath);
   if (fileStats === null) {
     return fileStats;
   }
 
-  const bundlePath = getBundleFilePath(filePath, baseDir);
+  const bundlePath = getBundleFilePath(safeFilePath, baseDir);
 
   let fileContent = '';
   let fileHash = '';
   if (!withContent && !!cache) {
     // Try to get hash from cache
-    const cachedData = cache.getKey(filePath) as CachedData | null;
+    const cachedData = cache.getKey(safeFilePath) as CachedData | null;
     if (cachedData) {
       if (cachedData[0] === fileStats.size && cachedData[1] === fileStats.mtimeMs) {
         fileHash = cachedData[2];
@@ -450,21 +463,21 @@ export async function getFileInfo(
 
   if (!fileHash) {
     try {
-      fileContent = fs.readFileSync(filePath, { encoding: 'utf8' });
+      fileContent = fs.readFileSync(safeFilePath, { encoding: 'utf8' });
       fileHash = calcHash(fileContent);
-      cache?.setKey(filePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
+      cache?.setKey(safeFilePath, [fileStats.size, fileStats.mtimeMs, fileHash]);
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (err.code === 'EACCES' || err.code === 'EPERM') {
         console.log(
-          `${filePath} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
+          `${safeFilePath} is not accessible. Please check permissions and adjust .dcignore file to not even test this file`,
         );
       }
     }
   }
 
   return {
-    filePath,
+    filePath: safeFilePath,
     bundlePath,
     size: fileStats.size,
     hash: fileHash,
@@ -492,7 +505,7 @@ export function resolveBundleFilePath(baseDir: string, bundleFilePath: string): 
   }
 
   if (baseDir) {
-    return nodePath.resolve(baseDir, decodeURI(relPath));
+    return assertPathWithinBaseDir(baseDir, nodePath.resolve(baseDir, decodeURI(relPath)));
   }
 
   return decodeURI(relPath);

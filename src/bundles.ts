@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import pick from 'lodash.pick';
 import omit from 'lodash.omit';
 import pMap from 'p-map';
 
@@ -12,6 +11,7 @@ import {
   determineBaseDir,
   collectBundleFiles,
 } from './files';
+import { pick } from './utils/pick';
 
 import {
   CreateBundleErrorCodes,
@@ -116,9 +116,16 @@ export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Pr
     const resp = await createBundle({
       ...apiParams,
       files: bucketFiles.reduce((d, f) => {
-        d[f.bundlePath] = pick(f, ['hash', 'content']);
+        if (f.content === undefined) {
+          throw new Error(`Missing file content for ${f.bundlePath}`);
+        }
+
+        d[f.bundlePath] = {
+          hash: f.hash,
+          content: f.content,
+        };
         return d;
-      }, {}),
+      }, {} as BundleFiles),
     });
 
     if (resp.type !== 'error') {

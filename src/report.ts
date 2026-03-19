@@ -1,5 +1,4 @@
 import * as uuid from 'uuid';
-import pick from 'lodash.pick';
 import { POLLING_INTERVAL } from './constants';
 import { emitter } from './emitter';
 import {
@@ -17,6 +16,7 @@ import {
   GetReportOptions,
 } from './http';
 import { ReportResult } from './interfaces/analysis-result.interface';
+import { pick } from './utils/pick';
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 

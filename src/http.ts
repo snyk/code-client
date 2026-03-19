@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import pick from 'lodash.pick';
 import { gzip } from 'zlib';
 import { promisify } from 'util';
 
@@ -14,6 +13,7 @@ import {
   ReportOptions,
   ScmReportOptions,
 } from './interfaces/analysis-options.interface';
+import { pick } from './utils/pick';
 import { generateErrorWithDetail, getURL } from './utils/httpUtils';
 import { JsonApiErrorObject } from './interfaces/json-api';
 

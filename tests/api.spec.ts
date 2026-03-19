@@ -1,8 +1,6 @@
-import pick from 'lodash.pick';
-import 'jest-extended';
-
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
 import { bundleFiles, bundleFilesFull, singleBundleFull } from './constants/sample';
+import { expectSameMembers } from './helpers/expect-same-members';
 import {
   getFilters,
   createBundle,
@@ -115,7 +113,7 @@ describe('Requests to public API', () => {
   it(
     'creates bundle successfully',
     async () => {
-      const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj, [i, d]) => {
+      const files: BundleFiles = [...(await bundleFiles).entries()].reduce<BundleFiles>((obj, [i, d]) => {
         obj[d.bundlePath] = `${i}`;
         return obj;
       }, {});
@@ -260,8 +258,15 @@ describe('Requests to public API', () => {
     'test successful workflow',
     async () => {
       // Create a bundle first
-      const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
-        r[d.bundlePath] = pick(d, ['hash', 'content']);
+      const files: BundleFiles = (await bundleFilesFull).reduce<BundleFiles>((r, d) => {
+        if (d.content === undefined) {
+          throw new Error(`Missing file content for ${d.bundlePath}`);
+        }
+
+        r[d.bundlePath] = {
+          hash: d.hash,
+          content: d.content,
+        };
         return r;
       }, {});
 
@@ -306,7 +311,7 @@ describe('Requests to public API', () => {
       if (response.value.status === AnalysisStatus.complete && response.value.type === 'sarif') {
         expect(response.value.sarif.runs[0].results?.length).toBeGreaterThan(0);
 
-        expect(response.value.coverage).toIncludeSameMembers([
+        expectSameMembers(response.value.coverage, [
           {
             files: 2,
             isSupported: true,

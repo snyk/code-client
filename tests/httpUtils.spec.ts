@@ -24,7 +24,7 @@ describe('getURL', () => {
     const base = 'api.snykgov.io';
     const path = '/analysis';
 
-    expect(() => getURL(base, path)).toThrowError('A valid Org id is required for this operation');
+    expect(() => getURL(base, path)).toThrow('A valid Org id is required for this operation');
   });
 
   it('should throw an error if fedramp and org is invalid', () => {
@@ -32,7 +32,7 @@ describe('getURL', () => {
     const path = '/analysis';
     const orgId = '1-2-3-4';
 
-    expect(() => getURL(base, path, orgId)).toThrowError('A valid Org id is required for this operation');
+    expect(() => getURL(base, path, orgId)).toThrow('A valid Org id is required for this operation');
   });
 });
 

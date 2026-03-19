@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as nodePath from 'path';
-import 'jest-extended';
 
 import {
   collectBundleFiles,
@@ -13,6 +12,7 @@ import {
 } from '../src/files';
 import { getGlobPatterns } from '../src';
 import { FileInfo } from '../src/interfaces/files.interface';
+import { expectSameMembers } from './helpers/expect-same-members';
 import {
   sampleProjectPath,
   supportedFiles,
@@ -39,8 +39,8 @@ describe('files', () => {
     }
     // all files in the repo are expected other than the file that exceeds MAX_FILE_SIZE 'big-file.js'
     const expectedFiles = (await bundleFiles).filter(obj => !obj.bundlePath.includes('big-file.js'));
-    expect(files.map(f => f.filePath)).toIncludeSameMembers(expectedFiles.map(f => f.filePath)); // Assert same files in bundle
-    expect(files).toIncludeSameMembers(expectedFiles); // Assert same properties for files in bundle
+    expectSameMembers(files.map(f => f.filePath), expectedFiles.map(f => f.filePath)); // Assert same files in bundle
+    expectSameMembers(files, expectedFiles); // Assert same properties for files in bundle
 
     // big-file.js should be added to skippedOversizedFiles
     expect(skippedOversizedFiles.length).toEqual(1);

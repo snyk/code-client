@@ -11,14 +11,14 @@ import { ErrorCodes, NETWORK_ERRORS, MAX_RETRY_ATTEMPTS, REQUEST_RETRY_DELAY } f
 
 const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
 
+declare global {
+  // Snyk CLI sets this flag when --insecure is used.
+  var ignoreUnknownCA: boolean | undefined;
+}
+
 // Snyk CLI allow passing --insecure flag which allows self-signed certificates
 // It updates global namespace property ignoreUnknownCA and we can use it in order
 // to pass rejectUnauthorized option to https agent
-export declare interface Global extends NodeJS.Global {
-  ignoreUnknownCA: boolean;
-}
-declare const global: Global;
-
 const TIMEOUT_DEFAULT = 600000;
 
 const agentOptions = {
@@ -28,7 +28,7 @@ const agentOptions = {
   maxFreeSockets: 256,
   freeSocketTimeout: 60000, // Maximum number of sockets to leave open for 60 seconds in a free state. Only relevant if keepAlive is set to true. Defaults to 256.
   socketActiveTTL: 1000 * 60 * 10,
-  rejectUnauthorized: !global.ignoreUnknownCA,
+  rejectUnauthorized: !globalThis.ignoreUnknownCA,
 };
 
 export interface Payload {
@@ -108,7 +108,8 @@ export async function makeRequest<T = void>(
       errorCode = response.statusCode;
     } catch (err) {
       error = err; // do not swallow the error, pass further to the caller instead
-      errorCode = NETWORK_ERRORS[err.code || err.errno];
+      const networkError = String((err as NodeJS.ErrnoException).code ?? (err as NodeJS.ErrnoException).errno ?? '');
+      errorCode = NETWORK_ERRORS[networkError as keyof typeof NETWORK_ERRORS];
       emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
     }
 

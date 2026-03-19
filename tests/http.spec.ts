@@ -33,7 +33,7 @@ describe('HTTP', () => {
   const authHost = 'https://dev.snyk.io';
 
   beforeEach(() => {
-    jest.resetModuleRegistry();
+    jest.resetModules();
   });
 
   it('should respolve IPv6, if http request succeeds', async () => {

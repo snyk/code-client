@@ -5,11 +5,7 @@ import { Cache, readJSON } from '../src/cache';
 describe('Cache', () => {
   afterAll(() => {
     const dir = path.resolve(__dirname, '../fixtures');
-    fs.rmdir(dir, { recursive: true }, err => {
-      if (err) {
-        throw err;
-      }
-    });
+    fs.rmSync(dir, { recursive: true, force: true });
   });
   it('should not crash if the cache file exists but it is an empty string', function () {
     const cachePath = path.resolve(__dirname, '../fixtures/.cache2');

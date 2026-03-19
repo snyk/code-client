@@ -1,5 +1,3 @@
-import 'jest-extended';
-
 import { collectFilePolicies, parseFileIgnores } from '../src/files';
 import { sampleProjectPath, fileIgnoresFixtures, bundleFileIgnores, bundleFilePolicies } from './constants/sample';
 
@@ -37,20 +35,20 @@ describe('file ignores', () => {
       const collectPath = `${fileIgnoresFixtures}/dot-snyk-excludes`;
       const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Object {
-          "excludes": Array [
-            "${collectPath}/root-excluded/**",
-            "${collectPath}/root-excluded",
-            "${collectPath}/root-excluded-contents/**",
-            "${collectPath}/**/deep-excluded/**",
-            "${collectPath}/**/deep-excluded",
-            "${collectPath}/**/deep-excluded-contents/**",
-            "${collectPath}/sub/root-excluded/**",
-            "${collectPath}/sub/root-excluded",
-            "${collectPath}/sub/**/deep-excluded/**",
-            "${collectPath}/sub/**/deep-excluded",
+        {
+          "excludes": [
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/root-excluded-contents/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/**/deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/**/deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/**/deep-excluded-contents/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/sub/root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/sub/root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/sub/**/deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-snyk-excludes/sub/**/deep-excluded",
           ],
-          "ignores": Array [
+          "ignores": [
             "**/.git/**",
           ],
         }
@@ -61,18 +59,18 @@ describe('file ignores', () => {
       const collectPath = `${fileIgnoresFixtures}/dot-dcignore-rules`;
       const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Object {
-          "excludes": Array [],
-          "ignores": Array [
+        {
+          "excludes": [],
+          "ignores": [
             "**/.git/**",
-            "${collectPath}/root-excluded/**",
-            "${collectPath}/root-excluded",
-            "${collectPath}/root-excluded-contents/**",
-            "${collectPath}/**/deep-excluded/**",
-            "${collectPath}/**/deep-excluded",
-            "${collectPath}/**/deep-excluded-contents/**",
-            "!${collectPath}/not/deep-excluded/**",
-            "!${collectPath}/not/deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/root-excluded-contents/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/**/deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/**/deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/**/deep-excluded-contents/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/not/deep-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-dcignore-rules/not/deep-excluded",
           ],
         }
       `);
@@ -82,18 +80,18 @@ describe('file ignores', () => {
       const collectPath = `${fileIgnoresFixtures}/dot-gitignore-rules`;
       const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Object {
-          "excludes": Array [],
-          "ignores": Array [
+        {
+          "excludes": [],
+          "ignores": [
             "**/.git/**",
-            "${collectPath}/root-excluded/**",
-            "${collectPath}/root-excluded",
-            "${collectPath}/root-excluded-contents/**",
-            "${collectPath}/**/deep-excluded/**",
-            "${collectPath}/**/deep-excluded",
-            "${collectPath}/**/deep-excluded-contents/**",
-            "!${collectPath}/not/deep-excluded/**",
-            "!${collectPath}/not/deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/root-excluded-contents/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/**/deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/**/deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/**/deep-excluded-contents/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/not/deep-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/dot-gitignore-rules/not/deep-excluded",
           ],
         }
       `);
@@ -103,33 +101,33 @@ describe('file ignores', () => {
       const collectPath = `${fileIgnoresFixtures}/combined`;
       const ignoreRules = await collectFilePolicies([collectPath]);
       expect(ignoreRules).toMatchInlineSnapshot(`
-        Object {
-          "excludes": Array [
-            "${collectPath}/snyk-root-excluded/**",
-            "${collectPath}/snyk-root-excluded",
-            "${collectPath}/**/snyk-deep-excluded/**",
-            "${collectPath}/**/snyk-deep-excluded",
-            "${collectPath}/sub/snyk-nested-excluded/**",
-            "${collectPath}/sub/snyk-nested-excluded",
+        {
+          "excludes": [
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/snyk-root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/snyk-root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/snyk-deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/snyk-deep-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/sub/snyk-nested-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/sub/snyk-nested-excluded",
           ],
-          "ignores": Array [
+          "ignores": [
             "**/.git/**",
-            "${collectPath}/dcignore-root-excluded/**",
-            "${collectPath}/dcignore-root-excluded",
-            "${collectPath}/**/dcignore-deep-excluded/**",
-            "${collectPath}/**/dcignore-deep-excluded",
-            "!${collectPath}/dcignore-root-not-excluded/**",
-            "!${collectPath}/dcignore-root-not-excluded",
-            "!${collectPath}/**/dcignore-deep-not-excluded/**",
-            "!${collectPath}/**/dcignore-deep-not-excluded",
-            "${collectPath}/gitignore-root-excluded/**",
-            "${collectPath}/gitignore-root-excluded",
-            "${collectPath}/**/gitignore-deep-excluded/**",
-            "${collectPath}/**/gitignore-deep-excluded",
-            "!${collectPath}/gitignore-root-not-excluded/**",
-            "!${collectPath}/gitignore-root-not-excluded",
-            "!${collectPath}/**/gitignore-deep-not-excluded/**",
-            "!${collectPath}/**/gitignore-deep-not-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/dcignore-root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/dcignore-root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/dcignore-deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/dcignore-deep-excluded",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/dcignore-root-not-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/dcignore-root-not-excluded",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/dcignore-deep-not-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/dcignore-deep-not-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/gitignore-root-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/gitignore-root-excluded",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/gitignore-deep-excluded/**",
+            "/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/gitignore-deep-excluded",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/gitignore-root-not-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/gitignore-root-not-excluded",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/gitignore-deep-not-excluded/**",
+            "!/Users/fsargent/src/snyk/code-client/tests/fixtures/file-ignores/combined/**/gitignore-deep-not-excluded",
           ],
         }
       `);

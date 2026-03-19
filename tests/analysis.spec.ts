@@ -1,11 +1,11 @@
 import path from 'path';
 import nock from 'nock';
 import jsonschema from 'jsonschema';
-import 'jest-extended';
 
 import { analyzeFolders, extendAnalysis, analyzeBundle, analyzeScmProject } from '../src/analysis';
 import { uploadRemoteBundle } from '../src/bundles';
 import { baseURL, sessionToken, source, TEST_TIMEOUT } from './constants/base';
+import { expectSameMembers } from './helpers/expect-same-members';
 import { sampleProjectPath, bundleFilesFull, bundleExtender, getReportReturn } from './constants/sample';
 import { emitter } from '../src/emitter';
 import { AnalysisResponseProgress } from '../src/http';
@@ -88,7 +88,7 @@ describe('Functional test of analysis', () => {
         expect(bundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
         expect(bundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(bundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(bundle.analysisResults.coverage).toIncludeSameMembers([
+        expectSameMembers(bundle.analysisResults.coverage, [
           {
             files: 2,
             isSupported: true,
@@ -271,7 +271,7 @@ describe('Functional test of analysis', () => {
         expect(extendedBundle.analysisResults.timing.analysis).toBeGreaterThanOrEqual(0);
         expect(extendedBundle.analysisResults.timing.fetchingCode).toBeGreaterThanOrEqual(0);
         expect(extendedBundle.analysisResults.timing.queue).toBeGreaterThanOrEqual(0);
-        expect(extendedBundle.analysisResults.coverage).toIncludeSameMembers([
+        expectSameMembers(extendedBundle.analysisResults.coverage, [
           {
             files: 2,
             isSupported: true,

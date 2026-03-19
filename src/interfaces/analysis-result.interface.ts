@@ -5,6 +5,7 @@ interface Coverage {
   files: number;
   isSupported: boolean;
   lang: string;
+  type?: string;
 }
 
 interface AnalysisResultBase {

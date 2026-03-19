@@ -4,10 +4,10 @@ import path from 'path';
 import fs from 'fs';
 
 export class Cache {
-  public visited = {};
-  public persisted = {};
+  public visited: Record<string, boolean> = {};
+  public persisted: Record<string, any> = {};
   public pathToFile = '';
-  constructor(docId: string, cacheDir?: any) {
+  constructor(docId: string, cacheDir?: string) {
     this.pathToFile = cacheDir ? path.resolve(cacheDir, docId) : path.resolve(__dirname, '../.cache/', docId);
     if (fs.existsSync(this.pathToFile)) {
       this.persisted = tryParse(this.pathToFile, {});
@@ -29,7 +29,7 @@ export class Cache {
     this.persisted[key] = value;
   }
   private prune() {
-    const obj = {};
+    const obj: Record<string, any> = {};
 
     const keys = Object.keys(this.visited);
 
@@ -47,23 +47,23 @@ export class Cache {
   }
 }
 
-function writeJSON(filePath: string, data: any): void {
+function writeJSON(filePath: string, data: unknown): void {
   fs.mkdirSync(path.dirname(filePath), {
     recursive: true,
   });
   fs.writeFileSync(filePath, JSON.stringify(data));
 }
-function tryParse(filePath: string, defaultValue: any): JSON {
+function tryParse<T>(filePath: string, defaultValue: T): T {
   let result;
   try {
-    result = readJSON(filePath);
+    result = readJSON(filePath) as T;
   } catch (ex) {
     result = defaultValue;
   }
   return result;
 }
 
-export function readJSON(filePath: string): JSON {
+export function readJSON(filePath: string): unknown {
   return JSON.parse(
     fs.readFileSync(filePath, {
       encoding: 'utf8',

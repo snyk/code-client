@@ -28,7 +28,7 @@ function parseConnectionOptions(options: {
       const [key, value] = h.split(':');
       m[key.trim()] = value.trim();
       return m;
-    }, {});
+    }, {} as Record<string, string>);
   }
   return {
     baseURL: options.url,

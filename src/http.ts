@@ -100,6 +100,9 @@ export async function compressAndEncode(payload: unknown): Promise<Buffer> {
   return await deflate(Buffer.from(JSON.stringify(payload)).toString('base64'));
 }
 
+/**
+ * @deprecated This legacy authentication helper is kept for compatibility only and is not used by current internal consumers.
+ */
 export function startSession(options: StartSessionOptions): StartSessionResponseDto {
   const { source, authHost } = options;
   const draftToken = uuidv4();
@@ -116,6 +119,8 @@ export function getVerifyCallbackUrl(authHost: string): string {
 
 export type IpFamily = 6 | undefined;
 /**
+ * @deprecated This legacy authentication helper is kept for compatibility only and is not used by current internal consumers.
+ *
  * Dispatches a FORCED IPv6 request to test client's ISP and network capability.
  *
  * @return {number} IP family number used by the client.
@@ -156,6 +161,9 @@ interface CheckSessionOptions {
   readonly ipFamily?: IpFamily;
 }
 
+/**
+ * @deprecated This legacy authentication helper is kept for compatibility only and is not used by current internal consumers.
+ */
 export async function checkSession(options: CheckSessionOptions): Promise<Result<string, CheckSessionErrorCodes>> {
   const defaultValue: ResultSuccess<string> = {
     type: 'success',

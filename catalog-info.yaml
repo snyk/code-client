@@ -16,5 +16,5 @@ metadata:
 spec:
   type: external-library
   lifecycle: '-'
-  owner: codesec_code-integrations
+  owner: code-integrations
   system: snyk-code

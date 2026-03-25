@@ -4,7 +4,7 @@ export function pick<T extends object, K extends keyof T>(value: T, keys: readon
   const result = {} as Pick<T, K>;
 
   for (const key of keys) {
-    if (key in value) {
+    if (Object.hasOwn(value, key)) {
       result[key] = value[key];
     }
   }

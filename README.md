@@ -25,32 +25,34 @@ import codeClient from '@snyk/code-client';
 const baseURL = 'https://www.snyk.io';
 ```
 
-### Requests the creation of a new login session
+`@snyk/code-client` is primarily used for Snyk Code scanning, bundle creation, and reporting APIs. The older authentication helpers are still exported for compatibility, but they are legacy and are not used by current internal consumers.
+
+### Run analysis
 
 ```javascript
-const loginResponse = await codeClient.startSession({
-  baseURL,
-  // An identificator for the editor using the Snyk APIs
-  source: 'atom',
+const authorization = process.env.SNYK_OAUTH_TOKEN
+  ? `Bearer ${process.env.SNYK_OAUTH_TOKEN}`
+  : `token ${process.env.SNYK_API_KEY}`;
+
+const result = await codeClient.analyzeFolders({
+  connection: {
+    baseURL,
+    sessionToken: authorization,
+    source: 'cli',
+  },
+  analysisOptions: {
+    severity: codeClient.AnalysisSeverity.info,
+  },
+  fileOptions: {
+    paths: ['.'],
+  },
 });
-
-if (loginResponse.type === 'error') {
-  // Handle error and alert user
-}
-
-const { sessionToken, loginURL } = loginResponse.value;
 ```
 
-### Checks status of the login process
+`sessionToken` is sent as the `Authorization` header value. Follow the same pattern used by current internal consumers:
 
-```javascript
-const sessionResponse = await codeClient.checkSession({ baseURL, sessionToken });
-if (sessionResponse.type === 'error') {
-  // Handle error and alert user
-}
-
-const isLoggedIn = sessionResponse.value; // boolean
-```
+- OAuth: `Bearer <access-token>`
+- API token: `token <api-key>`
 
 ### Subscribe to events.
 

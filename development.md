@@ -21,13 +21,14 @@ $ npm link @snyk/code-client
 Test variables:
 
 - `SNYK_API_HOST` is the API server host (by default: https://deeproxy.dev.snyk.io)
-- `SNYK_AUTH_HOST` is the Snyk authentication server host (by default: https://dev.snyk.io)
 - `SNYK_API_KEY` is a sessionToken of a user with access to the Snyk
 
 ```shell script
 $ cd <package-location>
-$ SNYK_API_HOST=... SNYK_AUTH_HOST=... SNYK_API_KEY=... npm run test
+$ SNYK_API_HOST=... SNYK_API_KEY=... npm run test
 ```
+
+Note: the legacy authentication helpers exported by `@snyk/code-client` are kept for compatibility, but they are not part of the test suite and are not used by current internal consumers.
 
 #### Publish
 

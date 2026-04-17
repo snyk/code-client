@@ -3,9 +3,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:prettier/recommended",
-    "prettier"
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:prettier/recommended"
   ],
   "globals": {
     "Atomics": "readonly",

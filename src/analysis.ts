@@ -101,7 +101,7 @@ export async function analyzeBundle(options: GetAnalysisOptions): Promise<Analys
 }
 
 function normalizeResultFiles(files: AnalysisFiles, baseDir: string): AnalysisFiles {
-  return Object.entries(files).reduce((obj, [path, positions]) => {
+  return Object.entries(files).reduce((obj: AnalysisFiles, [path, positions]) => {
     const filePath = resolveBundleFilePath(baseDir, path);
     obj[filePath] = positions;
     return obj;
@@ -257,7 +257,7 @@ const moveSuggestionIndexes = <T>(
 ): { [index: string]: T } => {
   const entries = Object.entries(suggestions);
 
-  return entries.reduce((obj, [i, s]) => {
+  return entries.reduce((obj: { [index: string]: T }, [i, s]) => {
     obj[`${parseInt(i, 10) + suggestionIndex + 1}`] = s;
     return obj;
   }, {});
@@ -280,7 +280,7 @@ function mergeLegacyResults(
   const newSuggestions = moveSuggestionIndexes<Suggestion>(suggestionIndex, newAnalysisResults.suggestions);
   const suggestions = { ...oldAnalysisResults.suggestions, ...newSuggestions };
 
-  const newFiles = Object.entries(newAnalysisResults.files).reduce((obj, [fn, s]) => {
+  const newFiles = Object.entries(newAnalysisResults.files).reduce((obj: AnalysisFiles, [fn, s]) => {
     obj[fn] = moveSuggestionIndexes(suggestionIndex, s);
     return obj;
   }, {});

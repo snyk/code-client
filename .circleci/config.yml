@@ -90,8 +90,7 @@ jobs:
           command: npm install
       - run:
           name: Publish to GitHub
-          ## this is a work around, as it seems that the latest version has issues with < node14
-          command: npx semantic-release@16
+          command: npx semantic-release
 
 workflows:
   default_workflow:
@@ -105,17 +104,17 @@ workflows:
               ignore:
                 - master
       - security-scans:
-          node_version: '12.22.7'
+          node_version: '20.19.2'
           name: Security Scans
           context:
             - prodsec-orb-runtime
             - codesec_code-integrations
       - lint:
-          node_version: '12.22.7'
+          node_version: '20.19.2'
       - test:
           matrix:
             parameters:
-              node_version: ['10.24.0', '12.22.7']
+              node_version: ['18.20.8', '20.19.2']
               package-lock: ['locked-dependencies', 'no-package-lock']
           context:
             - nodejs-install
@@ -123,7 +122,7 @@ workflows:
           requires:
             - lint
       - release:
-          node_version: '12.22.7'
+          node_version: '20.19.2'
           context: nodejs-lib-release
           requires:
             - lint

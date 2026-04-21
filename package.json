@@ -2,7 +2,6 @@
   "name": "@snyk/code-client",
   "description": "Typescript consumer of SnykCode public API",
   "main": "dist/index.js",
-  "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -34,6 +33,9 @@
     "url": "https://github.com/snyk/code-client/issues"
   },
   "homepage": "https://github.com/snyk/code-client#readme",
+  "engines": {
+    "node": ">=18"
+  },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",

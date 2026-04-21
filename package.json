@@ -87,7 +87,7 @@
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
     "lodash.union": "^4.6.0",
-    "multimatch": "^5.0.0",
+    "minimatch": "^10.2.5",
     "needle": "^3.3.0",
     "p-map": "^3.0.0",
     "uuid": "^8.3.2",

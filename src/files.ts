@@ -1,7 +1,7 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
 import fg from 'fast-glob';
-import multimatch from 'multimatch';
+import { minimatch } from 'minimatch';
 import crypto from 'crypto';
 import { parse as parseYaml } from 'yaml';
 import union from 'lodash.union';
@@ -49,7 +49,7 @@ export function notEmpty<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
-const multiMatchOptions = { matchBase: true, dot: true };
+const matchOptions = { matchBase: true, dot: true };
 const fgOptions = {
   dot: true,
   absolute: true,
@@ -61,8 +61,8 @@ const fgOptions = {
 type CachedData = [number, number, string];
 
 function filterSupportedFiles(files: string[], supportedFiles: SupportedFiles): string[] {
-  const patters = getGlobPatterns(supportedFiles);
-  return multimatch(files, patters, multiMatchOptions);
+  const patterns = getGlobPatterns(supportedFiles);
+  return files.filter(f => patterns.some(p => minimatch(f, p, matchOptions)));
 }
 
 function parseIgnoreRulesToGlobs(rules: string[], baseDir: string): string[] {
@@ -215,7 +215,7 @@ export async function collectFilePolicies(
     // Parse rules from relevant .[*]ignore files inside this directory.
     // Exclude ignore files under paths excluded by .snyk files.
     const ignoreFiles = allIgnoredFiles.filter(
-      f => !f.endsWith(DOTSNYK_FILENAME) && multimatch([nodePath.dirname(f)], snykExcludeRules).length === 0,
+      f => !f.endsWith(DOTSNYK_FILENAME) && !snykExcludeRules.some(rule => minimatch(nodePath.dirname(f), rule)),
     );
     const ignoreFileRules = union(...ignoreFiles.map(parseFileIgnores));
 
@@ -542,5 +542,10 @@ export function* composeFilePayloads(files: FileInfo[], bucketSize = MAX_PAYLOAD
 }
 
 export function isMatch(filePath: string, rules: string[]): boolean {
-  return !!multimatch([filePath], rules, { ...multiMatchOptions, matchBase: false }).length;
+  const opts = { ...matchOptions, matchBase: false };
+  const positiveRules = rules.filter(r => !r.startsWith('!'));
+  const negativeRules = rules.filter(r => r.startsWith('!')).map(r => r.slice(1));
+  const matched = positiveRules.some(rule => minimatch(filePath, rule, opts));
+  if (!matched) return false;
+  return !negativeRules.some(rule => minimatch(filePath, rule, opts));
 }

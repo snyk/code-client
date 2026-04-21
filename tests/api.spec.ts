@@ -115,7 +115,7 @@ describe('Requests to public API', () => {
   it(
     'creates bundle successfully',
     async () => {
-      const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj, [i, d]) => {
+      const files: BundleFiles = [...(await bundleFiles).entries()].reduce((obj: BundleFiles, [i, d]) => {
         obj[d.bundlePath] = `${i}`;
         return obj;
       }, {});
@@ -260,8 +260,8 @@ describe('Requests to public API', () => {
     'test successful workflow',
     async () => {
       // Create a bundle first
-      const files: BundleFiles = (await bundleFilesFull).reduce((r, d) => {
-        r[d.bundlePath] = pick(d, ['hash', 'content']);
+      const files: BundleFiles = (await bundleFilesFull).reduce((r: BundleFiles, d) => {
+        r[d.bundlePath] = pick(d, ['hash', 'content']) as BundleFiles[string];
         return r;
       }, {});
 

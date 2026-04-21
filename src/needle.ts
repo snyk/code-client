@@ -14,10 +14,9 @@ const sleep = (duration: number) => new Promise(resolve => setTimeout(resolve, d
 // Snyk CLI allow passing --insecure flag which allows self-signed certificates
 // It updates global namespace property ignoreUnknownCA and we can use it in order
 // to pass rejectUnauthorized option to https agent
-export declare interface Global extends NodeJS.Global {
+declare const global: typeof globalThis & {
   ignoreUnknownCA: boolean;
-}
-declare const global: Global;
+};
 
 const TIMEOUT_DEFAULT = 600000;
 
@@ -108,7 +107,7 @@ export async function makeRequest<T = void>(
       errorCode = response.statusCode;
     } catch (err) {
       error = err; // do not swallow the error, pass further to the caller instead
-      errorCode = NETWORK_ERRORS[err.code || err.errno];
+      errorCode = NETWORK_ERRORS[(err.code || err.errno) as keyof typeof NETWORK_ERRORS];
       emitter.apiRequestLog(`Requested url --> ${url} | error --> ${err}`);
     }
 

@@ -116,9 +116,9 @@ export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Pr
     const resp = await createBundle({
       ...apiParams,
       files: bucketFiles.reduce((d, f) => {
-        d[f.bundlePath] = pick(f, ['hash', 'content']);
+        d[f.bundlePath] = pick(f, ['hash', 'content']) as BundleFiles[string];
         return d;
-      }, {}),
+      }, {} as BundleFiles),
     });
 
     if (resp.type !== 'error') {

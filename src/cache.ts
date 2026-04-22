@@ -4,13 +4,13 @@ import path from 'path';
 import fs from 'fs';
 
 export class Cache {
-  public visited = {};
-  public persisted = {};
+  public visited: Record<string, boolean> = {};
+  public persisted: Record<string, unknown> = {};
   public pathToFile = '';
   constructor(docId: string, cacheDir?: any) {
     this.pathToFile = cacheDir ? path.resolve(cacheDir, docId) : path.resolve(__dirname, '../.cache/', docId);
     if (fs.existsSync(this.pathToFile)) {
-      this.persisted = tryParse(this.pathToFile, {});
+      this.persisted = tryParse(this.pathToFile, {}) as unknown as Record<string, unknown>;
     }
   }
 
@@ -29,7 +29,7 @@ export class Cache {
     this.persisted[key] = value;
   }
   private prune() {
-    const obj = {};
+    const obj: Record<string, unknown> = {};
 
     const keys = Object.keys(this.visited);
 

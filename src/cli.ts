@@ -24,7 +24,7 @@ function parseConnectionOptions(options: {
 }): ConnectionOptions {
   let headers: { [key: string]: string } = {};
   if (options.headers?.length) {
-    headers = options.headers.reduce((m, h) => {
+    headers = options.headers.reduce((m: { [key: string]: string }, h) => {
       const [key, value] = h.split(':');
       m[key.trim()] = value.trim();
       return m;

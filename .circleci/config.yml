@@ -104,17 +104,17 @@ workflows:
               ignore:
                 - master
       - security-scans:
-          node_version: '20.19.2'
+          node_version: '24.15.0'
           name: Security Scans
           context:
             - prodsec-orb-runtime
             - codesec_code-integrations
       - lint:
-          node_version: '20.19.2'
+          node_version: '24.15.0'
       - test:
           matrix:
             parameters:
-              node_version: ['18.20.8', '20.19.2']
+              node_version: ['24.15.0']
               package-lock: ['locked-dependencies', 'no-package-lock']
           context:
             - nodejs-install
@@ -122,7 +122,7 @@ workflows:
           requires:
             - lint
       - release:
-          node_version: '20.19.2'
+          node_version: '24.15.0'
           context: nodejs-lib-release
           requires:
             - lint

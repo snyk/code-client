@@ -89,8 +89,10 @@ jobs:
           name: Install
           command: npm install
       - run:
-          name: Publish to GitHub
-          command: npx semantic-release
+          name: Publish to NPM and GitHub
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            npx semantic-release
 
 workflows:
   default_workflow:
@@ -123,7 +125,9 @@ workflows:
             - lint
       - release:
           node_version: '24.15.0'
-          context: nodejs-lib-release
+          context:
+            - nodejs-install
+            - github-release
           requires:
             - lint
           filters:

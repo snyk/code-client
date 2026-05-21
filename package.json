@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/snyk/code-client.git"
+    "url": "https://github.com/snyk/code-client.git"
   },
   "keywords": [
     "snyk",
@@ -29,6 +29,9 @@
   ],
   "author": "snyk",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "bugs": {
     "url": "https://github.com/snyk/code-client/issues"
   },

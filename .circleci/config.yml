@@ -17,6 +17,9 @@ jobs:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
       - run:
+          name: Ensure npm >= 11.12.1
+          command: sudo npm install --location=global npm@^11.12.1
+      - run:
           name: Install
           command: npm install
       - prodsec/security_scans:
@@ -38,6 +41,9 @@ jobs:
       - restore_cache:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>>-<< parameters.package-lock >>>
+      - run:
+          name: Ensure npm >= 11.12.1
+          command: sudo npm install --location=global npm@^11.12.1
       - when:
           condition: << parameters.package-lock >> == "locked-dependencies"
           steps:
@@ -69,6 +75,9 @@ jobs:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
       - run:
+          name: Ensure npm >= 11.12.1
+          command: sudo npm install --location=global npm@^11.12.1
+      - run:
           name: Install
           command: npm install
       - run: npm run lint
@@ -85,6 +94,9 @@ jobs:
       - restore_cache:
           keys:
             - v2-{{ .Branch }}-{{ .Revision }}-<< parameters.node_version >>
+      - run:
+          name: Ensure npm >= 11.12.1
+          command: sudo npm install --location=global npm@^11.12.1
       - run:
           name: Install
           command: npm install
@@ -114,7 +126,7 @@ workflows:
       - test:
           matrix:
             parameters:
-              node_version: ['18.20.8', '20.19.2']
+              node_version: ['20.19.2', '24.15.0']
               package-lock: ['locked-dependencies', 'no-package-lock']
           context:
             - nodejs-install

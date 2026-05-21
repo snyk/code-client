@@ -34,7 +34,8 @@
   },
   "homepage": "https://github.com/snyk/code-client#readme",
   "engines": {
-    "node": ">=18"
+    "node": ">=20.17.0",
+    "npm": "^11.12.1"
   },
   "jest": {
     "preset": "ts-jest",

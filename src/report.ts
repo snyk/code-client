@@ -1,5 +1,5 @@
-import * as uuid from 'uuid';
 import { pick } from './utils/pick';
+import { validate as validateUuid } from './utils/uuid';
 import { POLLING_INTERVAL } from './constants';
 import { emitter } from './emitter';
 import {
@@ -112,7 +112,7 @@ export async function reportScm(options: ScmUploadReportOptions): Promise<Report
   if (!projectId || projectId.length === 0) {
     throw new Error('"project-id" must be provided for "report"');
   }
-  if (!uuid.validate(projectId)) {
+  if (!validateUuid(projectId)) {
     throw new Error('"project-id" must be a valid UUID');
   }
 

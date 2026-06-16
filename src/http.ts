@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import { pick } from './utils/pick';
+import { v4 as uuidv4 } from './utils/uuid';
 import { gzip } from 'zlib';
 import { promisify } from 'util';
 

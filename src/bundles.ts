@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import omit from 'lodash.omit';
 import { pick } from './utils/pick';
-import pMap from 'p-map';
+import { omit } from './utils/omit';
+import { mapConcurrent } from './utils/concurrency';
 
 import { BundleFiles, FileInfo, SupportedFiles } from './interfaces/files.interface';
 
@@ -131,9 +131,7 @@ export async function uploadRemoteBundle(options: UpdateRemoteBundleOptions): Pr
   for (const bucketFiles of composeFilePayloads(options.files)) {
     files.push(bucketFiles);
   }
-  await pMap(files, async (task: FileInfo[]) => await uploadFileChunks(task), {
-    concurrency: UPLOAD_CONCURRENCY,
-  });
+  await mapConcurrent(files, UPLOAD_CONCURRENCY, async (task: FileInfo[]) => await uploadFileChunks(task));
 }
 
 interface FullfillRemoteBundleOptions extends ConnectionOptions {

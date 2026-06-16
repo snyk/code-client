@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import omit from 'lodash.omit';
-import { v4 as uuidv4 } from 'uuid';
+import { omit } from './utils/omit';
+import { v4 as uuidv4 } from './utils/uuid';
 
 import { prepareExtendingBundle, resolveBundleFilePath, calcHash } from './files';
 import { POLLING_INTERVAL } from './constants';

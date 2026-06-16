@@ -1,9 +1,0 @@
-tests/sample-repo
-node_modules
-dist
-coverage
-.yal
-**/.dccache
-.idea
-tsc.iml
-tsconfig.tsbuildinfo

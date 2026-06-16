@@ -4,7 +4,7 @@ import fg from 'fast-glob';
 import { minimatch } from 'minimatch';
 import crypto from 'crypto';
 import { parse as parseYaml } from 'yaml';
-import union from 'lodash.union';
+import { union } from './utils/union';
 import util from 'util';
 import { Cache } from './cache';
 import {

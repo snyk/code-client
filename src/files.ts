@@ -1,6 +1,7 @@
 import * as nodePath from 'path';
 import * as fs from 'fs';
-import fg from 'fast-glob';
+import { glob, globIterate, Ignore } from 'glob';
+import type { IgnoreLike } from 'glob';
 import { minimatch } from 'minimatch';
 import crypto from 'crypto';
 import { parse as parseYaml } from 'yaml';
@@ -50,13 +51,24 @@ export function notEmpty<T>(value: T | null | undefined): value is T {
 }
 
 const matchOptions = { matchBase: true, dot: true };
-const fgOptions = {
+const globOptions = {
   dot: true,
   absolute: true,
-  baseNameMatch: true,
-  onlyFiles: true,
-  suppressErrors: true,
+  matchBase: true,
+  nodir: true,
 };
+
+function createGlobIgnore(patterns: string[], symlinksEnabled: boolean): IgnoreLike {
+  const ignore = new Ignore(patterns, { platform: process.platform });
+  return {
+    ignored: entry => {
+      // nodir alone also matches sockets and FIFOs, which must never be read.
+      const unsupportedType = !entry.isUnknown() && !entry.isFile() && !entry.isDirectory() && !entry.isSymbolicLink();
+      return unsupportedType || (!symlinksEnabled && entry.isSymbolicLink()) || ignore.ignored(entry);
+    },
+    childrenIgnored: entry => (!symlinksEnabled && entry.isSymbolicLink()) || ignore.childrenIgnored(entry),
+  };
+}
 
 type CachedData = [number, number, string];
 
@@ -199,13 +211,18 @@ export async function collectFilePolicies(
     }
 
     // Find .snyk and .[*]ignore files inside this directory.
-    const allIgnoredFiles = await fg(
+    const allIgnoredFiles = await glob(
       IGNORE_FILES_NAMES.map(i => `*${i}`),
       {
-        ...fgOptions,
+        ...globOptions,
         cwd: folder,
-        followSymbolicLinks: symlinksEnabled,
+        follow: symlinksEnabled,
+        ignore: createGlobIgnore([], symlinksEnabled),
       },
+    );
+    // Keep parent policies before nested policies, independent of traversal order.
+    allIgnoredFiles.sort(
+      (a, b) => a.split(nodePath.sep).length - b.split(nodePath.sep).length || (a < b ? -1 : a > b ? 1 : 0),
     );
 
     // Parse rules from all .snyk files inside this directory.
@@ -257,16 +274,16 @@ async function* searchFiles(
   const negativeIgnores = policies.ignores.filter(rule => rule.startsWith('!')).map(rule => rule.substring(1));
   // We need to use the ignore rules directly in the stream. Otherwise we would expand all the branches of the file system
   // that should be ignored, leading to performance issues (the parser would look stuck while analyzing each ignored file).
-  // However, fast-glob doesn't address the negative rules in the ignore option correctly.
+  // Glob ignore patterns cannot re-include files through negative rules.
   // As a compromise between correctness and performance, we split the search in two streams, the first one using the
   // extension patterns as a search term and the positive ignore rules in the options, while the second that manually
   // expands those branches that should be excluded from the ignore rules throught the negative ignores as search term
   // and then matches the extensions as a second step to exclude any file that should not be analyzed.
-  const positiveSearcher = fg.stream(patterns, {
-    ...fgOptions,
+  const positiveSearcher = globIterate(patterns, {
+    ...globOptions,
     cwd,
-    followSymbolicLinks: symlinksEnabled,
-    ignore: positiveIgnores,
+    follow: symlinksEnabled,
+    ignore: createGlobIgnore(positiveIgnores, symlinksEnabled),
   });
   for await (const filePath of positiveSearcher) {
     yield filePath;
@@ -279,13 +296,13 @@ async function* searchFiles(
   // `!node_module/my_module/` <= excludes the `my_module` subfolder from the ignore
   // `node_module/my_module/build/` <= re-includes the `build` subfolder in the ignore
   if (negativeIgnores.length) {
-    const negativeSearcher = fg.stream(negativeIgnores, {
-      ...fgOptions,
+    const negativeSearcher = globIterate(negativeIgnores, {
+      ...globOptions,
       cwd,
-      followSymbolicLinks: symlinksEnabled,
-      baseNameMatch: false,
+      follow: symlinksEnabled,
+      matchBase: false,
       // Exclude rules should still be respected
-      ignore: policies.excludes,
+      ignore: createGlobIgnore(policies.excludes, symlinksEnabled),
     });
     for await (const filePath of negativeSearcher) {
       if (isMatch(filePath.toString(), deepPatterns)) yield filePath;
@@ -372,24 +389,27 @@ export async function prepareExtendingBundle(
   if (processingFiles.length) {
     // Determine existing files (minus removed)
     if (isWindows) {
-      processingFiles = processingFiles.map(f => f.replace(/\\/g, '/')); // fg requires forward-slashes in Windows globs
+      processingFiles = processingFiles.map(f => f.replace(/\\/g, '/')); // glob patterns require forward-slashes on Windows
     }
 
-    const entries = await fg(processingFiles, {
-      ...fgOptions,
+    const entries = await glob(processingFiles, {
+      ...globOptions,
       cwd: baseDir,
-      followSymbolicLinks: symlinksEnabled,
-      objectMode: true,
-      stats: true,
+      follow: symlinksEnabled,
+      ignore: createGlobIgnore([], symlinksEnabled),
+      absolute: undefined,
+      withFileTypes: true,
+      stat: true,
     });
 
-    let foundFiles: Set<string> = new Set(); // This initialization is needed to help Typescript checker
-    foundFiles = entries.reduce((s, e) => {
-      if (e.stats && e.stats.size <= MAX_FILE_SIZE) {
-        s.add(e.path);
-      }
-      return s;
-    }, foundFiles);
+    const foundPaths = await Promise.all(
+      entries.map(async entry => {
+        // Glob exposes lstat data. Follow enabled file symlinks for the size limit.
+        const stats = entry.isSymbolicLink() ? await fs.promises.stat(entry.fullpath()).catch(() => null) : entry;
+        return stats?.isFile() && stats.size !== undefined && stats.size <= MAX_FILE_SIZE ? entry.fullpath() : null;
+      }),
+    );
+    const foundFiles = new Set(foundPaths.filter(notEmpty));
 
     removedFiles = processingFiles.reduce((s, p) => {
       if (!foundFiles.has(p)) {

@@ -50,6 +50,12 @@ describe('files', () => {
       ...f,
       filePath: f.filePath.replace(sampleProjectPath, '<basePath>'),
     }));
+    // File discovery order is not guaranteed. Keep the metadata snapshot stable.
+    filesWithoutBasePath.sort(
+      (a, b) =>
+        a.bundlePath.split('/').length - b.bundlePath.split('/').length ||
+        (a.bundlePath < b.bundlePath ? -1 : a.bundlePath > b.bundlePath ? 1 : 0),
+    );
     expect(filesWithoutBasePath).toMatchSnapshot();
   });
 

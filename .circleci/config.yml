@@ -101,7 +101,7 @@ workflows:
           context:
             - snyk-bot-slack
             - prodsec-orb-runtime
-          channel: snyk-on-snyk-codesec_code-integrations
+          channel: snyk-on-snyk-engines_code-integrations
           filters:
             branches:
               ignore:

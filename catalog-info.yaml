@@ -5,7 +5,7 @@ metadata:
   annotations:
     circleci.com/project-slug: github/snyk/code-client
     github.com/project-slug: snyk/code-client
-    github.com/team-slug: snyk/codesec_code-integrations
+    github.com/team-slug: snyk/engines_code-integrations
     backstage.io/techdocs-ref: dir:.
   labels:
     snyk.io/businessCriticality: medium

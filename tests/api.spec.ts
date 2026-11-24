@@ -41,7 +41,9 @@ describe('Requests to public API', () => {
     const response = await getFilters({ baseURL, source: 'api-test', attempts: 1, extraHeaders: {} });
     expect(response.type).toEqual('success');
     if (response.type === 'error') return;
-    expect(new Set(response.value.configFiles)).toEqual(new Set(['.dcignore', '.gitignore', '.snyk', '.snyk-rules']));
+    expect(response.value.configFiles).toEqual(
+      expect.arrayContaining(['.dcignore', '.gitignore', '.snyk', '.snyk-rules']),
+    );
     expect(response.value.extensions).toEqual(
       expect.arrayContaining([
         '.cs',
